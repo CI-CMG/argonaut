@@ -1,0 +1,13 @@
+
+camel:
+  springboot:
+    main-run-controller: true
+
+spring:
+  threads:
+    virtual:
+      enabled: true
+
+#spring:
+#  main:
+#    web-application-type: none
