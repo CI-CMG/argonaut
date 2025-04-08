@@ -11,26 +11,16 @@ import org.springframework.validation.annotation.Validated;
 public class ServiceProperties {
 
   @NotBlank
-  private String frenchGdacDirectory;
-  @NotBlank
-  private String aomlDacDirectory;
+  private String dacDirectory;
   @NotBlank
   private String workDirectory;
 
-  public String getFrenchGdacDirectory() {
-    return frenchGdacDirectory;
+  public String getDacDirectory() {
+    return dacDirectory;
   }
 
-  public void setFrenchGdacDirectory(String frenchGdacDirectory) {
-    this.frenchGdacDirectory = frenchGdacDirectory;
-  }
-
-  public String getAomlDacDirectory() {
-    return aomlDacDirectory;
-  }
-
-  public void setAomlDacDirectory(String aomlDacDirectory) {
-    this.aomlDacDirectory = aomlDacDirectory;
+  public void setDacDirectory(String dacDirectory) {
+    this.dacDirectory = dacDirectory;
   }
 
   public String getWorkDirectory() {

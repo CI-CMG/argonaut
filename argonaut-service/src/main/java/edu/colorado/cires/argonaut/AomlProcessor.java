@@ -2,15 +2,24 @@ package edu.colorado.cires.argonaut;
 
 import edu.colorado.cires.cmg.shellexecutor.DefaultShellExecutor;
 import edu.colorado.cires.cmg.shellexecutor.ShellExecutor;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
-import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.function.Consumer;
+import java.util.stream.Stream;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
+import org.apache.camel.ProducerTemplate;
+import org.apache.commons.compress.archivers.ArchiveEntry;
+import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
+import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -19,58 +28,177 @@ import org.springframework.stereotype.Component;
 public class AomlProcessor implements Processor {
 
   private final ShellExecutor shellExecutor = new DefaultShellExecutor();
-  private final ServiceProperties serviceProperties;
   private final Path exeJar;
+  private final Path java;
+  private final Path specDir;
+  private final Path workingDir;
+  private final ProducerTemplate producerTemplate;
 
   @Autowired
-  public AomlProcessor(ServiceProperties serviceProperties) {
-    this.serviceProperties = serviceProperties;
-    Path workingDir = Paths.get(serviceProperties.getWorkDirectory());
+  public AomlProcessor(ServiceProperties serviceProperties, ProducerTemplate producerTemplate) {
+    this.producerTemplate = producerTemplate;
     ClassLoader classLoader = getClass().getClassLoader();
-    URL resource = classLoader.getResource("file_checker_exec.jar");
 
-    if (resource == null) {
-      throw new IllegalArgumentException("file is not found!");
-    }
+    java = Paths.get(System.getProperty("java.home")).resolve("bin").resolve("java");
 
+    workingDir = Paths.get(serviceProperties.getWorkDirectory());
     try {
       Files.createDirectories(workingDir);
     } catch (IOException e) {
       throw new RuntimeException("Unable to create " + workingDir, e);
     }
+    specDir = workingDir.resolve("file_checker_spec");
+
+    URL execResource = classLoader.getResource("file_checker_exec.jar");
+    URL specResource = classLoader.getResource("file_checker_spec.zip");
+
+    if (execResource == null) {
+      throw new IllegalArgumentException("file_checker_exec.jar not found");
+    }
+    if (specResource == null) {
+      throw new IllegalArgumentException("file_checker_spec.zip not found");
+    }
 
     exeJar = workingDir.resolve("file_checker_exec.jar");
-
     try {
-      IOUtils.copy(resource, exeJar.toFile());
+      IOUtils.copy(execResource, exeJar.toFile());
     } catch (IOException e) {
       throw new RuntimeException("Unable to copy file checker", e);
     }
+
+    unzip(specResource, workingDir);
   }
+
+  private static File newFile(File destinationDir, ZipEntry zipEntry) throws IOException {
+    File destFile = new File(destinationDir, zipEntry.getName());
+
+    String destDirPath = destinationDir.getCanonicalPath();
+    String destFilePath = destFile.getCanonicalPath();
+
+    if (!destFilePath.startsWith(destDirPath + File.separator)) {
+      throw new IOException("Entry is outside of the target dir: " + zipEntry.getName());
+    }
+
+    return destFile;
+  }
+
+  private static void unzip(URL specResource, Path workingDir) {
+    File destDir = workingDir.resolve("file_checker_spec").toFile();
+
+    try (ZipInputStream zis = new ZipInputStream(specResource.openStream())) {
+      ZipEntry zipEntry = zis.getNextEntry();
+      while (zipEntry != null) {
+        File newFile = newFile(destDir, zipEntry);
+        if (zipEntry.isDirectory()) {
+          if (!newFile.isDirectory() && !newFile.mkdirs()) {
+            throw new IOException("Failed to create directory " + newFile);
+          }
+        } else {
+          File parent = newFile.getParentFile();
+          if (!parent.isDirectory() && !parent.mkdirs()) {
+            throw new IOException("Failed to create directory " + parent);
+          }
+          try (FileOutputStream fos = new FileOutputStream(newFile)) {
+            IOUtils.copy(zis, fos);
+          }
+        }
+        zipEntry = zis.getNextEntry();
+      }
+    } catch (IOException e) {
+      throw new RuntimeException("Unable to read specs", e);
+    }
+  }
+
+  //TODO check for zip slip vulnerability
+  public void unTar(Path tarGz, Path tempDir) throws IOException {
+    try (InputStream inputStream = Files.newInputStream(tarGz)) {
+      TarArchiveInputStream tar = new TarArchiveInputStream(new GzipCompressorInputStream(inputStream));
+      ArchiveEntry entry;
+      while ((entry = tar.getNextEntry()) != null) {
+        Path extractTo = tempDir.resolve(entry.getName());
+        if (entry.isDirectory()) {
+          Files.createDirectories(extractTo);
+        } else {
+          Files.copy(tar, extractTo);
+        }
+      }
+    }
+  }
+
 
   @Override
   public void process(Exchange exchange) throws Exception {
-//    File file = exchange.getIn().getBody(File.class);
+    File readyFile = exchange.getIn().getBody(File.class);
+    FileResolver resolver = resolveTarGz(readyFile);
 
-    String separator = FileSystems.getDefault().getSeparator();
-    String classpath = System.getProperty("java.class.path");
-    String path = System.getProperty("java.home") + separator + "bin" + separator + "java";
+    Path tempDir = Files.createTempDirectory(workingDir, "processing");
     try {
-      long timeout = 120000L;
+      unTar(resolver.getTarGzFile(), tempDir);
+      try {
+        long timeout = 120000L;
 
-      Consumer<String> logger = System.out::println;
+        Consumer<String> logger = System.out::println;
 
-      int exitCode = shellExecutor.execute(Paths.get("/Users/cslater/projects/argo-pipeline"), logger, timeout,
-          "java",
-          "-jar",
-          exeJar.toAbsolutePath().toString(),
-          "aoml",
-          "/Users/cslater/third-party-projects/ArgoFormatChecker/file_checker_spec",
-          "/Users/cslater/projects/argo-pipeline/out",
-          "/Users/cslater/projects/argo-pipeline/sample_files/aoml_dac/uncompressed");
-    } catch (InterruptedException e) {
-      Thread.currentThread().interrupt();
-      throw new RuntimeException(e);
+        int exitCode = shellExecutor.execute(Paths.get("/Users/cslater/projects/argo-pipeline"), logger, timeout,
+            java.toAbsolutePath().toString(),
+            "-jar",
+            exeJar.toAbsolutePath().toString(),
+            resolver.getDac(),
+            specDir.toAbsolutePath().toString(),
+            tempDir.toAbsolutePath().toString(),
+            tempDir.toAbsolutePath().toString());
+        if (exitCode != 0) {
+          throw new RuntimeException("Error executing file checker: " + exitCode);
+        }
+
+      } catch (InterruptedException e) {
+        Thread.currentThread().interrupt();
+        throw new RuntimeException(e);
+      }
+    } finally {
+//      FileUtils.deleteQuietly(tempDir.toFile());
+    }
+
+    try(Stream<Path> files = Files.list(tempDir)) {
+      files.filter(file -> file.getFileName().toString().endsWith(".filecheck"))
+          .forEach(file -> {
+            String fileName = file.getFileName().toString().replaceAll("\\.filecheck$", "");
+            Path ncFile = file.getParent().resolve(fileName);
+            producerTemplate.sendBody("seda:validation", new ValidationMessage(ncFile, file));
+          });
+    }
+
+
+  }
+
+  private FileResolver resolveTarGz(File readyFile) {
+    Path readyPath = readyFile.toPath();
+    Path parent = readyPath.getParent();
+    if (readyPath.getParent() == null || readyPath.getParent().getParent() == null) {
+      throw new RuntimeException("Tar gz file parent is null");
+    }
+    String dac = parent.getParent().getFileName().toString();
+    String readyFileName = readyFile.getName();
+    String fileName = readyFileName.replaceAll("\\.ready$", "");
+    return new FileResolver(parent.resolve(fileName), dac);
+  }
+
+  private static class FileResolver {
+
+    private final Path tarGzFile;
+    private final String dac;
+
+    private FileResolver(Path tarGzFile, String dac) {
+      this.tarGzFile = tarGzFile;
+      this.dac = dac;
+    }
+
+    public Path getTarGzFile() {
+      return tarGzFile;
+    }
+
+    public String getDac() {
+      return dac;
     }
   }
 }

@@ -7,9 +7,10 @@
       dest="target/file_checker_exec.jar"
     />
     <unzip src="target/ArgoFormatChecker.zip" dest="target/ArgoFormatChecker"/>
-    <copy todir="target/generated/src/main/resources/file_checker_spec">
-      <fileset dir="target/ArgoFormatChecker/ArgoFormatChecker-2.8.14/file_checker_spec"/>
-    </copy>
+    <zip
+      destfile="target/generated/src/main/resources/file_checker_spec.zip"
+      basedir="target/ArgoFormatChecker/ArgoFormatChecker-2.8.14/file_checker_spec"
+    />
     <copy file="target/file_checker_exec.jar" tofile="target/generated/src/main/resources/file_checker_exec.jar"/>
   </target>
 </project>
