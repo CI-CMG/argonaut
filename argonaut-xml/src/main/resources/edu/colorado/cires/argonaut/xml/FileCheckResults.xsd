@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema targetNamespace="https://colorado.edu/cires/argonaught/FileCheckResults"
+  xmlns="https://colorado.edu/cires/argonaught/FileCheckResults"
+  xmlns:xs="http://www.w3.org/2001/XMLSchema"
+  elementFormDefault="qualified">
+
+  <xs:complexType name="Metadata">
+    <xs:all>
+      <xs:element name="dac" type="xs:string"/>
+      <xs:element name="DATA_TYPE" type="xs:string" minOccurs="0"/>
+      <xs:element name="FORMAT_VERSION" type="xs:string" minOccurs="0"/>
+      <xs:element name="DATE_UPDATE" type="xs:string" minOccurs="0"/>
+      <xs:element name="DATA_CENTRE" type="xs:string" minOccurs="0"/>
+      <xs:element name="PLATFORM_NUMBER" type="xs:string" minOccurs="0"/>
+      <xs:element name="PI_NAME" type="xs:string" minOccurs="0"/>
+      <xs:element name="WMO_INST_TYPE" type="xs:string" minOccurs="0"/>
+      <xs:element name="DATA_MODE" type="xs:string" minOccurs="0"/>
+      <xs:element name="DIRECTION" type="xs:string" minOccurs="0"/>
+      <xs:element name="N_PROF" type="xs:integer" minOccurs="0"/>
+      <xs:element name="N_LEVELS" type="xs:integer" minOccurs="0"/>
+      <!--comma separated integer array-->
+      <xs:element name="CYCLE_NUMBER" type="xs:string" minOccurs="0"/>
+      <!--comma separated decimal array-->
+      <xs:element name="LATITUDE" type="xs:string" minOccurs="0"/>
+      <!--comma separated decimal array-->
+      <xs:element name="LONGITUDE" type="xs:string" minOccurs="0"/>
+      <xs:element name="JULD_QC" type="xs:string" minOccurs="0"/>
+      <xs:element name="POSITION_QC" type="xs:string" minOccurs="0"/>
+      <xs:element name="PROFILE_TEMP_QC" type="xs:string" minOccurs="0"/>
+      <xs:element name="PROFILE_PSAL_QC" type="xs:string" minOccurs="0"/>
+      <xs:element name="PROFILE_DOXY_QC" type="xs:string" minOccurs="0"/>
+      <xs:element name="STATION_PARAMETERS" type="xs:string" minOccurs="0"/>
+      <xs:element name="PARAMETER_DATA_MODE" type="xs:string" minOccurs="0"/>
+      <xs:element name="psal-adj-mean" type="xs:decimal" minOccurs="0"/>
+      <xs:element name="psal-adj-sdev" type="xs:decimal" minOccurs="0"/>
+      <xs:element name="min_latitude" type="xs:decimal" minOccurs="0"/>
+      <xs:element name="max_latitude" type="xs:decimal" minOccurs="0"/>
+      <xs:element name="min_longitude" type="xs:decimal" minOccurs="0"/>
+      <xs:element name="max_longitude" type="xs:decimal" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+
+  <xs:complexType name="Errors">
+    <xs:sequence>
+      <xs:element name="error" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+    <xs:attribute name="number" type="xs:integer"/>
+  </xs:complexType>
+
+  <xs:complexType name="Warnings">
+    <xs:sequence>
+      <xs:element name="warning" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+    <xs:attribute name="number" type="xs:integer"/>
+  </xs:complexType>
+
+  <xs:complexType name="FileCheckResults">
+    <xs:all>
+      <xs:element name="file" type="xs:string"/>
+      <xs:element name="status" type="xs:string"/>
+      <xs:element name="phase" type="xs:string"/>
+      <xs:element name="metadata" type="Metadata" minOccurs="0"/>
+      <xs:element name="errors" type="Errors" minOccurs="0"/>
+      <xs:element name="warnings" type="Warnings" minOccurs="0"/>
+    </xs:all>
+    <xs:attribute name="filechecker_version" type="xs:string"/>
+    <xs:attribute name="spec_version" type="xs:string"/>
+  </xs:complexType>
+
+  <xs:element name="FileCheckResults" type="FileCheckResults"/>
+
+</xs:schema>

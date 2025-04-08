@@ -86,3 +86,16 @@ https://docs.google.com/presentation/d/119awYbYBre5jmMUAkgafKwjz2vaQd6HzFG4HjRA1
 https://docs.google.com/presentation/d/1ATL496dt-A0p8qNa36XrnUu7IMgX4Yh15dP-IqBoM1s/edit#slide=id.g30a84cc3728_0_147
 https://docs.google.com/presentation/d/1TNuaQiMKrV6t9ypsFO_Gj08trz8U2lYiuBrCsSucJyw/edit#slide=id.g309f790de8a_0_183
 https://docs.google.com/presentation/d/1upwtqrrn-86AJyIQ8_9BOUSpKIkip_aFGzMT_SqvOlA/edit#slide=id.g309f790de8a_0_183
+
+From Tim:
+```
+Basically what I would need is the set up of a prototype Argo Global Data Assembly center.  
+What that means is monitoring a system directory for each of the 10 data assembly centers 
+(the U. S. center is at NOAA Atlantic Ocean and Met Lab in MIami) running each submission through 
+a file checker and then either processing into the GDAC collection or pushing back to the DAC 
+specific system for inspection and reprocessing by the DAC.  There is also a mirror with the 
+French GDAC to ensure both have the exact same data.  Finally there is public dissemination.  
+We could set up a test system with the U.. S. DAC at AOML as a first step.   
+Please let me know what is possible with CIRES.  If some piece of this, I can write up a 
+work plan in the next few days for inspection
+```

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bindings
+  xmlns="https://jakarta.ee/xml/ns/jaxb"
+  xmlns:xs="http://www.w3.org/2001/XMLSchema"
+  xmlns:xjc="http://java.sun.com/xml/ns/jaxb/xjc"
+  version="3.0">
+
+  <globalBindings generateElementClass="true">
+    <xjc:simple/>
+  </globalBindings>
+
+  <bindings schemaLocation="FileCheckResults.xsd">
+    <schemaBindings>
+      <package name="edu.colorado.cires.argonaut.xml.filecheck" />
+    </schemaBindings>
+  </bindings>
+
+</bindings>

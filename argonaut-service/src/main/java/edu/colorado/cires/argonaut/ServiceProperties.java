@@ -14,6 +14,8 @@ public class ServiceProperties {
   private String frenchGdacDirectory;
   @NotBlank
   private String aomlDacDirectory;
+  @NotBlank
+  private String workDirectory;
 
   public String getFrenchGdacDirectory() {
     return frenchGdacDirectory;
@@ -29,5 +31,13 @@ public class ServiceProperties {
 
   public void setAomlDacDirectory(String aomlDacDirectory) {
     this.aomlDacDirectory = aomlDacDirectory;
+  }
+
+  public String getWorkDirectory() {
+    return workDirectory;
+  }
+
+  public void setWorkDirectory(String workDirectory) {
+    this.workDirectory = workDirectory;
   }
 }

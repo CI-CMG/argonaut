@@ -16,7 +16,7 @@ public class Routes extends RouteBuilder {
 
   @Override
   public void configure() throws Exception {
-    from("file:{{argo.aoml-dac-directory}}"
+    from("file:{{argo.aoml-dac-directory}}/staging"
         + "?doneFileName=${file:name}.ready"
         + "&moveFailed=../error"
         + "&preMove=../processing"
@@ -24,12 +24,12 @@ public class Routes extends RouteBuilder {
         + "&bridgeErrorHandler=true")
       .process(aomlProcessor);
 
-    from("file:{{argo.french-gdac-directory}}"
-        + "?doneFileName=${file:name}.ready"
-        + "&moveFailed=../error"
-        + "&preMove=../processing"
-        + "&move=../done"
-        + "&bridgeErrorHandler=true")
-        .process(frenchGdacProcessor);
+//    from("file:{{argo.french-gdac-directory}}"
+//        + "?doneFileName=${file:name}.ready"
+//        + "&moveFailed=../error"
+//        + "&preMove=../processing"
+//        + "&move=../done"
+//        + "&bridgeErrorHandler=true")
+//        .process(frenchGdacProcessor);
   }
 }

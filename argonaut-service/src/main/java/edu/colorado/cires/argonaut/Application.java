@@ -7,6 +7,7 @@ import org.springframework.boot.system.ApplicationHome;
 
 @SpringBootApplication
 public class Application {
+
   public static void main(String[] args){
     File svcHome = new ApplicationHome().getDir();
     String path = svcHome.getAbsolutePath();
