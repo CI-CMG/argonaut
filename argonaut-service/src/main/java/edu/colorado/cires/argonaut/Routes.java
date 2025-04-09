@@ -13,12 +13,14 @@ public class Routes extends RouteBuilder {
 
   private final AomlProcessor aomlProcessor;
   private final ValidationProcessor validationProcessor;
+  private final ServiceProperties serviceProperties;
 
   public Routes(ServiceProperties serviceProperties, AomlProcessor aomlProcessor, ValidationProcessor validationProcessor) {
     this.aomlProcessor = aomlProcessor;
     this.validationProcessor = validationProcessor;
-    Streams.of(SupportedDacs.values()).forEach(dac -> {
-      Path dir = Paths.get(serviceProperties.getWorkDirectory()).resolve("processing").resolve(dac.name());
+    this.serviceProperties = serviceProperties;
+    serviceProperties.getDacs().forEach(dac -> {
+      Path dir = Paths.get(serviceProperties.getWorkDirectory()).resolve("processing").resolve(dac);
       try {
         Files.createDirectories(dir);
       } catch (IOException e) {
@@ -29,7 +31,7 @@ public class Routes extends RouteBuilder {
 
   @Override
   public void configure() throws Exception {
-    Streams.of(SupportedDacs.values()).map(SupportedDacs::toString)
+    serviceProperties.getDacs()
             .forEach(dac -> from("file:{{argo.aoml-dac-directory}}/" + dac + "/staging"
                 + "?doneFileName=${file:name}.ready"
                 + "&moveFailed=../error"

@@ -1,0 +1,3 @@
+argonaut:
+  dac-directory: target/dac
+  work-directory: target/work
