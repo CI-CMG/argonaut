@@ -20,6 +20,7 @@ import org.apache.camel.ProducerTemplate;
 import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -32,6 +33,7 @@ public class AomlProcessor implements Processor {
   private final Path java;
   private final Path specDir;
   private final Path workingDir;
+  private final Path processingDir;
   private final ProducerTemplate producerTemplate;
 
   @Autowired
@@ -67,6 +69,13 @@ public class AomlProcessor implements Processor {
     }
 
     unzip(specResource, workingDir);
+
+    processingDir = workingDir.resolve("processing");
+    try {
+      Files.createDirectories(processingDir);
+    } catch (IOException e) {
+      throw new RuntimeException("Unable to create processing directory", e);
+    }
   }
 
   private static File newFile(File destinationDir, ZipEntry zipEntry) throws IOException {
@@ -155,17 +164,29 @@ public class AomlProcessor implements Processor {
         Thread.currentThread().interrupt();
         throw new RuntimeException(e);
       }
-    } finally {
-//      FileUtils.deleteQuietly(tempDir.toFile());
-    }
+      try (Stream<Path> files = Files.list(tempDir)) {
+        files.filter(file -> file.getFileName().toString().endsWith(".filecheck"))
+            .forEach(file -> {
+              String fileName = file.getFileName().toString().replaceAll("\\.filecheck$", "");
+              Path fileCheckFile = processingDir.resolve(resolver.dac).resolve(file.getFileName());
+              Path tempNcFile = file.getParent().resolve(fileName);
+              Path ncFile = processingDir.resolve(resolver.dac).resolve(fileName);
+              try {
+                Files.move(tempNcFile, ncFile);
+              } catch (IOException e) {
+                throw new RuntimeException("Unable to move " + tempNcFile + " to " + ncFile, e);
+              }
+              try {
+                Files.move(file, fileCheckFile);
+              } catch (IOException e) {
+                throw new RuntimeException("Unable to move " + file + " to " + fileCheckFile, e);
+              }
 
-    try(Stream<Path> files = Files.list(tempDir)) {
-      files.filter(file -> file.getFileName().toString().endsWith(".filecheck"))
-          .forEach(file -> {
-            String fileName = file.getFileName().toString().replaceAll("\\.filecheck$", "");
-            Path ncFile = file.getParent().resolve(fileName);
-            producerTemplate.sendBody("seda:validation", new ValidationMessage(ncFile, file));
-          });
+              producerTemplate.sendBody("seda:validation", new ValidationMessage(ncFile, fileCheckFile));
+            });
+      }
+    } finally {
+      FileUtils.deleteQuietly(tempDir.toFile());
     }
 
 

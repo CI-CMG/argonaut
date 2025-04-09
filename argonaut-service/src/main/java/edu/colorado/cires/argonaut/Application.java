@@ -9,6 +9,8 @@ import org.springframework.boot.system.ApplicationHome;
 public class Application {
 
   public static void main(String[] args){
+    System.setProperty("camel.threads.virtual.enabled", "true");
+
     File svcHome = new ApplicationHome().getDir();
     String path = svcHome.getAbsolutePath();
     System.setProperty("svc.home", path);

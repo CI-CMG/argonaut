@@ -3,6 +3,7 @@ camel:
   springboot:
     main-run-controller: true
 
+
 spring:
   threads:
     virtual:

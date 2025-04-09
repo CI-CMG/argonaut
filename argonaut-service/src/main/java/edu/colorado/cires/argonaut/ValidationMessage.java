@@ -1,6 +1,7 @@
 package edu.colorado.cires.argonaut;
 
 import java.nio.file.Path;
+import java.util.Objects;
 
 public class ValidationMessage {
   private final Path ncFile;
@@ -17,5 +18,27 @@ public class ValidationMessage {
 
   public Path getFileCheckXmlFile() {
     return fileCheckXmlFile;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+    ValidationMessage that = (ValidationMessage) o;
+    return Objects.equals(ncFile, that.ncFile) && Objects.equals(fileCheckXmlFile, that.fileCheckXmlFile);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(ncFile, fileCheckXmlFile);
+  }
+
+  @Override
+  public String toString() {
+    return "ValidationMessage{" +
+        "ncFile=" + ncFile +
+        ", fileCheckXmlFile=" + fileCheckXmlFile +
+        '}';
   }
 }
