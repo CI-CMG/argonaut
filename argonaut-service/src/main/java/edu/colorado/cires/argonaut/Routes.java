@@ -32,7 +32,7 @@ public class Routes extends RouteBuilder {
   @Override
   public void configure() throws Exception {
     serviceProperties.getDacs()
-            .forEach(dac -> from("file:{{argo.aoml-dac-directory}}/" + dac + "/staging"
+            .forEach(dac -> from("file:{{argonaut.dac-directory}}/" + dac + "/staging"
                 + "?doneFileName=${file:name}.ready"
                 + "&moveFailed=../error"
                 + "&preMove=../processing"

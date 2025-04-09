@@ -11,33 +11,7 @@
 
   <artifactId>argonaut-file-checker</artifactId>
 
-  <dependencies>
-    <dependency>
-      <groupId>org.apache.logging.log4j</groupId>
-      <artifactId>log4j-api</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.logging.log4j</groupId>
-      <artifactId>log4j-core</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.logging.log4j</groupId>
-      <artifactId>log4j-slf4j2-impl</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-api</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>edu.ucar</groupId>
-      <artifactId>netcdf4</artifactId>
-    </dependency>
-  </dependencies>
-
   <build>
-    <sourceDirectory>target/generated/src/main/java</sourceDirectory>
     <resources>
       <resource>
         <directory>target/generated/src/main/resources</directory>
