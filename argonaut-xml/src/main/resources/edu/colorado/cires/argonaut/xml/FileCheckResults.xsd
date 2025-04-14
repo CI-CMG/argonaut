@@ -1,8 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<xs:schema targetNamespace="https://colorado.edu/cires/argonaught/FileCheckResults"
-  xmlns="https://colorado.edu/cires/argonaught/FileCheckResults"
-  xmlns:xs="http://www.w3.org/2001/XMLSchema"
-  elementFormDefault="qualified">
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
 
   <xs:complexType name="Metadata">
     <xs:all>
