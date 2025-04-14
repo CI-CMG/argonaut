@@ -1,3 +1,6 @@
+Requirements: https://docs.google.com/document/d/1fE7Kfk5NqltaJlbvjIpi0_pxIw97NdaI/edit
+
+
 
 French GDAC:  https://argo-gdac-sandbox.s3.eu-west-3.amazonaws.com/pub/index.html#pub/
 

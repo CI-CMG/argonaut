@@ -10,6 +10,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
@@ -22,11 +23,15 @@ import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public class AomlProcessor implements Processor {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(AomlProcessor.class);
 
   private final ShellExecutor shellExecutor = new DefaultShellExecutor();
   private final Path exeJar;
@@ -148,14 +153,19 @@ public class AomlProcessor implements Processor {
 
         Consumer<String> logger = System.out::println;
 
-        int exitCode = shellExecutor.execute(tempDir, logger, timeout,
-            java.toAbsolutePath().toString(),
+        String[] args = {
+            java.toAbsolutePath().normalize().toString(),
             "-jar",
-            exeJar.toAbsolutePath().toString(),
+            exeJar.toAbsolutePath().normalize().toString(),
             resolver.getDac(),
-            specDir.toAbsolutePath().toString(),
-            tempDir.toAbsolutePath().toString(),
-            tempDir.toAbsolutePath().toString());
+            specDir.toAbsolutePath().normalize().toString(),
+            tempDir.toAbsolutePath().normalize().toString(),
+            tempDir.toAbsolutePath().normalize().toString()
+        };
+
+        LOGGER.info("Running " + Arrays.toString(args));
+
+        int exitCode = shellExecutor.execute(tempDir, logger, timeout, args);
         if (exitCode != 0) {
           throw new RuntimeException("Error executing file checker: " + exitCode);
         }
@@ -198,7 +208,8 @@ public class AomlProcessor implements Processor {
     if (readyPath.getParent() == null || readyPath.getParent().getParent() == null) {
       throw new RuntimeException("Tar gz file parent is null");
     }
-    String dac = parent.getParent().getFileName().toString();
+    parent = parent.toAbsolutePath().normalize();
+    String dac = parent.getParent().toAbsolutePath().normalize().getFileName().toString();
     String readyFileName = readyFile.getName();
     String fileName = readyFileName.replaceAll("\\.ready$", "");
     return new FileResolver(parent.resolve(fileName), dac);
