@@ -148,7 +148,7 @@ public class AomlProcessor implements Processor {
 
         Consumer<String> logger = System.out::println;
 
-        int exitCode = shellExecutor.execute(Paths.get("/Users/cslater/projects/argo-pipeline"), logger, timeout,
+        int exitCode = shellExecutor.execute(tempDir, logger, timeout,
             java.toAbsolutePath().toString(),
             "-jar",
             exeJar.toAbsolutePath().toString(),
