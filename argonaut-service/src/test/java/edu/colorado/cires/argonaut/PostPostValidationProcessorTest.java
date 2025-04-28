@@ -9,7 +9,7 @@ import org.apache.camel.Exchange;
 import org.apache.camel.Message;
 import org.junit.jupiter.api.Test;
 
-public class ValidationProcessorTest {
+public class PostPostValidationProcessorTest {
 
   @Test
   public void testParseXml() throws Exception {
@@ -18,7 +18,7 @@ public class ValidationProcessorTest {
         Paths.get("src/test/resources/validation/1901830_meta.nc.filecheck")
     );
 
-    ValidationProcessor processor = new ValidationProcessor();
+    PostValidationProcessor processor = new PostValidationProcessor();
     Exchange exchange = mock(Exchange.class);
     Message message = mock(Message.class);
     when(message.getBody(ValidationMessage.class)).thenReturn(validationMessage);

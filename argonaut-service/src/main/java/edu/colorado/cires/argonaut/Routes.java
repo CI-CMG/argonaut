@@ -5,20 +5,22 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import org.apache.camel.builder.RouteBuilder;
-import org.apache.commons.lang3.stream.Streams;
 import org.springframework.stereotype.Component;
 
 @Component
 public class Routes extends RouteBuilder {
 
   private final AomlProcessor aomlProcessor;
-  private final ValidationProcessor validationProcessor;
+  private final PostValidationProcessor postValidationProcessor;
   private final ServiceProperties serviceProperties;
+  private final ErrorProcessor errorProcessor;
 
-  public Routes(ServiceProperties serviceProperties, AomlProcessor aomlProcessor, ValidationProcessor validationProcessor) {
+  public Routes(ServiceProperties serviceProperties, AomlProcessor aomlProcessor, PostValidationProcessor postValidationProcessor,
+      ErrorProcessor errorProcessor) {
     this.aomlProcessor = aomlProcessor;
-    this.validationProcessor = validationProcessor;
+    this.postValidationProcessor = postValidationProcessor;
     this.serviceProperties = serviceProperties;
+    this.errorProcessor = errorProcessor;
     serviceProperties.getDacs().forEach(dac -> {
       Path dir = Paths.get(serviceProperties.getWorkDirectory()).resolve("processing").resolve(dac);
       try {
@@ -39,7 +41,8 @@ public class Routes extends RouteBuilder {
                 + "&move=../done"
                 + "&bridgeErrorHandler=true").process(aomlProcessor));
 
-    from("seda:validation").process(validationProcessor);
+    from("seda:validation").process(postValidationProcessor);
+    from("seda:error").process(errorProcessor);
 
 //    from("file:{{argo.french-gdac-directory}}"
 //        + "?doneFileName=${file:name}.ready"

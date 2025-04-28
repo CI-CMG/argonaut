@@ -1,16 +1,23 @@
 package edu.colorado.cires.argonaut;
 
+import edu.colorado.cires.argonaut.xml.filecheck.FileCheckResults;
 import edu.colorado.cires.cmg.shellexecutor.DefaultShellExecutor;
 import edu.colorado.cires.cmg.shellexecutor.ShellExecutor;
+import jakarta.xml.bind.JAXBContext;
+import jakarta.xml.bind.JAXBException;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Reader;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
@@ -39,6 +46,7 @@ public class AomlProcessor implements Processor {
   private final Path specDir;
   private final Path workingDir;
   private final Path processingDir;
+  private final Path errorDir;
   private final ProducerTemplate producerTemplate;
 
   @Autowired
@@ -80,6 +88,13 @@ public class AomlProcessor implements Processor {
       Files.createDirectories(processingDir);
     } catch (IOException e) {
       throw new RuntimeException("Unable to create processing directory", e);
+    }
+
+    errorDir = workingDir.resolve("error");
+    try {
+      Files.createDirectories(errorDir);
+    } catch (IOException e) {
+      throw new RuntimeException("Unable to create error directory", e);
     }
   }
 
@@ -146,6 +161,7 @@ public class AomlProcessor implements Processor {
     FileResolver resolver = resolveTarGz(readyFile);
 
     Path tempDir = Files.createTempDirectory(workingDir, "processing");
+    Map<String, FileCheckPair> fileCheckPairtList = new HashMap<>();
     try {
       unTar(resolver.getTarGzFile(), tempDir);
       try {
@@ -175,31 +191,96 @@ public class AomlProcessor implements Processor {
         throw new RuntimeException(e);
       }
       try (Stream<Path> files = Files.list(tempDir)) {
-        files.filter(file -> file.getFileName().toString().endsWith(".filecheck"))
+        files.filter(Files::isRegularFile)
             .forEach(file -> {
-              String fileName = file.getFileName().toString().replaceAll("\\.filecheck$", "");
-              Path fileCheckFile = processingDir.resolve(resolver.dac).resolve(file.getFileName());
-              Path tempNcFile = file.getParent().resolve(fileName);
-              Path ncFile = processingDir.resolve(resolver.dac).resolve(fileName);
-              try {
-                Files.move(tempNcFile, ncFile);
-              } catch (IOException e) {
-                throw new RuntimeException("Unable to move " + tempNcFile + " to " + ncFile, e);
+//              String fileName= file.getFileName().toString();
+              String key = file.getFileName().toString().replaceAll("\\.filecheck$", "");
+
+              FileCheckPair fileCheckPair = fileCheckPairtList.get(key);
+              if (fileCheckPair == null){
+                fileCheckPair = new FileCheckPair();
               }
-              try {
-                Files.move(file, fileCheckFile);
-              } catch (IOException e) {
-                throw new RuntimeException("Unable to move " + file + " to " + fileCheckFile, e);
+              if (file.getFileName().toString().contains(".filecheck")){
+                fileCheckPair.setFileCheckFile(file);
+              } else {
+                fileCheckPair.setNcFile(file);
               }
 
-              producerTemplate.sendBody("seda:validation", new ValidationMessage(ncFile, fileCheckFile));
-            });
+              if (fileCheckPair.isComplete()){
+                fileCheckPairtList.remove(key);
+                FileCheckResults checkResults;
+                try (
+                    Reader reader = Files.newBufferedReader(fileCheckPair.getFileCheckFile(), StandardCharsets.UTF_8)) {
+                  checkResults = (FileCheckResults) JAXBContext.newInstance(FileCheckResults.class).createUnmarshaller().unmarshal(reader);
+                } catch (JAXBException | IOException e) {
+                  throw new IllegalStateException("Unable to parse " + fileCheckPair.getFileCheckFile(), e);
+                }
+                if (checkResults.getStatus().equals("FILE-ACCEPTED")){
+                  Path processingDacDir = processingDir.resolve(resolver.dac);
+                  Path fileCheckFile = processingDacDir.resolve(fileCheckPair.getFileCheckFile().getFileName());
+                  Path ncFile = processingDacDir.resolve(fileCheckPair.getNcFile().getFileName());
+                  try {
+                    Files.createDirectories(processingDacDir);
+                  } catch (IOException e) {
+                    throw new RuntimeException("Unable to create processing "+ resolver.dac + " directory", e);
+                  }
+                  try{
+                    Files.move(fileCheckPair.getNcFile(), ncFile);
+                  } catch (IOException e) {
+                    throw new RuntimeException("Unable to move " + fileCheckPair.getNcFile() + " to " + ncFile, e);
+                  }
+                  try{
+                    Files.move(fileCheckPair.getFileCheckFile(), fileCheckFile);
+                  } catch (IOException e) {
+                    throw new RuntimeException("Unable to move " + fileCheckPair.getFileCheckFile() + " to " + fileCheckFile, e);
+                  }
+                  producerTemplate.sendBody("seda:validation", new ValidationMessage(ncFile,fileCheckFile));
+                } else {
+                  Path errorDacDir = errorDir.resolve(resolver.dac);
+                  Path erFileCheckFile = errorDacDir.resolve(fileCheckPair.getFileCheckFile().getFileName());
+                  Path erNcFile = errorDacDir.resolve(fileCheckPair.getNcFile().getFileName());
+                  try {
+                    Files.createDirectories(errorDir);
+                  } catch (IOException e) {
+                    throw new RuntimeException("Unable to create error "+ resolver.dac + " directory", e);
+                  }
+                  try{
+                    Files.move(fileCheckPair.getNcFile(), erNcFile);
+                  } catch (IOException e) {
+                    throw new RuntimeException("Unable to move " + fileCheckPair.getNcFile() + " to " + erNcFile, e);
+                  }
+                  try{
+                    Files.move(fileCheckPair.getFileCheckFile(), erFileCheckFile);
+                  } catch (IOException e) {
+                    throw new RuntimeException("Unable to move " + fileCheckPair.getFileCheckFile() + " to " + erFileCheckFile, e);
+                  }
+                  producerTemplate.sendBody("seda:error", new ErrorMessage(fileCheckPair.getNcFile(),checkResults.getStatus()));
+                }
+              } else {
+                fileCheckPairtList.put(key, fileCheckPair);
+              }
+          });
       }
     } finally {
       FileUtils.deleteQuietly(tempDir.toFile());
     }
-
-
+    //incomplete pairs
+    fileCheckPairtList.forEach((k, fileCheckPair) ->{
+      Path errorDacDir = errorDir.resolve(resolver.dac);
+      Path tempFile = fileCheckPair.getExistingFile();
+      Path erFile = errorDacDir.resolve(fileCheckPair.getFileCheckFile().getFileName());
+      try {
+        Files.createDirectories(errorDir);
+      } catch (IOException e) {
+        throw new RuntimeException("Unable to create error "+ resolver.dac + " directory", e);
+      }
+      try{
+        Files.move(tempFile, erFile);
+      } catch (IOException e) {
+        throw new RuntimeException("Unable to move " + fileCheckPair.getNcFile() + " to " + erFile, e);
+      }
+      producerTemplate.sendBody("seda:error", new ErrorMessage(tempFile,"Error while file checking"));
+    });
   }
 
   private FileResolver resolveTarGz(File readyFile) {

@@ -11,7 +11,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
@@ -24,8 +23,7 @@ import org.apache.commons.lang3.stream.Streams;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.internal.verification.Times;
-import org.mockito.verification.VerificationMode;
+
 
 class AomlProcessorTest {
 
@@ -148,6 +146,7 @@ class AomlProcessorTest {
   @AfterEach
   public void after() throws Exception {
     FileUtils.deleteQuietly(dacDir.toFile());
+    FileUtils.deleteQuietly(workDir.toFile());
   }
 
   @Test
@@ -160,7 +159,7 @@ class AomlProcessorTest {
     Path stagingDir = dacDir.resolve("aoml/staging");
     Files.createDirectories(stagingDir);
     Path processingDir = workDir.resolve("processing").resolve("aoml");
-    Files.createDirectories(processingDir);
+    Path errorDir = workDir.resolve("error").resolve("aoml");
     String fileName = "nc_2025.04.02_16.15.tar.gz";
     Path stagedFile = stagingDir.resolve(fileName);
     Path readyFile = stagingDir.resolve("nc_2025.04.02_16.15.tar.gz.ready");
