@@ -5,10 +5,14 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import org.apache.camel.builder.RouteBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 @Component
 public class Routes extends RouteBuilder {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(Routes.class);
 
   private final AomlProcessor aomlProcessor;
   private final PostValidationProcessor postValidationProcessor;
@@ -44,12 +48,9 @@ public class Routes extends RouteBuilder {
     from("seda:validation").process(postValidationProcessor);
     from("seda:error").process(errorProcessor);
 
-//    from("file:{{argo.french-gdac-directory}}"
-//        + "?doneFileName=${file:name}.ready"
-//        + "&moveFailed=../error"
-//        + "&preMove=../processing"
-//        + "&move=../done"
-//        + "&bridgeErrorHandler=true")
-//        .process(frenchGdacProcessor);
+    from("seda:update-index").process(exchange -> LOGGER.info("seda:update-index: {}", exchange.getIn().getBody()));
+    from("seda:gdac-sync").process(exchange -> LOGGER.info("seda:gdac-sync: {}", exchange.getIn().getBody()));
+    from("seda:geo-merge").process(exchange -> LOGGER.info("seda:geo-merge: {}", exchange.getIn().getBody()));
+    from("seda:prof-merge").process(exchange -> LOGGER.info("seda:prof-merge: {}", exchange.getIn().getBody()));
   }
 }
