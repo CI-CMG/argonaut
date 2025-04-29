@@ -102,3 +102,8 @@ We could set up a test system with the U.. S. DAC at AOML as a first step.
 Please let me know what is possible with CIRES.  If some piece of this, I can write up a 
 work plan in the next few days for inspection
 ```
+
+Here are GDAC merged files :
+latest_data files: https://data-argo.ifremer.fr/latest_data
+geo files: https://data-argo.ifremer.fr/geo/atlantic_ocean/2025/04/
+float file https://data-argo.ifremer.fr/dac/aoml/7902298/7902298_prof.nc
