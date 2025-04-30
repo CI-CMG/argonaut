@@ -15,15 +15,17 @@ public class Routes extends RouteBuilder {
   private static final Logger LOGGER = LoggerFactory.getLogger(Routes.class);
 
   private final AomlProcessor aomlProcessor;
+  private final ValidationProcessor validationProcessor;
   private final PostValidationProcessor postValidationProcessor;
   private final ServiceProperties serviceProperties;
   private final ErrorProcessor errorProcessor;
 
-  public Routes(ServiceProperties serviceProperties, AomlProcessor aomlProcessor, PostValidationProcessor postValidationProcessor,
-      ErrorProcessor errorProcessor) {
+  public Routes(ServiceProperties serviceProperties, AomlProcessor aomlProcessor, ValidationProcessor validationProcessor,
+      PostValidationProcessor postValidationProcessor, ErrorProcessor errorProcessor) {
     this.aomlProcessor = aomlProcessor;
-    this.postValidationProcessor = postValidationProcessor;
+    this.validationProcessor = validationProcessor;
     this.serviceProperties = serviceProperties;
+    this.postValidationProcessor = postValidationProcessor;
     this.errorProcessor = errorProcessor;
     serviceProperties.getDacs().forEach(dac -> {
       Path dir = Paths.get(serviceProperties.getWorkDirectory()).resolve("processing").resolve(dac);
@@ -45,7 +47,8 @@ public class Routes extends RouteBuilder {
                 + "&move=../done"
                 + "&bridgeErrorHandler=true").process(aomlProcessor));
 
-    from("seda:validation").process(postValidationProcessor);
+    from("seda:validation").process(validationProcessor);
+    from("seda:postvalidation").process(postValidationProcessor);
     from("seda:error").process(errorProcessor);
 
     from("seda:update-index").process(exchange -> LOGGER.info("seda:update-index: {}", exchange.getIn().getBody()));

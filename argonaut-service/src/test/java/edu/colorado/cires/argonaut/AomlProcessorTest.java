@@ -6,6 +6,8 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -29,6 +31,7 @@ class AomlProcessorTest {
 
   private static final Path dacDir = Paths.get("target/dac");
   private static final Path workDir = Paths.get("target/work");
+  private ObjectMapper objectMapper = new ObjectMapper();
 
   private static final String[] files = new String[]{
       "1901830_meta.nc",
@@ -152,6 +155,7 @@ class AomlProcessorTest {
   @Test
   public void smokeTest() throws Exception {
 
+
     ServiceProperties serviceProperties = new ServiceProperties();
     serviceProperties.setWorkDirectory(workDir.toString());
     serviceProperties.setDacDirectory(dacDir.toString());
@@ -167,7 +171,7 @@ class AomlProcessorTest {
 
     ProducerTemplate producerTemplate = mock(ProducerTemplate.class);
 
-    AomlProcessor processor = new AomlProcessor(serviceProperties, producerTemplate);
+    AomlProcessor processor = new AomlProcessor(serviceProperties, producerTemplate, objectMapper);
     Exchange exchange = mock(Exchange.class);
     Message message = mock(Message.class);
     when(message.getBody(File.class)).thenReturn(readyFile.toFile());
@@ -187,10 +191,14 @@ class AomlProcessorTest {
     });
     assertEquals(expectedFiles, processedFiles);
 
-
-    validationMessages.forEach(vm -> verify(producerTemplate).sendBody(eq("seda:validation"), eq(vm)));
-
-
+    //validationMessages.forEach(vm -> verify(producerTemplate).sendBody(eq("seda:validation"), eq(vm)));
+    validationMessages.stream().map(vm -> {
+      try {
+        return objectMapper.writeValueAsString(vm);
+      } catch (JsonProcessingException e) {
+        throw new RuntimeException(e);
+      }
+    }).forEach(vm -> verify(producerTemplate).sendBody(eq("seda:validation"), eq(vm)));
 
   }
 

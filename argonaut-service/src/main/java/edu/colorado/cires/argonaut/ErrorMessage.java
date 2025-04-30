@@ -1,19 +1,19 @@
 package edu.colorado.cires.argonaut;
 
-import java.nio.file.Path;
 import java.util.Objects;
 
 public class ErrorMessage {
-  private final Path file;
+  private final String ncFile;
   private final String message;
 
-  public ErrorMessage(Path file, String message) {
-    this.file = file;
+
+  public ErrorMessage(String ncFile, String message) {
+    this.ncFile = ncFile;
     this.message = message;
   }
 
-  public Path getFile() {
-    return file;
+  public String getNcFile() {
+    return ncFile;
   }
 
   public String getMessage() {
@@ -29,19 +29,20 @@ public class ErrorMessage {
       return false;
     }
     ErrorMessage that = (ErrorMessage) o;
-    return Objects.equals(file, that.file) && Objects.equals(message, that.message);
+    return Objects.equals(ncFile, that.ncFile) && Objects.equals(message, that.message);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(file, message);
+    return Objects.hash(ncFile, message);
   }
 
   @Override
   public String toString() {
     return "ErrorMessage{" +
-        "file=" + file +
+        "ncFile='" + ncFile + '\'' +
         ", message='" + message + '\'' +
         '}';
   }
+
 }
