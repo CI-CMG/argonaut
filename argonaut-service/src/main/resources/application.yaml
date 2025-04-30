@@ -8,6 +8,7 @@ argonaut:
   index-cron: '0 * * * * ?'
   gdac-sync-cron: '30 3 * * * ?'
   float-merge-quiet-timeout: 'PT1H'
+  file-checker-timeout: 'PT2M'
 
 
 camel:

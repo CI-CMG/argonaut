@@ -1,6 +1,7 @@
 package edu.colorado.cires.argonaut;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import java.nio.file.Path;
@@ -23,6 +24,8 @@ public class ServiceProperties {
   private Path submissionDirectory;
   @NotNull
   private Path outputDirectory;
+  @NotNull
+  private Duration fileCheckerTimeout;
 
 
   @NotNull
@@ -89,6 +92,14 @@ public class ServiceProperties {
 
   public void setFloatMergeQuietTimeout(Duration floatMergeQuietTimeout) {
     this.floatMergeQuietTimeout = floatMergeQuietTimeout;
+  }
+
+  public Duration getFileCheckerTimeout() {
+    return fileCheckerTimeout;
+  }
+
+  public void setFileCheckerTimeout(Duration fileCheckerTimeout) {
+    this.fileCheckerTimeout = fileCheckerTimeout;
   }
 
   public static class DacConfig {

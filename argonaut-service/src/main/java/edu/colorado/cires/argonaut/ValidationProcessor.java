@@ -27,7 +27,7 @@ public class ValidationProcessor implements Processor {
   @Autowired
   public ValidationProcessor(ServiceProperties serviceProperties, ProducerTemplate producerTemplate) {
     this.producerTemplate = producerTemplate;
-    workingDir = Paths.get(serviceProperties.getWorkDirectory());
+    workingDir = serviceProperties.getWorkDirectory();
     processingDir = workingDir.resolve("processing");
     validateDir = workingDir.resolve("validated");
     try {

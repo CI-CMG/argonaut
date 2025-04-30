@@ -37,10 +37,14 @@ processing
  - - - \<float\>
  - - - - \<float>_meta.nc
  - - - - \<float>_Rtraj.nc
+ - - - - \<float>_Rtraj.nc.filecheck
  - - - - \<float>_tech.nc
+ - - - - \<float>_tech.nc.filecheck
  - - - - profiles
  - - - - - R\<float>_xxx.nc
+ - - - - - R\<float>_xxx.nc.filecheck
  - - - - - D\<float>_xxx.nc
+ - - - - - D\<float>_xxx.nc.filecheck
 
 # Final Directory Structure
 

@@ -156,8 +156,8 @@ class SubmissionProcessorTest {
 
 
     ServiceProperties serviceProperties = new ServiceProperties();
-    serviceProperties.setWorkDirectory(workDir.toString());
-    serviceProperties.setDacDirectory(dacDir.toString());
+//    serviceProperties.setWorkDirectory(workDir.toString());
+//    serviceProperties.setDacDirectory(dacDir.toString());
 
     Path stagingDir = dacDir.resolve("aoml/staging");
     Files.createDirectories(stagingDir);

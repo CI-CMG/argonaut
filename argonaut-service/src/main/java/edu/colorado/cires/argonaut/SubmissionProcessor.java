@@ -2,6 +2,8 @@ package edu.colorado.cires.argonaut;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import edu.colorado.cires.argonaut.message.HeaderConsts;
+import edu.colorado.cires.argonaut.util.ArgonautFileUtils;
 import edu.colorado.cires.cmg.shellexecutor.DefaultShellExecutor;
 import edu.colorado.cires.cmg.shellexecutor.ShellExecutor;
 import java.io.File;
@@ -12,10 +14,13 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -36,6 +41,7 @@ import org.springframework.stereotype.Component;
 public class SubmissionProcessor implements Processor {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(SubmissionProcessor.class);
+  private static Pattern FILE_NAME_PATTERN = Pattern.compile("([A-Z]+)?([0-9]+)_(.+)\\.nc(\\.filecheck)?");
 
   private final ShellExecutor shellExecutor = new DefaultShellExecutor();
   private final Path exeJar;
@@ -43,8 +49,9 @@ public class SubmissionProcessor implements Processor {
   private final Path specDir;
   private final Path workingDir;
   private final Path processingDir;
-  private final Path errorDir;
   private final ProducerTemplate producerTemplate;
+  private final Duration timeout;
+  private final Path submissionDir;
 
   @Autowired
   public SubmissionProcessor(ServiceProperties serviceProperties, ProducerTemplate producerTemplate) {
@@ -53,12 +60,9 @@ public class SubmissionProcessor implements Processor {
 
     java = Paths.get(System.getProperty("java.home")).resolve("bin").resolve("java");
 
-    workingDir = Paths.get(serviceProperties.getWorkDirectory());
-    try {
-      Files.createDirectories(workingDir);
-    } catch (IOException e) {
-      throw new RuntimeException("Unable to create " + workingDir, e);
-    }
+    workingDir = serviceProperties.getWorkDirectory();
+    ArgonautFileUtils.createDirectories(workingDir);
+
     specDir = workingDir.resolve("file_checker_spec");
 
     URL execResource = classLoader.getResource("file_checker_exec.jar");
@@ -72,27 +76,16 @@ public class SubmissionProcessor implements Processor {
     }
 
     exeJar = workingDir.resolve("file_checker_exec.jar");
-    try {
-      IOUtils.copy(execResource, exeJar.toFile());
-    } catch (IOException e) {
-      throw new RuntimeException("Unable to copy file checker", e);
-    }
+    ArgonautFileUtils.copy(execResource, exeJar);
 
     unzip(specResource, workingDir);
 
     processingDir = workingDir.resolve("processing");
-    try {
-      Files.createDirectories(processingDir);
-    } catch (IOException e) {
-      throw new RuntimeException("Unable to create processing directory", e);
-    }
+    ArgonautFileUtils.createDirectories(workingDir);
 
-    errorDir = workingDir.resolve("error");
-    try {
-      Files.createDirectories(errorDir);
-    } catch (IOException e) {
-      throw new RuntimeException("Unable to create error directory", e);
-    }
+    timeout = serviceProperties.getFileCheckerTimeout();
+
+    submissionDir = serviceProperties.getSubmissionDirectory();
   }
 
   private static File newFile(File destinationDir, ZipEntry zipEntry) throws IOException {
@@ -154,15 +147,22 @@ public class SubmissionProcessor implements Processor {
 
   @Override
   public void process(Exchange exchange) throws Exception {
-    File readyFile = exchange.getIn().getBody(File.class);
-    FileResolver resolver = resolveTarGz(readyFile);
+    String dac = exchange.getIn().getHeader(HeaderConsts.DAC, String.class);
+    String timestamp = exchange.getIn().getHeader(HeaderConsts.SUBMISSION_TIMESTAMP, String.class);
+    Path submittedTarGzFile = exchange.getIn().getBody(File.class).toPath();
+    Path submissionProcessingDir = submissionDir.resolve("dac").resolve(dac).resolve("processing").resolve(timestamp);
+    ArgonautFileUtils.createDirectories(submissionProcessingDir);
+    String tarGzFileFileName = submittedTarGzFile.getFileName().toString();
+    Path tarGzFile = submissionProcessingDir.resolve(tarGzFileFileName);
+
+    ArgonautFileUtils.move(submittedTarGzFile, tarGzFile);
+//    FileResolver resolver = resolveTarGz(readyFile);
 
     Path tempDir = Files.createTempDirectory(workingDir, "processing");
-    Map<String, FileCheckPair> fileCheckPairtList = new HashMap<>();
+    Map<String, FileCheckPair> fileCheckPairMap = new HashMap<>();
     try {
-      unTar(resolver.getTarGzFile(), tempDir);
+      unTar(tarGzFile, tempDir);
       try {
-        long timeout = 120000L;
 
         Consumer<String> logger = System.out::println;
 
@@ -170,7 +170,7 @@ public class SubmissionProcessor implements Processor {
             java.toAbsolutePath().normalize().toString(),
             "-jar",
             exeJar.toAbsolutePath().normalize().toString(),
-            resolver.getDac(),
+            dac,
             specDir.toAbsolutePath().normalize().toString(),
             tempDir.toAbsolutePath().normalize().toString(),
             tempDir.toAbsolutePath().normalize().toString()
@@ -178,7 +178,7 @@ public class SubmissionProcessor implements Processor {
 
         LOGGER.info("Running " + Arrays.toString(args));
 
-        int exitCode = shellExecutor.execute(tempDir, logger, timeout, args);
+        int exitCode = shellExecutor.execute(tempDir, logger, timeout.toMillis(), args);
         if (exitCode != 0) {
           throw new RuntimeException("Error executing file checker: " + exitCode);
         }
@@ -190,84 +190,89 @@ public class SubmissionProcessor implements Processor {
       try (Stream<Path> files = Files.list(tempDir)) {
         files.filter(Files::isRegularFile)
             .forEach(file -> {
-//              String fileName= file.getFileName().toString();
-              String key = file.getFileName().toString().replaceAll("\\.filecheck$", "");
+              String fileName = file.getFileName().toString();
+              Matcher matcher = FILE_NAME_PATTERN.matcher(fileName);
+              if(matcher.matches()) {
+                String floatDir = matcher.group(2);
 
-              FileCheckPair fileCheckPair = fileCheckPairtList.get(key);
-              if (fileCheckPair == null){
-                fileCheckPair = new FileCheckPair();
-              }
-              if (file.getFileName().toString().contains(".filecheck")){
-                fileCheckPair.setFileCheckFile(file);
+                String key = (matcher.group(1) == null ? "" : matcher.group(1)) + matcher.group(2) + "_" + matcher.group(3);
+
+                FileCheckPair fileCheckPair = fileCheckPairMap.get(key);
+                if (fileCheckPair == null){
+                  fileCheckPair = new FileCheckPair();
+                }
+                if (file.getFileName().toString().contains(".filecheck")){
+                  fileCheckPair.setFileCheckFile(file);
+                } else {
+                  fileCheckPair.setNcFile(file);
+                }
+
+                if (fileCheckPair.isComplete()){
+
+
+
+                  Path processingDacDir = processingDir.resolve("dac").resolve(dac).resolve(floatDir);
+
+                  // TODO is this assumption correct? Do we need to open the NetCDF file and check?
+                  if (!Character.isDigit(key.charAt(0))){
+                    processingDacDir = processingDir.resolve("profile");
+                  }
+                  ArgonautFileUtils.createDirectories(processingDacDir);
+                  Path fileCheckFile = processingDacDir.resolve(fileCheckPair.getFileCheckFile().getFileName());
+                  Path ncFile = processingDacDir.resolve(fileCheckPair.getNcFile().getFileName());
+
+                  //TODO add logging
+                  ArgonautFileUtils.move(fileCheckPair.getNcFile(), ncFile);
+                  ArgonautFileUtils.move(fileCheckPair.getFileCheckFile(), fileCheckFile);
+
+                  producerTemplate.sendBody("seda:validation", new ValidationMessage(ncFile, fileCheckFile));
+                  fileCheckPairMap.remove(key);
+                } else {
+                  fileCheckPairMap.put(key, fileCheckPair);
+                }
+
               } else {
-                fileCheckPair.setNcFile(file);
+                //TODO handle this properly
+                throw new IllegalArgumentException("Invalid file name: " + fileName);
               }
 
-              if (fileCheckPair.isComplete()){
-
-                Path processingDacDir = processingDir.resolve(resolver.dac);
-                if (!Character.isDigit(key.charAt(0))){
-                  processingDacDir = processingDir.resolve("profile");
-                }
-                Path fileCheckFile = processingDacDir.resolve(fileCheckPair.getFileCheckFile().getFileName());
-                Path ncFile = processingDacDir.resolve(fileCheckPair.getNcFile().getFileName());
-                try {
-                  Files.createDirectories(processingDacDir);
-                } catch (IOException e) {
-                  throw new RuntimeException("Unable to create processing "+ resolver.dac + " directory", e);
-                }
-                try{
-                  Files.move(fileCheckPair.getNcFile(), ncFile);
-                } catch (IOException e) {
-                  throw new RuntimeException("Unable to move " + fileCheckPair.getNcFile() + " to " + ncFile, e);
-                }
-                try{
-                  Files.move(fileCheckPair.getFileCheckFile(), fileCheckFile);
-                } catch (IOException e) {
-                  throw new RuntimeException("Unable to move " + fileCheckPair.getFileCheckFile() + " to " + fileCheckFile, e);
-                }
-
-                producerTemplate.sendBody("seda:validation", new ValidationMessage(ncFile, fileCheckFile));
-                fileCheckPairtList.remove(key);
-              } else {
-                fileCheckPairtList.put(key, fileCheckPair);
-              }
           });
       }
     } finally {
       FileUtils.deleteQuietly(tempDir.toFile());
     }
     //incomplete pairs
-    fileCheckPairtList.forEach((key, fileCheckPair) ->{
-      Path errorDacDir = errorDir.resolve(resolver.dac);
-      Path tempFile = fileCheckPair.getExistingFile();
-      Path erFile = errorDacDir.resolve(fileCheckPair.getFileCheckFile().getFileName());
-      try {
-        Files.createDirectories(errorDir);
-      } catch (IOException e) {
-        throw new RuntimeException("Unable to create error "+ resolver.dac + " directory", e);
-      }
-      try{
-        Files.move(tempFile, erFile);
-      } catch (IOException e) {
-        throw new RuntimeException("Unable to move " + fileCheckPair.getNcFile() + " to " + erFile, e);
-      }
-      producerTemplate.sendBody("seda:error", new ErrorMessage(key,"Error executing AOML Processor"));
-    });
+    //TODO uncomment this after happy path is tested
+//    fileCheckPairMap.forEach((key, fileCheckPair) ->{
+//      Path errorDacDir = errorDir.resolve(resolver.dac);
+//      Path tempFile = fileCheckPair.getExistingFile();
+//      Path erFile = errorDacDir.resolve(fileCheckPair.getFileCheckFile().getFileName());
+//      try {
+//        Files.createDirectories(errorDir);
+//      } catch (IOException e) {
+//        throw new RuntimeException("Unable to create error "+ resolver.dac + " directory", e);
+//      }
+//      try{
+//        Files.move(tempFile, erFile);
+//      } catch (IOException e) {
+//        throw new RuntimeException("Unable to move " + fileCheckPair.getNcFile() + " to " + erFile, e);
+//      }
+//      producerTemplate.sendBody("seda:error", new ErrorMessage(key,"Error executing AOML Processor"));
+//    });
   }
 
-  private FileResolver resolveTarGz(File readyFile) {
-    Path readyPath = readyFile.toPath();
-    Path parent = readyPath.getParent();
-    if (readyPath.getParent() == null || readyPath.getParent().getParent() == null) {
-      throw new RuntimeException("Tar gz file parent is null");
-    }
-    parent = parent.toAbsolutePath().normalize();
-    String dac = parent.getParent().toAbsolutePath().normalize().getFileName().toString();
-    String readyFileName = readyFile.getName();
-    String fileName = readyFileName.replaceAll("\\.ready$", "");
-    return new FileResolver(parent.resolve(fileName), dac);
-  }
+//  private FileResolver resolveTarGz(File readyFile) {
+//    Path readyPath = readyFile.toPath();
+//    Path parent = readyPath.getParent();
+//    if (readyPath.getParent() == null || readyPath.getParent().getParent() == null) {
+//      throw new RuntimeException("Tar gz file parent is null");
+//    }
+//    parent = parent.toAbsolutePath().normalize();
+//    String dac = parent.getParent().toAbsolutePath().normalize().getFileName().toString();
+//    String readyFileName = readyFile.getName();
+//    String fileName = readyFileName.replaceAll("\\.ready$", "");
+//    return new FileResolver(parent.resolve(fileName), dac);
+//  }
 
   private static class FileResolver {
 
