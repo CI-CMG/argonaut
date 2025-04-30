@@ -23,12 +23,10 @@ public class ValidationProcessor implements Processor {
   private final Path validateDir;
   private final Path errorDir;
   private final ProducerTemplate producerTemplate;
-  private final ObjectMapper objectMapper;
 
   @Autowired
-  public ValidationProcessor(ServiceProperties serviceProperties, ProducerTemplate producerTemplate, ObjectMapper objectMapper) {
+  public ValidationProcessor(ServiceProperties serviceProperties, ProducerTemplate producerTemplate) {
     this.producerTemplate = producerTemplate;
-    this.objectMapper = objectMapper;
     workingDir = Paths.get(serviceProperties.getWorkDirectory());
     processingDir = workingDir.resolve("processing");
     validateDir = workingDir.resolve("validated");
@@ -47,9 +45,8 @@ public class ValidationProcessor implements Processor {
 
   @Override
   public void process(Exchange exchange) throws Exception {
-//    ValidationMessage validationMessage = exchange.getIn().getBody(ValidationMessage.class);
+    ValidationMessage validationMessage = exchange.getIn().getBody(ValidationMessage.class);
     String body = exchange.getIn().getBody(String.class);
-    ValidationMessage validationMessage = objectMapper.readValue(body,ValidationMessage.class);
     Path ncFile = validationMessage.getNcFile();
     Path fileCheckXmlFile = validationMessage.getFileCheckXmlFile();
     FileCheckResults checkResults;

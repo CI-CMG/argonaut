@@ -46,12 +46,9 @@ public class SubmissionProcessor implements Processor {
   private final Path errorDir;
   private final ProducerTemplate producerTemplate;
 
-  private final ObjectMapper objectMapper;
-
   @Autowired
-  public SubmissionProcessor(ServiceProperties serviceProperties, ProducerTemplate producerTemplate, ObjectMapper objectMapper) {
+  public SubmissionProcessor(ServiceProperties serviceProperties, ProducerTemplate producerTemplate) {
     this.producerTemplate = producerTemplate;
-    this.objectMapper = objectMapper;
     ClassLoader classLoader = getClass().getClassLoader();
 
     java = Paths.get(System.getProperty("java.home")).resolve("bin").resolve("java");
@@ -229,11 +226,8 @@ public class SubmissionProcessor implements Processor {
                 } catch (IOException e) {
                   throw new RuntimeException("Unable to move " + fileCheckPair.getFileCheckFile() + " to " + fileCheckFile, e);
                 }
-                try {
-                  producerTemplate.sendBody("seda:validation", objectMapper.writeValueAsString(new ValidationMessage(ncFile, fileCheckFile)));
-                } catch (JsonProcessingException e) {
-                  throw new RuntimeException(e);
-                }
+
+                producerTemplate.sendBody("seda:validation", new ValidationMessage(ncFile, fileCheckFile));
                 fileCheckPairtList.remove(key);
               } else {
                 fileCheckPairtList.put(key, fileCheckPair);

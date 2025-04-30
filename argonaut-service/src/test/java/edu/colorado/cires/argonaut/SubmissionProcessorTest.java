@@ -31,7 +31,6 @@ class SubmissionProcessorTest {
 
   private static final Path dacDir = Paths.get("target/dac");
   private static final Path workDir = Paths.get("target/work");
-  private ObjectMapper objectMapper = new ObjectMapper();
 
   private static final String[] files = new String[]{
       "1901830_meta.nc",
@@ -171,7 +170,7 @@ class SubmissionProcessorTest {
 
     ProducerTemplate producerTemplate = mock(ProducerTemplate.class);
 
-    SubmissionProcessor processor = new SubmissionProcessor(serviceProperties, producerTemplate, objectMapper);
+    SubmissionProcessor processor = new SubmissionProcessor(serviceProperties, producerTemplate);
     Exchange exchange = mock(Exchange.class);
     Message message = mock(Message.class);
     when(message.getBody(File.class)).thenReturn(readyFile.toFile());
@@ -191,15 +190,7 @@ class SubmissionProcessorTest {
     });
     assertEquals(expectedFiles, processedFiles);
 
-    //validationMessages.forEach(vm -> verify(producerTemplate).sendBody(eq("seda:validation"), eq(vm)));
-    validationMessages.stream().map(vm -> {
-      try {
-        return objectMapper.writeValueAsString(vm);
-      } catch (JsonProcessingException e) {
-        throw new RuntimeException(e);
-      }
-    }).forEach(vm -> verify(producerTemplate).sendBody(eq("seda:validation"), eq(vm)));
-
+    validationMessages.forEach(vm -> verify(producerTemplate).sendBody(eq("seda:validation"), eq(vm)));
   }
 
 }

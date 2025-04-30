@@ -19,7 +19,6 @@ import org.junit.jupiter.api.Test;
 public class ValidationProcessorTest {
   private static final Path dacDir = Paths.get("target/dac");
   private static final Path workDir = Paths.get("target/work");
-  private ObjectMapper objectMapper = new ObjectMapper();
 
   @BeforeEach
   public void before() throws Exception {
