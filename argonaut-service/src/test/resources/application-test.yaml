@@ -1,3 +1,6 @@
 argonaut:
   dac-directory: target/dac
   work-directory: target/work
+  submission-directory: target/submission
+  processing-directory: target/processing
+  output-directory: target/output

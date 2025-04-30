@@ -27,7 +27,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 
-class AomlProcessorTest {
+class SubmissionProcessorTest {
 
   private static final Path dacDir = Paths.get("target/dac");
   private static final Path workDir = Paths.get("target/work");
@@ -171,7 +171,7 @@ class AomlProcessorTest {
 
     ProducerTemplate producerTemplate = mock(ProducerTemplate.class);
 
-    AomlProcessor processor = new AomlProcessor(serviceProperties, producerTemplate, objectMapper);
+    SubmissionProcessor processor = new SubmissionProcessor(serviceProperties, producerTemplate, objectMapper);
     Exchange exchange = mock(Exchange.class);
     Message message = mock(Message.class);
     when(message.getBody(File.class)).thenReturn(readyFile.toFile());

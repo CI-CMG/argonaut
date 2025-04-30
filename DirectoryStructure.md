@@ -7,8 +7,20 @@ submission
  - - - - xxx.tar.gz
  - - - - <dac_name>_greylist.csv
  - - - - <dac_name>_removal.txt
+ - - - processing
+ - - - - <submission_timestamp>
+ - - - - - xxx.tar.gz
+ - - - - - <dac_name>_greylist.csv
+ - - - - - <dac_name>_removal.txt
+ - - - processed
+ - - - - <submission_timestamp>
+ - - - - - xxx.tar.gz
+ - - - - - <dac_name>_greylist.csv
+ - - - - - <dac_name>_removal.txt
  - - - reject
  - - - - <submission_timestamp>
+ - - - - - xxx.tar.gz
+ - - - - - error_report.csv
  - - - - - \<float\>
  - - - - - - \<float\>_meta.nc
  - - - - - - \<float\>_Rtraj.nc
@@ -32,7 +44,7 @@ processing
 
 # Final Directory Structure
 
-final
+output
   - etc
   - - removed
   - - - <dac_name>
@@ -45,8 +57,6 @@ final
   - - - - - - \<float>_Rtraj.nc.md5
   - - - - - - \<float>_tech.nc
   - - - - - - \<float>_tech.nc.md5
-  - - - - - - \<float>_prof.nc
-  - - - - - - \<float>_prof.nc.md5
   - - - - - - profiles
   - - - - - - - R\<float>_xxx.nc
   - - - - - - - R\<float>_xxx.nc.md5
@@ -61,6 +71,8 @@ final
   - - - - \<float>_Rtraj.nc.md5
   - - - - \<float>_tech.nc
   - - - - \<float>_tech.nc.md5
+  - - - - \<float>_prof.nc
+  - - - - \<float>_prof.nc.md5
   - - - - profiles
   - - - - - R\<float>_xxx.nc
   - - - - - R\<float>_xxx.nc.md5
@@ -85,6 +97,7 @@ final
   - latest_data
   - - R\<year>\<MM>\<dd>\_prof\_\<num>.nc
   - - R\<year>\<MM>\<dd>\_prof\_\<num>.nc.md5
+
 # Differences from French GDAC
 1. Removal structure. French GDAC does not have a timestamp directory
 2. Likely difference in reject structure

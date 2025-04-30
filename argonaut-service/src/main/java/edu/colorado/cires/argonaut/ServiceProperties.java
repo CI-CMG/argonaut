@@ -1,7 +1,11 @@
 package edu.colorado.cires.argonaut;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import java.nio.file.Path;
+import java.time.Duration;
+import java.util.ArrayList;
 import java.util.List;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
@@ -12,34 +16,101 @@ import org.springframework.validation.annotation.Validated;
 @Validated
 public class ServiceProperties {
 
-  @NotBlank
-  private String dacDirectory;
-  @NotBlank
-  private String workDirectory;
+
   @NotNull
-  private List<@NotBlank String> dacs;
+  private Path workDirectory;
+  @NotNull
+  private Path submissionDirectory;
+  @NotNull
+  private Path outputDirectory;
 
-  public String getDacDirectory() {
-    return dacDirectory;
+
+  @NotNull
+  private List<@Valid DacConfig> dacs;
+  @NotBlank
+  private String indexCron;
+  @NotBlank
+  private String gdacSyncCron;
+  @NotNull
+  private Duration floatMergeQuietTimeout;
+
+  public Path getSubmissionDirectory() {
+    return submissionDirectory;
   }
 
-  public void setDacDirectory(String dacDirectory) {
-    this.dacDirectory = dacDirectory;
+  public void setSubmissionDirectory(Path submissionDirectory) {
+    this.submissionDirectory = submissionDirectory.toAbsolutePath().normalize();
   }
 
-  public String getWorkDirectory() {
+
+  public Path getOutputDirectory() {
+    return outputDirectory;
+  }
+
+  public void setOutputDirectory(Path outputDirectory) {
+    this.outputDirectory = outputDirectory.toAbsolutePath().normalize();
+  }
+
+  public String getGdacSyncCron() {
+    return gdacSyncCron;
+  }
+
+  public void setGdacSyncCron(String gdacSyncCron) {
+    this.gdacSyncCron = gdacSyncCron;
+  }
+
+  public String getIndexCron() {
+    return indexCron;
+  }
+
+  public void setIndexCron(String indexCron) {
+    this.indexCron = indexCron;
+  }
+
+  public Path getWorkDirectory() {
     return workDirectory;
   }
 
-  public void setWorkDirectory(String workDirectory) {
-    this.workDirectory = workDirectory;
+  public void setWorkDirectory(Path workDirectory) {
+    this.workDirectory = workDirectory.toAbsolutePath().normalize();
   }
 
-  public List<String> getDacs() {
+  public List<DacConfig> getDacs() {
     return dacs;
   }
 
-  public void setDacs(List<String> dacs) {
+  public void setDacs(List<DacConfig> dacs) {
     this.dacs = dacs;
+  }
+
+  public Duration getFloatMergeQuietTimeout() {
+    return floatMergeQuietTimeout;
+  }
+
+  public void setFloatMergeQuietTimeout(Duration floatMergeQuietTimeout) {
+    this.floatMergeQuietTimeout = floatMergeQuietTimeout;
+  }
+
+  public static class DacConfig {
+    @NotBlank
+    private String name;
+    @NotNull
+    private List<@NotBlank String> email = new ArrayList<>();
+
+    public String getName() {
+      return name;
+    }
+
+    public void setName(String name) {
+      this.name = name;
+    }
+
+    public List<String> getEmail() {
+      return email;
+    }
+
+    public void setEmail(List<String> email) {
+      this.email = email;
+    }
   }
 }

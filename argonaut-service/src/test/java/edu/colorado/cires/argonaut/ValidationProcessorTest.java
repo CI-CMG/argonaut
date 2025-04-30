@@ -34,34 +34,34 @@ public class ValidationProcessorTest {
     FileUtils.deleteQuietly(dacDir.toFile());
     FileUtils.deleteQuietly(workDir.toFile());
   }
-  @Test
-  public void testParseXml() throws Exception {
-    ValidationMessage validationMessage = new ValidationMessage(
-        Paths.get("src/test/resources/validation/1901830_meta.nc"),
-        Paths.get("src/test/resources/validation/1901830_meta.nc.filecheck")
-    );
-    ServiceProperties serviceProperties = new ServiceProperties();
-    serviceProperties.setWorkDirectory(workDir.toString());
-    serviceProperties.setDacDirectory(dacDir.toString());
-
-    Path stagingDir = dacDir.resolve("aoml/staging");
-    Files.createDirectories(stagingDir);
-    Path processingDir = workDir.resolve("processing").resolve("aoml");
-    Files.createDirectories(processingDir);
-    Path errorDir = workDir.resolve("error").resolve("aoml");
-    String fileName1 = "1901830_meta.nc";
-    Path stagedFile = stagingDir.resolve(fileName);
-    Path readyFile = stagingDir.resolve("nc_2025.04.02_16.15.tar.gz.ready");
-    Files.copy(Paths.get("src/test/resources/aoml").resolve(fileName), stagedFile);
-
-    Files.
-//    ProducerTemplate producerTemplate = mock(ProducerTemplate.class);
-//    ValidationProcessor processor = new ValidationProcessor(serviceProperties, producerTemplate, objectMapper);
-//    Exchange exchange = mock(Exchange.class);
-//    Message message = mock(Message.class);
-//    when(message.getBody(ValidationMessage.class)).thenReturn(validationMessage);
-//    when(exchange.getIn()).thenReturn(message);
-//    processor.process(exchange);
-  }
+//  @Test
+//  public void testParseXml() throws Exception {
+//    ValidationMessage validationMessage = new ValidationMessage(
+//        Paths.get("src/test/resources/validation/1901830_meta.nc"),
+//        Paths.get("src/test/resources/validation/1901830_meta.nc.filecheck")
+//    );
+//    ServiceProperties serviceProperties = new ServiceProperties();
+//    serviceProperties.setWorkDirectory(workDir.toString());
+//    serviceProperties.setDacDirectory(dacDir.toString());
+//
+//    Path stagingDir = dacDir.resolve("aoml/staging");
+//    Files.createDirectories(stagingDir);
+//    Path processingDir = workDir.resolve("processing").resolve("aoml");
+//    Files.createDirectories(processingDir);
+//    Path errorDir = workDir.resolve("error").resolve("aoml");
+//    String fileName1 = "1901830_meta.nc";
+//    Path stagedFile = stagingDir.resolve(fileName);
+//    Path readyFile = stagingDir.resolve("nc_2025.04.02_16.15.tar.gz.ready");
+//    Files.copy(Paths.get("src/test/resources/aoml").resolve(fileName), stagedFile);
+//
+//    Files.
+////    ProducerTemplate producerTemplate = mock(ProducerTemplate.class);
+////    ValidationProcessor processor = new ValidationProcessor(serviceProperties, producerTemplate, objectMapper);
+////    Exchange exchange = mock(Exchange.class);
+////    Message message = mock(Message.class);
+////    when(message.getBody(ValidationMessage.class)).thenReturn(validationMessage);
+////    when(exchange.getIn()).thenReturn(message);
+////    processor.process(exchange);
+//  }
 
 }

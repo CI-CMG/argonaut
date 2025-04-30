@@ -19,7 +19,8 @@ public class CronRoutes extends RouteBuilder {
 
   @Override
   public void configure() throws Exception {
-    from("cron:tab?schedule=0/1+*+*+*+*+?")
-      .process(exchange -> LOGGER.info("Cron route triggered: {}", exchange.getIn().getBody()));
+    from("cron:tab?schedule=RAW({{argonaut.index-cron}})")
+      .routeId("index-cron")
+      .process(exchange -> LOGGER.info("index-cron triggered: {}", exchange.getIn().getBody()));
   }
 }

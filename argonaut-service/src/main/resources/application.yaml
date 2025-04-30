@@ -2,7 +2,13 @@ argonaut:
   dac-directory: ''
   work-directory: ''
   dacs:
-    - aoml
+    - name: aoml
+#      email:
+#        - foo.bar@example.com
+  index-cron: '0 * * * * ?'
+  gdac-sync-cron: '30 3 * * * ?'
+  float-merge-quiet-timeout: 'PT1H'
+
 
 camel:
   springboot:

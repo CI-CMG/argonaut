@@ -33,9 +33,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class AomlProcessor implements Processor {
+public class SubmissionProcessor implements Processor {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(AomlProcessor.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(SubmissionProcessor.class);
 
   private final ShellExecutor shellExecutor = new DefaultShellExecutor();
   private final Path exeJar;
@@ -49,7 +49,7 @@ public class AomlProcessor implements Processor {
   private final ObjectMapper objectMapper;
 
   @Autowired
-  public AomlProcessor(ServiceProperties serviceProperties, ProducerTemplate producerTemplate, ObjectMapper objectMapper) {
+  public SubmissionProcessor(ServiceProperties serviceProperties, ProducerTemplate producerTemplate, ObjectMapper objectMapper) {
     this.producerTemplate = producerTemplate;
     this.objectMapper = objectMapper;
     ClassLoader classLoader = getClass().getClassLoader();
