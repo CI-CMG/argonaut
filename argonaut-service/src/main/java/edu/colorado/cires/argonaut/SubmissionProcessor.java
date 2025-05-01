@@ -150,7 +150,9 @@ public class SubmissionProcessor implements Processor {
     String dac = exchange.getIn().getHeader(HeaderConsts.DAC, String.class);
     String timestamp = exchange.getIn().getHeader(HeaderConsts.SUBMISSION_TIMESTAMP, String.class);
     Path submittedTarGzFile = exchange.getIn().getBody(File.class).toPath();
-    Path submissionProcessingDir = submissionDir.resolve("dac").resolve(dac).resolve("processing").resolve(timestamp);
+    Path dacDir = submissionDir.resolve("dac").resolve(dac);
+    Path submissionProcessingDir = dacDir.resolve("processing").resolve(timestamp);
+    Path submissionProcessedDir = dacDir.resolve("processed").resolve(timestamp);
     ArgonautFileUtils.createDirectories(submissionProcessingDir);
     String tarGzFileFileName = submittedTarGzFile.getFileName().toString();
     Path tarGzFile = submissionProcessingDir.resolve(tarGzFileFileName);
@@ -240,6 +242,8 @@ public class SubmissionProcessor implements Processor {
       }
     } finally {
       FileUtils.deleteQuietly(tempDir.toFile());
+      ArgonautFileUtils.createDirectories(submissionProcessedDir);
+      ArgonautFileUtils.move(tarGzFile, submissionProcessedDir.resolve(tarGzFileFileName));
     }
     //incomplete pairs
     //TODO uncomment this after happy path is tested

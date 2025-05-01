@@ -171,11 +171,13 @@ public class DataSubmissionTest {
     Path submitDir = aomlDir.resolve("submit");
 
     Path submissionProcessingDir = aomlDir.resolve("processing");
+    Path submissionProcessedDir = aomlDir.resolve("processed");
     Path aomlProcessingDir = serviceProperties.getWorkDirectory().resolve("processing/dac/aoml");
 
     FileTestUtils.emptyDirectory(submitDir);
     FileTestUtils.emptyDirectory(submissionProcessingDir);
     FileTestUtils.emptyDirectory(aomlProcessingDir);
+    FileTestUtils.emptyDirectory(submissionProcessedDir);
 
     String fileName = "nc_2025.04.02_16.15.tar.gz";
     Path submittedFile = submitDir.resolve(fileName);
@@ -206,7 +208,7 @@ public class DataSubmissionTest {
     assertEquals(expectedFiles, processedFiles);
 
     assertFalse(Files.exists(submittedFile));
-    assertTrue(Files.exists(submissionProcessingDir.resolve(timestamp).resolve(fileName)));
+    assertTrue(Files.exists(submissionProcessedDir.resolve(timestamp).resolve(fileName)));
 
 
   }
