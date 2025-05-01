@@ -1,5 +1,6 @@
-package edu.colorado.cires.argonaut;
+package edu.colorado.cires.argonaut.route;
 
+import edu.colorado.cires.argonaut.ServiceProperties;
 import org.apache.camel.builder.RouteBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

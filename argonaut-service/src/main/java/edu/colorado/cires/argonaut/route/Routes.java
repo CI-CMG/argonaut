@@ -3,7 +3,9 @@ package edu.colorado.cires.argonaut.route;
 import edu.colorado.cires.argonaut.ErrorProcessor;
 import edu.colorado.cires.argonaut.PostValidationProcessor;
 import edu.colorado.cires.argonaut.ServiceProperties;
+import edu.colorado.cires.argonaut.processor.FileMoveProcessor;
 import edu.colorado.cires.argonaut.processor.SubmissionProcessor;
+import edu.colorado.cires.argonaut.processor.SubmissionReportProcessor;
 import edu.colorado.cires.argonaut.processor.ValidationProcessor;
 import edu.colorado.cires.argonaut.message.HeaderConsts;
 import edu.colorado.cires.argonaut.message.NcSubmissionMessage;
@@ -28,15 +30,20 @@ public class Routes extends RouteBuilder {
   private final ServiceProperties serviceProperties;
   private final ErrorProcessor errorProcessor;
   private final SubmissionTimestampService submissionTimestampService;
+  private final FileMoveProcessor fileMoveProcessor;
+  private final SubmissionReportProcessor submissionReportProcessor;
 
   public Routes(ServiceProperties serviceProperties, SubmissionProcessor submissionProcessor, ValidationProcessor validationProcessor,
-      PostValidationProcessor postValidationProcessor, ErrorProcessor errorProcessor, SubmissionTimestampService submissionTimestampService) {
+      PostValidationProcessor postValidationProcessor, ErrorProcessor errorProcessor, SubmissionTimestampService submissionTimestampService,
+      FileMoveProcessor fileMoveProcessor, SubmissionReportProcessor submissionReportProcessor) {
     this.submissionProcessor = submissionProcessor;
     this.validationProcessor = validationProcessor;
     this.serviceProperties = serviceProperties;
     this.postValidationProcessor = postValidationProcessor;
     this.errorProcessor = errorProcessor;
     this.submissionTimestampService = submissionTimestampService;
+    this.fileMoveProcessor = fileMoveProcessor;
+    this.submissionReportProcessor = submissionReportProcessor;
   }
 
   @Override
@@ -74,7 +81,7 @@ public class Routes extends RouteBuilder {
 
     from(QueueConsts.SUBMIT_DATA).process(submissionProcessor).split(body()).to(QueueConsts.VALIDATION);
 
-    from(QueueConsts.VALIDATION)
+    from(QueueConsts.VALIDATION + "?concurrentConsumers=" + serviceProperties.getValidationThreads())
       .process(validationProcessor)
       .choice()
         .when(NcSubmissionMessage.IS_VALID)
@@ -82,7 +89,19 @@ public class Routes extends RouteBuilder {
         .otherwise()
           .to(QueueConsts.VALIDATION_FAILURE);
 
-//    from(QueueConsts.VALIDATION_SUCCESS);
+    from(QueueConsts.VALIDATION_SUCCESS)
+      .multicast().parallelProcessing()
+        .to(QueueConsts.FILE_OUTPUT);
+
+    from(QueueConsts.FILE_OUTPUT).process(fileMoveProcessor).to(QueueConsts.FILE_MOVED);
+
+    from(QueueConsts.FILE_MOVED)
+        .multicast().parallelProcessing()
+        .to(QueueConsts.SUBMISSION_REPORT);
+
+    from(QueueConsts.SUBMISSION_REPORT + "?concurrentConsumers=1")
+        .process(submissionReportProcessor)
+        .to(QueueConsts.SUBMISSION_COMPLETE_AGG);
 //
 //
 //    from(QueueConsts.VALIDATION_FAILURE);

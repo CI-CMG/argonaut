@@ -20,6 +20,7 @@ import java.util.Arrays;
 import java.util.function.Consumer;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
+import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -143,6 +144,7 @@ public class ValidationProcessor implements Processor {
 
       String[] args = {
           java.toAbsolutePath().normalize().toString(),
+          "-Xmx" + serviceProperties.getFileCheckerHeap(),
           "-jar",
           exeJar.toAbsolutePath().normalize().toString(),
           dac,
@@ -181,5 +183,6 @@ public class ValidationProcessor implements Processor {
     if (error != null) {
       ncSubmissionMessage.setValidationError(error);
     }
+    FileUtils.deleteQuietly(fileCheckXmlFile.toFile());
   }
 }

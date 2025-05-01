@@ -1,6 +1,5 @@
 package edu.colorado.cires.argonaut.message;
 
-import java.time.Instant;
 import java.util.Objects;
 import org.apache.camel.Predicate;
 

@@ -27,6 +27,11 @@ public class ServiceProperties {
   @NotNull
   private Duration fileCheckerTimeout;
 
+  @Min(1)
+  private int validationThreads;
+  @NotBlank
+  private String fileCheckerHeap;
+
 
   @NotNull
   private List<@Valid DacConfig> dacs;
@@ -36,6 +41,22 @@ public class ServiceProperties {
   private String gdacSyncCron;
   @NotNull
   private Duration floatMergeQuietTimeout;
+
+  public String getFileCheckerHeap() {
+    return fileCheckerHeap;
+  }
+
+  public void setFileCheckerHeap(String fileCheckerHeap) {
+    this.fileCheckerHeap = fileCheckerHeap;
+  }
+
+  public int getValidationThreads() {
+    return validationThreads;
+  }
+
+  public void setValidationThreads(int validationThreads) {
+    this.validationThreads = validationThreads;
+  }
 
   public Path getSubmissionDirectory() {
     return submissionDirectory;

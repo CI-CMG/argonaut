@@ -6,7 +6,10 @@ public final class QueueConsts {
   public static final String VALIDATION_FAILURE = "seda:validation-failure";
   public static final String VALIDATION = "seda:validation";
   public static final String SUBMIT_DATA = "seda:submit-data";
+  public static final String FILE_OUTPUT = "seda:file-output";
   public static final String SUBMISSION_REPORT = "seda:submit-report";
+  public static final String FILE_MOVED = "seda:file-moved";
+  public static final String SUBMISSION_COMPLETE_AGG = "seda:submission-complete-agg";
 
   private QueueConsts() {
 

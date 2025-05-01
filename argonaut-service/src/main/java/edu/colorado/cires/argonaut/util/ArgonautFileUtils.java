@@ -13,6 +13,7 @@ import java.util.zip.ZipInputStream;
 import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 
 public class ArgonautFileUtils {
@@ -30,6 +31,14 @@ public class ArgonautFileUtils {
       IOUtils.copy(resource, dest.toFile());
     } catch (IOException e) {
       throw new RuntimeException("Unable to copy resource: " + resource + " to " + dest, e);
+    }
+  }
+
+  public static void copy(Path source, Path dest) {
+    try {
+      FileUtils.copyFile(source.toFile(), dest.toFile());
+    } catch (IOException e) {
+      throw new RuntimeException("Unable to copy file: " + source + " to " + dest, e);
     }
   }
 
@@ -118,12 +127,24 @@ public class ArgonautFileUtils {
     return serviceProperties.getSubmissionDirectory().resolve("dac").resolve(dac);
   }
 
+  public static Path getSubmissionDirForDacSubmit(ServiceProperties serviceProperties, String dac) {
+    return getSubmissionDirForDac(serviceProperties, dac).resolve("submit");
+  }
+
   public static Path getSubmissionProcessingDirForDac(ServiceProperties serviceProperties, String dac) {
     return getSubmissionDirForDac(serviceProperties, dac).resolve("processing");
   }
 
   public static Path getSubmissionProcessedDirForDac(ServiceProperties serviceProperties, String dac) {
     return getSubmissionDirForDac(serviceProperties, dac).resolve("processed");
+  }
+
+  public static Path getOutputProfileDir(ServiceProperties serviceProperties, String dac, String floatId, boolean isProfile) {
+    Path dacDir = serviceProperties.getOutputDirectory().resolve("dac").resolve(dac).resolve(floatId);
+    if (isProfile) {
+      dacDir = dacDir.resolve("profiles");
+    }
+    return dacDir;
   }
 
   private ArgonautFileUtils() {

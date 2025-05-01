@@ -5,24 +5,19 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
-import edu.colorado.cires.argonaut.message.HeaderConsts;
 import edu.colorado.cires.argonaut.message.NcSubmissionMessage;
 import edu.colorado.cires.argonaut.service.SubmissionTimestampService;
-import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.apache.camel.EndpointInject;
-import org.apache.camel.Exchange;
 import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.test.spring.junit5.CamelSpringBootTest;
 import org.apache.camel.test.spring.junit5.MockEndpointsAndSkip;
@@ -40,7 +35,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 @DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
 @ActiveProfiles("test")
 @MockEndpointsAndSkip("seda:validation-success|seda:validation-failure")
-public class DataSubmissionTest {
+public class DataSubmissionAndValidationTest {
 
   private static final String[] files = new String[]{
       "1901830_meta.nc",
@@ -206,7 +201,6 @@ public class DataSubmissionTest {
     Streams.of(files).forEach(name -> {
       Path floatDir = aomlProcessingDir.resolve(name.split("_")[0]);
       expectedFiles.add(floatDir.resolve(name));
-      expectedFiles.add(floatDir.resolve(name + ".filecheck"));
 
       NcSubmissionMessage expectedMessage = new NcSubmissionMessage();
       expectedMessage.setProfile(false);
