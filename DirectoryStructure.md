@@ -17,17 +17,15 @@ submission
  - - - - - xxx.tar.gz
  - - - - - <dac_name>_greylist.csv
  - - - - - <dac_name>_removal.txt
- - - - reject
- - - - - <submission_timestamp>
- - - - - - xxx.tar.gz
- - - - - - error_report.csv
- - - - - - \<float\>
- - - - - - - \<float\>_meta.nc
- - - - - - - \<float\>_Rtraj.nc
- - - - - - - \<float\>_tech.nc
- - - - - - - profiles
- - - - - - - - R\<float\>_xxx.nc
- - - - - - - - D\<float\>_xxx.nc
+ - - - - - submission_report.csv
+ - - - - - reject
+ - - - - - - \<float\>
+ - - - - - - - \<float\>_meta.nc
+ - - - - - - - \<float\>_Rtraj.nc
+ - - - - - - - \<float\>_tech.nc
+ - - - - - - - profiles
+ - - - - - - - - R\<float\>_xxx.nc
+ - - - - - - - - D\<float\>_xxx.nc
 
 # Internal Processing Structure
 
