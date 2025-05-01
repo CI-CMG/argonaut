@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
 import edu.colorado.cires.argonaut.message.HeaderConsts;
+import edu.colorado.cires.argonaut.message.NcSubmissionMessage;
 import edu.colorado.cires.argonaut.service.SubmissionTimestampService;
 import java.io.File;
 import java.nio.file.Files;
@@ -13,9 +14,12 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.apache.camel.EndpointInject;
 import org.apache.camel.Exchange;
@@ -35,7 +39,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 @CamelSpringBootTest
 @DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
 @ActiveProfiles("test")
-@MockEndpointsAndSkip("seda:validation|seda:error")
+@MockEndpointsAndSkip("seda:validation-success|seda:validation-failure")
 public class DataSubmissionTest {
 
   private static final String[] files = new String[]{
@@ -147,11 +151,11 @@ public class DataSubmissionTest {
     System.setProperty("camel.threads.virtual.enabled", "true");
   }
 
-  @EndpointInject("mock:seda:validation")
-  private MockEndpoint validation;
+  @EndpointInject("mock:seda:validation-success")
+  private MockEndpoint validationSuccess;
 
-  @EndpointInject("mock:seda:error")
-  private MockEndpoint error;
+  @EndpointInject("mock:seda:validation-failure")
+  private MockEndpoint validationFailure;
 
   @MockitoBean
   private SubmissionTimestampService submissionTimestampService;
@@ -183,29 +187,43 @@ public class DataSubmissionTest {
     Path submittedFile = submitDir.resolve(fileName);
     Path copyFile = aomlDir.resolve(fileName);
 
-    validation.expectedMessageCount(102);
-    validation.setAssertPeriod(2000);
-    error.expectedMessageCount(0);
-    error.setAssertPeriod(2000);
+    validationSuccess.expectedMessageCount(102);
+    validationSuccess.setAssertPeriod(2000);
+    validationFailure.expectedMessageCount(0);
+    validationFailure.setAssertPeriod(2000);
 
     // copy before moving to prevent state where file is picked up halfway
     Files.copy(Paths.get("src/test/resources/aoml").resolve(fileName), copyFile);
     Files.move(copyFile, submittedFile);
 
-    MockEndpoint.assertIsSatisfied(validation, error);
+    MockEndpoint.assertIsSatisfied(60, TimeUnit.SECONDS, validationSuccess, validationFailure);
     Set<Path> processedFiles = new TreeSet<>();
     try (Stream<Path> stream = Files.walk(aomlProcessingDir)) {
       stream.filter(Files::isRegularFile).forEach(processedFiles::add);
     }
-//    List<ValidationMessage> validationMessages = new ArrayList<>();
+    Set<NcSubmissionMessage> validationMessages = new HashSet<>();
     Set<Path> expectedFiles = new TreeSet<>();
     Streams.of(files).forEach(name -> {
       Path floatDir = aomlProcessingDir.resolve(name.split("_")[0]);
       expectedFiles.add(floatDir.resolve(name));
       expectedFiles.add(floatDir.resolve(name + ".filecheck"));
-//      validationMessages.add(new ValidationMessage(processingDir.resolve(name), processingDir.resolve(name + ".filecheck")));
+
+      NcSubmissionMessage expectedMessage = new NcSubmissionMessage();
+      expectedMessage.setProfile(false);
+      expectedMessage.setDac("aoml");
+      expectedMessage.setFileName(name);
+      expectedMessage.setTimestamp(timestamp);
+      expectedMessage.setFloatId(floatDir.getFileName().toString());
+
+      validationMessages.add(expectedMessage);
     });
+
+    Set<NcSubmissionMessage> receivedMessages = validationSuccess.getExchanges().stream()
+        .map(exchange -> exchange.getIn().getBody(NcSubmissionMessage.class))
+        .collect(Collectors.toSet());
+
     assertEquals(expectedFiles, processedFiles);
+    assertEquals(validationMessages, receivedMessages);
 
     assertFalse(Files.exists(submittedFile));
     assertTrue(Files.exists(submissionProcessedDir.resolve(timestamp).resolve(fileName)));

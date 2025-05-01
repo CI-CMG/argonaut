@@ -107,3 +107,6 @@ Here are GDAC merged files :
 latest_data files: https://data-argo.ifremer.fr/latest_data
 geo files: https://data-argo.ifremer.fr/geo/atlantic_ocean/2025/04/
 float file https://data-argo.ifremer.fr/dac/aoml/7902298/7902298_prof.nc
+
+Architecture diagram live link: https://lucid.app/publicSegments/view/31ad2582-241f-49d8-88fc-b2910ae00ad4/image.png
+

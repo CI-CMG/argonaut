@@ -1,11 +1,16 @@
-package edu.colorado.cires.argonaut;
+package edu.colorado.cires.argonaut.route;
 
+import edu.colorado.cires.argonaut.ErrorProcessor;
+import edu.colorado.cires.argonaut.PostValidationProcessor;
+import edu.colorado.cires.argonaut.ServiceProperties;
+import edu.colorado.cires.argonaut.processor.SubmissionProcessor;
+import edu.colorado.cires.argonaut.processor.ValidationProcessor;
 import edu.colorado.cires.argonaut.message.HeaderConsts;
+import edu.colorado.cires.argonaut.message.NcSubmissionMessage;
 import edu.colorado.cires.argonaut.service.SubmissionTimestampService;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import org.apache.camel.builder.AggregationStrategies;
 import org.apache.camel.builder.RouteBuilder;
 import org.slf4j.Logger;
@@ -49,7 +54,6 @@ public class Routes extends RouteBuilder {
             throw new RuntimeException("Unable to create submit directory " + dacSubmitDir, e);
           }
 
-
           //TODO add logging
           from("file:" + dacSubmitDir)
             .routeId("dac-submit-" + dac.getName())
@@ -66,18 +70,31 @@ public class Routes extends RouteBuilder {
                 .to("seda:submit-unknown");
         });
 
-    from("seda:submit-data")
-      .process(submissionProcessor);
+    // @formatter:off
+
+    from(QueueConsts.SUBMIT_DATA).process(submissionProcessor).split(body()).to(QueueConsts.VALIDATION);
+
+    from(QueueConsts.VALIDATION)
+      .process(validationProcessor)
+      .choice()
+        .when(NcSubmissionMessage.IS_VALID)
+          .to(QueueConsts.VALIDATION_SUCCESS)
+        .otherwise()
+          .to(QueueConsts.VALIDATION_FAILURE);
+
+//    from(QueueConsts.VALIDATION_SUCCESS);
+//
+//
+//    from(QueueConsts.VALIDATION_FAILURE);
+
     from("seda:submit-greylist")
-        .process(exchange -> LOGGER.info("seda:submit-greylist: {}", exchange.getIn().getBody()));
+      .process(exchange -> LOGGER.info("seda:submit-greylist: {}", exchange.getIn().getBody()));
     from("seda:submit-removal")
-        .process(exchange -> LOGGER.info("seda:submit-removal: {}", exchange.getIn().getBody()));
+      .process(exchange -> LOGGER.info("seda:submit-removal: {}", exchange.getIn().getBody()));
     from("seda:submit-unknown")
-        .process(exchange -> LOGGER.info("seda:submit-unknown: {}", exchange.getIn().getBody()));
+      .process(exchange -> LOGGER.info("seda:submit-unknown: {}", exchange.getIn().getBody()));
 
 
-    from("seda:validation")
-      .process(validationProcessor);
     from("seda:postvalidation")
       .process(postValidationProcessor);
     from("seda:error")
@@ -99,6 +116,8 @@ public class Routes extends RouteBuilder {
         .useOriginal())
       .completionTimeout(serviceProperties.getFloatMergeQuietTimeout().toString())
       .to("seda:float-merge");
+
+    // @formatter:on
 
   }
 }
