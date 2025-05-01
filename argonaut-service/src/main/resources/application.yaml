@@ -11,6 +11,7 @@ argonaut:
   file-checker-timeout: 'PT2M'
   validation-threads: 20
   file-checker-heap: '256m'
+  submission-report-threads: 10
 
 
 camel:

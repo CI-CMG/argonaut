@@ -29,6 +29,8 @@ public class ServiceProperties {
 
   @Min(1)
   private int validationThreads;
+  @Min(1)
+  private int submissionReportThreads;
   @NotBlank
   private String fileCheckerHeap;
 
@@ -41,6 +43,14 @@ public class ServiceProperties {
   private String gdacSyncCron;
   @NotNull
   private Duration floatMergeQuietTimeout;
+
+  public int getSubmissionReportThreads() {
+    return submissionReportThreads;
+  }
+
+  public void setSubmissionReportThreads(int submissionReportThreads) {
+    this.submissionReportThreads = submissionReportThreads;
+  }
 
   public String getFileCheckerHeap() {
     return fileCheckerHeap;

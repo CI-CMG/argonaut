@@ -68,7 +68,7 @@ public class Routes extends RouteBuilder {
             .setHeader(HeaderConsts.SUBMISSION_TIMESTAMP, submissionTimestampService::generateTimestamp)
             .choice()
               .when(simple("${header.CamelFileNameOnly.endsWith('.tar.gz')}"))
-                .to("seda:submit-data")
+                .to(QueueConsts.SUBMIT_DATA)
               .when(simple("${header.CamelFileNameOnly.endsWith('_greylist.csv')}"))
                 .to("seda:submit-greylist")
               .when(simple("${header.CamelFileNameOnly.endsWith('_removal.txt')}"))
@@ -99,7 +99,7 @@ public class Routes extends RouteBuilder {
         .multicast().parallelProcessing()
         .to(QueueConsts.SUBMISSION_REPORT);
 
-    from(QueueConsts.SUBMISSION_REPORT + "?concurrentConsumers=1")
+    from(QueueConsts.SUBMISSION_REPORT + "?concurrentConsumers=" + serviceProperties.getSubmissionReportThreads())
         .process(submissionReportProcessor)
         .to(QueueConsts.SUBMISSION_COMPLETE_AGG);
 //

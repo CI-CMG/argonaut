@@ -6,7 +6,16 @@ import edu.colorado.cires.argonaut.message.NcSubmissionMessage;
 import edu.colorado.cires.argonaut.route.QueueConsts;
 import edu.colorado.cires.argonaut.util.ArgonautFileUtils;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.Instant;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.TreeSet;
 import org.apache.camel.EndpointInject;
 import org.apache.camel.ProducerTemplate;
 import org.apache.camel.component.mock.MockEndpoint;
@@ -41,40 +50,48 @@ public class SubmissionReportTest {
 
   @Test
   public void testReportHappyPath() throws Exception {
-
-    String timestamp = Instant.now().toString();
-    String floatId = "1901830";
     String dac = "aoml";
-    String fileName = "1901830_meta.nc";
-    String fileName2 = "1901830_tech.nc";
+    Instant timestamp = Instant.now();
 
-    NcSubmissionMessage message = new NcSubmissionMessage();
-    message.setFloatId(floatId);
-    message.setDac(dac);
-    message.setTimestamp(timestamp);
-    message.setFileName(fileName);
-    message.setProfile(false);
+    Map<Path, Set<String>> expected = new TreeMap<>();
+    Set<NcSubmissionMessage> messages = new HashSet<>();
 
-    NcSubmissionMessage message2 = new NcSubmissionMessage();
-    message2.setFloatId(floatId);
-    message2.setDac(dac);
-    message2.setTimestamp(timestamp);
-    message2.setFileName(fileName2);
-    message2.setProfile(false);
+    for (int i = 0; i < 10; i++) {
+      String timestampStr = timestamp.minusSeconds(i).toString();
+      String floatId = "190183" + i;
+
+      for (String fileName : Arrays.asList(floatId + "_meta.nc", floatId + "_tech.nc", floatId + "_Rtraj.nc")) {
+        NcSubmissionMessage message = new NcSubmissionMessage();
+        message.setFloatId(floatId);
+        message.setDac(dac);
+        message.setTimestamp(timestampStr);
+        message.setFileName(fileName);
+        message.setProfile(false);
+
+        messages.add(message);
+
+        Path path = ArgonautFileUtils.getSubmissionProcessedDirForDac(serviceProperties, dac).resolve(timestampStr).resolve("submission_report.csv");
+        Set<String> rows = expected.get(path);
+        if(rows == null) {
+          rows = new TreeSet<>();
+          expected.put(path, rows);
+        }
+        rows.add(timestampStr + "," + dac + "," + floatId + "," + fileName + ",success");
+      }
+    }
 
     FileTestUtils.emptyDirectory(ArgonautFileUtils.getSubmissionProcessedDirForDac(serviceProperties, dac));
 
-    submissionCompleteAgg.expectedMessageCount(2);
+    submissionCompleteAgg.expectedMessageCount(messages.size());
 
-    producerTemplate.sendBody(QueueConsts.FILE_MOVED, message);
-    producerTemplate.sendBody(QueueConsts.FILE_MOVED, message2);
+    messages.forEach(message -> producerTemplate.sendBody(QueueConsts.FILE_MOVED, message));
 
     submissionCompleteAgg.assertIsSatisfied();
 
-    String expectedCsv = timestamp + ",aoml,1901830,1901830_meta.nc,success\n" + timestamp + ",aoml,1901830,1901830_tech.nc,success\n";
-    String actualCsv = Files.readString(ArgonautFileUtils.getSubmissionProcessedDirForDac(serviceProperties, dac).resolve("submission_report.csv"));
-
-    assertEquals(expectedCsv, actualCsv);
+    for (Entry<Path, Set<String>> entry : expected.entrySet()) {
+      Set<String> actualCsv = new TreeSet<>(Files.readAllLines(entry.getKey()));
+      assertEquals(entry.getValue(), actualCsv);
+    }
 
   }
 
