@@ -1,6 +1,6 @@
 package edu.colorado.cires.argonaut.util;
 
-import edu.colorado.cires.argonaut.ServiceProperties;
+import edu.colorado.cires.argonaut.config.ServiceProperties;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;

@@ -3,36 +3,26 @@ package edu.colorado.cires.argonaut;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.when;
 
+import edu.colorado.cires.argonaut.config.ServiceProperties;
 import edu.colorado.cires.argonaut.message.NcSubmissionMessage;
 import edu.colorado.cires.argonaut.route.QueueConsts;
-import edu.colorado.cires.argonaut.service.SubmissionTimestampService;
 import edu.colorado.cires.argonaut.util.ArgonautFileUtils;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Instant;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.TreeSet;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import org.apache.camel.EndpointInject;
 import org.apache.camel.ProducerTemplate;
 import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.test.spring.junit5.CamelSpringBootTest;
 import org.apache.camel.test.spring.junit5.MockEndpointsAndSkip;
-import org.apache.commons.lang3.stream.Streams;
-import org.checkerframework.checker.units.qual.A;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 @SpringBootTest
 @CamelSpringBootTest

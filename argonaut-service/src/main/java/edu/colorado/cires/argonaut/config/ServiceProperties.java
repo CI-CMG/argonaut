@@ -1,4 +1,4 @@
-package edu.colorado.cires.argonaut;
+package edu.colorado.cires.argonaut.config;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;

@@ -1,5 +1,6 @@
-package edu.colorado.cires.argonaut;
+package edu.colorado.cires.argonaut.processor;
 
+import edu.colorado.cires.argonaut.config.ServiceProperties;
 import java.nio.file.Path;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
@@ -9,12 +10,12 @@ import ucar.nc2.Dimension;
 import ucar.nc2.write.NetcdfFormatWriter;
 
 @Component
-public class MergeProcessor implements Processor {
+public class BioMergeProcessor implements Processor {
 
   private final ServiceProperties serviceProperties;
 
   @Autowired
-  public MergeProcessor(ServiceProperties serviceProperties) {
+  public BioMergeProcessor(ServiceProperties serviceProperties) {
     this.serviceProperties = serviceProperties;
   }
 

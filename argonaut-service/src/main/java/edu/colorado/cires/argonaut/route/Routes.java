@@ -1,8 +1,6 @@
 package edu.colorado.cires.argonaut.route;
 
-import edu.colorado.cires.argonaut.ErrorProcessor;
-import edu.colorado.cires.argonaut.PostValidationProcessor;
-import edu.colorado.cires.argonaut.ServiceProperties;
+import edu.colorado.cires.argonaut.config.ServiceProperties;
 import edu.colorado.cires.argonaut.processor.FileMoveProcessor;
 import edu.colorado.cires.argonaut.processor.SubmissionProcessor;
 import edu.colorado.cires.argonaut.processor.SubmissionReportProcessor;
@@ -26,21 +24,17 @@ public class Routes extends RouteBuilder {
 
   private final SubmissionProcessor submissionProcessor;
   private final ValidationProcessor validationProcessor;
-  private final PostValidationProcessor postValidationProcessor;
   private final ServiceProperties serviceProperties;
-  private final ErrorProcessor errorProcessor;
   private final SubmissionTimestampService submissionTimestampService;
   private final FileMoveProcessor fileMoveProcessor;
   private final SubmissionReportProcessor submissionReportProcessor;
 
   public Routes(ServiceProperties serviceProperties, SubmissionProcessor submissionProcessor, ValidationProcessor validationProcessor,
-      PostValidationProcessor postValidationProcessor, ErrorProcessor errorProcessor, SubmissionTimestampService submissionTimestampService,
+      SubmissionTimestampService submissionTimestampService,
       FileMoveProcessor fileMoveProcessor, SubmissionReportProcessor submissionReportProcessor) {
     this.submissionProcessor = submissionProcessor;
     this.validationProcessor = validationProcessor;
     this.serviceProperties = serviceProperties;
-    this.postValidationProcessor = postValidationProcessor;
-    this.errorProcessor = errorProcessor;
     this.submissionTimestampService = submissionTimestampService;
     this.fileMoveProcessor = fileMoveProcessor;
     this.submissionReportProcessor = submissionReportProcessor;
@@ -113,11 +107,6 @@ public class Routes extends RouteBuilder {
     from("seda:submit-unknown")
       .process(exchange -> LOGGER.info("seda:submit-unknown: {}", exchange.getIn().getBody()));
 
-
-    from("seda:postvalidation")
-      .process(postValidationProcessor);
-    from("seda:error")
-      .process(errorProcessor);
 
     from("seda:update-index")
       .process(exchange -> LOGGER.info("seda:update-index: {}", exchange.getIn().getBody()));

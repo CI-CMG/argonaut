@@ -1,6 +1,6 @@
 package edu.colorado.cires.argonaut.processor;
 
-import edu.colorado.cires.argonaut.ServiceProperties;
+import edu.colorado.cires.argonaut.config.ServiceProperties;
 import edu.colorado.cires.argonaut.message.HeaderConsts;
 import edu.colorado.cires.argonaut.message.NcSubmissionMessage;
 import edu.colorado.cires.argonaut.util.ArgonautFileUtils;

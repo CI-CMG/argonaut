@@ -2,6 +2,7 @@ package edu.colorado.cires.argonaut;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import edu.colorado.cires.argonaut.config.ServiceProperties;
 import edu.colorado.cires.argonaut.message.NcSubmissionMessage;
 import edu.colorado.cires.argonaut.route.QueueConsts;
 import edu.colorado.cires.argonaut.util.ArgonautFileUtils;
@@ -9,7 +10,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;

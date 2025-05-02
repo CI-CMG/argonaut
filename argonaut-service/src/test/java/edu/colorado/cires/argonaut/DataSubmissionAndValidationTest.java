@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
+import edu.colorado.cires.argonaut.config.ServiceProperties;
 import edu.colorado.cires.argonaut.message.NcSubmissionMessage;
 import edu.colorado.cires.argonaut.service.SubmissionTimestampService;
 import java.nio.file.Files;
