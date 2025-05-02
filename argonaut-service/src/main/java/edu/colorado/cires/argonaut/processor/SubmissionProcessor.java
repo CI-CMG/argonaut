@@ -92,6 +92,7 @@ public class SubmissionProcessor implements Processor {
       ArgonautFileUtils.move(tarGzFile, submissionProcessedDir.resolve(tarGzFileFileName));
     }
 
+    output.forEach(message -> message.setNumberOfFilesInSubmission(output.size()));
     exchange.getIn().setBody(output);
 
   }

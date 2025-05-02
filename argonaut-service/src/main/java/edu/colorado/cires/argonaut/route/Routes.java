@@ -1,5 +1,6 @@
 package edu.colorado.cires.argonaut.route;
 
+import edu.colorado.cires.argonaut.aggregator.SubmissionCompleteAggregationStrategy;
 import edu.colorado.cires.argonaut.config.ServiceProperties;
 import edu.colorado.cires.argonaut.processor.FileMoveProcessor;
 import edu.colorado.cires.argonaut.processor.SubmissionProcessor;
@@ -28,16 +29,19 @@ public class Routes extends RouteBuilder {
   private final SubmissionTimestampService submissionTimestampService;
   private final FileMoveProcessor fileMoveProcessor;
   private final SubmissionReportProcessor submissionReportProcessor;
+  private final SubmissionCompleteAggregationStrategy submissionCompleteAggregationStrategy;
 
   public Routes(ServiceProperties serviceProperties, SubmissionProcessor submissionProcessor, ValidationProcessor validationProcessor,
       SubmissionTimestampService submissionTimestampService,
-      FileMoveProcessor fileMoveProcessor, SubmissionReportProcessor submissionReportProcessor) {
+      FileMoveProcessor fileMoveProcessor, SubmissionReportProcessor submissionReportProcessor,
+      SubmissionCompleteAggregationStrategy submissionCompleteAggregationStrategy) {
     this.submissionProcessor = submissionProcessor;
     this.validationProcessor = validationProcessor;
     this.serviceProperties = serviceProperties;
     this.submissionTimestampService = submissionTimestampService;
     this.fileMoveProcessor = fileMoveProcessor;
     this.submissionReportProcessor = submissionReportProcessor;
+    this.submissionCompleteAggregationStrategy = submissionCompleteAggregationStrategy;
   }
 
   @Override
@@ -96,9 +100,12 @@ public class Routes extends RouteBuilder {
     from(QueueConsts.SUBMISSION_REPORT + "?concurrentConsumers=" + serviceProperties.getSubmissionReportThreads())
         .process(submissionReportProcessor)
         .to(QueueConsts.SUBMISSION_COMPLETE_AGG);
-//
-//
-//    from(QueueConsts.VALIDATION_FAILURE);
+
+
+    from(QueueConsts.SUBMISSION_COMPLETE_AGG)
+        .aggregate(simple("${body.dac}_${body.timestamp}"), submissionCompleteAggregationStrategy)
+        .to(QueueConsts.PREPARE_SUBMISSION_EMAIL);
+
 
     from("seda:submit-greylist")
       .process(exchange -> LOGGER.info("seda:submit-greylist: {}", exchange.getIn().getBody()));

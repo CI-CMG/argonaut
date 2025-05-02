@@ -12,6 +12,7 @@ public class NcSubmissionMessage {
   private String dac;
   private String fileName;
   private boolean profile;
+  private int numberOfFilesInSubmission;
 
   public String getTimestamp() {
     return timestamp;
@@ -61,20 +62,28 @@ public class NcSubmissionMessage {
     this.profile = profile;
   }
 
+  public int getNumberOfFilesInSubmission() {
+    return numberOfFilesInSubmission;
+  }
+
+  public void setNumberOfFilesInSubmission(int numberOfFilesInSubmission) {
+    this.numberOfFilesInSubmission = numberOfFilesInSubmission;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
     NcSubmissionMessage that = (NcSubmissionMessage) o;
-    return profile == that.profile && Objects.equals(floatId, that.floatId) && Objects.equals(validationError, that.validationError)
-        && Objects.equals(timestamp, that.timestamp) && Objects.equals(dac, that.dac) && Objects.equals(fileName,
-        that.fileName);
+    return profile == that.profile && numberOfFilesInSubmission == that.numberOfFilesInSubmission && Objects.equals(floatId, that.floatId)
+        && Objects.equals(validationError, that.validationError) && Objects.equals(timestamp, that.timestamp)
+        && Objects.equals(dac, that.dac) && Objects.equals(fileName, that.fileName);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(floatId, validationError, timestamp, dac, fileName, profile);
+    return Objects.hash(floatId, validationError, timestamp, dac, fileName, profile, numberOfFilesInSubmission);
   }
 
   @Override
@@ -86,6 +95,7 @@ public class NcSubmissionMessage {
         ", dac='" + dac + '\'' +
         ", fileName='" + fileName + '\'' +
         ", profile=" + profile +
+        ", numberOfFilesInSubmission=" + numberOfFilesInSubmission +
         '}';
   }
 

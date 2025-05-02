@@ -147,6 +147,14 @@ public class ArgonautFileUtils {
     return dacDir;
   }
 
+  public static Path getRejectProfileDir(ServiceProperties serviceProperties, String dac, String timestamp, String floatId, boolean isProfile) {
+    Path dacDir = getSubmissionProcessedDirForDac(serviceProperties, dac).resolve(timestamp).resolve("reject").resolve(floatId);
+    if (isProfile) {
+      dacDir = dacDir.resolve("profiles");
+    }
+    return dacDir;
+  }
+
   private ArgonautFileUtils() {
 
   }

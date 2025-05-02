@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class FileMoveProcessor implements Processor {
 
-  private static Logger LOGGER = LoggerFactory.getLogger(FileMoveProcessor.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(FileMoveProcessor.class);
 
   private final ServiceProperties serviceProperties;
 
@@ -28,7 +28,12 @@ public class FileMoveProcessor implements Processor {
     NcSubmissionMessage message = exchange.getIn().getBody(NcSubmissionMessage.class);
     Path source = ArgonautFileUtils.getProcessingProfileDir(serviceProperties, message.getDac(), message.getFloatId(), message.isProfile())
         .resolve(message.getFileName());
-    Path destDir = ArgonautFileUtils.getOutputProfileDir(serviceProperties, message.getDac(), message.getFloatId(), message.isProfile());
+    Path destDir;
+    if (message.getValidationError() != null) {
+      destDir = ArgonautFileUtils.getOutputProfileDir(serviceProperties, message.getDac(), message.getFloatId(), message.isProfile());
+    } else {
+      destDir = ArgonautFileUtils.getRejectProfileDir(serviceProperties, message.getDac(), message.getTimestamp(), message.getFloatId(), message.isProfile());
+    }
     ArgonautFileUtils.createDirectories(destDir);
     Path dest = destDir.resolve(message.getFileName());
     LOGGER.info("Moving file {} to {}", source, dest);

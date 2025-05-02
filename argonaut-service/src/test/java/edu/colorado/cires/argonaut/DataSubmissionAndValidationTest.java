@@ -7,6 +7,7 @@ import static org.mockito.Mockito.when;
 
 import edu.colorado.cires.argonaut.config.ServiceProperties;
 import edu.colorado.cires.argonaut.message.NcSubmissionMessage;
+import edu.colorado.cires.argonaut.route.QueueConsts;
 import edu.colorado.cires.argonaut.service.SubmissionTimestampService;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -35,7 +36,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 @CamelSpringBootTest
 @DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
 @ActiveProfiles("test")
-@MockEndpointsAndSkip("seda:validation-success|seda:validation-failure")
+@MockEndpointsAndSkip(QueueConsts.VALIDATION_SUCCESS + "|" + QueueConsts.FILE_OUTPUT)
 public class DataSubmissionAndValidationTest {
 
   private static final String[] files = new String[]{
@@ -147,11 +148,11 @@ public class DataSubmissionAndValidationTest {
     System.setProperty("camel.threads.virtual.enabled", "true");
   }
 
-  @EndpointInject("mock:seda:validation-success")
+  @EndpointInject("mock:" + QueueConsts.VALIDATION_SUCCESS)
   private MockEndpoint validationSuccess;
 
-  @EndpointInject("mock:seda:validation-failure")
-  private MockEndpoint validationFailure;
+  @EndpointInject("mock:" + QueueConsts.FILE_OUTPUT)
+  private MockEndpoint fileOutput;
 
   @MockitoBean
   private SubmissionTimestampService submissionTimestampService;
@@ -185,14 +186,14 @@ public class DataSubmissionAndValidationTest {
 
     validationSuccess.expectedMessageCount(102);
     validationSuccess.setAssertPeriod(2000);
-    validationFailure.expectedMessageCount(0);
-    validationFailure.setAssertPeriod(2000);
+    fileOutput.expectedMessageCount(0);
+    fileOutput.setAssertPeriod(2000);
 
     // copy before moving to prevent state where file is picked up halfway
     Files.copy(Paths.get("src/test/resources/aoml").resolve(fileName), copyFile);
     Files.move(copyFile, submittedFile);
 
-    MockEndpoint.assertIsSatisfied(60, TimeUnit.SECONDS, validationSuccess, validationFailure);
+    MockEndpoint.assertIsSatisfied(60, TimeUnit.SECONDS, validationSuccess, fileOutput);
     Set<Path> processedFiles = new TreeSet<>();
     try (Stream<Path> stream = Files.walk(aomlProcessingDir)) {
       stream.filter(Files::isRegularFile).forEach(processedFiles::add);
@@ -209,6 +210,75 @@ public class DataSubmissionAndValidationTest {
       expectedMessage.setFileName(name);
       expectedMessage.setTimestamp(timestamp);
       expectedMessage.setFloatId(floatDir.getFileName().toString());
+      expectedMessage.setNumberOfFilesInSubmission(102);
+
+      validationMessages.add(expectedMessage);
+    });
+
+    Set<NcSubmissionMessage> receivedMessages = validationSuccess.getExchanges().stream()
+        .map(exchange -> exchange.getIn().getBody(NcSubmissionMessage.class))
+        .collect(Collectors.toSet());
+
+    assertEquals(expectedFiles, processedFiles);
+    assertEquals(validationMessages, receivedMessages);
+
+    assertFalse(Files.exists(submittedFile));
+    assertTrue(Files.exists(submissionProcessedDir.resolve(timestamp).resolve(fileName)));
+
+
+  }
+
+
+  @Test
+  public void testSubmitDataWithFailures() throws Exception {
+
+    String timestamp = Instant.now().toString();
+    when(submissionTimestampService.generateTimestamp()).thenReturn(timestamp);
+
+    Path submissionDir = serviceProperties.getSubmissionDirectory();
+    Path aomlDir = submissionDir.resolve("dac").resolve("aoml");
+    Path submitDir = aomlDir.resolve("submit");
+
+    Path submissionProcessingDir = aomlDir.resolve("processing");
+    Path submissionProcessedDir = aomlDir.resolve("processed");
+    Path aomlProcessingDir = serviceProperties.getWorkDirectory().resolve("processing/dac/aoml");
+
+    FileTestUtils.emptyDirectory(submitDir);
+    FileTestUtils.emptyDirectory(submissionProcessingDir);
+    FileTestUtils.emptyDirectory(aomlProcessingDir);
+    FileTestUtils.emptyDirectory(submissionProcessedDir);
+
+    String fileName = "nc_2025.04.02_16.15.tar.gz";
+    Path submittedFile = submitDir.resolve(fileName);
+    Path copyFile = aomlDir.resolve(fileName);
+
+    validationSuccess.expectedMessageCount(102);
+    validationSuccess.setAssertPeriod(2000);
+    fileOutput.expectedMessageCount(0);
+    fileOutput.setAssertPeriod(2000);
+
+    // copy before moving to prevent state where file is picked up halfway
+    Files.copy(Paths.get("src/test/resources/aoml").resolve(fileName), copyFile);
+    Files.move(copyFile, submittedFile);
+
+    MockEndpoint.assertIsSatisfied(60, TimeUnit.SECONDS, validationSuccess, fileOutput);
+    Set<Path> processedFiles = new TreeSet<>();
+    try (Stream<Path> stream = Files.walk(aomlProcessingDir)) {
+      stream.filter(Files::isRegularFile).forEach(processedFiles::add);
+    }
+    Set<NcSubmissionMessage> validationMessages = new HashSet<>();
+    Set<Path> expectedFiles = new TreeSet<>();
+    Streams.of(files).forEach(name -> {
+      Path floatDir = aomlProcessingDir.resolve(name.split("_")[0]);
+      expectedFiles.add(floatDir.resolve(name));
+
+      NcSubmissionMessage expectedMessage = new NcSubmissionMessage();
+      expectedMessage.setProfile(false);
+      expectedMessage.setDac("aoml");
+      expectedMessage.setFileName(name);
+      expectedMessage.setTimestamp(timestamp);
+      expectedMessage.setFloatId(floatDir.getFileName().toString());
+      expectedMessage.setNumberOfFilesInSubmission(102);
 
       validationMessages.add(expectedMessage);
     });
