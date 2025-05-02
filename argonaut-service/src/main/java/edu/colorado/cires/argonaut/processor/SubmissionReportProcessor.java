@@ -34,7 +34,8 @@ public class SubmissionReportProcessor implements Processor {
     synchronized (lockMap) {
       lock = lockMap.get(submissionReportCsv);
       if (lock == null) {
-        lockMap.put(submissionReportCsv, lock = new ReentrantLock());
+        lock = new ReentrantLock();
+        lockMap.put(submissionReportCsv, lock);
         countMap.put(submissionReportCsv, 0);
       }
       countMap.put(submissionReportCsv, countMap.get(submissionReportCsv) + 1);
@@ -44,21 +45,22 @@ public class SubmissionReportProcessor implements Processor {
       ArgonautFileUtils.createDirectories(processedDir);
       String reportMessage = message.getValidationError() == null ? "success" : message.getValidationError();
       String row = String.join(",", message.getTimestamp(), message.getDac(), message.getFloatId(), message.getFileName(), reportMessage);
-      try(FileWriter fileWriter = new FileWriter(submissionReportCsv.toFile(), true)) {
+      try (FileWriter fileWriter = new FileWriter(submissionReportCsv.toFile(), true)) {
         fileWriter.write(row);
         fileWriter.write("\n");
       }
-    }finally {
+    } finally {
       lock.unlock();
-    }
-    synchronized (lockMap) {
-      int count = countMap.get(submissionReportCsv);
-      if (count == 1) {
-        lockMap.remove(submissionReportCsv);
-        countMap.remove(submissionReportCsv);
-      } else {
-        countMap.put(submissionReportCsv, count - 1);
+      synchronized (lockMap) {
+        int count = countMap.get(submissionReportCsv);
+        if (count == 1) {
+          lockMap.remove(submissionReportCsv);
+          countMap.remove(submissionReportCsv);
+        } else {
+          countMap.put(submissionReportCsv, count - 1);
+        }
       }
     }
+
   }
 }
