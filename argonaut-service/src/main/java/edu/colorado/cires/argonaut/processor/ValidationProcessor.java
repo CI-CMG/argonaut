@@ -17,6 +17,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Duration;
 import java.util.Arrays;
+import java.util.List;
 import java.util.function.Consumer;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
@@ -83,7 +84,7 @@ public class ValidationProcessor implements Processor {
     ArgonautFileUtils.unzip(specResource, destPath);
   }
 
-  private static String validateXml(Path fileCheckXmlFile) {
+  private static List<String> validateXml(Path fileCheckXmlFile) {
     FileCheckResults checkResults;
     try (
         Reader reader = Files.newBufferedReader(fileCheckXmlFile, StandardCharsets.UTF_8)) {
@@ -113,7 +114,7 @@ public class ValidationProcessor implements Processor {
 //      }
 //      producerTemplate.sendBody("seda:postvalidate", new PostValidationMessage(ncFileValidate,fileCheckFileValidate));
     } else {
-      return checkResults.getStatus();
+      return checkResults.getErrors().getErrors();
 //      Path errorDacDir = errorDir.resolve(dac);
 //      Path erFileCheckFile = errorDacDir.resolve(fileCheckXmlFile.getFileName());
 //      Path erNcFile = errorDacDir.resolve(ncFile.getFileName());
@@ -179,7 +180,7 @@ public class ValidationProcessor implements Processor {
     Path processingDacDir = ArgonautFileUtils.getProcessingProfileDir(serviceProperties, dac, floatId, isProfile);
     checkFile(dac, processingDacDir, fileName);
     Path fileCheckXmlFile = processingDacDir.resolve(fileName + ".filecheck");
-    String error = validateXml(fileCheckXmlFile);
+    List<String> error = validateXml(fileCheckXmlFile);
     if (error != null) {
       ncSubmissionMessage.setValidationError(error);
     }

@@ -85,7 +85,7 @@ public class Routes extends RouteBuilder {
         .when(NcSubmissionMessage.IS_VALID)
           .to(QueueConsts.VALIDATION_SUCCESS)
         .otherwise()
-          .to(QueueConsts.VALIDATION_FAILURE);
+          .to(QueueConsts.FILE_OUTPUT);
 
     from(QueueConsts.VALIDATION_SUCCESS)
       .multicast().parallelProcessing()

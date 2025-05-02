@@ -43,7 +43,7 @@ public class SubmissionReportProcessor implements Processor {
     lock.lock();
     try {
       ArgonautFileUtils.createDirectories(processedDir);
-      String reportMessage = message.getValidationError() == null ? "success" : message.getValidationError();
+      String reportMessage = message.getValidationError() == null ? "success" : String.join("\n", message.getValidationError());
       String row = String.join(",", message.getTimestamp(), message.getDac(), message.getFloatId(), message.getFileName(), reportMessage);
       try (FileWriter fileWriter = new FileWriter(submissionReportCsv.toFile(), true)) {
         fileWriter.write(row);
