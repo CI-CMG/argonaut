@@ -80,4 +80,42 @@ public class PostValidationTest {
   }
 
 
+  @Test
+  public void testSubmitErrorProfile() throws Exception {
+
+    String timestamp = Instant.now().toString();
+    String floatId = "5905716";
+    String dac = "aoml";
+    String fileName = "R5905716_245.nc";
+
+    NcSubmissionMessage message = new NcSubmissionMessage();
+    message.setFloatId(floatId);
+    message.setDac(dac);
+    message.setTimestamp(timestamp);
+    message.setFileName(fileName);
+    message.setProfile(true);
+    message.getValidationError().add("very bad profile");
+    message.setNumberOfFilesInSubmission(100);
+
+    FileTestUtils.emptyDirectory(serviceProperties.getOutputDirectory());
+    FileTestUtils.emptyDirectory(ArgonautFileUtils.getProcessingDir(serviceProperties));
+
+    Path testFile = Paths.get("src/test/resources/" + fileName);
+    Path processingFile = ArgonautFileUtils.getProcessingProfileDir(serviceProperties, dac, floatId, true).resolve(fileName);
+
+    ArgonautFileUtils.copy(testFile, processingFile);
+
+    fileMoved.expectedMessageCount(1);
+
+    producerTemplate.sendBody(QueueConsts.FILE_OUTPUT, message);
+
+    fileMoved.assertIsSatisfied();
+
+    assertFalse(Files.exists(processingFile));
+    Path outputFile = ArgonautFileUtils.getRejectProfileDir(serviceProperties, dac, timestamp, floatId, true).resolve(fileName);
+    assertTrue(Files.exists(outputFile));
+
+  }
+
+
 }

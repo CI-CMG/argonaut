@@ -16,7 +16,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
 import org.apache.camel.Exchange;
@@ -93,47 +95,15 @@ public class ValidationProcessor implements Processor {
       throw new IllegalStateException("Unable to parse " + fileCheckXmlFile, e);
     }
     if (checkResults.getStatus().equals("FILE-ACCEPTED")) {
-      return null;
-//      Path validateDacDir = workingDir.resolve(dac);
-//      Path fileCheckFileValidate = validateDacDir.resolve(fileCheckXmlFile.getFileName());
-//      Path ncFileValidate = validateDir.resolve(ncFile.getFileName());
-//      try {
-//        Files.createDirectories(validateDacDir);
-//      } catch (IOException e) {
-//        throw new RuntimeException("Unable to create "+ dac + " directory", e);
-//      }
-//      try{
-//        Files.move(ncFile, ncFileValidate);
-//      } catch (IOException e) {
-//        throw new RuntimeException("Unable to move " + ncFile + " to " + ncFileValidate, e);
-//      }
-//      try{
-//        Files.move(fileCheckXmlFile,fileCheckFileValidate);
-//      } catch (IOException e) {
-//        throw new RuntimeException("Unable to move " + fileCheckXmlFile + " to " + fileCheckFileValidate, e);
-//      }
-//      producerTemplate.sendBody("seda:postvalidate", new PostValidationMessage(ncFileValidate,fileCheckFileValidate));
+      return Collections.emptyList();
     } else {
-      return checkResults.getErrors().getErrors();
-//      Path errorDacDir = errorDir.resolve(dac);
-//      Path erFileCheckFile = errorDacDir.resolve(fileCheckXmlFile.getFileName());
-//      Path erNcFile = errorDacDir.resolve(ncFile.getFileName());
-//      try {
-//        Files.createDirectories(errorDir);
-//      } catch (IOException e) {
-//        throw new RuntimeException("Unable to create error " + dac + " directory", e);
-//      }
-//      try{
-//        Files.move(ncFile, erNcFile);
-//      } catch (IOException e) {
-//        throw new RuntimeException("Unable to move " + ncFile + " to " + erNcFile, e);
-//      }
-//      try{
-//        Files.move(fileCheckXmlFile, erFileCheckFile);
-//      } catch (IOException e) {
-//        throw new RuntimeException("Unable to move " + fileCheckXmlFile + " to " + erFileCheckFile, e);
-//      }
-//      producerTemplate.sendBody("seda:error", new ErrorMessage(ncFile.getFileName().toString(),checkResults.getStatus()));
+      List<String> errors;
+      if(checkResults.getErrors() != null && checkResults.getErrors().getErrors() != null && !checkResults.getErrors().getErrors().isEmpty()) {
+        errors = checkResults.getErrors().getErrors();
+      } else  {
+        errors = Arrays.asList(checkResults.getStatus());
+      }
+      return errors;
     }
   }
 
@@ -181,9 +151,7 @@ public class ValidationProcessor implements Processor {
     checkFile(dac, processingDacDir, fileName);
     Path fileCheckXmlFile = processingDacDir.resolve(fileName + ".filecheck");
     List<String> error = validateXml(fileCheckXmlFile);
-    if (error != null) {
-      ncSubmissionMessage.setValidationError(error);
-    }
+    ncSubmissionMessage.setValidationError(error);
     FileUtils.deleteQuietly(fileCheckXmlFile.toFile());
   }
 }

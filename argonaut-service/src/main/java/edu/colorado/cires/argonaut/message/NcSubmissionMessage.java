@@ -1,5 +1,6 @@
 package edu.colorado.cires.argonaut.message;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import org.apache.camel.Predicate;
@@ -8,7 +9,7 @@ public class NcSubmissionMessage {
 
 
   private String floatId;
-  private List<String> validationError;
+  private List<String> validationError = new ArrayList<>();
   private String timestamp;
   private String dac;
   private String fileName;
@@ -52,6 +53,9 @@ public class NcSubmissionMessage {
   }
 
   public void setValidationError(List<String> validationError) {
+    if (validationError == null) {
+      validationError = new ArrayList<>();
+    }
     this.validationError = validationError;
   }
 
@@ -103,6 +107,6 @@ public class NcSubmissionMessage {
         '}';
   }
 
-  public static final Predicate IS_VALID = exchange -> exchange.getIn().getBody(NcSubmissionMessage.class).getValidationError() == null;
+  public static final Predicate IS_VALID = exchange -> exchange.getIn().getBody(NcSubmissionMessage.class).getValidationError().isEmpty();
 
 }

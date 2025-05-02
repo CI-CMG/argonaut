@@ -10,6 +10,8 @@ import java.util.Map;
 import java.util.concurrent.locks.ReentrantLock;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVPrinter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -43,11 +45,10 @@ public class SubmissionReportProcessor implements Processor {
     lock.lock();
     try {
       ArgonautFileUtils.createDirectories(processedDir);
-      String reportMessage = message.getValidationError() == null ? "success" : String.join("\n", message.getValidationError());
-      String row = String.join(",", message.getTimestamp(), message.getDac(), message.getFloatId(), message.getFileName(), reportMessage);
-      try (FileWriter fileWriter = new FileWriter(submissionReportCsv.toFile(), true)) {
-        fileWriter.write(row);
-        fileWriter.write("\n");
+      CSVFormat csvFormat = CSVFormat.DEFAULT.builder().setTrim(true).get();
+      String reportMessage = message.getValidationError().isEmpty() ? "success" : String.join("\n", message.getValidationError());
+      try (final CSVPrinter printer = new CSVPrinter(new FileWriter(submissionReportCsv.toFile(), true), csvFormat)) {
+        printer.printRecord(message.getTimestamp(), message.getDac(), message.getFloatId(), message.getFileName(), reportMessage);
       }
     } finally {
       lock.unlock();

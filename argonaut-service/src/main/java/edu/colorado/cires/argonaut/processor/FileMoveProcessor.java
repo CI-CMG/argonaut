@@ -29,7 +29,7 @@ public class FileMoveProcessor implements Processor {
     Path source = ArgonautFileUtils.getProcessingProfileDir(serviceProperties, message.getDac(), message.getFloatId(), message.isProfile())
         .resolve(message.getFileName());
     Path destDir;
-    if (message.getValidationError() != null) {
+    if (message.getValidationError().isEmpty()) {
       destDir = ArgonautFileUtils.getOutputProfileDir(serviceProperties, message.getDac(), message.getFloatId(), message.isProfile());
     } else {
       destDir = ArgonautFileUtils.getRejectProfileDir(serviceProperties, message.getDac(), message.getTimestamp(), message.getFloatId(), message.isProfile());
