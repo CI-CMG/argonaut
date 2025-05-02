@@ -15,7 +15,7 @@
     <Logger name="org.apache.activemq.audit" level="warn" additivity="false">
       <AppenderRef ref="Console"/>
     </Logger>
-    <Logger name="gov.noaa.ncei" level="debug" additivity="false">
+    <Logger name="edu.colorado.cires" level="debug" additivity="false">
       <AppenderRef ref="Console"/>
     </Logger>
     <Root level="info">

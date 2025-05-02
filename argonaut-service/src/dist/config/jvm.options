@@ -1,0 +1,38 @@
+-server
+-Xms1g
+-Xmx1g
+
+-Xlog:gc=debug:file=${svc.home}/log/gc.log::filecount=10,filesize=10m
+
+-Dlog4j2.configurationFile=${svc.home}/config/log4j2.xml
+-Dlog4j2.disableJmx
+-Djava.util.logging.manager=org.apache.logging.log4j.jul.LogManager
+
+-XX:+HeapDumpOnOutOfMemoryError
+-XX:HeapDumpPath=${svc.home}/heap-dump-${date}.hprof
+
+
+# Enable JMX remote management.
+-Dcom.sun.management.jmxremote
+
+# Specify the port number for JMX connections (e.g., 9010).
+-Dcom.sun.management.jmxremote.port=9010
+
+# Enable authentication for JMX connections to secure access.
+-Dcom.sun.management.jmxremote.authenticate=false
+#-Dcom.sun.management.jmxremote.authenticate=true
+
+# Enable SSL to encrypt communication and secure JMX connections.
+-Dcom.sun.management.jmxremote.ssl=false
+#-Dcom.sun.management.jmxremote.ssl=true
+
+# Specify the path to the password file, which contains credentials for authentication.
+#-Dcom.sun.management.jmxremote.password.file=/path/to/jmxremote.password
+
+# Specify the path to the access file, which defines user roles and permissions.
+#-Dcom.sun.management.jmxremote.access.file=/path/to/jmxremote.access
+
+#-Djava.rmi.server.hostname=<external IP>
+
+# Uncomment to enable remote debugging
+#-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=9102
