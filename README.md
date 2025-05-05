@@ -110,3 +110,5 @@ float file https://data-argo.ifremer.fr/dac/aoml/7902298/7902298_prof.nc
 
 Architecture diagram live link: https://lucid.app/publicSegments/view/31ad2582-241f-49d8-88fc-b2910ae00ad4/image.png
 
+Code to create bio merged profile:  https://github.com/euroargodev/Coriolis-data-processing-chain-for-Argo-floats/blob/main/decArgo_soft/soft/util/nc_create_synthetic_profile_rt.m
+Maybe code to create multi float file: https://github.com/euroargodev/Coriolis-data-processing-chain-for-Argo-floats/blob/main/decArgo_soft/soft/util/nc_create_multi_prof_file.m
