@@ -157,7 +157,7 @@ public class DateChecker {
         Paths.get("/Users/cslater/projects/argo-pipeline/argonaut-pre-processing/src/main/resources/argo_cloud_details.csv"))) {
       reader.lines().forEach(line -> {
         String[] split = line.split(",");
-        String key = split[0];
+        String key = split[0].replaceAll("^ARGO/", "");
         int size = Integer.parseInt(split[1]);
         ZonedDateTime dateTime = ZonedDateTime.parse(split[2]);
         Instant instant = dateTime.toInstant();

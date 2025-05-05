@@ -3,6 +3,7 @@ package edu.colorado.cires.argonaut.route;
 import edu.colorado.cires.argonaut.aggregator.SubmissionCompleteAggregationStrategy;
 import edu.colorado.cires.argonaut.config.ServiceProperties;
 import edu.colorado.cires.argonaut.processor.FileMoveProcessor;
+import edu.colorado.cires.argonaut.processor.FloatMergeProcessor;
 import edu.colorado.cires.argonaut.processor.SubmissionProcessor;
 import edu.colorado.cires.argonaut.processor.SubmissionReportProcessor;
 import edu.colorado.cires.argonaut.processor.ValidationProcessor;
@@ -30,11 +31,12 @@ public class Routes extends RouteBuilder {
   private final FileMoveProcessor fileMoveProcessor;
   private final SubmissionReportProcessor submissionReportProcessor;
   private final SubmissionCompleteAggregationStrategy submissionCompleteAggregationStrategy;
+  private final FloatMergeProcessor floatMergeProcessor;
 
   public Routes(ServiceProperties serviceProperties, SubmissionProcessor submissionProcessor, ValidationProcessor validationProcessor,
       SubmissionTimestampService submissionTimestampService,
       FileMoveProcessor fileMoveProcessor, SubmissionReportProcessor submissionReportProcessor,
-      SubmissionCompleteAggregationStrategy submissionCompleteAggregationStrategy) {
+      SubmissionCompleteAggregationStrategy submissionCompleteAggregationStrategy, FloatMergeProcessor floatMergeProcessor) {
     this.submissionProcessor = submissionProcessor;
     this.validationProcessor = validationProcessor;
     this.serviceProperties = serviceProperties;
@@ -42,6 +44,7 @@ public class Routes extends RouteBuilder {
     this.fileMoveProcessor = fileMoveProcessor;
     this.submissionReportProcessor = submissionReportProcessor;
     this.submissionCompleteAggregationStrategy = submissionCompleteAggregationStrategy;
+    this.floatMergeProcessor = floatMergeProcessor;
   }
 
   @Override
@@ -89,7 +92,7 @@ public class Routes extends RouteBuilder {
 
     from(QueueConsts.VALIDATION_SUCCESS)
       .multicast().parallelProcessing()
-        .to(QueueConsts.FILE_OUTPUT);
+        .to(QueueConsts.FILE_OUTPUT, QueueConsts.FLOAT_MERGE_AGG);
 
     from(QueueConsts.FILE_OUTPUT).process(fileMoveProcessor).to(QueueConsts.FILE_MOVED);
 
@@ -101,36 +104,17 @@ public class Routes extends RouteBuilder {
         .process(submissionReportProcessor)
         .to(QueueConsts.SUBMISSION_COMPLETE_AGG);
 
-
     from(QueueConsts.SUBMISSION_COMPLETE_AGG)
         .aggregate(simple("${body.dac}_${body.timestamp}"), submissionCompleteAggregationStrategy)
         .to(QueueConsts.PREPARE_SUBMISSION_EMAIL);
 
+    from(QueueConsts.FLOAT_MERGE_AGG)
+        .aggregate(simple("${body.dac}_${body.floatId}"), AggregationStrategies.useOriginal())
+        .completionInterval(serviceProperties.getFloatMergeQuietTimeout().toMillis())
+        .to(QueueConsts.FLOAT_MERGE);
 
-    from("seda:submit-greylist")
-      .process(exchange -> LOGGER.info("seda:submit-greylist: {}", exchange.getIn().getBody()));
-    from("seda:submit-removal")
-      .process(exchange -> LOGGER.info("seda:submit-removal: {}", exchange.getIn().getBody()));
-    from("seda:submit-unknown")
-      .process(exchange -> LOGGER.info("seda:submit-unknown: {}", exchange.getIn().getBody()));
+    from(QueueConsts.FLOAT_MERGE).process(floatMergeProcessor).to(QueueConsts.UPDATE_INDEX_AGG);
 
-
-    from("seda:update-index")
-      .process(exchange -> LOGGER.info("seda:update-index: {}", exchange.getIn().getBody()));
-    from("seda:gdac-sync")
-      .process(exchange -> LOGGER.info("seda:gdac-sync: {}", exchange.getIn().getBody()));
-    from("seda:geo-merge")
-      .process(exchange -> LOGGER.info("seda:geo-merge: {}", exchange.getIn().getBody()));
-    from("seda:remove")
-      .process(exchange -> LOGGER.info("seda:remove: {}", exchange.getIn().getBody()));
-    from("seda:float-merge")
-      .process(exchange -> LOGGER.info("seda:float-merge: {}", exchange.getIn().getBody()));
-
-    from("seda:float-merge-aggregate")
-      .aggregate(simple("${body.dac}_${body.floatId}"), AggregationStrategies
-        .useOriginal())
-      .completionTimeout(serviceProperties.getFloatMergeQuietTimeout().toString())
-      .to("seda:float-merge");
 
     // @formatter:on
 

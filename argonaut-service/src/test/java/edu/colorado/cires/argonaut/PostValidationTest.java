@@ -28,7 +28,7 @@ import org.springframework.test.context.ActiveProfiles;
 @CamelSpringBootTest
 @DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
 @ActiveProfiles("test")
-@MockEndpointsAndSkip(QueueConsts.FILE_MOVED)
+@MockEndpointsAndSkip(QueueConsts.FILE_MOVED + "|" + QueueConsts.FLOAT_MERGE_AGG)
 public class PostValidationTest {
 
   static {
@@ -37,6 +37,9 @@ public class PostValidationTest {
 
   @EndpointInject("mock:" + QueueConsts.FILE_MOVED)
   private MockEndpoint fileMoved;
+
+  @EndpointInject("mock:" + QueueConsts.FLOAT_MERGE_AGG)
+  private MockEndpoint floatMergeAgg;
 
   @Autowired
   private ServiceProperties serviceProperties;
@@ -68,10 +71,15 @@ public class PostValidationTest {
     ArgonautFileUtils.copy(testFile, processingFile);
 
     fileMoved.expectedMessageCount(1);
+    floatMergeAgg.setExpectedMessageCount(1);
 
     producerTemplate.sendBody(QueueConsts.VALIDATION_SUCCESS, message);
 
-    fileMoved.assertIsSatisfied();
+    MockEndpoint.assertIsSatisfied(fileMoved, floatMergeAgg);
+
+    NcSubmissionMessage floatMergeAggMessage = floatMergeAgg.getExchanges().get(0).getIn().getBody(NcSubmissionMessage.class);
+    assertEquals(floatId, floatMergeAggMessage.getFloatId());
+    assertEquals(dac, floatMergeAggMessage.getDac());
 
     assertFalse(Files.exists(processingFile));
     Path outputFile = ArgonautFileUtils.getOutputProfileDir(serviceProperties, dac, floatId, false).resolve(fileName);
@@ -106,10 +114,12 @@ public class PostValidationTest {
     ArgonautFileUtils.copy(testFile, processingFile);
 
     fileMoved.expectedMessageCount(1);
+    floatMergeAgg.setExpectedMessageCount(0);
+    floatMergeAgg.setAssertPeriod(200);
 
     producerTemplate.sendBody(QueueConsts.FILE_OUTPUT, message);
 
-    fileMoved.assertIsSatisfied();
+    MockEndpoint.assertIsSatisfied(fileMoved, floatMergeAgg);
 
     assertFalse(Files.exists(processingFile));
     Path outputFile = ArgonautFileUtils.getRejectProfileDir(serviceProperties, dac, timestamp, floatId, true).resolve(fileName);

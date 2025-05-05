@@ -7,7 +7,7 @@ argonaut:
 #        - foo.bar@example.com
   index-cron: '0 * * * * ?'
   gdac-sync-cron: '30 3 * * * ?'
-  float-merge-quiet-timeout: 'PT1H'
+  float-merge-quiet-timeout: 'PT30M'
   file-checker-timeout: 'PT2M'
   validation-threads: 20
   file-checker-heap: '256m'
