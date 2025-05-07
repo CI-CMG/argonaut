@@ -2,8 +2,11 @@ package edu.colorado.cires.argonaut.route;
 
 import edu.colorado.cires.argonaut.aggregator.SubmissionCompleteAggregationStrategy;
 import edu.colorado.cires.argonaut.config.ServiceProperties;
+import edu.colorado.cires.argonaut.message.RemovalMessage;
 import edu.colorado.cires.argonaut.processor.FileMoveProcessor;
 import edu.colorado.cires.argonaut.processor.FloatMergeProcessor;
+import edu.colorado.cires.argonaut.processor.RemovalFileValidator;
+import edu.colorado.cires.argonaut.processor.RemovalMessageTranslator;
 import edu.colorado.cires.argonaut.processor.SubmissionProcessor;
 import edu.colorado.cires.argonaut.processor.SubmissionReportProcessor;
 import edu.colorado.cires.argonaut.processor.ValidationProcessor;
@@ -32,11 +35,14 @@ public class Routes extends RouteBuilder {
   private final SubmissionReportProcessor submissionReportProcessor;
   private final SubmissionCompleteAggregationStrategy submissionCompleteAggregationStrategy;
   private final FloatMergeProcessor floatMergeProcessor;
+  private final RemovalFileValidator removalFileValidator;
+  private final RemovalMessageTranslator removalMessageTranslator;
 
   public Routes(ServiceProperties serviceProperties, SubmissionProcessor submissionProcessor, ValidationProcessor validationProcessor,
       SubmissionTimestampService submissionTimestampService,
       FileMoveProcessor fileMoveProcessor, SubmissionReportProcessor submissionReportProcessor,
-      SubmissionCompleteAggregationStrategy submissionCompleteAggregationStrategy, FloatMergeProcessor floatMergeProcessor) {
+      SubmissionCompleteAggregationStrategy submissionCompleteAggregationStrategy, FloatMergeProcessor floatMergeProcessor,
+      RemovalFileValidator removalFileValidator, RemovalMessageTranslator removalMessageTranslator) {
     this.submissionProcessor = submissionProcessor;
     this.validationProcessor = validationProcessor;
     this.serviceProperties = serviceProperties;
@@ -45,6 +51,8 @@ public class Routes extends RouteBuilder {
     this.submissionReportProcessor = submissionReportProcessor;
     this.submissionCompleteAggregationStrategy = submissionCompleteAggregationStrategy;
     this.floatMergeProcessor = floatMergeProcessor;
+    this.removalFileValidator = removalFileValidator;
+    this.removalMessageTranslator = removalMessageTranslator;
   }
 
   @Override
@@ -70,12 +78,12 @@ public class Routes extends RouteBuilder {
             .choice()
               .when(simple("${header.CamelFileNameOnly.endsWith('.tar.gz')}"))
                 .to(QueueConsts.SUBMIT_DATA)
-              .when(simple("${header.CamelFileNameOnly.endsWith('_greylist.csv')}"))
-                .to("seda:submit-greylist")
+//              .when(simple("${header.CamelFileNameOnly.endsWith('_greylist.csv')}"))
+//                .to("seda:submit-greylist")
               .when(simple("${header.CamelFileNameOnly.endsWith('_removal.txt')}"))
-                .to("seda:submit-removal")
+                .to(QueueConsts.SUBMIT_REMOVAL)
               .otherwise()
-                .to("seda:submit-unknown");
+                .to(QueueConsts.SUBMIT_UNKNOWN);
         });
 
     // @formatter:off
@@ -114,6 +122,16 @@ public class Routes extends RouteBuilder {
         .to(QueueConsts.FLOAT_MERGE);
 
     from(QueueConsts.FLOAT_MERGE).process(floatMergeProcessor).to(QueueConsts.UPDATE_INDEX_AGG);
+
+    from(QueueConsts.SUBMIT_REMOVAL).process(removalFileValidator)
+        .choice()
+          .when(RemovalMessage.IS_VALID)
+            .to(QueueConsts.REMOVAL_SPLITTER)
+          .otherwise()
+            .process(removalMessageTranslator)
+            .to(QueueConsts.SUBMISSION_REPORT);
+
+    from(QueueConsts.REMOVAL_SPLITTER).split(simple("${body.filesToRemove}")).to(QueueConsts.VALIDATION_SUCCESS);
 
 
     // @formatter:on

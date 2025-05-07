@@ -18,7 +18,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
-import software.amazon.awssdk.services.s3.endpoints.internal.Value.Str;
 
 public class DateChecker {
 
@@ -161,9 +160,9 @@ public class DateChecker {
         int size = Integer.parseInt(split[1]);
         ZonedDateTime dateTime = ZonedDateTime.parse(split[2]);
         Instant instant = dateTime.toInstant();
-        String originalTimestampString = split[3]; // 2023-08-02 10:46:11
         Instant originalTimestamp = null;
         try {
+          String originalTimestampString = split[3]; // 2023-08-02 10:46:11
           LocalDateTime ldt = LocalDateTime.parse(originalTimestampString, DTF);
           OffsetDateTime zdt = ldt.atOffset(ZoneOffset.ofHours(-4));
           originalTimestamp = zdt.toInstant(); // 2023-08-02T08:46:11-06:00 from s3://argo-gdac-sandbox/pub/dac/aoml/13857/profiles/R13857_001.nc == 2023-08-02T14:46:11Z

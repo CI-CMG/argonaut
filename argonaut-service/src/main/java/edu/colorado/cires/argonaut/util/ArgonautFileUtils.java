@@ -1,6 +1,7 @@
 package edu.colorado.cires.argonaut.util;
 
 import edu.colorado.cires.argonaut.config.ServiceProperties;
+import edu.colorado.cires.argonaut.message.NcSubmissionMessage;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -8,6 +9,9 @@ import java.io.InputStream;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import org.apache.commons.compress.archivers.ArchiveEntry;
@@ -17,6 +21,8 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 
 public class ArgonautFileUtils {
+
+  private static final Pattern FILE_NAME_PATTERN = Pattern.compile("([A-Z]+)?([0-9]+)_(.+)\\.nc(\\.filecheck)?");
 
   public static void createDirectories(Path path) {
     try {
@@ -153,6 +159,20 @@ public class ArgonautFileUtils {
       dacDir = dacDir.resolve("profiles");
     }
     return dacDir;
+  }
+
+  public static Optional<NcSubmissionMessage> ncSubmissionMessageFromFileName(String fileName) {
+    Matcher matcher = FILE_NAME_PATTERN.matcher(fileName);
+    if (matcher.matches()) {
+      String floatDir = matcher.group(2);
+      boolean profile = matcher.group(1) != null;
+      NcSubmissionMessage ncSubmissionMessage = new NcSubmissionMessage();
+      ncSubmissionMessage.setFileName(fileName);
+      ncSubmissionMessage.setProfile(profile);
+      ncSubmissionMessage.setFloatId(floatDir);
+      return Optional.of(ncSubmissionMessage);
+    }
+    return Optional.empty();
   }
 
   private ArgonautFileUtils() {

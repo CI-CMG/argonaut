@@ -7,6 +7,9 @@ import org.apache.camel.Predicate;
 
 public class NcSubmissionMessage {
 
+  public enum Operation {
+    ADD, REMOVE
+  }
 
   private String floatId;
   private List<String> validationError = new ArrayList<>();
@@ -15,6 +18,15 @@ public class NcSubmissionMessage {
   private String fileName;
   private boolean profile;
   private int numberOfFilesInSubmission;
+  private Operation operation = Operation.ADD;
+
+  public Operation getOperation() {
+    return operation;
+  }
+
+  public void setOperation(Operation operation) {
+    this.operation = operation;
+  }
 
   public String getTimestamp() {
     return timestamp;
@@ -77,21 +89,18 @@ public class NcSubmissionMessage {
 
   @Override
   public boolean equals(Object o) {
-    if (this == o) {
-      return true;
-    }
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
     NcSubmissionMessage that = (NcSubmissionMessage) o;
     return profile == that.profile && numberOfFilesInSubmission == that.numberOfFilesInSubmission && Objects.equals(floatId, that.floatId)
         && Objects.equals(validationError, that.validationError) && Objects.equals(timestamp, that.timestamp)
-        && Objects.equals(dac, that.dac) && Objects.equals(fileName, that.fileName);
+        && Objects.equals(dac, that.dac) && Objects.equals(fileName, that.fileName) && operation == that.operation;
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(floatId, validationError, timestamp, dac, fileName, profile, numberOfFilesInSubmission);
+    return Objects.hash(floatId, validationError, timestamp, dac, fileName, profile, numberOfFilesInSubmission, operation);
   }
 
   @Override
@@ -104,6 +113,7 @@ public class NcSubmissionMessage {
         ", fileName='" + fileName + '\'' +
         ", profile=" + profile +
         ", numberOfFilesInSubmission=" + numberOfFilesInSubmission +
+        ", operation=" + operation +
         '}';
   }
 

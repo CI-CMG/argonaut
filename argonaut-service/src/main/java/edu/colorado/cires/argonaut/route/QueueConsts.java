@@ -15,6 +15,9 @@ public final class QueueConsts {
   public static final String LATEST_MERGE_AGG = "seda:latest-merge-agg";
   public static final String UPDATE_INDEX_AGG = "seda:update-index-agg";
   public static final String FLOAT_MERGE = "seda:float-merge";
+  public static final String SUBMIT_REMOVAL = "seda:submit-removal";
+  public static final String SUBMIT_UNKNOWN = "seda:submit-unknown";
+  public static final String REMOVAL_SPLITTER = "seda:removal-splitter";
 
   private QueueConsts() {
 

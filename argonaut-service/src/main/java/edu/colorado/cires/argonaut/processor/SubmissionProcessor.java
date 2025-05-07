@@ -24,7 +24,6 @@ import org.springframework.stereotype.Component;
 public class SubmissionProcessor implements Processor {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(SubmissionProcessor.class);
-  private static final Pattern FILE_NAME_PATTERN = Pattern.compile("([A-Z]+)?([0-9]+)_(.+)\\.nc(\\.filecheck)?");
 
   private final Path workingDir;
   private final Path processingDir;
@@ -62,29 +61,19 @@ public class SubmissionProcessor implements Processor {
       try (Stream<Path> files = Files.list(tempDir)) {
         files.filter(Files::isRegularFile).forEach(file -> {
           String fileName = file.getFileName().toString();
-          Matcher matcher = FILE_NAME_PATTERN.matcher(fileName);
-          if (matcher.matches()) {
-            String floatDir = matcher.group(2);
-            Path processingDacDir = processingDir.resolve("dac").resolve(dac).resolve(floatDir);
-            boolean profile = matcher.group(1) != null;
-            if (profile) {
+          ArgonautFileUtils.ncSubmissionMessageFromFileName(fileName).ifPresent(ncSubmissionMessage -> {
+            ncSubmissionMessage.setDac(dac);
+            ncSubmissionMessage.setTimestamp(timestamp);
+            Path processingDacDir = processingDir.resolve("dac").resolve(dac).resolve(ncSubmissionMessage.getFloatId());
+            if (ncSubmissionMessage.isProfile()) {
               processingDacDir = processingDacDir.resolve("profiles");
             }
             ArgonautFileUtils.createDirectories(processingDacDir);
             Path ncFile = processingDacDir.resolve(file.getFileName());
             LOGGER.info("Adding to processing directory {}", ncFile);
             ArgonautFileUtils.move(file, ncFile);
-
-            NcSubmissionMessage ncSubmissionMessage = new NcSubmissionMessage();
-            ncSubmissionMessage.setDac(dac);
-            ncSubmissionMessage.setFileName(fileName);
-            ncSubmissionMessage.setProfile(profile);
-            ncSubmissionMessage.setTimestamp(timestamp);
-            ncSubmissionMessage.setFloatId(floatDir);
-
             output.add(ncSubmissionMessage);
-          }
-
+          });
         });
       }
     } finally {
