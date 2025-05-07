@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import edu.colorado.cires.argonaut.config.ServiceProperties;
 import edu.colorado.cires.argonaut.message.NcSubmissionMessage;
+import edu.colorado.cires.argonaut.message.NcSubmissionMessage.Operation;
 import edu.colorado.cires.argonaut.route.QueueConsts;
 import edu.colorado.cires.argonaut.util.ArgonautFileUtils;
 import java.nio.file.Files;
@@ -124,6 +125,113 @@ public class PostValidationTest {
     assertFalse(Files.exists(processingFile));
     Path outputFile = ArgonautFileUtils.getRejectProfileDir(serviceProperties, dac, timestamp, floatId, true).resolve(fileName);
     assertTrue(Files.exists(outputFile));
+
+  }
+
+  @Test
+  public void testRemovalProfile() throws Exception {
+
+    String timestamp = Instant.now().toString();
+    String floatId = "5905716";
+    String dac = "aoml";
+    String fileName = "R5905716_245.nc";
+
+    NcSubmissionMessage message = new NcSubmissionMessage();
+    message.setFloatId(floatId);
+    message.setDac(dac);
+    message.setTimestamp(timestamp);
+    message.setFileName(fileName);
+    message.setProfile(true);
+    message.setOperation(Operation.REMOVE);
+    message.setNumberOfFilesInSubmission(13);
+
+    FileTestUtils.emptyDirectory(serviceProperties.getOutputDirectory());
+
+    Path testFile = Paths.get("src/test/resources").resolve(fileName);
+    Path outputFile = Paths.get("target/output/dac").resolve(dac).resolve(floatId).resolve("profiles").resolve(fileName);
+    Path removedFile =  Paths.get("target/output/removed/dac").resolve(dac).resolve(timestamp).resolve(floatId).resolve("profiles").resolve(fileName);
+    Files.createDirectories(outputFile.getParent());
+
+    ArgonautFileUtils.copy(testFile, outputFile);
+    assertTrue(Files.exists(outputFile));
+    assertFalse(Files.exists(removedFile));
+
+    fileMoved.expectedMessageCount(1);
+    floatMergeAgg.setExpectedMessageCount(1);
+
+    producerTemplate.sendBody(QueueConsts.VALIDATION_SUCCESS, message);
+
+    MockEndpoint.assertIsSatisfied(fileMoved, floatMergeAgg);
+
+    NcSubmissionMessage expectedMessage = new NcSubmissionMessage();
+    expectedMessage.setProfile(true);
+    expectedMessage.setFloatId(floatId);
+    expectedMessage.setDac("aoml");
+    expectedMessage.setTimestamp(timestamp);
+    expectedMessage.setFileName(fileName);
+    expectedMessage.setOperation(Operation.REMOVE);
+    expectedMessage.setNumberOfFilesInSubmission(13);
+
+    NcSubmissionMessage floatMergeAggMessage = floatMergeAgg.getExchanges().get(0).getIn().getBody(NcSubmissionMessage.class);
+    NcSubmissionMessage fileMovedMessage = fileMoved.getExchanges().get(0).getIn().getBody(NcSubmissionMessage.class);
+    assertEquals(expectedMessage, fileMovedMessage);
+    assertEquals(expectedMessage, floatMergeAggMessage);
+
+    assertFalse(Files.exists(outputFile));
+    assertTrue(Files.exists(removedFile));
+  }
+
+  @Test
+  public void testRemovalMetadata() throws Exception {
+
+    String timestamp = Instant.now().toString();
+    String floatId = "1901830";
+    String dac = "aoml";
+    String fileName = "1901830_meta.nc";
+
+    NcSubmissionMessage message = new NcSubmissionMessage();
+    message.setFloatId(floatId);
+    message.setDac(dac);
+    message.setTimestamp(timestamp);
+    message.setFileName(fileName);
+    message.setProfile(false);
+    message.setOperation(Operation.REMOVE);
+    message.setNumberOfFilesInSubmission(13);
+
+    FileTestUtils.emptyDirectory(serviceProperties.getOutputDirectory());
+
+    Path testFile = Paths.get("src/test/resources").resolve(fileName);
+    Path outputFile = Paths.get("target/output/dac").resolve(dac).resolve(floatId).resolve(fileName);
+    Path removedFile =  Paths.get("target/output/removed/dac").resolve(dac).resolve(timestamp).resolve(floatId).resolve(fileName);
+    Files.createDirectories(outputFile.getParent());
+
+    ArgonautFileUtils.copy(testFile, outputFile);
+    assertTrue(Files.exists(outputFile));
+    assertFalse(Files.exists(removedFile));
+
+    fileMoved.expectedMessageCount(1);
+    floatMergeAgg.setExpectedMessageCount(1);
+
+    producerTemplate.sendBody(QueueConsts.VALIDATION_SUCCESS, message);
+
+    MockEndpoint.assertIsSatisfied(fileMoved, floatMergeAgg);
+
+    NcSubmissionMessage expectedMessage = new NcSubmissionMessage();
+    expectedMessage.setProfile(false);
+    expectedMessage.setFloatId(floatId);
+    expectedMessage.setDac("aoml");
+    expectedMessage.setTimestamp(timestamp);
+    expectedMessage.setFileName(fileName);
+    expectedMessage.setOperation(Operation.REMOVE);
+    expectedMessage.setNumberOfFilesInSubmission(13);
+
+    NcSubmissionMessage floatMergeAggMessage = floatMergeAgg.getExchanges().get(0).getIn().getBody(NcSubmissionMessage.class);
+    NcSubmissionMessage fileMovedMessage = fileMoved.getExchanges().get(0).getIn().getBody(NcSubmissionMessage.class);
+    assertEquals(expectedMessage, fileMovedMessage);
+    assertEquals(expectedMessage, floatMergeAggMessage);
+
+    assertFalse(Files.exists(outputFile));
+    assertTrue(Files.exists(removedFile));
 
   }
 

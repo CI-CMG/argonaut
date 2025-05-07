@@ -47,8 +47,8 @@ processing
 # Final Directory Structure
 
 output
-  - etc
-  - - removed
+  - removed
+  - - dac
   - - - <dac_name>
   - - - - <submission_timestamp>
   - - - - - <dac_name>_removal.txt

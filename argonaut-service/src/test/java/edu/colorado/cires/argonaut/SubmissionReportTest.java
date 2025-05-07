@@ -38,7 +38,7 @@ import org.springframework.test.context.ActiveProfiles;
 @CamelSpringBootTest
 @DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
 @ActiveProfiles("test")
-@MockEndpointsAndSkip(QueueConsts.SUBMISSION_COMPLETE_AGG)
+@MockEndpointsAndSkip(QueueConsts.SUBMISSION_COMPLETE_AGG + "|" + QueueConsts.UPDATE_INDEX_AGG)
 public class SubmissionReportTest {
 
   static {
@@ -47,6 +47,9 @@ public class SubmissionReportTest {
 
   @EndpointInject("mock:" + QueueConsts.SUBMISSION_COMPLETE_AGG)
   private MockEndpoint submissionCompleteAgg;
+
+  @EndpointInject("mock:" + QueueConsts.UPDATE_INDEX_AGG)
+  private MockEndpoint updateIndexAgg;
 
   @Autowired
   private ServiceProperties serviceProperties;
@@ -89,10 +92,11 @@ public class SubmissionReportTest {
     FileTestUtils.emptyDirectory(ArgonautFileUtils.getSubmissionProcessedDirForDac(serviceProperties, dac));
 
     submissionCompleteAgg.expectedMessageCount(messages.size());
+    updateIndexAgg.expectedMessageCount(messages.size());
 
     messages.forEach(message -> producerTemplate.sendBody(QueueConsts.FILE_MOVED, message));
 
-    submissionCompleteAgg.assertIsSatisfied();
+    MockEndpoint.assertIsSatisfied(submissionCompleteAgg, updateIndexAgg);
 
     for (Entry<Path, Set<String>> entry : expected.entrySet()) {
       Set<String> actualCsv = new TreeSet<>(Files.readAllLines(entry.getKey()));
@@ -140,10 +144,11 @@ public class SubmissionReportTest {
     FileTestUtils.emptyDirectory(ArgonautFileUtils.getSubmissionProcessedDirForDac(serviceProperties, dac));
 
     submissionCompleteAgg.expectedMessageCount(messages.size());
+    updateIndexAgg.expectedMessageCount(messages.size());
 
     messages.forEach(message -> producerTemplate.sendBody(QueueConsts.FILE_MOVED, message));
 
-    submissionCompleteAgg.assertIsSatisfied();
+    MockEndpoint.assertIsSatisfied(submissionCompleteAgg, updateIndexAgg);
 
     Map<Path, Set<List<String>>> actual = new TreeMap<>();
 

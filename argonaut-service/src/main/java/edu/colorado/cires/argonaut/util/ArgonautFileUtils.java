@@ -145,6 +145,14 @@ public class ArgonautFileUtils {
     return getSubmissionDirForDac(serviceProperties, dac).resolve("processed");
   }
 
+  public static Path getRemovedProfileDir(ServiceProperties serviceProperties, String dac, String timestamp, String floatId, boolean isProfile) {
+    Path dacDir = serviceProperties.getOutputDirectory().resolve("removed").resolve("dac").resolve(dac).resolve(timestamp).resolve(floatId);
+    if (isProfile) {
+      dacDir = dacDir.resolve("profiles");
+    }
+    return dacDir;
+  }
+
   public static Path getOutputProfileDir(ServiceProperties serviceProperties, String dac, String floatId, boolean isProfile) {
     Path dacDir = serviceProperties.getOutputDirectory().resolve("dac").resolve(dac).resolve(floatId);
     if (isProfile) {

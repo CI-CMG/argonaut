@@ -106,7 +106,7 @@ public class Routes extends RouteBuilder {
 
     from(QueueConsts.FILE_MOVED)
         .multicast().parallelProcessing()
-        .to(QueueConsts.SUBMISSION_REPORT);
+        .to(QueueConsts.SUBMISSION_REPORT, QueueConsts.UPDATE_INDEX_AGG);
 
     from(QueueConsts.SUBMISSION_REPORT + "?concurrentConsumers=" + serviceProperties.getSubmissionReportThreads())
         .process(submissionReportProcessor)
