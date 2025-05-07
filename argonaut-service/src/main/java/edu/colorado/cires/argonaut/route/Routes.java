@@ -100,7 +100,12 @@ public class Routes extends RouteBuilder {
 
     from(QueueConsts.VALIDATION_SUCCESS)
       .multicast().parallelProcessing()
-        .to(QueueConsts.FILE_OUTPUT, QueueConsts.FLOAT_MERGE_AGG);
+        .to(
+            QueueConsts.FILE_OUTPUT,
+            QueueConsts.LATEST_MERGE_AGG,
+            QueueConsts.FLOAT_MERGE_AGG,
+            QueueConsts.GEO_MERGE_AGG
+        );
 
     from(QueueConsts.FILE_OUTPUT).process(fileMoveProcessor).to(QueueConsts.FILE_MOVED);
 

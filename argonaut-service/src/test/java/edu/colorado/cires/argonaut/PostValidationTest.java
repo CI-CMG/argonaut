@@ -29,7 +29,7 @@ import org.springframework.test.context.ActiveProfiles;
 @CamelSpringBootTest
 @DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
 @ActiveProfiles("test")
-@MockEndpointsAndSkip(QueueConsts.FILE_MOVED + "|" + QueueConsts.FLOAT_MERGE_AGG)
+@MockEndpointsAndSkip(QueueConsts.FILE_MOVED + "|" + QueueConsts.FLOAT_MERGE_AGG + "|" + QueueConsts.GEO_MERGE_AGG + "|" + QueueConsts.LATEST_MERGE_AGG)
 public class PostValidationTest {
 
   static {
@@ -41,6 +41,12 @@ public class PostValidationTest {
 
   @EndpointInject("mock:" + QueueConsts.FLOAT_MERGE_AGG)
   private MockEndpoint floatMergeAgg;
+
+  @EndpointInject("mock:" + QueueConsts.GEO_MERGE_AGG)
+  private MockEndpoint geoMergeAgg;
+
+  @EndpointInject("mock:" + QueueConsts.LATEST_MERGE_AGG)
+  private MockEndpoint latestMergeAgg;
 
   @Autowired
   private ServiceProperties serviceProperties;
@@ -73,10 +79,12 @@ public class PostValidationTest {
 
     fileMoved.expectedMessageCount(1);
     floatMergeAgg.setExpectedMessageCount(1);
+    geoMergeAgg.expectedMessageCount(1);
+    latestMergeAgg.expectedMessageCount(1);
 
     producerTemplate.sendBody(QueueConsts.VALIDATION_SUCCESS, message);
 
-    MockEndpoint.assertIsSatisfied(fileMoved, floatMergeAgg);
+    MockEndpoint.assertIsSatisfied(fileMoved, floatMergeAgg, geoMergeAgg, latestMergeAgg);
 
     NcSubmissionMessage floatMergeAggMessage = floatMergeAgg.getExchanges().get(0).getIn().getBody(NcSubmissionMessage.class);
     assertEquals(floatId, floatMergeAggMessage.getFloatId());
@@ -117,6 +125,10 @@ public class PostValidationTest {
     fileMoved.expectedMessageCount(1);
     floatMergeAgg.setExpectedMessageCount(0);
     floatMergeAgg.setAssertPeriod(200);
+    geoMergeAgg.expectedMessageCount(0);
+    geoMergeAgg.setAssertPeriod(200);
+    latestMergeAgg.expectedMessageCount(0);
+    latestMergeAgg.setAssertPeriod(200);
 
     producerTemplate.sendBody(QueueConsts.FILE_OUTPUT, message);
 
@@ -158,6 +170,8 @@ public class PostValidationTest {
 
     fileMoved.expectedMessageCount(1);
     floatMergeAgg.setExpectedMessageCount(1);
+    geoMergeAgg.expectedMessageCount(1);
+    latestMergeAgg.expectedMessageCount(1);
 
     producerTemplate.sendBody(QueueConsts.VALIDATION_SUCCESS, message);
 
@@ -176,6 +190,8 @@ public class PostValidationTest {
     NcSubmissionMessage fileMovedMessage = fileMoved.getExchanges().get(0).getIn().getBody(NcSubmissionMessage.class);
     assertEquals(expectedMessage, fileMovedMessage);
     assertEquals(expectedMessage, floatMergeAggMessage);
+    assertEquals(expectedMessage, fileMoved.getExchanges().get(0).getIn().getBody(NcSubmissionMessage.class));
+    assertEquals(expectedMessage, latestMergeAgg.getExchanges().get(0).getIn().getBody(NcSubmissionMessage.class));
 
     assertFalse(Files.exists(outputFile));
     assertTrue(Files.exists(removedFile));
@@ -211,6 +227,8 @@ public class PostValidationTest {
 
     fileMoved.expectedMessageCount(1);
     floatMergeAgg.setExpectedMessageCount(1);
+    geoMergeAgg.expectedMessageCount(1);
+    latestMergeAgg.expectedMessageCount(1);
 
     producerTemplate.sendBody(QueueConsts.VALIDATION_SUCCESS, message);
 
@@ -229,6 +247,8 @@ public class PostValidationTest {
     NcSubmissionMessage fileMovedMessage = fileMoved.getExchanges().get(0).getIn().getBody(NcSubmissionMessage.class);
     assertEquals(expectedMessage, fileMovedMessage);
     assertEquals(expectedMessage, floatMergeAggMessage);
+    assertEquals(expectedMessage, fileMoved.getExchanges().get(0).getIn().getBody(NcSubmissionMessage.class));
+    assertEquals(expectedMessage, latestMergeAgg.getExchanges().get(0).getIn().getBody(NcSubmissionMessage.class));
 
     assertFalse(Files.exists(outputFile));
     assertTrue(Files.exists(removedFile));
