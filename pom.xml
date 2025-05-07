@@ -16,9 +16,64 @@
   <version>1.0.0-SNAPSHOT</version>
   <packaging>pom</packaging>
 
+  <name>${project.groupId}:${project.artifactId}</name>
+  <description>
+    A Spring Boot Argo GDAC pipeline
+  </description>
+  <url>https://github.com/CI-CMG/argonaut</url>
+
+  <licenses>
+    <license>
+      <name>MIT License</name>
+      <url>http://www.opensource.org/licenses/mit-license.php</url>
+    </license>
+  </licenses>
+
+  <developers>
+    <developer>
+      <name>CIRES Coastal and Marine Geophysics / Marine Geology and Geophysics Developers</name>
+      <organization>CIRES</organization>
+      <organizationUrl>https://github.com/CI-CMG</organizationUrl>
+    </developer>
+  </developers>
+
+  <scm>
+    <connection>scm:git:https://github.com/CI-CMG/argonaut.git</connection>
+    <developerConnection>scm:git:https://github.com/CI-CMG/argonaut.git</developerConnection>
+    <url>https://github.com/CI-CMG/argonaut</url>
+    <tag>HEAD</tag>
+  </scm>
+
+  <distributionManagement>
+    <snapshotRepository>
+      <id>ossrh</id>
+      <url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
+    </snapshotRepository>
+  </distributionManagement>
+
   <properties>
     <java.version>21</java.version>
+    <javadoc.version>3.11.2</javadoc.version>
+    <jacoco.version>0.8.12</jacoco.version>
+    <project.root>${project.basedir}</project.root>
+    <git.username />
+    <git.password />
   </properties>
+
+  <reporting>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <version>${javadoc.version}</version>
+      </plugin>
+      <plugin>
+        <groupId>org.jacoco</groupId>
+        <artifactId>jacoco-maven-plugin</artifactId>
+        <version>${jacoco.version}</version>
+      </plugin>
+    </plugins>
+  </reporting>
 
   <modules>
     <module>argonaut-xml</module>
@@ -29,9 +84,33 @@
 
   <repositories>
     <repository>
+      <id>central</id>
+      <name>Central Repository</name>
+      <url>https://repo.maven.apache.org/maven2</url>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+      <releases>
+        <enabled>true</enabled>
+        <updatePolicy>never</updatePolicy>
+        <checksumPolicy>fail</checksumPolicy>
+      </releases>
+    </repository>
+    <repository>
       <id>unidata-all</id>
       <name>Unidata All</name>
       <url>https://artifacts.unidata.ucar.edu/repository/unidata-all/</url>
+    </repository>
+    <repository>
+      <id>ossrh</id>
+      <url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
+      <snapshots>
+        <enabled>true</enabled>
+        <updatePolicy>always</updatePolicy>
+      </snapshots>
+      <releases>
+        <enabled>false</enabled>
+      </releases>
     </repository>
   </repositories>
 
@@ -142,7 +221,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-javadoc-plugin</artifactId>
-          <version>3.11.2</version>
+          <version>${javadoc.version}</version>
         </plugin>
         <plugin>
           <groupId>org.owasp</groupId>
@@ -152,7 +231,7 @@
         <plugin>
           <groupId>org.jacoco</groupId>
           <artifactId>jacoco-maven-plugin</artifactId>
-          <version>0.8.12</version>
+          <version>${jacoco.version}</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
@@ -182,8 +261,282 @@
           <artifactId>maven-antrun-plugin</artifactId>
           <version>3.1.0</version>
         </plugin>
+        <plugin>
+          <groupId>org.simplify4u.plugins</groupId>
+          <artifactId>sign-maven-plugin</artifactId>
+          <version>1.1.0</version>
+        </plugin>
+        <plugin>
+          <groupId>org.sonatype.plugins</groupId>
+          <artifactId>nexus-staging-maven-plugin</artifactId>
+          <version>1.7.0</version>
+        </plugin>
       </plugins>
     </pluginManagement>
+
+    <plugins>
+
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>attach-javadocs</id>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-source-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>attach-sources</id>
+            <goals>
+              <goal>jar-no-fork</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.simplify4u.plugins</groupId>
+        <artifactId>sign-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <goals>
+              <goal>sign</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.sonatype.plugins</groupId>
+        <artifactId>nexus-staging-maven-plugin</artifactId>
+        <extensions>true</extensions>
+        <configuration>
+          <serverId>ossrh</serverId>
+          <nexusUrl>https://s01.oss.sonatype.org/</nexusUrl>
+          <autoReleaseAfterClose>true</autoReleaseAfterClose>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-release-plugin</artifactId>
+        <configuration>
+          <autoVersionSubmodules>true</autoVersionSubmodules>
+          <useReleaseProfile>false</useReleaseProfile>
+          <releaseProfiles>release,site-publish</releaseProfiles>
+          <goals>deploy site</goals>
+          <tagNameFormat>v@{project.version}</tagNameFormat>
+          <arguments>-DskipTests -Dgit.username=${git.username} -Dgit.password=${git.password}</arguments>
+          <username>${git.username}</username>
+          <password>${git.password}</password>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.jacoco</groupId>
+        <artifactId>jacoco-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>default-prepare-agent</id>
+            <goals>
+              <goal>prepare-agent</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>report</id>
+            <phase>verify</phase>
+            <goals>
+              <goal>report</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>com.github.spotbugs</groupId>
+        <artifactId>spotbugs-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <goals>
+              <goal>check</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <excludeFilterFile>spotbugs-exclude.xml</excludeFilterFile>
+        </configuration>
+      </plugin>
+
+    </plugins>
   </build>
+
+  <profiles>
+    <profile>
+      <id>release</id>
+      <properties>
+        <sign.skipNoKey>false</sign.skipNoKey>
+      </properties>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>pl.project13.maven</groupId>
+            <artifactId>git-commit-id-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>get-the-git-infos</id>
+                <goals>
+                  <goal>revision</goal>
+                </goals>
+                <phase>pre-site</phase>
+              </execution>
+            </executions>
+            <configuration>
+              <injectAllReactorProjects>true</injectAllReactorProjects>
+              <failOnNoGitDirectory>false</failOnNoGitDirectory>
+              <offline>true</offline>
+              <replacementProperties>
+                <replacementProperty>
+                  <property>git.remote.origin.url</property>
+                  <propertyOutputSuffix>suffix</propertyOutputSuffix>
+                  <token>^.+/(.+).git$</token>
+                  <value>$1</value>
+                  <regex>true</regex>
+                </replacementProperty>
+              </replacementProperties>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+    <profile>
+      <id>site-publish</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-site-plugin</artifactId>
+          </plugin>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-resources-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>index.html</id>
+                <phase>site</phase>
+                <goals>
+                  <goal>copy-resources</goal>
+                </goals>
+                <configuration>
+                  <outputDirectory>${project.build.directory}/site-resources</outputDirectory>
+                  <useDefaultDelimiters>false</useDefaultDelimiters>
+                  <delimiters>
+                    <delimiter>@</delimiter>
+                  </delimiters>
+                  <resources>
+                    <resource>
+                      <directory>${project.root}/site-resources</directory>
+                      <filtering>true</filtering>
+                    </resource>
+                  </resources>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-antrun-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>publish-site</id>
+                <phase>site</phase>
+                <goals>
+                  <goal>run</goal>
+                </goals>
+                <configuration>
+                  <target>
+                    <delete dir="${project.build.directory}/project-documentation" quiet="true" />
+                    <exec dir="${project.build.directory}" executable="git">
+                      <arg value="clone" />
+                      <arg value="--depth=1" />
+                      <arg value="https://${git.username}:${git.password}@github.com/CI-CMG/project-documentation.git" />
+                    </exec>
+                    <exec dir="${project.build.directory}/project-documentation" executable="git">
+                      <arg value="remote" />
+                      <arg value="add" />
+                      <arg value="javadoc" />
+                      <arg value="https://${git.username}:${git.password}@github.com/CI-CMG/project-documentation.git" />
+                    </exec>
+                    <exec dir="${project.build.directory}/project-documentation" executable="git" failonerror="false">
+                      <arg value="rm" />
+                      <arg value="-r" />
+                      <arg value="${git.remote.origin.url.suffix}/${project.version}" />
+                    </exec>
+                    <mkdir dir="${project.build.directory}/project-documentation/${git.remote.origin.url.suffix}" />
+                    <copy todir="${project.build.directory}/project-documentation/${git.remote.origin.url.suffix}">
+                      <fileset file="${project.build.directory}/site-resources/index.html" />
+                    </copy>
+                    <copy todir="${project.build.directory}/project-documentation/${git.remote.origin.url.suffix}/${project.version}">
+                      <fileset dir="${project.build.directory}/site" />
+                    </copy>
+                    <exec dir="${project.build.directory}/project-documentation" executable="git">
+                      <arg value="add" />
+                      <arg value="${git.remote.origin.url.suffix}/index.html" />
+                    </exec>
+                    <exec dir="${project.build.directory}/project-documentation" executable="git">
+                      <arg value="add" />
+                      <arg value="${git.remote.origin.url.suffix}/${project.version}" />
+                    </exec>
+                    <exec dir="${project.build.directory}/project-documentation" executable="git">
+                      <arg value="commit" />
+                      <arg value="-m" />
+                      <arg value="Update Documentation: ${git.remote.origin.url.suffix}/${project.version}" />
+                    </exec>
+                    <exec dir="${project.build.directory}/project-documentation" executable="git">
+                      <arg value="push" />
+                      <arg value="javadoc" />
+                      <arg value="trunk" />
+                    </exec>
+                  </target>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+    <profile>
+      <id>dep-check</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.owasp</groupId>
+            <artifactId>dependency-check-maven</artifactId>
+            <configuration>
+              <failBuildOnCVSS>0</failBuildOnCVSS>
+              <suppressionFiles>
+                <suppressionFile>${project.root}/owasp-dep-check-suppression.xml</suppressionFile>
+              </suppressionFiles>
+            </configuration>
+            <executions>
+              <execution>
+                <goals>
+                  <goal>check</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 
 </project>
