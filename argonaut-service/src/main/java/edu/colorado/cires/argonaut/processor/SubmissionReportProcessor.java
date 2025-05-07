@@ -27,6 +27,17 @@ public class SubmissionReportProcessor implements Processor {
     this.serviceProperties = serviceProperties;
   }
 
+  private static String successMessage(NcSubmissionMessage message) {
+    switch (message.getOperation()) {
+      case ADD:
+        return "added";
+      case REMOVE:
+        return "removed";
+      default:
+        throw new IllegalArgumentException("Operation not supported: " + message.getOperation());
+    }
+  }
+
   @Override
   public void process(Exchange exchange) throws Exception {
     NcSubmissionMessage message = exchange.getIn().getBody(NcSubmissionMessage.class);
@@ -46,7 +57,7 @@ public class SubmissionReportProcessor implements Processor {
     try {
       ArgonautFileUtils.createDirectories(processedDir);
       CSVFormat csvFormat = CSVFormat.DEFAULT.builder().setTrim(true).get();
-      String reportMessage = message.getValidationError().isEmpty() ? "success" : String.join("\n", message.getValidationError());
+      String reportMessage = message.getValidationError().isEmpty() ? successMessage(message) : String.join("\n", message.getValidationError());
       try (final CSVPrinter printer = new CSVPrinter(new FileWriter(submissionReportCsv.toFile(), true), csvFormat)) {
         printer.printRecord(message.getTimestamp(), message.getDac(), message.getFloatId(), message.getFileName(), reportMessage);
       }
