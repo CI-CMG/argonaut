@@ -38,6 +38,13 @@ public class SubmissionReportProcessor implements Processor {
     }
   }
 
+  private static String valueOrEmpty(String value) {
+    if (value == null) {
+      return "";
+    }
+    return value.trim();
+  }
+
   @Override
   public void process(Exchange exchange) throws Exception {
     NcSubmissionMessage message = exchange.getIn().getBody(NcSubmissionMessage.class);
@@ -59,7 +66,13 @@ public class SubmissionReportProcessor implements Processor {
       CSVFormat csvFormat = CSVFormat.DEFAULT.builder().setTrim(true).get();
       String reportMessage = message.getValidationError().isEmpty() ? successMessage(message) : String.join("\n", message.getValidationError());
       try (final CSVPrinter printer = new CSVPrinter(new FileWriter(submissionReportCsv.toFile(), true), csvFormat)) {
-        printer.printRecord(message.getTimestamp(), message.getDac(), message.getFloatId(), message.getFileName(), reportMessage);
+        printer.printRecord(
+            valueOrEmpty(message.getTimestamp()),
+            valueOrEmpty(message.getDac()),
+            valueOrEmpty(message.getFloatId()),
+            valueOrEmpty(message.getFileName()),
+            valueOrEmpty(reportMessage)
+        );
       }
     } finally {
       lock.unlock();
