@@ -1,5 +1,4 @@
 argonaut:
-  dac-directory: ''
   work-directory: ''
   dacs:
     - name: aoml
@@ -12,13 +11,52 @@ argonaut:
   validation-threads: 20
   file-checker-heap: '256m'
   submission-report-threads: 10
+  local-submission-ftp-server:
+    enabled: false
+    password-encoding: sha256
+    user-file: '${svc.home}/config/ftp-server-users.properties'
+    keystore-file: '${svc.home}/config/ftp-server.jks'
+    keystore-password: ''
+    port: 2221
+    anonymous-login-enabled: false
+  local-output-ftp-server:
+    enabled: false
+    password-encoding: sha256
+    user-file: '${svc.home}/config/ftp-anonymous.properties'
+    keystore-file: '${svc.home}/config/ftp-server.jks'
+    keystore-password: ''
+    port: 2211
+    anonymous-login-enabled: true
+  output-directory: ''
 
+server:
+  compression:
+    enabled: true
+  tomcat:
+    accesslog:
+      directory: ${svc.home}/log
+      enabled: true
+      max-days: 31
+  port: 4747
+  ssl:
+    enabled: true
+    #key-store: ''
+    #key-store-password: ''
+    key-store-type: PKCS12
+    #key-alias: ''
+  servlet:
+    context-path: /gdac
 
 camel:
   springboot:
     main-run-controller: true
 
 spring:
+  web:
+    resources:
+      static-locations: file:${argonaut.output-directory}
+  main:
+    web-application-type: none
   threads:
     virtual:
       enabled: true

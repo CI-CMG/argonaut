@@ -36,13 +36,38 @@ public class ServiceProperties {
 
 
   @NotNull
-  private List<@Valid DacConfig> dacs;
+  private List<@Valid DacConfig> dacs = new ArrayList<>();
   @NotBlank
   private String indexCron;
   @NotBlank
   private String gdacSyncCron;
   @NotNull
   private Duration floatMergeQuietTimeout;
+
+  @NotNull
+  @Valid
+  private FtpServerConfig localSubmissionFtpServer;
+
+  @NotNull
+  @Valid
+  private FtpServerConfig localOutputFtpServer;
+
+
+  public FtpServerConfig getLocalOutputFtpServer() {
+    return localOutputFtpServer;
+  }
+
+  public void setLocalOutputFtpServer(FtpServerConfig localOutputFtpServer) {
+    this.localOutputFtpServer = localOutputFtpServer;
+  }
+
+  public FtpServerConfig getLocalSubmissionFtpServer() {
+    return localSubmissionFtpServer;
+  }
+
+  public void setLocalSubmissionFtpServer(FtpServerConfig localSubmissionFtpServer) {
+    this.localSubmissionFtpServer = localSubmissionFtpServer;
+  }
 
   public int getSubmissionReportThreads() {
     return submissionReportThreads;
@@ -153,6 +178,87 @@ public class ServiceProperties {
 
     public void setEmail(List<String> email) {
       this.email = email;
+    }
+  }
+
+  public enum PasswordEncoding {
+    none, sha1, sha256, sha512, md5
+  }
+
+  public static class FtpServerConfig {
+    private boolean enabled = false;
+    private boolean sslEnabled = true;
+    private boolean anonymousLoginEnabled = false;
+    private Path userFile;
+    @NotNull
+    private PasswordEncoding passwordEncoding;
+    private Path keystoreFile;
+    private String keystorePassword;
+    @Min(1)
+    private int port;
+
+    public boolean isAnonymousLoginEnabled() {
+      return anonymousLoginEnabled;
+    }
+
+    public void setAnonymousLoginEnabled(boolean anonymousLoginEnabled) {
+      this.anonymousLoginEnabled = anonymousLoginEnabled;
+    }
+
+    public boolean isSslEnabled() {
+      return sslEnabled;
+    }
+
+    public void setSslEnabled(boolean sslEnabled) {
+      this.sslEnabled = sslEnabled;
+    }
+
+    public int getPort() {
+      return port;
+    }
+
+    public void setPort(int port) {
+      this.port = port;
+    }
+
+    public Path getKeystoreFile() {
+      return keystoreFile;
+    }
+
+    public void setKeystoreFile(Path keystoreFile) {
+      this.keystoreFile = keystoreFile;
+    }
+
+    public String getKeystorePassword() {
+      return keystorePassword;
+    }
+
+    public void setKeystorePassword(String keystorePassword) {
+      this.keystorePassword = keystorePassword;
+    }
+
+    public boolean isEnabled() {
+      return enabled;
+    }
+
+    public void setEnabled(boolean enabled) {
+      this.enabled = enabled;
+    }
+
+    public Path getUserFile() {
+      return userFile;
+    }
+
+    public void setUserFile(Path userFile) {
+      this.userFile = userFile;
+    }
+
+    public PasswordEncoding getPasswordEncoding() {
+      return passwordEncoding;
+    }
+
+    public void setPasswordEncoding(PasswordEncoding passwordEncoding) {
+      this.passwordEncoding = passwordEncoding;
     }
   }
 }

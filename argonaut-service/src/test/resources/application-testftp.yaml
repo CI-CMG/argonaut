@@ -1,0 +1,21 @@
+argonaut:
+  work-directory: target/work
+  submission-directory: target/submission
+  output-directory: target/output
+  local-submission-ftp-server:
+    enabled: true
+    ssl-enabled: false
+    password-encoding: none
+    user-file: src/test/resources/ftp-server-users.properties
+  local-output-ftp-server:
+    enabled: true
+    ssl-enabled: false
+    user-file: src/test/resources/ftp-anonymous-users.properties
+
+camel:
+  springboot:
+    main-run-controller: false
+
+spring:
+  main:
+    web-application-type: servlet
