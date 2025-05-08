@@ -56,6 +56,7 @@
     <javadoc.version>3.11.2</javadoc.version>
     <jacoco.version>0.8.12</jacoco.version>
     <project.root>${project.basedir}</project.root>
+    <nvdApiKey>${env.NVD_API_KEY}</nvdApiKey>
     <git.username />
     <git.password />
   </properties>
