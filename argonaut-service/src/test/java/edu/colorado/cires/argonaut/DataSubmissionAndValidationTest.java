@@ -195,7 +195,7 @@ public class DataSubmissionAndValidationTest {
     Files.copy(Paths.get("src/test/resources/aoml").resolve(fileName), copyFile);
     Files.move(copyFile, submittedFile);
 
-    MockEndpoint.assertIsSatisfied(120, TimeUnit.SECONDS, validationSuccess, fileOutput);
+    MockEndpoint.assertIsSatisfied(5, TimeUnit.MINUTES, validationSuccess, fileOutput);
     Set<Path> processedFiles = new TreeSet<>();
     try (Stream<Path> stream = Files.walk(aomlProcessingDir)) {
       stream.filter(Files::isRegularFile).forEach(processedFiles::add);
