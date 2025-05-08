@@ -10,6 +10,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,7 +32,7 @@ public class RemovalFileValidator implements Processor {
 
   private List<String> validate(String dac, Path removalFile) {
     List<String> errors = new ArrayList<>();
-    String fileName = removalFile.getFileName().toString();
+    String fileName = ArgonautFileUtils.getRequiredFileName(removalFile);
     if (!fileName.equals(dac + "_removal.txt")) {
       errors.add("removal file name does not match DAC '" + dac + "' (" + dac + "_removal.txt): " + fileName);
     }
@@ -40,7 +41,7 @@ public class RemovalFileValidator implements Processor {
 
   private List<NcSubmissionMessage> parse(String dac, String timestamp, Path removalFile) throws IOException {
     List<NcSubmissionMessage> messages = new ArrayList<>();
-    try (BufferedReader reader = new BufferedReader(new FileReader(removalFile.toFile()))) {
+    try (BufferedReader reader = new BufferedReader(new FileReader(removalFile.toFile(), StandardCharsets.UTF_8))) {
       reader.lines().forEach(line -> {
         if (StringUtils.isNotBlank(line)) {
           ArgonautFileUtils.ncSubmissionMessageFromFileName(line.trim()).ifPresent(message -> {
@@ -65,7 +66,7 @@ public class RemovalFileValidator implements Processor {
     ArgonautFileUtils.createDirectories(submissionProcessedDir);
     try {
       RemovalMessage output = new RemovalMessage();
-      output.setFileName(removalFile.getFileName().toString());
+      output.setFileName(ArgonautFileUtils.getRequiredFileName(removalFile));
       output.setTimestamp(timestamp);
       output.setDac(dac);
       exchange.getIn().setBody(output);

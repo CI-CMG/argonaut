@@ -4,6 +4,7 @@ import edu.colorado.cires.argonaut.config.ServiceProperties;
 import edu.colorado.cires.argonaut.message.NcSubmissionMessage;
 import edu.colorado.cires.argonaut.util.ArgonautFileUtils;
 import java.io.FileWriter;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
@@ -65,7 +66,10 @@ public class SubmissionReportProcessor implements Processor {
       ArgonautFileUtils.createDirectories(processedDir);
       CSVFormat csvFormat = CSVFormat.DEFAULT.builder().setTrim(true).get();
       String reportMessage = message.getValidationError().isEmpty() ? successMessage(message) : String.join("\n", message.getValidationError());
-      try (final CSVPrinter printer = new CSVPrinter(new FileWriter(submissionReportCsv.toFile(), true), csvFormat)) {
+      try (
+          FileWriter writer = new FileWriter(submissionReportCsv.toFile(), StandardCharsets.UTF_8, true);
+          CSVPrinter printer = new CSVPrinter(writer, csvFormat)
+      ) {
         printer.printRecord(
             valueOrEmpty(message.getTimestamp()),
             valueOrEmpty(message.getDac()),

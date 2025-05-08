@@ -48,7 +48,7 @@ public class SubmissionProcessor implements Processor {
     Path submissionProcessedDir = ArgonautFileUtils.getSubmissionProcessedDirForDac(serviceProperties, dac).resolve(timestamp);
     ArgonautFileUtils.createDirectories(submissionProcessingDir);
     ArgonautFileUtils.createDirectories(submissionProcessedDir);
-    String tarGzFileFileName = submittedTarGzFile.getFileName().toString();
+    String tarGzFileFileName = ArgonautFileUtils.getRequiredFileName(submittedTarGzFile);
     Path tarGzFile = submissionProcessingDir.resolve(tarGzFileFileName);
 
     LOGGER.info("Moving {} to {}", submittedTarGzFile, tarGzFile);

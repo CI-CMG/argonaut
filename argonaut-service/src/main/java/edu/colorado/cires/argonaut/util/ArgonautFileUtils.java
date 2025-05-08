@@ -183,6 +183,14 @@ public class ArgonautFileUtils {
     return Optional.empty();
   }
 
+  public static String getRequiredFileName(Path path) {
+    Path fileName = path.getFileName();
+    if (fileName == null) {
+      throw new IllegalArgumentException("No file name on path: " + path);
+    }
+    return fileName.toString();
+  }
+
   private ArgonautFileUtils() {
 
   }

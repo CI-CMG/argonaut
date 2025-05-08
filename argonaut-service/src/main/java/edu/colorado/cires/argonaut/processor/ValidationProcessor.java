@@ -16,7 +16,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Duration;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -30,16 +29,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class ValidationProcessor implements Processor {
+public final class ValidationProcessor implements Processor {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(ValidationProcessor.class);
-
-  //TODO clean up
-//  private final Path workingDir;
-//  private final Path processingDir;
-//  private final Path validateDir;
-//  private final Path errorDir;
-//  private final ProducerTemplate producerTemplate;
 
   private final ShellExecutor shellExecutor = new DefaultShellExecutor();
   private final Path java;
@@ -52,16 +44,6 @@ public class ValidationProcessor implements Processor {
   @Autowired
   public ValidationProcessor(ServiceProperties serviceProperties) {
     this.serviceProperties = serviceProperties;
-//    this.producerTemplate = producerTemplate;
-//    workingDir = serviceProperties.getWorkDirectory();
-//    processingDir = workingDir.resolve("processing");
-//    validateDir = workingDir.resolve("validated");
-//    try {
-//      Files.createDirectories(validateDir);
-//    } catch (IOException e) {
-//      throw new RuntimeException("Unable to create validated directory", e);
-//    }
-//    errorDir = workingDir.resolve("error");
 
     java = Paths.get(System.getProperty("java.home")).resolve("bin").resolve("java");
     workingDir = serviceProperties.getWorkDirectory();
