@@ -82,5 +82,8 @@ abstract class FtpService {
     server.stop();
   }
 
+  @Override
+  protected final void finalize() throws Throwable {
 
+  }
 }
