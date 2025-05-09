@@ -11,10 +11,12 @@ argonaut:
     enabled: true
     ssl-enabled: false
     user-file: src/test/resources/ftp-anonymous-users.properties
-
-camel:
-  springboot:
-    main-run-controller: false
+server:
+  tomcat:
+    accesslog:
+      enabled: false
+  ssl:
+    enabled: false
 
 spring:
   main:

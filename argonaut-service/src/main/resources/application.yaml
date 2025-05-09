@@ -33,6 +33,8 @@ server:
   compression:
     enabled: true
   tomcat:
+    redirect-context-root: false
+    use-relative-redirects: true
     accesslog:
       directory: ${svc.home}/log
       enabled: true
@@ -52,9 +54,14 @@ camel:
     main-run-controller: true
 
 spring:
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
   web:
     resources:
-      static-locations: file:${argonaut.output-directory}
+      static-locations:
+        - file:${argonaut.output-directory}/
+        - classpath:/static/
   main:
     web-application-type: none
   threads:

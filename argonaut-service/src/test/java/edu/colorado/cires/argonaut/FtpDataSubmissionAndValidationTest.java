@@ -28,13 +28,14 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 @Disabled
-@SpringBootTest
+@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @CamelSpringBootTest
 @DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
 @ActiveProfiles("testftp")
@@ -61,7 +62,7 @@ public class FtpDataSubmissionAndValidationTest {
 
   @Test
   public void test() throws Exception {
-    Thread.sleep(TimeUnit.MINUTES.toMillis(5));
+    Thread.sleep(TimeUnit.MINUTES.toMillis(1));
   }
 
   @Test
