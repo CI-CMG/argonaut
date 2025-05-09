@@ -1,6 +1,7 @@
 package edu.colorado.cires.argonaut.web;
 
 import edu.colorado.cires.argonaut.config.ServiceProperties;
+import edu.colorado.cires.argonaut.util.ArgonautFileUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -12,12 +13,14 @@ import java.util.stream.Stream;
 import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.servlet.HandlerMapping;
 
 @Controller
+@ConditionalOnWebApplication
 public class FileServerController {
 
   private final ServiceProperties serviceProperties;
@@ -27,6 +30,7 @@ public class FileServerController {
   public FileServerController(ServiceProperties serviceProperties, @Value("#{servletContext.contextPath}") String servletContextPath) {
     this.serviceProperties = serviceProperties;
     this.servletContextPath = "/" + servletContextPath.replaceAll("/", "");
+    ArgonautFileUtils.createDirectories(this.serviceProperties.getOutputDirectory());
   }
 
   private static boolean isHidden(Path path) {
