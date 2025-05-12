@@ -1,14 +1,21 @@
 package edu.colorado.cires.argonaut.service;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.Set;
 import java.util.TreeSet;
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import ucar.nc2.NetcdfFile;
+import ucar.nc2.NetcdfFiles;
+import ucar.nc2.Variable;
 
 class MultiFloatMergeServiceTest {
 
@@ -43,17 +50,24 @@ class MultiFloatMergeServiceTest {
     Path outputFile = daceDir.resolve("2901615_prof.nc");
     MultiFloatMergeService floatMergeService = new MultiFloatMergeService();
     floatMergeService.mergeFloats(outputFile, profileNcFiles);
-//    String fileName = "nc_2025.04.02_16.15.tar.gz";
-//    Path stagedFile = stagingDir.resolve(fileName);
-//    Path readyFile = stagingDir.resolve("nc_2025.04.02_16.15.tar.gz.ready");
-//    Files.copy(Paths.get("src/test/resources/aoml").resolve(fileName), stagedFile);
 
-//    AomlProcessor processor = new AomlProcessor(serviceProperties);
-//    Exchange exchange = mock(Exchange.class);
-//    Message message = mock(Message.class);
-//    when(message.getBody(File.class)).thenReturn(readyFile.toFile());
-//    when(exchange.getIn()).thenReturn(message);
-//    processor.process(exchange);
+    assertTrue(Files.exists(outputFile));
+    try (NetcdfFile ncfile = NetcdfFiles.open(outputFile.toString())) {
+
+      Variable cycleNumbers = ncfile.findVariable("CYCLE_NUMBER");
+      assertTrue(Arrays.equals(new int[]{3}, cycleNumbers.getShape()));
+      assertEquals(3, cycleNumbers.read().getSize());
+      assertEquals(1, cycleNumbers.read().getInt(0));
+
+      Variable platformNumber = ncfile.findVariable(ProfileNcConsts.PLATFORM_NUMBER);
+      assertTrue(Arrays.equals(new int[]{3, ProfileNcConsts.STRING8}, platformNumber.getShape()));
+      assertEquals("2901615 ,2901615 ,2901615 ", platformNumber.read(":,:").toString());
+      assertEquals( "Argo China SOA                                                  ", ncfile.findVariable("PROJECT_NAME").read("0,:").toString());
+      assertEquals("Fengying JI                                                     ", ncfile.findVariable("PI_NAME").read("1,:").toString());
+      Variable temp = ncfile.findVariable(ProfileNcConsts.STATION_PARAMETERS);
+      assertEquals("PRES            ,TEMP            ,PSAL            ", ncfile.findVariable(ProfileNcConsts.STATION_PARAMETERS).read("0,:,:").toString());
+    }
+
 
   }
 }

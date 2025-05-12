@@ -2,10 +2,18 @@ package edu.colorado.cires.argonaut.service;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
+import ucar.ma2.Array;
+import ucar.ma2.ArrayChar;
+import ucar.ma2.ArrayChar.D2;
+import ucar.ma2.ArrayInt;
+import ucar.ma2.ArrayString;
 import ucar.ma2.DataType;
+import ucar.ma2.Index;
+import ucar.ma2.InvalidRangeException;
 import ucar.nc2.Attribute;
 import ucar.nc2.Dimension;
 import ucar.nc2.NetcdfFile;
@@ -17,24 +25,23 @@ public class MultiFloatMergeService {
 
   // https://docs.unidata.ucar.edu/netcdf-java/5.4/userguide/writing_netcdf.html
 
+
   public void mergeFloats(Path outputFile, Set<Path> profileNcFiles) throws IOException {
 
     Profile profile = new Profile();
-    profile.setDimensions(profileNcFiles);
-//    int nParam = getNParamSize(profileNcFiles);
-//    int nCalib = getNCalib(profileNcFiles);
-//    int nLevels = getNlevels(profileNcFiles);
+    profile.setProfileNcFiles(profileNcFiles);
+    profile.setDimension();
 
     NetcdfFormatWriter.Builder builder = NetcdfFormatWriter.createNewNetcdf3(outputFile.toString());
 
-    Dimension dateTimeDim = builder.addDimension("DATE_TIME", 14);
-    Dimension string256Dim = builder.addDimension("STRING256", 256);
-    Dimension string64Dim = builder.addDimension("STRING64", 64);
-    Dimension string32Dim = builder.addDimension("STRING32", 32);
-    Dimension string16Dim = builder.addDimension("STRING16", 16);
-    Dimension string8Dim = builder.addDimension("STRING8", 8);
-    Dimension string4Dim = builder.addDimension("STRING4", 4);
-    Dimension string2Dim = builder.addDimension("STRING2", 2);
+    Dimension dateTimeDim = builder.addDimension("DATE_TIME", ProfileNcConsts.DATE_TIME);
+    Dimension string256Dim = builder.addDimension("STRING256", ProfileNcConsts.STRING256);
+    Dimension string64Dim = builder.addDimension("STRING64", ProfileNcConsts.STRING64);
+    Dimension string32Dim = builder.addDimension("STRING32", ProfileNcConsts.STRING32);
+    Dimension string16Dim = builder.addDimension("STRING16", ProfileNcConsts.STRING16);
+    Dimension string8Dim = builder.addDimension("STRING8", ProfileNcConsts.STRING8);
+    Dimension string4Dim = builder.addDimension("STRING4", ProfileNcConsts.STRING8);
+    Dimension string2Dim = builder.addDimension("STRING2", ProfileNcConsts.STRING2);
 
     Dimension nProfDim = builder.addDimension("N_PROF", profile.getnProf());
     Dimension nParamDim = builder.addDimension("N_PARAM", profile.getnParam()); // 3, Maybe 4
@@ -87,12 +94,12 @@ public class MultiFloatMergeService {
         .addAttribute(new Attribute( "conventions", "YYYYMMDDHHMISS"))
         .addAttribute(new Attribute("_FillValue", " "));
 
-    Variable.Builder varPlatformNum = builder.addVariable("PLATFORM_NUMBER", DataType.STRING, Arrays.asList(nProfDim, string8Dim))
+    Variable.Builder varPlatformNum = builder.addVariable(ProfileNcConsts.PLATFORM_NUMBER, DataType.STRING, Arrays.asList(nProfDim, string8Dim))
         .addAttribute(new Attribute("long_name", "Float unique identifier"))
         .addAttribute(new Attribute("conventions", "WMO float identifier : A9IIIII"))
         .addAttribute(new Attribute("_FillValue", " "));
 
-    Variable.Builder varProjectName = builder.addVariable("PROJECT_NAME", DataType.STRING, Arrays.asList(nProfDim, string64Dim))
+    Variable.Builder varProjectName = builder.addVariable(ProfileNcConsts.PROJECT_NAME, DataType.STRING, Arrays.asList(nProfDim, string64Dim))
         .addAttribute(new Attribute("long_name", "Name of the project"))
         .addAttribute(new Attribute("_FillValue", " "));
 
@@ -100,12 +107,12 @@ public class MultiFloatMergeService {
         .addAttribute(new Attribute("long_name", "Name of the principal investigator"))
         .addAttribute(new Attribute("_FillValue", " "));
 
-    Variable.Builder varStationParameters = builder.addVariable("STATION_PARAMETERS", DataType.STRING, Arrays.asList(nProfDim,nParamDim, string16Dim))
+    Variable.Builder varStationParameters = builder.addVariable(ProfileNcConsts.STATION_PARAMETERS, DataType.STRING, Arrays.asList(nProfDim,nParamDim, string16Dim))
         .addAttribute(new Attribute("long_name", "List of available parameters for the station"))
         .addAttribute(new Attribute("conventions", "Argo reference table 3"))
         .addAttribute(new Attribute("_FillValue", " "));
 
-    Variable.Builder varCycleNumber = builder.addVariable("CYCLE_NUMBER", DataType.INT, Arrays.asList(nProfDim))
+    Variable.Builder varCycleNumber = builder.addVariable(ProfileNcConsts.CYCLE_NUMBER, DataType.INT, Arrays.asList(nProfDim))
         .addAttribute(new Attribute("long_name", "Float cycle number"))
         .addAttribute(new Attribute("conventions", "0...N, 0 : launch cycle (if exists), 1 : first complete cycle"))
         .addAttribute(new Attribute("_FillValue", 99999));
@@ -135,7 +142,7 @@ public class MultiFloatMergeService {
         .addAttribute(new Attribute("conventions", "R : real time; D : delayed mode; A : real time with adjustment"))
         .addAttribute(new Attribute("_FillValue", " "));
 
-    Variable.Builder varPlatformType = builder.addVariable("PLATFORM_TYPE", DataType.STRING, Arrays.asList(nProfDim, string32Dim))
+    Variable.Builder varPlatformType = builder.addVariable("PLATFORM_TYPE", DataType.CHAR, Arrays.asList(nProfDim, string32Dim))
         .addAttribute(new Attribute("long_name", "Type of float"))
         .addAttribute(new Attribute("conventions", "Argo reference table 23"))
         .addAttribute(new Attribute("_FillValue", " "));
@@ -441,41 +448,91 @@ public class MultiFloatMergeService {
 
     builder.setFill(true);
     try (NetcdfFormatWriter writer = builder.build()) {
-      int index = 0;
+      int[] originD1 = new int[]{0};
+      int[] stringOr = new int[]{0,ProfileNcConsts.STRING8};
+      Variable cycleNumberWriter = writer.findVariable(ProfileNcConsts.CYCLE_NUMBER);
+      Variable platformNumberWriter = writer.findVariable(ProfileNcConsts.PLATFORM_NUMBER);
+      int count = 0;
       for (Path profileNcFile: profileNcFiles){
         try (NetcdfFile ncfile = NetcdfFiles.open(profileNcFile.toString())) {
-          Variable fCycleNum =ncfile.findVariable("CYCLE_NUMBER");
-          // ncfile.findVariable("CYCLE_NUMBER").read().getInt(0)
-          int[] fShape = fCycleNum.getShape();
+          originD1[0] = count;
+          stringOr[0] = count;
+          writer.write(cycleNumberWriter,originD1,getArrayIntD1(ncfile.findVariable(ProfileNcConsts.CYCLE_NUMBER).read().getInt(0)));
+          String d1 = ncfile.findVariable(ProfileNcConsts.PLATFORM_NUMBER).read("0,:").toString();
+          ArrayString data = getArrayStringD1(d1);
+          try{
+            writer.write(platformNumberWriter, stringOr, data);
+          }catch (InvalidRangeException e) {
+            throw new RuntimeException("An error writing platform: " + count, e);
+          }
         } catch (IOException e) {
           throw new RuntimeException("An error opening profile nc file : " + profileNcFile, e);
+        } catch (InvalidRangeException e) {
+          throw new RuntimeException(e);
         }
+        count++;
       }
+
+//      profile.setVariables();
+//      try{
+//        writer.write(writer.findVariable("PLATFORM_NUMBER"), profile.getPlatformNumbers());
+//        writer.write(writer.findVariable("PROJECT_NAME"), profile.getProjectNames());
+//        writer.write(writer.findVariable("PI_NAME"), profile.getPiNames());
+//        writer.write(writer.findVariable("CYCLE_NUMBER"), profile.getCycleNumbers());
+//        writer.write(writer.findVariable(ProfileNcConsts.STATION_PARAMETERS), profile.getStationParameters());
+//
+//      } catch (InvalidRangeException e) {
+//        throw new RuntimeException(e);
+//      }
     }catch (IOException e) {
       throw new RuntimeException("An error occurred creating multi float merge file : " + outputFile, e);
     }
-
-
-
   }
 
-  private int getNlevels(Set<Path> profileNcFiles) {
-    throw new UnsupportedOperationException();
+  private ArrayInt getArrayIntD1(int value){
+    int[] shape = new int[]{1};
+    ArrayInt data = new ArrayInt(shape, false);
+    Index ima = data.getIndex();
+    data.setInt(ima.set(0), value);
+    return data;
   }
 
-  private int getNCalib(Set<Path> profileNcFiles) {
-    throw new UnsupportedOperationException();
+  private ArrayString getArrayStringD1(String  value){
+    int[] shape = {1, ProfileNcConsts.STRING8};
+    ArrayString data = new ArrayString.D1(shape[0]);
+    Index ima = data.getIndex();
+    data.setObject(0,value);
+    return data;
   }
-
-  private int getNParamSize(Set<Path> profileNcFiles) {
-    throw new UnsupportedOperationException();
-  }
-
   class Profile {
+    Set<Path> profileNcFiles;
     int nProf;
     int nParam;
     int nCalib;
     int nLevels;
+
+    List<Integer> cycleNumbers;
+    List<String> platformNumbers;
+    List<String> projectNames;
+    List<String> piNames;
+    List<String[]> stationParameters;
+
+    public void setProfileNcFiles(Set<Path> profileNcFiles) {
+      this.profileNcFiles = profileNcFiles;
+    }
+
+    public void setDimension() {
+      nProf = profileNcFiles.size();
+      for (Path profileNcFile: profileNcFiles){
+        try (NetcdfFile ncfile = NetcdfFiles.open(profileNcFile.toString())) {
+          setnParam(ncfile.findDimension("N_PARAM").getLength());
+          setnCalib(ncfile.findDimension("N_CALIB").getLength());
+          setnLevels(ncfile.findDimension("N_LEVELS").getLength());
+        } catch (IOException e) {
+          throw new RuntimeException("An error opening profile nc file : " + profileNcFile, e);
+        }
+      }
+    }
 
     public int getnProf() {
       return nProf;
@@ -485,32 +542,141 @@ public class MultiFloatMergeService {
       return nParam;
     }
 
+    public void setnParam(int nParam) {
+      if (this.nParam < nParam) {
+        this.nParam = nParam;
+      }
+    }
+
     public int getnCalib() {
       return nCalib;
+    }
+
+    public void setnCalib(int nCalib) {
+      if (this.nCalib < nCalib) {
+        this.nCalib = nCalib;
+      }
     }
 
     public int getnLevels() {
       return nLevels;
     }
 
-    public void setDimensions(Set<Path> profileNcFiles) {
-      nProf = profileNcFiles.size();
+    public void setnLevels(int nLevels) {
+      this.nLevels = nLevels;
+    }
+
+    public void setVariables() {
       for (Path profileNcFile: profileNcFiles){
         try (NetcdfFile ncfile = NetcdfFiles.open(profileNcFile.toString())) {
-          nParam = maxInt(nParam, ncfile.findDimension("N_PARAM").getLength());
-          nCalib = maxInt(nCalib, ncfile.findDimension("N_CALIB").getLength());
-          nLevels = maxInt(nLevels, ncfile.findDimension("N_LEVELS").getLength());
+          addCycleNumber(ncfile.findVariable("CYCLE_NUMBER").read());
+          addPlatformNumber(ncfile.findVariable("PLATFORM_NUMBER").read("0,:").toString());
+          addProjectName(ncfile.findVariable("PROJECT_NAME").read("0,:").toString());
+          addPiName(ncfile.findVariable("PI_NAME").read("0,:").toString());
+          addStationParameter(ncfile.findVariable(ProfileNcConsts.STATION_PARAMETERS).read("0,:,:").toString().split(","));
         } catch (IOException e) {
           throw new RuntimeException("An error opening profile nc file : " + profileNcFile, e);
+        } catch (InvalidRangeException e) {
+          throw new RuntimeException(e);
         }
       }
     }
-
-    private int maxInt(int x, int y){
-      if (y > x){
-        return y;
+    public ArrayInt getCycleNumbers() {
+      int[] shape = {nProf};
+      ArrayInt cnums = new ArrayInt(shape, true);
+      Index ima = cnums.getIndex();
+      for (int i = 0; i < cycleNumbers.size(); i++){
+        int x = cycleNumbers.get(i);
+        cnums.setInt(ima.set(i), x);
       }
-      return x;
+      return cnums;
+    }
+
+    public void addCycleNumber(Array cycleNumber) {
+      if (this.cycleNumbers == null){
+        this.cycleNumbers = new ArrayList<>();
+
+      }
+      this.cycleNumbers.add(cycleNumber.getInt(0));
+    }
+
+    public ArrayString getPlatformNumbers() {
+      int[] shape = {nProf, ProfileNcConsts.STRING8};
+      ArrayString data = new ArrayString.D2(shape[0], shape[1]);
+      Index ima = data.getIndex();
+      for (int i = 0; i < platformNumbers.size(); i++){
+        String x = platformNumbers.get(i);
+        data.set(ima.set(i), x);
+      }
+
+      return data;
+    }
+
+    public void addPlatformNumber(String platformNumber) {
+      if (this.platformNumbers == null){
+        this.platformNumbers = new ArrayList<>();
+      }
+      this.platformNumbers.add(platformNumber);
+
+    }
+
+    public ArrayString getProjectNames() {
+      int[] shape = {nProf, ProfileNcConsts.STRING64};
+      ArrayString data = new ArrayString.D2(shape[0], shape[1]);
+      Index ima = data.getIndex();
+      for (int i = 0; i < projectNames.size(); i++){
+        String x = projectNames.get(i);
+        data.set(ima.set(i), x);
+      }
+
+      return data;
+    }
+
+    public void addProjectName(String projectName) {
+      if (this.projectNames == null){
+        this.projectNames = new ArrayList<>();
+      }
+      this.projectNames.add(projectName);
+    }
+
+    public ArrayString getPiNames() {
+      int[] shape = {nProf, ProfileNcConsts.STRING64};
+      ArrayString data = new ArrayString.D2(shape[0], shape[1]);
+      Index ima = data.getIndex();
+      for (int i = 0; i < piNames.size(); i++){
+        data.set(ima.set(i), piNames.get(i));
+      }
+      return data;
+    }
+
+    public void addPiName(String piName) {
+      if (this.piNames == null){
+        this.piNames = new ArrayList<>();
+      }
+      this.piNames.add(piName);
+    }
+
+    public ArrayString getStationParameters() {
+      int[] shape = {nProf, nParam, ProfileNcConsts.STRING16};
+      ArrayString data = new ArrayString.D3(shape[0], shape[1], shape[2]);
+      Index ima = data.getIndex();
+      for (int x = 0; x < stationParameters.size(); x++){
+        for(int y = 0; y < stationParameters.get(x).length; y++){
+          data.set(ima.set(x,y),  stationParameters.get(x)[y]);
+        }
+      }
+      return data;
+    }
+
+    public void addStationParameter(String[] stationParameter) {
+      if (this.stationParameters == null){
+        this.stationParameters = new ArrayList<>();
+      }
+//      String[] sp = new String[nParam];
+//      Arrays.fill(sp," ");
+//      System.arraycopy(stationParameter,0,sp,0,stationParameter.length);
+//////      List.of(sp);
+      stationParameters.add(stationParameter);
     }
   }
 }
