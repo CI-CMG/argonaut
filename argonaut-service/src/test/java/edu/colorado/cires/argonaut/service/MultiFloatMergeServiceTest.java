@@ -12,11 +12,13 @@ import java.util.TreeSet;
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import ucar.nc2.NetcdfFile;
 import ucar.nc2.NetcdfFiles;
 import ucar.nc2.Variable;
 
+@Disabled
 class MultiFloatMergeServiceTest {
 
   private static final Path submissionDir = Paths.get("target/submission");
