@@ -19,6 +19,7 @@ argonaut:
     keystore-password: ''
     port: 2221
     anonymous-login-enabled: false
+    ssl-enabled: true
   local-output-ftp-server:
     enabled: false
     password-encoding: sha256
@@ -27,6 +28,7 @@ argonaut:
     keystore-password: ''
     port: 2211
     anonymous-login-enabled: true
+    ssl-enabled: true
   output-directory: ''
 
 server:

@@ -71,7 +71,7 @@ public class Routes extends RouteBuilder {
           }
 
           //TODO add logging
-          from("file:" + dacSubmitDir)
+          from("file:" + dacSubmitDir + "?readLock=changed")
             .routeId("dac-submit-" + dac.getName())
             .setHeader(HeaderConsts.DAC, constant(dac.getName()))
             .setHeader(HeaderConsts.SUBMISSION_TIMESTAMP, submissionTimestampService::generateTimestamp)
