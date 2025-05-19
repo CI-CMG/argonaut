@@ -13,7 +13,7 @@
 
   <groupId>io.github.ci-cmg.argo</groupId>
   <artifactId>argonaut</artifactId>
-  <version>1.0.0-SNAPSHOT</version>
+  <version>0.1.0-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <name>${project.groupId}:${project.artifactId}</name>
@@ -70,10 +70,11 @@
   </reporting>
 
   <modules>
+    <module>argonaut-common</module>
     <module>argonaut-xml</module>
     <module>argonaut-file-checker</module>
+    <module>argonaut-index</module>
     <module>argonaut-service</module>
-<!--    <module>argonaut-pre-processing</module>-->
   </modules>
 
   <repositories>
