@@ -69,10 +69,12 @@ A service setup script is provided to simplify the creation process.
 
 ## Configuration
 ### Application Properties
-TODO
+For a list of configuration properties, see [CONFIGURATION](argonaut-service/docs/CONFIGURATION.md)
 
 ### Setting Properties Via Environment Variables
-TODO
+All configuration properties can be set by environment variables.  These will take precedence over values specified 
+in the configuration file.  Typically, all dots (periods) are replaced by underscores and all dashes are omitted. 
+Upper case is preferred.  More details can be found in the [Spring Boot Externalized Configuration Documentation](https://docs.spring.io/spring-boot/reference/features/external-config.html#features.external-config.typesafe-configuration-properties.relaxed-binding.environment-variables).
 
 ### JVM Options
 All JVM options passed to the application are located in _config/jvm.options_.  Lines starting with "#" are comments and will be ignored.
