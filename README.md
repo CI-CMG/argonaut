@@ -51,13 +51,62 @@ It is recommended, but not required, to set the JAVA_HOME environment variable t
 point to the location of your JRE installation.  If JAVA_HOME is not set, Argonaut
 will use whichever version of the java executable is on your PATH.
 
-That is it for the basic installation.  
+That is it for the basic installation.
 
 #### Advanced Installation Notes
+Argonaut can be run as a Linux service.  For this, it is recommended to run Argonaut with a dedicated user.
+
+To create a user run:
+```bash
+useradd argonaut
+```
+You may also want to increase the number of file descriptors for that user.
+
+A service setup script is provided to simplify the creation process.
+1. Navigate to the _svc_ directory in the installation location
+2. Edit _install-service.properties_ and set the _USER_and _JAVA_HOME_ properties
+3. Run _install-service.sh_ as root
+
+## Configuration
+### Application Properties
 TODO
 
+### Setting Properties Via Environment Variables
+TODO
+
+### JVM Options
+All JVM options passed to the application are located in _config/jvm.options_.  Lines starting with "#" are comments and will be ignored.
+Sensible defaults have been selected.  The service will need to be restarted for changes to take effect.
+
+### Logging
+Logging is configured by the _config/log4j2.xml_ file.  Detailed configuration instructions can be found here: https://logging.apache.org/log4j/2.x/manual/configuration.html.
+
+The most common changes would be adding loggers and changing levels though.
+
+To add a logger add the following to the _<Loggers>_ section:
+```xml
+    <Logger name="com.foo.bar" level="info" additivity="false">
+      <AppenderRef ref="File"/>
+    </Logger>
+```
+The name will be a package name (full or partial) or a class name.  Level will be one of "fatal", "error", "warn", "info", "debug", or "trace".
+
+To change the level of all loggers not explicitly set, update the level of the following entry in the file:
+```xml
+    <Root level="warn">
+      <AppenderRef ref="File"/>
+    </Root>
+``` 
+
+The _${sys:svc.home}_ placeholder can be used in the logging configuration and represents the absolute path to the service install location.
+
+Changes made to this file do not require a restart.  They will be picked up within 30 seconds.
 
 ## Usage
+To run the Argonaut (not as a Linux service), run _run.sh_ in the installation directory.  This will run Argonaut in the foreground.
+To run Argonaut in the background, run _start-background.sh_.  To stop the background application, run _stop-background.sh_.
+
+
 TODO
 
 ## Development Resources
