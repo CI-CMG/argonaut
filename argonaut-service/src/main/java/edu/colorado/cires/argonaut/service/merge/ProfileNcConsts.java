@@ -1,4 +1,4 @@
-package edu.colorado.cires.argonaut.service;
+package edu.colorado.cires.argonaut.service.merge;
 
 public final class ProfileNcConsts {
   public static final int DATE_TIME = 14;
@@ -18,6 +18,10 @@ public final class ProfileNcConsts {
   public static final String REFERENCE_DATE_TIME = "REFERENCE_DATE_TIME";
   public static final String DATE_CREATION = "DATE_CREATION";
   public static final String DATE_UPDATE = "DATE_UPDATE";
+  public static final String N_PARAM = "N_PARAM";
+  public static final String N_CALIB = "N_CALIB";
+  public static final String N_LEVELS = "N_LEVELS";
+
   public static final String PLATFORM_NUMBER = "PLATFORM_NUMBER";
   public static final String PROJECT_NAME = "PROJECT_NAME";
   public static final String  PI_NAME = "PI_NAME";

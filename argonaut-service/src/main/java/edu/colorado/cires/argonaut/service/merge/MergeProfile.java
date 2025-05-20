@@ -1,15 +1,16 @@
-package edu.colorado.cires.argonaut.service;
+package edu.colorado.cires.argonaut.service.merge;
 
 import java.io.IOException;
-import java.nio.file.Path;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
-import java.util.Set;
+import java.util.NoSuchElementException;
+import java.util.stream.Collectors;
 import ucar.ma2.Array;
 import ucar.ma2.ArrayDouble;
 import ucar.ma2.ArrayFloat;
@@ -22,13 +23,13 @@ import ucar.nc2.NetcdfFile;
 import ucar.nc2.NetcdfFiles;
 import ucar.nc2.Variable;
 
-public class Profile {
+public class MergeProfile {
     private final String dataType = "Argo profile    ";
     private final String formatVersion = "3.1";
     private final String handBookVersion = "1.2";
     private final String referenceDateTime = "19500101000000";
     private Instant currentDateTime;
-    private Set<Path> profileNcFiles;
+    private List<CoreProfile> profileNcFiles;
     private int nProf;
     private int nParam;
     private int nCalib;
@@ -105,22 +106,30 @@ public class Profile {
     return getArrayStringD1(new int[] {ProfileNcConsts.DATE_TIME}, dateTimeFormatter.format(ldt));
   }
 
-  public void setProfileNcFiles(Set<Path> profileNcFiles) {
+  public void setProfileNcFiles(List<CoreProfile> profileNcFiles) {
       this.profileNcFiles = profileNcFiles;
     }
 
     public void setDimension() {
       this.nProf = profileNcFiles.size();
       this.currentDateTime = Instant.now();
-      for (Path profileNcFile: profileNcFiles){
-        try (NetcdfFile ncfile = NetcdfFiles.open(profileNcFile.toString())) {
-          setnParam(ncfile.findDimension("N_PARAM").getLength());
-          setnCalib(ncfile.findDimension("N_CALIB").getLength());
-          setnLevels(ncfile.findDimension("N_LEVELS").getLength());
-        } catch (IOException e) {
-          throw new RuntimeException("An error opening profile nc file : " + profileNcFile, e);
-        }
-      }
+      CoreProfile  maxnParm = this.profileNcFiles
+          .stream()
+          .max(Comparator.comparing(CoreProfile::getnParam))
+          .orElseThrow(NoSuchElementException::new);
+      setnParam(maxnParm.getnParam());
+
+      CoreProfile  maxnCalib = this.profileNcFiles
+          .stream()
+          .max(Comparator.comparing(CoreProfile::getnCalib))
+          .orElseThrow(NoSuchElementException::new);
+      setnCalib(maxnCalib.getnCalib());
+
+      CoreProfile  maxnLevel = this.profileNcFiles
+          .stream()
+          .max(Comparator.comparing(CoreProfile::getnLevels))
+          .orElseThrow(NoSuchElementException::new);
+      setnLevels(maxnLevel.getnLevels());
     }
 
   public void setCurrentDateTime() {
@@ -136,9 +145,7 @@ public class Profile {
     }
 
     public void setnParam(int nParam) {
-      if (this.nParam < nParam) {
-        this.nParam = nParam;
-      }
+      this.nParam = nParam;
     }
 
 
@@ -147,9 +154,7 @@ public class Profile {
     }
 
     public void setnCalib(int nCalib) {
-      if (this.nCalib < nCalib) {
-        this.nCalib = nCalib;
-      }
+      this.nCalib = nCalib;
     }
 
     public int getnLevels() {
@@ -157,14 +162,16 @@ public class Profile {
     }
 
     public void setnLevels(int nLevel) {
-      if (this.nLevels < nLevel) {
-        this.nLevels = nLevel;
-      }
+      this.nLevels = nLevel;
     }
 
     public void setVariables() {
-      for (Path profileNcFile: profileNcFiles){
-        try (NetcdfFile ncfile = NetcdfFiles.open(profileNcFile.toString())) {
+      setCycleNumbers(this.profileNcFiles.stream().map(CoreProfile::getCycleNumber).collect(Collectors.toList()));
+      setJulds(this.profileNcFiles.stream().map(CoreProfile::getJuld).collect(Collectors.toList()));
+      setLatitudes(this.profileNcFiles.stream().map(CoreProfile::getLatitude).collect(Collectors.toList()));
+      setLongitude(this.profileNcFiles.stream().map(CoreProfile::getLongitude).collect(Collectors.toList()));
+      for (CoreProfile profileNcFile: profileNcFiles){
+        try (NetcdfFile ncfile = NetcdfFiles.open(profileNcFile.getFile().toString())) {
           try {
             addPlatformNumber(ncfile.findVariable(ProfileNcConsts.PLATFORM_NUMBER).read("0,:").toString());
           } catch (InvalidRangeException e) {
@@ -185,7 +192,7 @@ public class Profile {
           } catch (InvalidRangeException e) {
             throw new RuntimeException("An error reading: " + ProfileNcConsts.STATION_PARAMETERS + " from " + profileNcFile, e);
           }
-          addCycleNumber(ncfile.findVariable(ProfileNcConsts.CYCLE_NUMBER).read());
+
           try{
             addDirection(ncfile.findVariable(ProfileNcConsts.DIRECTION).read("0").toString());
           } catch (InvalidRangeException e) {
@@ -231,15 +238,12 @@ public class Profile {
           } catch (InvalidRangeException e) {
             throw new RuntimeException("An error reading: " + ProfileNcConsts.WMO_INST_TYPE + " from " + profileNcFile, e);
           }
-          addJuld(ncfile.findVariable(ProfileNcConsts.JULD).read().getDouble(0));
           try{
             addJuldQc(ncfile.findVariable(ProfileNcConsts.JULD_QC).read("0").toString());
           } catch (InvalidRangeException e) {
             throw new RuntimeException("An error reading: " + ProfileNcConsts.JULD_QC + " from " + profileNcFile, e);
           }
           addJuldLocations(ncfile.findVariable(ProfileNcConsts.JULD_LOCATION).read().getDouble(0));
-          addLatitudes(ncfile.findVariable(ProfileNcConsts.LATITUDE).read().getDouble(0));
-          addLongitude(ncfile.findVariable(ProfileNcConsts.LONGITUDE).read().getDouble(0));
           try{
             addPositionQcs(ncfile.findVariable(ProfileNcConsts.POSITION_QC).read("0").toString());
           } catch (InvalidRangeException e) {
@@ -393,11 +397,8 @@ public class Profile {
       return cnums;
     }
 
-    public void addCycleNumber(Array cycleNumber) {
-      if (this.cycleNumbers == null){
-        this.cycleNumbers = new ArrayList<>();
-      }
-      this.cycleNumbers.add(cycleNumber.getInt(0));
+    public void setCycleNumbers(List<Integer> cycleNumbers) {
+      this.cycleNumbers = cycleNumbers;
     }
 
     public ArrayString getPlatformNumbers() {
@@ -569,11 +570,8 @@ public class Profile {
     return data;
   }
 
-  public void addJuld(Double juld) {
-    if (this.julds == null){
-      this.julds = new ArrayList<>();
-    }
-    this.julds.add(juld);
+  public void setJulds(List<Double> julds) {
+    this.julds = julds;
   }
 
   public ArrayString getJuldQc() {
@@ -614,11 +612,8 @@ public class Profile {
     return data;
   }
 
-  public void addLatitudes(double latitudes) {
-    if (this.latitudes == null){
-      this.latitudes = new ArrayList<>();
-    }
-    this.latitudes.add(latitudes);
+  public void setLatitudes(List<Double> latitudes) {
+    this.latitudes = latitudes;
   }
 
   public ArrayDouble getLongitude() {
@@ -631,11 +626,8 @@ public class Profile {
     return data;
   }
 
-  public void addLongitude(Double longitude) {
-    if (this.longitudes == null){
-      this.longitudes = new ArrayList<>();
-    }
-    this.longitudes.add(longitude);
+  public void setLongitude(List<Double> longitudes) {
+    this.longitudes = longitudes;
   }
 
   public ArrayString getPositionQcs() {

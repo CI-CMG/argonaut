@@ -3,10 +3,16 @@ package edu.colorado.cires.argonaut.service;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import edu.colorado.cires.argonaut.service.merge.CoreProfile;
+import edu.colorado.cires.argonaut.service.merge.MultiFloatMergeService;
+import edu.colorado.cires.argonaut.service.merge.ProfileNcConsts;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 import org.apache.commons.io.FileUtils;
@@ -17,7 +23,6 @@ import org.junit.jupiter.api.Test;
 import ucar.nc2.NetcdfFile;
 import ucar.nc2.NetcdfFiles;
 import ucar.nc2.Variable;
-import ucar.nc2.ft.point.standard.Evaluator.VarAtt;
 
 @Disabled
 class MultiFloatMergeServiceTest {
@@ -43,11 +48,25 @@ class MultiFloatMergeServiceTest {
     Path resourceDir = Paths.get("src/test/resources/float_merge/nmdis/2901615/profiles");
 
     Files.createDirectories(profileDir);
-    Set<Path> profileNcFiles = new TreeSet<>();
+    List<CoreProfile> profileNcFiles = new ArrayList<>();
+
     for (String fileName: files) {
-      Path profileFile = profileDir.resolve(fileName);
-      profileNcFiles.add(profileFile);
-      Files.copy(resourceDir.resolve(fileName), profileFile);
+      CoreProfile coreProfile = new CoreProfile();
+      Path ncFile = profileDir.resolve(fileName);
+      coreProfile.setFile(ncFile);
+      profileNcFiles.add(coreProfile);
+      Files.copy(resourceDir.resolve(fileName), ncFile);
+      try (NetcdfFile ncfile = NetcdfFiles.open(ncFile.toString())) {
+        coreProfile.setCycleNumber(ncfile.findVariable(ProfileNcConsts.CYCLE_NUMBER).read().getInt(0));
+        coreProfile.setnParam(ncfile.findDimension(ProfileNcConsts.N_PARAM).getLength());
+        coreProfile.setnCalib(ncfile.findDimension(ProfileNcConsts.N_CALIB).getLength());
+        coreProfile.setnLevels(ncfile.findDimension(ProfileNcConsts.N_LEVELS).getLength());
+        coreProfile.setJuld(ncfile.findVariable(ProfileNcConsts.JULD).read().getDouble(0));
+        coreProfile.setLatitude(ncfile.findVariable(ProfileNcConsts.LATITUDE).read().getDouble(0));
+        coreProfile.setLongitude(ncfile.findVariable(ProfileNcConsts.LONGITUDE).read().getDouble(0));
+      } catch (IOException e) {
+        throw new RuntimeException("An error opening profile nc file : " + ncFile, e);
+      }
     }
 
     Path outputFile = daceDir.resolve("2901615_prof.nc");

@@ -1,8 +1,9 @@
-package edu.colorado.cires.argonaut.service;
+package edu.colorado.cires.argonaut.service.merge;
 
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Set;
 import ucar.ma2.DataType;
 import ucar.ma2.InvalidRangeException;
@@ -16,11 +17,11 @@ public class MultiFloatMergeService {
   // https://docs.unidata.ucar.edu/netcdf-java/5.4/userguide/writing_netcdf.html
 
 
-  public void mergeFloats(Path outputFile, Set<Path> profileNcFiles) throws IOException {
+  public void mergeFloats(Path outputFile, List<CoreProfile> coreProfiles) throws IOException {
 
-    Profile profile = new Profile();
-    profile.setProfileNcFiles(profileNcFiles);
-    profile.setDimension();
+    MergeProfile mergeProfile = new MergeProfile();
+    mergeProfile.setProfileNcFiles(coreProfiles);
+    mergeProfile.setDimension();
 
     NetcdfFormatWriter.Builder builder = NetcdfFormatWriter.createNewNetcdf3(outputFile.toString());
 
@@ -33,11 +34,11 @@ public class MultiFloatMergeService {
     Dimension string4Dim = builder.addDimension("STRING4", ProfileNcConsts.STRING4);
     Dimension string2Dim = builder.addDimension("STRING2", ProfileNcConsts.STRING2);
 
-    Dimension nProfDim = builder.addDimension("N_PROF", profile.getnProf());
-    Dimension nParamDim = builder.addDimension("N_PARAM", profile.getnParam()); // 3, Maybe 4
-    Dimension nLevelsDim = builder.addDimension("N_LEVELS", profile.getnLevels());
+    Dimension nProfDim = builder.addDimension("N_PROF", mergeProfile.getnProf());
+    Dimension nParamDim = builder.addDimension("N_PARAM", mergeProfile.getnParam()); // 3, Maybe 4
+    Dimension nLevelsDim = builder.addDimension("N_LEVELS", mergeProfile.getnLevels());
     Dimension nHistoryDim = builder.addUnlimitedDimension("N_HISTORY");
-    Dimension nCalibDim = builder.addDimension("N_CALIB", profile.getnCalib()); // 1
+    Dimension nCalibDim = builder.addDimension("N_CALIB", mergeProfile.getnCalib()); // 1
 
     builder.addVariable(ProfileNcConsts.DATA_TYPE, DataType.STRING, Arrays.asList(string16Dim))
         .addAttribute(new Attribute("long_name", "Data type"))
@@ -182,17 +183,17 @@ public class MultiFloatMergeService {
         .addAttribute(new Attribute("_FillValue", " "));
 
     builder.addVariable(ProfileNcConsts.PROFILE_PRES_QC, DataType.STRING, Arrays.asList(nProfDim))
-        .addAttribute(new Attribute("long_name", "Global quality flag of PRES profile"))
+        .addAttribute(new Attribute("long_name", "Global quality flag of PRES mergeProfile"))
         .addAttribute(new Attribute("conventions", "Argo reference table 2a"))
         .addAttribute(new Attribute("_FillValue", " "));
 
     builder.addVariable(ProfileNcConsts.PROFILE_TEMP_QC, DataType.STRING, Arrays.asList(nProfDim))
-        .addAttribute(new Attribute("long_name", "Global quality flag of TEMP profile"))
+        .addAttribute(new Attribute("long_name", "Global quality flag of TEMP mergeProfile"))
         .addAttribute(new Attribute("conventions", "Argo reference table 2a"))
         .addAttribute(new Attribute("_FillValue", " "));
 
     builder.addVariable(ProfileNcConsts.PROFILE_PSAL_QC, DataType.STRING, Arrays.asList(nProfDim))
-        .addAttribute(new Attribute("long_name", "Global quality flag of PSAL profile"))
+        .addAttribute(new Attribute("long_name", "Global quality flag of PSAL mergeProfile"))
         .addAttribute(new Attribute("conventions", "Argo reference table 2a"))
         .addAttribute(new Attribute("_FillValue", " "));
 
@@ -410,7 +411,7 @@ public class MultiFloatMergeService {
         .addAttribute(new Attribute("_FillValue", " "));
 
     // global attributes:
-    builder.addAttribute(new Attribute("title", "Argo float vertical profile"));
+    builder.addAttribute(new Attribute("title", "Argo float vertical mergeProfile"));
     builder.addAttribute(new Attribute("institution", "FR GDAC"));
     builder.addAttribute(new Attribute("source", "Argo float"));
     builder.addAttribute(new Attribute("history", "2023-09-05T09:51:37Z creation"));
@@ -422,281 +423,281 @@ public class MultiFloatMergeService {
     builder.setFill(true);
     try (NetcdfFormatWriter writer = builder.build()) {
 
-      profile.setVariables();
+      mergeProfile.setVariables();
       try{
-        writer.write(writer.findVariable(ProfileNcConsts.DATA_TYPE), profile.getDataType());
+        writer.write(writer.findVariable(ProfileNcConsts.DATA_TYPE), mergeProfile.getDataType());
       } catch (InvalidRangeException e) {
         throw new RuntimeException("An error writing "+ ProfileNcConsts.DATA_TYPE + " to " + outputFile, e);
       }
       try{
-        writer.write(writer.findVariable(ProfileNcConsts.FORMAT_VERSION), profile.getFormatVersion());
+        writer.write(writer.findVariable(ProfileNcConsts.FORMAT_VERSION), mergeProfile.getFormatVersion());
       } catch (InvalidRangeException e) {
         throw new RuntimeException("An error writing "+ ProfileNcConsts.FORMAT_VERSION + " to " + outputFile, e);
       }
       try{
-        writer.write(writer.findVariable(ProfileNcConsts.HANDBOOK_VERSION), profile.getHandBookVersion());
+        writer.write(writer.findVariable(ProfileNcConsts.HANDBOOK_VERSION), mergeProfile.getHandBookVersion());
       } catch (InvalidRangeException e) {
         throw new RuntimeException("An error writing "+ ProfileNcConsts.HANDBOOK_VERSION + " to " + outputFile, e);
       }
       try{
-        writer.write(writer.findVariable(ProfileNcConsts.REFERENCE_DATE_TIME), profile.getReferenceDateTime());
+        writer.write(writer.findVariable(ProfileNcConsts.REFERENCE_DATE_TIME), mergeProfile.getReferenceDateTime());
       } catch (InvalidRangeException e) {
         throw new RuntimeException("An error writing "+ ProfileNcConsts.REFERENCE_DATE_TIME + " to " + outputFile, e);
       }
       try{
-        writer.write(writer.findVariable(ProfileNcConsts.DATE_CREATION), profile.getCurrentDateTime());
+        writer.write(writer.findVariable(ProfileNcConsts.DATE_CREATION), mergeProfile.getCurrentDateTime());
       } catch (InvalidRangeException e) {
         throw new RuntimeException("An error writing "+ ProfileNcConsts.DATE_CREATION + " to " + outputFile, e);
       }
       try{
-        writer.write(writer.findVariable(ProfileNcConsts.DATE_UPDATE), profile.getCurrentDateTime());
+        writer.write(writer.findVariable(ProfileNcConsts.DATE_UPDATE), mergeProfile.getCurrentDateTime());
       } catch (InvalidRangeException e) {
         throw new RuntimeException("An error writing "+ ProfileNcConsts.DATE_UPDATE + " to " + outputFile, e);
       }
 
       try{
-        writer.write(writer.findVariable(ProfileNcConsts.PLATFORM_NUMBER), profile.getPlatformNumbers());
+        writer.write(writer.findVariable(ProfileNcConsts.PLATFORM_NUMBER), mergeProfile.getPlatformNumbers());
       } catch (InvalidRangeException e) {
         throw new RuntimeException("An error writing "+ ProfileNcConsts.PLATFORM_NUMBER + " to " + outputFile, e);
       }
       try {
-        writer.write(writer.findVariable(ProfileNcConsts.PROJECT_NAME), profile.getProjectNames());
+        writer.write(writer.findVariable(ProfileNcConsts.PROJECT_NAME), mergeProfile.getProjectNames());
       } catch (InvalidRangeException e) {
         throw new RuntimeException("An error writing "+ ProfileNcConsts.PROJECT_NAME + " to " + outputFile,e);
       }
       try {
-        writer.write(writer.findVariable(ProfileNcConsts.PI_NAME), profile.getPiNames());
+        writer.write(writer.findVariable(ProfileNcConsts.PI_NAME), mergeProfile.getPiNames());
       } catch (InvalidRangeException e) {
         throw new RuntimeException("An error writing "+ ProfileNcConsts.PI_NAME + " to " + outputFile,e);
       }
       try {
-        writer.write(writer.findVariable(ProfileNcConsts.CYCLE_NUMBER), profile.getCycleNumbers());
+        writer.write(writer.findVariable(ProfileNcConsts.CYCLE_NUMBER), mergeProfile.getCycleNumbers());
       } catch (InvalidRangeException e) {
         throw new RuntimeException("An error writing "+ ProfileNcConsts.CYCLE_NUMBER + " to " + outputFile,e);
       }
       try {
-        writer.write(writer.findVariable(ProfileNcConsts.STATION_PARAMETERS), profile.getStationParameters());
+        writer.write(writer.findVariable(ProfileNcConsts.STATION_PARAMETERS), mergeProfile.getStationParameters());
       } catch (InvalidRangeException e) {
         throw new RuntimeException("An error writing "+ ProfileNcConsts.STATION_PARAMETERS + " to " + outputFile,e);
       }
       try {
-        writer.write(writer.findVariable(ProfileNcConsts.DIRECTION), profile.getDirections());
+        writer.write(writer.findVariable(ProfileNcConsts.DIRECTION), mergeProfile.getDirections());
       } catch (InvalidRangeException e) {
         throw new RuntimeException("An error writing "+ ProfileNcConsts.DIRECTION + " to " + outputFile,e);
       }
       try {
-        writer.write(writer.findVariable(ProfileNcConsts.DATA_CENTRE), profile.getDataCenters());
+        writer.write(writer.findVariable(ProfileNcConsts.DATA_CENTRE), mergeProfile.getDataCenters());
       } catch (InvalidRangeException e) {
         throw new RuntimeException("An error writing "+ ProfileNcConsts.DATA_CENTRE + " to " + outputFile,e);
       }
       try {
-        writer.write(writer.findVariable(ProfileNcConsts.DC_REFERENCE), profile.getDcReferences());
+        writer.write(writer.findVariable(ProfileNcConsts.DC_REFERENCE), mergeProfile.getDcReferences());
       } catch (InvalidRangeException e) {
         throw new RuntimeException("An error writing "+ ProfileNcConsts.DC_REFERENCE + " to " + outputFile,e);
       }
       try {
-        writer.write(writer.findVariable(ProfileNcConsts.DATA_STATE_INDICATOR), profile.getDataStateIndicators());
+        writer.write(writer.findVariable(ProfileNcConsts.DATA_STATE_INDICATOR), mergeProfile.getDataStateIndicators());
       } catch (InvalidRangeException e) {
         throw new RuntimeException("An error writing "+ ProfileNcConsts.DATA_STATE_INDICATOR + " to " + outputFile,e);
       }
       try {
-        writer.write(writer.findVariable(ProfileNcConsts.DATA_MODE), profile.getDataModes());
+        writer.write(writer.findVariable(ProfileNcConsts.DATA_MODE), mergeProfile.getDataModes());
       } catch (InvalidRangeException e) {
         throw new RuntimeException("An error writing "+ ProfileNcConsts.DATA_MODE + " to " + outputFile,e);
       }
       try {
-        writer.write(writer.findVariable(ProfileNcConsts.PLATFORM_TYPE), profile.getPlatformTypes());
+        writer.write(writer.findVariable(ProfileNcConsts.PLATFORM_TYPE), mergeProfile.getPlatformTypes());
       } catch (InvalidRangeException e) {
         throw new RuntimeException("An error writing "+ ProfileNcConsts.PLATFORM_TYPE + " to " + outputFile,e);
       }
       try {
-        writer.write(writer.findVariable(ProfileNcConsts.FLOAT_SERIAL_NO), profile.getFloatSerialNos());
+        writer.write(writer.findVariable(ProfileNcConsts.FLOAT_SERIAL_NO), mergeProfile.getFloatSerialNos());
       } catch (InvalidRangeException e) {
         throw new RuntimeException("An error writing "+ ProfileNcConsts.FLOAT_SERIAL_NO + " to " + outputFile,e);
       }
       try {
-        writer.write(writer.findVariable(ProfileNcConsts.FIRMWARE_VERSION), profile.getFirmWareVersions());
+        writer.write(writer.findVariable(ProfileNcConsts.FIRMWARE_VERSION), mergeProfile.getFirmWareVersions());
       } catch (InvalidRangeException e) {
         throw new RuntimeException("An error writing "+ ProfileNcConsts.FIRMWARE_VERSION + " to " + outputFile,e);
       }
       try {
-        writer.write(writer.findVariable(ProfileNcConsts.WMO_INST_TYPE), profile.getWmoInstTypes());
+        writer.write(writer.findVariable(ProfileNcConsts.WMO_INST_TYPE), mergeProfile.getWmoInstTypes());
       } catch (InvalidRangeException e) {
         throw new RuntimeException("An error writing "+ ProfileNcConsts.WMO_INST_TYPE + " to " + outputFile,e);
       }
       try {
-        writer.write(writer.findVariable(ProfileNcConsts.JULD), profile.getJulds());
+        writer.write(writer.findVariable(ProfileNcConsts.JULD), mergeProfile.getJulds());
       } catch (InvalidRangeException e) {
         throw new RuntimeException("An error writing "+ ProfileNcConsts.JULD + " to " + outputFile,e);
       }
       try {
-        writer.write(writer.findVariable(ProfileNcConsts.JULD_QC), profile.getJuldQc());
+        writer.write(writer.findVariable(ProfileNcConsts.JULD_QC), mergeProfile.getJuldQc());
       } catch (InvalidRangeException e) {
         throw new RuntimeException("An error writing "+ ProfileNcConsts.JULD_QC + " to " + outputFile,e);
       }
       try {
-        writer.write(writer.findVariable(ProfileNcConsts.JULD_LOCATION), profile.getJuldLocations());
+        writer.write(writer.findVariable(ProfileNcConsts.JULD_LOCATION), mergeProfile.getJuldLocations());
       } catch (InvalidRangeException e) {
         throw new RuntimeException("An error writing "+ ProfileNcConsts.JULD_LOCATION + " to " + outputFile,e);
       }
       try {
-        writer.write(writer.findVariable(ProfileNcConsts.LATITUDE), profile.getLatitudes());
+        writer.write(writer.findVariable(ProfileNcConsts.LATITUDE), mergeProfile.getLatitudes());
       } catch (InvalidRangeException e) {
         throw new RuntimeException("An error writing "+ ProfileNcConsts.LATITUDE + " to " + outputFile,e);
       }
       try {
-        writer.write(writer.findVariable(ProfileNcConsts.LONGITUDE), profile.getLongitude());
+        writer.write(writer.findVariable(ProfileNcConsts.LONGITUDE), mergeProfile.getLongitude());
       } catch (InvalidRangeException e) {
         throw new RuntimeException("An error writing "+ ProfileNcConsts.LONGITUDE + " to " + outputFile,e);
       }
       try {
-        writer.write(writer.findVariable(ProfileNcConsts.POSITION_QC), profile.getPositionQcs());
+        writer.write(writer.findVariable(ProfileNcConsts.POSITION_QC), mergeProfile.getPositionQcs());
       } catch (InvalidRangeException e) {
         throw new RuntimeException("An error writing "+ ProfileNcConsts.POSITION_QC + " to " + outputFile,e);
       }
       try {
-        writer.write(writer.findVariable(ProfileNcConsts.POSITIONING_SYSTEM), profile.getPositioningSystems());
+        writer.write(writer.findVariable(ProfileNcConsts.POSITIONING_SYSTEM), mergeProfile.getPositioningSystems());
       } catch (InvalidRangeException e) {
         throw new RuntimeException("An error writing "+ ProfileNcConsts.POSITIONING_SYSTEM + " to " + outputFile,e);
       }
       try {
-        writer.write(writer.findVariable(ProfileNcConsts.PROFILE_PRES_QC), profile.getProfilePresQcs());
+        writer.write(writer.findVariable(ProfileNcConsts.PROFILE_PRES_QC), mergeProfile.getProfilePresQcs());
       } catch (InvalidRangeException e) {
         throw new RuntimeException("An error writing "+ ProfileNcConsts.PROFILE_PRES_QC + " to " + outputFile,e);
       }
       try {
-        writer.write(writer.findVariable(ProfileNcConsts.PROFILE_TEMP_QC), profile.getProfileTempQcs());
+        writer.write(writer.findVariable(ProfileNcConsts.PROFILE_TEMP_QC), mergeProfile.getProfileTempQcs());
       } catch (InvalidRangeException e) {
         throw new RuntimeException("An error writing "+ ProfileNcConsts.PROFILE_TEMP_QC + " to " + outputFile,e);
       }
       try {
-        writer.write(writer.findVariable(ProfileNcConsts.PROFILE_PSAL_QC), profile.getProfilePsalQcs());
+        writer.write(writer.findVariable(ProfileNcConsts.PROFILE_PSAL_QC), mergeProfile.getProfilePsalQcs());
       } catch (InvalidRangeException e) {
         throw new RuntimeException("An error writing "+ ProfileNcConsts.PROFILE_PSAL_QC + " to " + outputFile,e);
       }
       try {
-        writer.write(writer.findVariable(ProfileNcConsts.VERTICAL_SAMPLING_SCHEME), profile.getVerticalSamplingSchemes());
+        writer.write(writer.findVariable(ProfileNcConsts.VERTICAL_SAMPLING_SCHEME), mergeProfile.getVerticalSamplingSchemes());
       } catch (InvalidRangeException e) {
         throw new RuntimeException("An error writing "+ ProfileNcConsts.VERTICAL_SAMPLING_SCHEME + " to " + outputFile,e);
       }
       try {
-        writer.write(writer.findVariable(ProfileNcConsts.CONFIG_MISSION_NUMBER), profile.getConfigMissionNumbers());
+        writer.write(writer.findVariable(ProfileNcConsts.CONFIG_MISSION_NUMBER), mergeProfile.getConfigMissionNumbers());
       } catch (InvalidRangeException e) {
         throw new RuntimeException("An error writing "+ ProfileNcConsts.CONFIG_MISSION_NUMBER + " to " + outputFile,e);
       }
       try {
-        writer.write(writer.findVariable(ProfileNcConsts.PRES), profile.getPress());
+        writer.write(writer.findVariable(ProfileNcConsts.PRES), mergeProfile.getPress());
       } catch (InvalidRangeException e) {
         throw new RuntimeException("An error writing "+ ProfileNcConsts.PRES + " to " + outputFile,e);
       }
       
       try{
-        writer.write(writer.findVariable(ProfileNcConsts.PRES), profile.getPress());
+        writer.write(writer.findVariable(ProfileNcConsts.PRES), mergeProfile.getPress());
       } catch (InvalidRangeException e) {
         throw new RuntimeException("An error writing: " + ProfileNcConsts.PRES + " to " + outputFile, e);
       }
       try{
-        writer.write(writer.findVariable(ProfileNcConsts.PRES_QC), profile.getPresQcs());
+        writer.write(writer.findVariable(ProfileNcConsts.PRES_QC), mergeProfile.getPresQcs());
       } catch (InvalidRangeException e) {
         throw new RuntimeException("An error writing: " + ProfileNcConsts.PRES_QC + " to " + outputFile, e);
       }
       try{
-        writer.write(writer.findVariable(ProfileNcConsts.PRES_ADJUSTED), profile.getPresAdjusteds());
+        writer.write(writer.findVariable(ProfileNcConsts.PRES_ADJUSTED), mergeProfile.getPresAdjusteds());
       } catch (InvalidRangeException e) {
         throw new RuntimeException("An error writing: " + ProfileNcConsts.PRES_ADJUSTED + " to " + outputFile, e);
       }
       try{
-        writer.write(writer.findVariable(ProfileNcConsts.PRES_ADJUSTED_QC), profile.getPresAdjustedQcs());
+        writer.write(writer.findVariable(ProfileNcConsts.PRES_ADJUSTED_QC), mergeProfile.getPresAdjustedQcs());
       } catch (InvalidRangeException e) {
         throw new RuntimeException("An error writing: " + ProfileNcConsts.PRES_ADJUSTED_QC + " to " + outputFile, e);
       }
       try{
-        writer.write(writer.findVariable(ProfileNcConsts.PRES_ADJUSTED_ERROR), profile.getPresAdjustedErrors());
+        writer.write(writer.findVariable(ProfileNcConsts.PRES_ADJUSTED_ERROR), mergeProfile.getPresAdjustedErrors());
       } catch (InvalidRangeException e) {
         throw new RuntimeException("An error writing: " + ProfileNcConsts.PRES_ADJUSTED_ERROR + " to " + outputFile, e);
       }
 
       try{
-        writer.write(writer.findVariable(ProfileNcConsts.TEMP), profile.getTemps());
+        writer.write(writer.findVariable(ProfileNcConsts.TEMP), mergeProfile.getTemps());
       } catch (InvalidRangeException e) {
         throw new RuntimeException("An error writing: " + ProfileNcConsts.TEMP + " to " + outputFile, e);
       }
       try{
-        writer.write(writer.findVariable(ProfileNcConsts.TEMP_QC), profile.getTempQcs());
+        writer.write(writer.findVariable(ProfileNcConsts.TEMP_QC), mergeProfile.getTempQcs());
       } catch (InvalidRangeException e) {
         throw new RuntimeException("An error writing: " + ProfileNcConsts.TEMP_QC + " to " + outputFile, e);
       }
       try{
-        writer.write(writer.findVariable(ProfileNcConsts.TEMP_ADJUSTED), profile.getTempAdjusteds());
+        writer.write(writer.findVariable(ProfileNcConsts.TEMP_ADJUSTED), mergeProfile.getTempAdjusteds());
       } catch (InvalidRangeException e) {
         throw new RuntimeException("An error writing: " + ProfileNcConsts.TEMP_ADJUSTED + " to " + outputFile, e);
       }
       try{
-        writer.write(writer.findVariable(ProfileNcConsts.TEMP_ADJUSTED_QC), profile.getTempAdjustedQcs());
+        writer.write(writer.findVariable(ProfileNcConsts.TEMP_ADJUSTED_QC), mergeProfile.getTempAdjustedQcs());
       } catch (InvalidRangeException e) {
         throw new RuntimeException("An error writing: " + ProfileNcConsts.TEMP_ADJUSTED_QC + " to " + outputFile, e);
       }
       try{
-        writer.write(writer.findVariable(ProfileNcConsts.TEMP_ADJUSTED_ERROR), profile.getTempAdjustedErrors());
+        writer.write(writer.findVariable(ProfileNcConsts.TEMP_ADJUSTED_ERROR), mergeProfile.getTempAdjustedErrors());
       } catch (InvalidRangeException e) {
         throw new RuntimeException("An error writing: " + ProfileNcConsts.TEMP_ADJUSTED_ERROR + " to " + outputFile, e);
       }
 
       try{
-        writer.write(writer.findVariable(ProfileNcConsts.PSAL), profile.getPsals());
+        writer.write(writer.findVariable(ProfileNcConsts.PSAL), mergeProfile.getPsals());
       } catch (InvalidRangeException e) {
         throw new RuntimeException("An error writing: " + ProfileNcConsts.PSAL + " to " + outputFile, e);
       }
       try{
-        writer.write(writer.findVariable(ProfileNcConsts.PSAL_QC), profile.getPsalQcs());
+        writer.write(writer.findVariable(ProfileNcConsts.PSAL_QC), mergeProfile.getPsalQcs());
       } catch (InvalidRangeException e) {
         throw new RuntimeException("An error writing: " + ProfileNcConsts.PSAL_QC + " to " + outputFile, e);
       }
       try{
-        writer.write(writer.findVariable(ProfileNcConsts.PSAL_ADJUSTED), profile.getPsalAdjusteds());
+        writer.write(writer.findVariable(ProfileNcConsts.PSAL_ADJUSTED), mergeProfile.getPsalAdjusteds());
       } catch (InvalidRangeException e) {
         throw new RuntimeException("An error writing: " + ProfileNcConsts.PSAL_ADJUSTED + " to " + outputFile, e);
       }
       try{
-        writer.write(writer.findVariable(ProfileNcConsts.PSAL_ADJUSTED_QC), profile.getPsalAdjustedQcs());
+        writer.write(writer.findVariable(ProfileNcConsts.PSAL_ADJUSTED_QC), mergeProfile.getPsalAdjustedQcs());
       } catch (InvalidRangeException e) {
         throw new RuntimeException("An error writing: " + ProfileNcConsts.PSAL_ADJUSTED_QC + " to " + outputFile, e);
       }
       try{
-        writer.write(writer.findVariable(ProfileNcConsts.PSAL_ADJUSTED_ERROR), profile.getPsalAdjustedErrors());
+        writer.write(writer.findVariable(ProfileNcConsts.PSAL_ADJUSTED_ERROR), mergeProfile.getPsalAdjustedErrors());
       } catch (InvalidRangeException e) {
         throw new RuntimeException("An error writing: " + ProfileNcConsts.PSAL_ADJUSTED_ERROR + " to " + outputFile, e);
       }
 
       try{
-        writer.write(writer.findVariable(ProfileNcConsts.PARAMETER), profile.getParameters());
+        writer.write(writer.findVariable(ProfileNcConsts.PARAMETER), mergeProfile.getParameters());
       } catch (InvalidRangeException e) {
         throw new RuntimeException("An error writing: " + ProfileNcConsts.PARAMETER + " to " + outputFile, e);
       }
 
       try{
-        writer.write(writer.findVariable(ProfileNcConsts.PARAMETER), profile.getParameters());
+        writer.write(writer.findVariable(ProfileNcConsts.PARAMETER), mergeProfile.getParameters());
       } catch (InvalidRangeException e) {
         throw new RuntimeException("An error writing: " + ProfileNcConsts.PARAMETER + " to " + outputFile, e);
       }
 
       try{
-        writer.write(writer.findVariable(ProfileNcConsts.SCIENTIFIC_CALIB_EQUATION), profile.getScientifiCalibEquations());
+        writer.write(writer.findVariable(ProfileNcConsts.SCIENTIFIC_CALIB_EQUATION), mergeProfile.getScientifiCalibEquations());
       } catch (InvalidRangeException e) {
         throw new RuntimeException("An error writing: " + ProfileNcConsts.SCIENTIFIC_CALIB_EQUATION + " to " + outputFile, e);
       }
       try{
-        writer.write(writer.findVariable(ProfileNcConsts.SCIENTIFIC_CALIB_COEFFICIENT), profile.getScientifiCalibCoefficients());
+        writer.write(writer.findVariable(ProfileNcConsts.SCIENTIFIC_CALIB_COEFFICIENT), mergeProfile.getScientifiCalibCoefficients());
       } catch (InvalidRangeException e) {
         throw new RuntimeException("An error writing: " + ProfileNcConsts.SCIENTIFIC_CALIB_COEFFICIENT + " to " + outputFile, e);
       }
       try{
-        writer.write(writer.findVariable(ProfileNcConsts.SCIENTIFIC_CALIB_COMMENT), profile.getScientifiCalibComments());
+        writer.write(writer.findVariable(ProfileNcConsts.SCIENTIFIC_CALIB_COMMENT), mergeProfile.getScientifiCalibComments());
       } catch (InvalidRangeException e) {
         throw new RuntimeException("An error writing: " + ProfileNcConsts.SCIENTIFIC_CALIB_COMMENT + " to " + outputFile, e);
       }
       try{
-        writer.write(writer.findVariable(ProfileNcConsts.SCIENTIFIC_CALIB_DATE), profile.getScientifiCalibDates());
+        writer.write(writer.findVariable(ProfileNcConsts.SCIENTIFIC_CALIB_DATE), mergeProfile.getScientifiCalibDates());
       } catch (InvalidRangeException e) {
         throw new RuntimeException("An error writing: " + ProfileNcConsts.SCIENTIFIC_CALIB_DATE + " to " + outputFile, e);
       }
