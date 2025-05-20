@@ -73,6 +73,7 @@
     <module>argonaut-message</module>
     <module>argonaut-common</module>
     <module>argonaut-xml</module>
+    <module>argonaut-netcdf</module>
     <module>argonaut-file-checker</module>
     <module>argonaut-index</module>
     <module>argonaut-service</module>

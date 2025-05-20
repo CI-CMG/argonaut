@@ -1,11 +1,8 @@
-package edu.colorado.cires.argonaut.service;
+package edu.colorado.cires.argonaut.service.merge;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import edu.colorado.cires.argonaut.service.merge.CoreProfile;
-import edu.colorado.cires.argonaut.service.merge.MultiFloatMergeService;
-import edu.colorado.cires.argonaut.service.merge.ProfileNcConsts;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -13,8 +10,6 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;

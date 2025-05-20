@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Set;
 import ucar.ma2.DataType;
 import ucar.ma2.InvalidRangeException;
 import ucar.nc2.Attribute;
