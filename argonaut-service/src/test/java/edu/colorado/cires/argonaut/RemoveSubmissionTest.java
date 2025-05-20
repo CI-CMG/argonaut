@@ -111,14 +111,15 @@ public class RemoveSubmissionTest {
       boolean profile = name.startsWith("R");
       String floatId = name.split("_")[0].replaceAll("R", "");
 
-      NcSubmissionMessage expectedMessage = new NcSubmissionMessage();
-      expectedMessage.setProfile(profile);
-      expectedMessage.setOperation(NcSubmissionMessage.Operation.REMOVE);
-      expectedMessage.setDac("aoml");
-      expectedMessage.setFileName(name);
-      expectedMessage.setTimestamp(timestamp);
-      expectedMessage.setFloatId(floatId);
-      expectedMessage.setNumberOfFilesInSubmission(13);
+      NcSubmissionMessage expectedMessage = NcSubmissionMessage.builder()
+          .withProfile(profile)
+          .withOperation(NcSubmissionMessage.Operation.REMOVE)
+          .withDac("aoml")
+          .withFileName(name)
+          .withTimestamp(timestamp)
+          .withFloatId(floatId)
+          .withNumberOfFilesInSubmission(13)
+          .build();
 
       validationMessages.add(expectedMessage);
     });
@@ -137,7 +138,6 @@ public class RemoveSubmissionTest {
 
   @Test
   public void testSubmitIncorrectRemovalFile() throws Exception {
-
 
     String timestamp = Instant.now().toString();
     when(submissionTimestampService.generateTimestamp()).thenReturn(timestamp);
@@ -170,20 +170,21 @@ public class RemoveSubmissionTest {
 
     MockEndpoint.assertIsSatisfied(validationSuccess, submissionReport);
 
-
     NcSubmissionMessage receivedMessage = submissionReport.getExchanges().stream()
         .map(exchange -> exchange.getIn().getBody(NcSubmissionMessage.class))
-            .findFirst().orElse(null);
+        .findFirst().orElse(null);
 
-    NcSubmissionMessage expectedMessage = new NcSubmissionMessage();
-    expectedMessage.setProfile(false);
-    expectedMessage.setFileName(fileName);
-    expectedMessage.setValidationError(Collections.singletonList("removal file name does not match DAC 'aoml' (aoml_removal.txt): foobar_removal.txt"));
-    expectedMessage.setProfile(false);
-    expectedMessage.setOperation(NcSubmissionMessage.Operation.REMOVE);
-    expectedMessage.setDac("aoml");
-    expectedMessage.setNumberOfFilesInSubmission(1);
-    expectedMessage.setTimestamp(timestamp);
+    NcSubmissionMessage expectedMessage = NcSubmissionMessage.builder()
+        .withProfile(false)
+        .withFileName(fileName)
+        .withValidationErrors(
+            Collections.singletonList("removal file name does not match DAC 'aoml' (aoml_removal.txt): foobar_removal.txt"))
+        .withProfile(false)
+        .withOperation(NcSubmissionMessage.Operation.REMOVE)
+        .withDac("aoml")
+        .withNumberOfFilesInSubmission(1)
+        .withTimestamp(timestamp)
+        .build();
 
     assertEquals(expectedMessage, receivedMessage);
 

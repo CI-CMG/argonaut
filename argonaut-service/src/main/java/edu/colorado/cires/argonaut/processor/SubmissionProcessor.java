@@ -9,8 +9,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Stream;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
@@ -61,9 +59,11 @@ public class SubmissionProcessor implements Processor {
       try (Stream<Path> files = Files.list(tempDir)) {
         files.filter(Files::isRegularFile).forEach(file -> {
           String fileName = file.getFileName().toString();
-          ArgonautFileUtils.ncSubmissionMessageFromFileName(fileName).ifPresent(ncSubmissionMessage -> {
-            ncSubmissionMessage.setDac(dac);
-            ncSubmissionMessage.setTimestamp(timestamp);
+          ArgonautFileUtils.ncSubmissionMessageFromFileName(fileName).ifPresent(ncSubmissionMessageFromFile -> {
+            NcSubmissionMessage ncSubmissionMessage = NcSubmissionMessage.builder(ncSubmissionMessageFromFile)
+                .withDac(dac)
+                .withTimestamp(timestamp)
+                .build();
             Path processingDacDir = processingDir.resolve("dac").resolve(dac).resolve(ncSubmissionMessage.getFloatId());
             if (ncSubmissionMessage.isProfile()) {
               processingDacDir = processingDacDir.resolve("profiles");
@@ -81,8 +81,7 @@ public class SubmissionProcessor implements Processor {
       ArgonautFileUtils.move(tarGzFile, submissionProcessedDir.resolve(tarGzFileFileName));
     }
 
-    output.forEach(message -> message.setNumberOfFilesInSubmission(output.size()));
-    exchange.getIn().setBody(output);
+    exchange.getIn().setBody(output.stream().map(NcSubmissionMessage::builder).map(builder -> builder.withNumberOfFilesInSubmission(output.size()).build()).toList());
 
   }
 

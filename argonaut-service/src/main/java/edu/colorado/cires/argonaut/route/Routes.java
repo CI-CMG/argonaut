@@ -2,7 +2,9 @@ package edu.colorado.cires.argonaut.route;
 
 import edu.colorado.cires.argonaut.aggregator.SubmissionCompleteAggregationStrategy;
 import edu.colorado.cires.argonaut.config.ServiceProperties;
-import edu.colorado.cires.argonaut.message.RemovalMessage;
+import edu.colorado.cires.argonaut.message.HeaderConsts;
+import edu.colorado.cires.argonaut.message.NcSubmissionMessagePredicate;
+import edu.colorado.cires.argonaut.message.RemovalMessagePredicate;
 import edu.colorado.cires.argonaut.processor.FileMoveProcessor;
 import edu.colorado.cires.argonaut.processor.FloatMergeProcessor;
 import edu.colorado.cires.argonaut.processor.RemovalFileValidator;
@@ -10,8 +12,6 @@ import edu.colorado.cires.argonaut.processor.RemovalMessageTranslator;
 import edu.colorado.cires.argonaut.processor.SubmissionProcessor;
 import edu.colorado.cires.argonaut.processor.SubmissionReportProcessor;
 import edu.colorado.cires.argonaut.processor.ValidationProcessor;
-import edu.colorado.cires.argonaut.message.HeaderConsts;
-import edu.colorado.cires.argonaut.message.NcSubmissionMessage;
 import edu.colorado.cires.argonaut.service.SubmissionTimestampService;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -83,8 +83,7 @@ public class Routes extends RouteBuilder {
               .when(simple("${header.CamelFileNameOnly.endsWith('_removal.txt')}"))
                 .to(QueueConsts.SUBMIT_REMOVAL)
               .otherwise()
-                .to(QueueConsts.SUBMIT_UNKNOWN);
-        });
+                .to(QueueConsts.SUBMIT_UNKNOWN);       });
 
     // @formatter:off
 
@@ -93,7 +92,7 @@ public class Routes extends RouteBuilder {
     from(QueueConsts.VALIDATION + "?concurrentConsumers=" + serviceProperties.getValidationThreads())
       .process(validationProcessor)
       .choice()
-        .when(NcSubmissionMessage.IS_VALID)
+        .when(NcSubmissionMessagePredicate.IS_VALID)
           .to(QueueConsts.VALIDATION_SUCCESS)
         .otherwise()
           .to(QueueConsts.FILE_OUTPUT);
@@ -130,13 +129,13 @@ public class Routes extends RouteBuilder {
 
     from(QueueConsts.SUBMIT_REMOVAL).process(removalFileValidator)
         .choice()
-          .when(RemovalMessage.IS_VALID)
+          .when(RemovalMessagePredicate.IS_VALID)
             .to(QueueConsts.REMOVAL_SPLITTER)
           .otherwise()
             .process(removalMessageTranslator)
             .to(QueueConsts.SUBMISSION_REPORT);
 
-    from(QueueConsts.REMOVAL_SPLITTER).split(simple("${body.filesToRemove}")).to(QueueConsts.VALIDATION_SUCCESS);
+    from(QueueConsts.REMOVAL_SPLITTER).split(simple("${body.removalFiles}")).to(QueueConsts.VALIDATION_SUCCESS);
 
 
     // @formatter:on

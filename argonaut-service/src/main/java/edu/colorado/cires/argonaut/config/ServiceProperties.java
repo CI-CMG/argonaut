@@ -15,7 +15,7 @@ import org.springframework.validation.annotation.Validated;
 @Configuration
 @ConfigurationProperties(prefix = "argonaut")
 @Validated
-public class ServiceProperties {
+public class ServiceProperties implements ArgonautDirectoryConfig {
 
 
   @NotNull
@@ -93,6 +93,7 @@ public class ServiceProperties {
     this.validationThreads = validationThreads;
   }
 
+  @Override
   public Path getSubmissionDirectory() {
     return submissionDirectory;
   }
@@ -101,7 +102,7 @@ public class ServiceProperties {
     this.submissionDirectory = submissionDirectory.toAbsolutePath().normalize();
   }
 
-
+  @Override
   public Path getOutputDirectory() {
     return outputDirectory;
   }
@@ -126,6 +127,7 @@ public class ServiceProperties {
     this.indexCron = indexCron;
   }
 
+  @Override
   public Path getWorkDirectory() {
     return workDirectory;
   }

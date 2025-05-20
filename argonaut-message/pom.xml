@@ -9,7 +9,7 @@
     <version>0.1.0-SNAPSHOT</version>
   </parent>
 
-  <artifactId>argonaut-common</artifactId>
+  <artifactId>argonaut-message</artifactId>
 
   <properties>
     <project.root>${project.parent.basedir}</project.root>
@@ -17,17 +17,8 @@
 
   <dependencies>
     <dependency>
-      <groupId>io.github.ci-cmg.argo</groupId>
-      <artifactId>argonaut-message</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>commons-io</groupId>
-      <artifactId>commons-io</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.commons</groupId>
-      <artifactId>commons-compress</artifactId>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
     </dependency>
   </dependencies>
 

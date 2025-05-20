@@ -165,7 +165,6 @@ public class DataSubmissionAndValidationTest {
         "7902143_tech.nc"
     };
 
-
     String timestamp = Instant.now().toString();
     when(submissionTimestampService.generateTimestamp()).thenReturn(timestamp);
 
@@ -206,13 +205,14 @@ public class DataSubmissionAndValidationTest {
       Path floatDir = aomlProcessingDir.resolve(name.split("_")[0]);
       expectedFiles.add(floatDir.resolve(name));
 
-      NcSubmissionMessage expectedMessage = new NcSubmissionMessage();
-      expectedMessage.setProfile(false);
-      expectedMessage.setDac("aoml");
-      expectedMessage.setFileName(name);
-      expectedMessage.setTimestamp(timestamp);
-      expectedMessage.setFloatId(floatDir.getFileName().toString());
-      expectedMessage.setNumberOfFilesInSubmission(102);
+      NcSubmissionMessage expectedMessage = NcSubmissionMessage.builder()
+          .withProfile(false)
+          .withDac("aoml")
+          .withFileName(name)
+          .withTimestamp(timestamp)
+          .withFloatId(floatDir.getFileName().toString())
+          .withNumberOfFilesInSubmission(102)
+          .build();
 
       validationMessages.add(expectedMessage);
     });
@@ -284,15 +284,16 @@ public class DataSubmissionAndValidationTest {
       Path floatDir = aomlProcessingDir.resolve(name.split("_")[0].replaceAll("^[A-Z]+", ""));
       expectedFiles.add(floatDir.resolve("profiles").resolve(name));
 
-      NcSubmissionMessage expectedMessage = new NcSubmissionMessage();
-      expectedMessage.setProfile(true);
-      expectedMessage.setDac("aoml");
-      expectedMessage.setFileName(name);
-      expectedMessage.setTimestamp(timestamp);
-      expectedMessage.setFloatId(floatDir.getFileName().toString());
-      expectedMessage.setNumberOfFilesInSubmission(files.length);
+      NcSubmissionMessage expectedMessage = NcSubmissionMessage.builder()
+          .withProfile(true)
+          .withDac("aoml")
+          .withFileName(name)
+          .withTimestamp(timestamp)
+          .withFloatId(floatDir.getFileName().toString())
+          .withNumberOfFilesInSubmission(files.length)
+          .build();
 
-      if(name.equals(badFile)) {
+      if (name.equals(badFile)) {
         failedMessages.add(expectedMessage);
       } else {
         validationMessages.add(expectedMessage);
@@ -310,7 +311,7 @@ public class DataSubmissionAndValidationTest {
     assertEquals(expectedFiles, processedFiles);
     assertEquals(validationMessages, receivedValidMessages);
     assertEquals(badFile, receivedFailedMessage.getFileName());
-    assertEquals(1, receivedFailedMessage.getValidationError().size());
+    assertEquals(1, receivedFailedMessage.getValidationErrors().size());
 
     assertFalse(Files.exists(submittedFile));
     assertTrue(Files.exists(submissionProcessedDir.resolve(timestamp).resolve(fileName)));

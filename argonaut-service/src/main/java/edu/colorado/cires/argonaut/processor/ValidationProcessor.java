@@ -133,7 +133,7 @@ public final class ValidationProcessor implements Processor {
     checkFile(dac, processingDacDir, fileName);
     Path fileCheckXmlFile = processingDacDir.resolve(fileName + ".filecheck");
     List<String> error = validateXml(fileCheckXmlFile);
-    ncSubmissionMessage.setValidationError(error);
     FileUtils.deleteQuietly(fileCheckXmlFile.toFile());
+    exchange.getIn().setBody(NcSubmissionMessage.builder(ncSubmissionMessage).withValidationErrors(error).build());
   }
 }

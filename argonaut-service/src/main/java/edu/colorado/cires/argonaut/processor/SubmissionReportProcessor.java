@@ -65,7 +65,7 @@ public class SubmissionReportProcessor implements Processor {
     try {
       ArgonautFileUtils.createDirectories(processedDir);
       CSVFormat csvFormat = CSVFormat.DEFAULT.builder().setTrim(true).get();
-      String reportMessage = message.getValidationError().isEmpty() ? successMessage(message) : String.join("\n", message.getValidationError());
+      String reportMessage = message.getValidationErrors().isEmpty() ? successMessage(message) : String.join("\n", message.getValidationErrors());
       try (
           FileWriter writer = new FileWriter(submissionReportCsv.toFile(), StandardCharsets.UTF_8, true);
           CSVPrinter printer = new CSVPrinter(writer, csvFormat)

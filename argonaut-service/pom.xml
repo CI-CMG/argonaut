@@ -28,6 +28,16 @@
       <version>${project.version}</version>
     </dependency>
     <dependency>
+      <groupId>io.github.ci-cmg.argo</groupId>
+      <artifactId>argonaut-common</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>io.github.ci-cmg.argo</groupId>
+      <artifactId>argonaut-message</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
       <groupId>io.github.ci-cmg</groupId>
       <artifactId>shell-executor</artifactId>
     </dependency>

@@ -70,6 +70,7 @@
   </reporting>
 
   <modules>
+    <module>argonaut-message</module>
     <module>argonaut-common</module>
     <module>argonaut-xml</module>
     <module>argonaut-file-checker</module>

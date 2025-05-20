@@ -13,23 +13,23 @@ public class SubmissionCompleteAggregationStrategy implements AggregationStrateg
   @Override
   public Exchange aggregate(Exchange oldExchange, Exchange newExchange) {
     NcSubmissionMessage ncSubmissionMessage = newExchange.getIn().getBody(NcSubmissionMessage.class);
-    SubmissionCompleteMessage next;
+    SubmissionCompleteMessage.Builder next;
     if(oldExchange == null) {
-      next = new SubmissionCompleteMessage();
-      next.setDac(ncSubmissionMessage.getDac());
-      next.setNumberOfFiles(ncSubmissionMessage.getNumberOfFilesInSubmission());
-      next.setTimeStamp(ncSubmissionMessage.getTimestamp());
+      next = SubmissionCompleteMessage.builder()
+          .withDac(ncSubmissionMessage.getDac())
+          .withNumberOfFiles(ncSubmissionMessage.getNumberOfFilesInSubmission())
+          .withTimeStamp(ncSubmissionMessage.getTimestamp());
     } else {
-      next = oldExchange.getIn().getBody(SubmissionCompleteMessage.class);
+      next = SubmissionCompleteMessage.builder(oldExchange.getIn().getBody(SubmissionCompleteMessage.class));
     }
-    next.getFilesCompleted().add(ncSubmissionMessage.getFileName());
-    newExchange.getIn().setBody(next);
+    next.addCompletedFile(ncSubmissionMessage.getFileName());
+    newExchange.getIn().setBody(next.build());
     return newExchange;
   }
 
   @Override
   public boolean matches(Exchange exchange) {
     SubmissionCompleteMessage message = exchange.getIn().getBody(SubmissionCompleteMessage.class);
-    return message.getFilesCompleted().size() == message.getNumberOfFiles();
+    return message.getCompletedFiles().size() == message.getNumberOfFiles();
   }
 }

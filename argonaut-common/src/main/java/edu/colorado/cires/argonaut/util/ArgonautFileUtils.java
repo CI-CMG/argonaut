@@ -1,6 +1,6 @@
 package edu.colorado.cires.argonaut.util;
 
-import edu.colorado.cires.argonaut.config.ServiceProperties;
+import edu.colorado.cires.argonaut.config.ArgonautDirectoryConfig;
 import edu.colorado.cires.argonaut.message.NcSubmissionMessage;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -20,10 +20,17 @@ import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 
+/**
+ * Common file utilities for Argonaut directories.
+ */
 public class ArgonautFileUtils {
 
   private static final Pattern FILE_NAME_PATTERN = Pattern.compile("([A-Z]+)?([0-9]+)_(.+)\\.nc(\\.filecheck)?");
 
+  /**
+   * Creates a new directory and parents. Throws a RuntimeException rather than a IOException
+   * @param path The directory to create
+   */
   public static void createDirectories(Path path) {
     try {
       Files.createDirectories(path);
@@ -113,15 +120,15 @@ public class ArgonautFileUtils {
     }
   }
 
-  public static Path getProcessingDir(ServiceProperties serviceProperties) {
+  public static Path getProcessingDir(ArgonautDirectoryConfig serviceProperties) {
     return serviceProperties.getWorkDirectory().resolve("processing");
   }
 
-  public static Path getProcessingDirForDac(ServiceProperties serviceProperties, String dac) {
+  public static Path getProcessingDirForDac(ArgonautDirectoryConfig serviceProperties, String dac) {
     return getProcessingDir(serviceProperties).resolve("dac").resolve(dac);
   }
 
-  public static Path getProcessingProfileDir(ServiceProperties serviceProperties, String dac, String floatId, boolean isProfile) {
+  public static Path getProcessingProfileDir(ArgonautDirectoryConfig serviceProperties, String dac, String floatId, boolean isProfile) {
     Path dir = getProcessingDirForDac(serviceProperties, dac).resolve(floatId);
     if (isProfile) {
       dir = dir.resolve("profiles");
@@ -129,23 +136,23 @@ public class ArgonautFileUtils {
     return dir;
   }
 
-  public static Path getSubmissionDirForDac(ServiceProperties serviceProperties, String dac) {
+  public static Path getSubmissionDirForDac(ArgonautDirectoryConfig serviceProperties, String dac) {
     return serviceProperties.getSubmissionDirectory().resolve("dac").resolve(dac);
   }
 
-  public static Path getSubmissionDirForDacSubmit(ServiceProperties serviceProperties, String dac) {
+  public static Path getSubmissionDirForDacSubmit(ArgonautDirectoryConfig serviceProperties, String dac) {
     return getSubmissionDirForDac(serviceProperties, dac).resolve("submit");
   }
 
-  public static Path getSubmissionProcessingDirForDac(ServiceProperties serviceProperties, String dac) {
+  public static Path getSubmissionProcessingDirForDac(ArgonautDirectoryConfig serviceProperties, String dac) {
     return getSubmissionDirForDac(serviceProperties, dac).resolve("processing");
   }
 
-  public static Path getSubmissionProcessedDirForDac(ServiceProperties serviceProperties, String dac) {
+  public static Path getSubmissionProcessedDirForDac(ArgonautDirectoryConfig serviceProperties, String dac) {
     return getSubmissionDirForDac(serviceProperties, dac).resolve("processed");
   }
 
-  public static Path getRemovedProfileDir(ServiceProperties serviceProperties, String dac, String timestamp, String floatId, boolean isProfile) {
+  public static Path getRemovedProfileDir(ArgonautDirectoryConfig serviceProperties, String dac, String timestamp, String floatId, boolean isProfile) {
     Path dacDir = serviceProperties.getOutputDirectory().resolve("removed").resolve("dac").resolve(dac).resolve(timestamp).resolve(floatId);
     if (isProfile) {
       dacDir = dacDir.resolve("profiles");
@@ -153,7 +160,7 @@ public class ArgonautFileUtils {
     return dacDir;
   }
 
-  public static Path getOutputProfileDir(ServiceProperties serviceProperties, String dac, String floatId, boolean isProfile) {
+  public static Path getOutputProfileDir(ArgonautDirectoryConfig serviceProperties, String dac, String floatId, boolean isProfile) {
     Path dacDir = serviceProperties.getOutputDirectory().resolve("dac").resolve(dac).resolve(floatId);
     if (isProfile) {
       dacDir = dacDir.resolve("profiles");
@@ -161,7 +168,7 @@ public class ArgonautFileUtils {
     return dacDir;
   }
 
-  public static Path getRejectProfileDir(ServiceProperties serviceProperties, String dac, String timestamp, String floatId, boolean isProfile) {
+  public static Path getRejectProfileDir(ArgonautDirectoryConfig serviceProperties, String dac, String timestamp, String floatId, boolean isProfile) {
     Path dacDir = getSubmissionProcessedDirForDac(serviceProperties, dac).resolve(timestamp).resolve("reject").resolve(floatId);
     if (isProfile) {
       dacDir = dacDir.resolve("profiles");
@@ -174,10 +181,11 @@ public class ArgonautFileUtils {
     if (matcher.matches()) {
       String floatDir = matcher.group(2);
       boolean profile = matcher.group(1) != null;
-      NcSubmissionMessage ncSubmissionMessage = new NcSubmissionMessage();
-      ncSubmissionMessage.setFileName(fileName);
-      ncSubmissionMessage.setProfile(profile);
-      ncSubmissionMessage.setFloatId(floatDir);
+      NcSubmissionMessage ncSubmissionMessage = NcSubmissionMessage.builder()
+          .withFileName(fileName)
+          .withProfile(profile)
+          .withFloatId(floatDir)
+          .build();
       return Optional.of(ncSubmissionMessage);
     }
     return Optional.empty();

@@ -14,14 +14,16 @@ public class RemovalMessageTranslator implements Processor {
   @Override
   public void process(Exchange exchange) throws Exception {
     RemovalMessage message = exchange.getIn().getBody(RemovalMessage.class);
-    NcSubmissionMessage ncSubmissionMessage = new NcSubmissionMessage();
-    ncSubmissionMessage.setOperation(Operation.REMOVE);
-    ncSubmissionMessage.setDac(message.getDac());
-    ncSubmissionMessage.setTimestamp(message.getTimestamp());
-    ncSubmissionMessage.setProfile(false);
-    ncSubmissionMessage.setFileName(message.getFileName());
-    ncSubmissionMessage.setNumberOfFilesInSubmission(1);
-    ncSubmissionMessage.setValidationError(message.getValidationError());
+    NcSubmissionMessage ncSubmissionMessage = NcSubmissionMessage.builder()
+        .withOperation(Operation.REMOVE)
+        .withDac(message.getDac())
+        .withTimestamp(message.getTimestamp())
+        .withProfile(false)
+        .withFileName(message.getFileName())
+        .withNumberOfFilesInSubmission(1)
+        .withValidationErrors(message.getValidationErrors())
+        .build();
+
     exchange.getIn().setBody(ncSubmissionMessage);
   }
 }

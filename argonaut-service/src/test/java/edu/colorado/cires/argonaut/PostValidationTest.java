@@ -13,6 +13,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Instant;
+import java.util.Collections;
 import org.apache.camel.EndpointInject;
 import org.apache.camel.ProducerTemplate;
 import org.apache.camel.component.mock.MockEndpoint;
@@ -29,7 +30,8 @@ import org.springframework.test.context.ActiveProfiles;
 @CamelSpringBootTest
 @DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
 @ActiveProfiles("test")
-@MockEndpointsAndSkip(QueueConsts.FILE_MOVED + "|" + QueueConsts.FLOAT_MERGE_AGG + "|" + QueueConsts.GEO_MERGE_AGG + "|" + QueueConsts.LATEST_MERGE_AGG)
+@MockEndpointsAndSkip(
+    QueueConsts.FILE_MOVED + "|" + QueueConsts.FLOAT_MERGE_AGG + "|" + QueueConsts.GEO_MERGE_AGG + "|" + QueueConsts.LATEST_MERGE_AGG)
 public class PostValidationTest {
 
   static {
@@ -62,12 +64,13 @@ public class PostValidationTest {
     String dac = "aoml";
     String fileName = "1901830_meta.nc";
 
-    NcSubmissionMessage message = new NcSubmissionMessage();
-    message.setFloatId(floatId);
-    message.setDac(dac);
-    message.setTimestamp(timestamp);
-    message.setFileName(fileName);
-    message.setProfile(false);
+    NcSubmissionMessage message = NcSubmissionMessage.builder()
+        .withFloatId(floatId)
+        .withDac(dac)
+        .withTimestamp(timestamp)
+        .withFileName(fileName)
+        .withProfile(false)
+        .build();
 
     FileTestUtils.emptyDirectory(serviceProperties.getOutputDirectory());
     FileTestUtils.emptyDirectory(ArgonautFileUtils.getProcessingDir(serviceProperties));
@@ -105,14 +108,15 @@ public class PostValidationTest {
     String dac = "aoml";
     String fileName = "R5905716_245.nc";
 
-    NcSubmissionMessage message = new NcSubmissionMessage();
-    message.setFloatId(floatId);
-    message.setDac(dac);
-    message.setTimestamp(timestamp);
-    message.setFileName(fileName);
-    message.setProfile(true);
-    message.getValidationError().add("very bad profile");
-    message.setNumberOfFilesInSubmission(100);
+    NcSubmissionMessage message = NcSubmissionMessage.builder()
+        .withFloatId(floatId)
+        .withDac(dac)
+        .withTimestamp(timestamp)
+        .withFileName(fileName)
+        .withProfile(true)
+        .withValidationErrors(Collections.singletonList("very bad profile"))
+        .withNumberOfFilesInSubmission(100)
+        .build();
 
     FileTestUtils.emptyDirectory(serviceProperties.getOutputDirectory());
     FileTestUtils.emptyDirectory(ArgonautFileUtils.getProcessingDir(serviceProperties));
@@ -148,20 +152,21 @@ public class PostValidationTest {
     String dac = "aoml";
     String fileName = "R5905716_245.nc";
 
-    NcSubmissionMessage message = new NcSubmissionMessage();
-    message.setFloatId(floatId);
-    message.setDac(dac);
-    message.setTimestamp(timestamp);
-    message.setFileName(fileName);
-    message.setProfile(true);
-    message.setOperation(Operation.REMOVE);
-    message.setNumberOfFilesInSubmission(13);
+    NcSubmissionMessage message = NcSubmissionMessage.builder()
+        .withFloatId(floatId)
+        .withDac(dac)
+        .withTimestamp(timestamp)
+        .withFileName(fileName)
+        .withProfile(true)
+        .withOperation(Operation.REMOVE)
+        .withNumberOfFilesInSubmission(13)
+        .build();
 
     FileTestUtils.emptyDirectory(serviceProperties.getOutputDirectory());
 
     Path testFile = Paths.get("src/test/resources").resolve(fileName);
     Path outputFile = Paths.get("target/output/dac").resolve(dac).resolve(floatId).resolve("profiles").resolve(fileName);
-    Path removedFile =  Paths.get("target/output/removed/dac").resolve(dac).resolve(timestamp).resolve(floatId).resolve("profiles").resolve(fileName);
+    Path removedFile = Paths.get("target/output/removed/dac").resolve(dac).resolve(timestamp).resolve(floatId).resolve("profiles").resolve(fileName);
     Files.createDirectories(outputFile.getParent());
 
     ArgonautFileUtils.copy(testFile, outputFile);
@@ -177,14 +182,15 @@ public class PostValidationTest {
 
     MockEndpoint.assertIsSatisfied(fileMoved, floatMergeAgg);
 
-    NcSubmissionMessage expectedMessage = new NcSubmissionMessage();
-    expectedMessage.setProfile(true);
-    expectedMessage.setFloatId(floatId);
-    expectedMessage.setDac("aoml");
-    expectedMessage.setTimestamp(timestamp);
-    expectedMessage.setFileName(fileName);
-    expectedMessage.setOperation(Operation.REMOVE);
-    expectedMessage.setNumberOfFilesInSubmission(13);
+    NcSubmissionMessage expectedMessage = NcSubmissionMessage.builder()
+        .withProfile(true)
+        .withFloatId(floatId)
+        .withDac("aoml")
+        .withTimestamp(timestamp)
+        .withFileName(fileName)
+        .withOperation(Operation.REMOVE)
+        .withNumberOfFilesInSubmission(13)
+        .build();
 
     NcSubmissionMessage floatMergeAggMessage = floatMergeAgg.getExchanges().get(0).getIn().getBody(NcSubmissionMessage.class);
     NcSubmissionMessage fileMovedMessage = fileMoved.getExchanges().get(0).getIn().getBody(NcSubmissionMessage.class);
@@ -205,20 +211,21 @@ public class PostValidationTest {
     String dac = "aoml";
     String fileName = "1901830_meta.nc";
 
-    NcSubmissionMessage message = new NcSubmissionMessage();
-    message.setFloatId(floatId);
-    message.setDac(dac);
-    message.setTimestamp(timestamp);
-    message.setFileName(fileName);
-    message.setProfile(false);
-    message.setOperation(Operation.REMOVE);
-    message.setNumberOfFilesInSubmission(13);
+    NcSubmissionMessage message = NcSubmissionMessage.builder()
+        .withFloatId(floatId)
+        .withDac(dac)
+        .withTimestamp(timestamp)
+        .withFileName(fileName)
+        .withProfile(false)
+        .withOperation(Operation.REMOVE)
+        .withNumberOfFilesInSubmission(13)
+        .build();
 
     FileTestUtils.emptyDirectory(serviceProperties.getOutputDirectory());
 
     Path testFile = Paths.get("src/test/resources").resolve(fileName);
     Path outputFile = Paths.get("target/output/dac").resolve(dac).resolve(floatId).resolve(fileName);
-    Path removedFile =  Paths.get("target/output/removed/dac").resolve(dac).resolve(timestamp).resolve(floatId).resolve(fileName);
+    Path removedFile = Paths.get("target/output/removed/dac").resolve(dac).resolve(timestamp).resolve(floatId).resolve(fileName);
     Files.createDirectories(outputFile.getParent());
 
     ArgonautFileUtils.copy(testFile, outputFile);
@@ -234,14 +241,15 @@ public class PostValidationTest {
 
     MockEndpoint.assertIsSatisfied(fileMoved, floatMergeAgg);
 
-    NcSubmissionMessage expectedMessage = new NcSubmissionMessage();
-    expectedMessage.setProfile(false);
-    expectedMessage.setFloatId(floatId);
-    expectedMessage.setDac("aoml");
-    expectedMessage.setTimestamp(timestamp);
-    expectedMessage.setFileName(fileName);
-    expectedMessage.setOperation(Operation.REMOVE);
-    expectedMessage.setNumberOfFilesInSubmission(13);
+    NcSubmissionMessage expectedMessage = NcSubmissionMessage.builder()
+        .withProfile(false)
+        .withFloatId(floatId)
+        .withDac("aoml")
+        .withTimestamp(timestamp)
+        .withFileName(fileName)
+        .withOperation(Operation.REMOVE)
+        .withNumberOfFilesInSubmission(13)
+        .build();
 
     NcSubmissionMessage floatMergeAggMessage = floatMergeAgg.getExchanges().get(0).getIn().getBody(NcSubmissionMessage.class);
     NcSubmissionMessage fileMovedMessage = fileMoved.getExchanges().get(0).getIn().getBody(NcSubmissionMessage.class);

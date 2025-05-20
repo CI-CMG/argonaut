@@ -9,9 +9,9 @@ import edu.colorado.cires.argonaut.message.SubmissionCompleteMessage;
 import edu.colorado.cires.argonaut.route.QueueConsts;
 import java.time.Instant;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.TreeSet;
 import java.util.stream.Collectors;
 import org.apache.camel.EndpointInject;
 import org.apache.camel.ProducerTemplate;
@@ -58,26 +58,27 @@ public class SubmissionCompleteAggregatorTest {
         String timestampStr = timestamp.minusSeconds(i).toString();
         String floatId = "190183" + i;
 
-        SubmissionCompleteMessage expectedMessage = new SubmissionCompleteMessage();
-        expectedMessage.setTimeStamp(timestampStr);
-        expectedMessage.setNumberOfFiles(3);
-        expectedMessage.setDac(dac);
+        SubmissionCompleteMessage.Builder expectedMessage = SubmissionCompleteMessage.builder()
+            .withTimeStamp(timestampStr)
+            .withNumberOfFiles(3)
+            .withDac(dac);
 
         for (String fileName : Arrays.asList(floatId + "_meta.nc", floatId + "_tech.nc", floatId + "_Rtraj.nc")) {
-          NcSubmissionMessage message = new NcSubmissionMessage();
-          message.setFloatId(floatId);
-          message.setDac(dac);
-          message.setTimestamp(timestampStr);
-          message.setFileName(fileName);
-          message.setProfile(false);
-          message.setNumberOfFilesInSubmission(3);
+          NcSubmissionMessage message = NcSubmissionMessage.builder()
+              .withFloatId(floatId)
+              .withDac(dac)
+              .withTimestamp(timestampStr)
+              .withFileName(fileName)
+              .withProfile(false)
+              .withNumberOfFilesInSubmission(3)
+              .build();
 
           messages.add(message);
 
-          expectedMessage.getFilesCompleted().add(fileName);
+          expectedMessage.addCompletedFile(fileName);
         }
 
-        expected.add(expectedMessage);
+        expected.add(expectedMessage.build());
       }
     }
 
@@ -102,10 +103,10 @@ public class SubmissionCompleteAggregatorTest {
     String timestamp = Instant.now().toString();
     String dac = "aoml";
 
-    SubmissionCompleteMessage expectedMessage = new SubmissionCompleteMessage();
-    expectedMessage.setTimeStamp(timestamp);
-    expectedMessage.setNumberOfFiles(13);
-    expectedMessage.setDac(dac);
+    SubmissionCompleteMessage.Builder expectedMessage = SubmissionCompleteMessage.builder()
+        .withTimeStamp(timestamp)
+        .withNumberOfFiles(13)
+        .withDac(dac);
 
     Set<NcSubmissionMessage> messages = new HashSet<>();
 
@@ -127,18 +128,19 @@ public class SubmissionCompleteAggregatorTest {
 
       String floatId = fileName.replaceAll("R", "").split("_")[0];
 
-      NcSubmissionMessage message = new NcSubmissionMessage();
-      message.setFloatId(floatId);
-      message.setDac(dac);
-      message.setTimestamp(timestamp);
-      message.setFileName(fileName);
-      message.setProfile(fileName.contains("R"));
-      message.setNumberOfFilesInSubmission(13);
-      message.setOperation(Operation.REMOVE);
+      NcSubmissionMessage message = NcSubmissionMessage.builder()
+          .withFloatId(floatId)
+          .withDac(dac)
+          .withTimestamp(timestamp)
+          .withFileName(fileName)
+          .withProfile(fileName.contains("R"))
+          .withNumberOfFilesInSubmission(13)
+          .withOperation(Operation.REMOVE)
+          .build();
 
       messages.add(message);
 
-      expectedMessage.getFilesCompleted().add(fileName);
+      expectedMessage.addCompletedFile(fileName);
 
     }
 
@@ -152,7 +154,7 @@ public class SubmissionCompleteAggregatorTest {
         .map(exchange -> exchange.getIn().getBody(SubmissionCompleteMessage.class))
         .findFirst().orElse(null);
 
-    assertEquals(expectedMessage, actual);
+    assertEquals(expectedMessage.build(), actual);
 
   }
 
@@ -163,19 +165,21 @@ public class SubmissionCompleteAggregatorTest {
     String timestamp = Instant.now().toString();
     String dac = "aoml";
 
-    SubmissionCompleteMessage expectedMessage = new SubmissionCompleteMessage();
-    expectedMessage.setTimeStamp(timestamp);
-    expectedMessage.setNumberOfFiles(1);
-    expectedMessage.setDac(dac);
-    expectedMessage.getFilesCompleted().add("foobar_removal.txt");
+    SubmissionCompleteMessage expectedMessage = SubmissionCompleteMessage.builder()
+        .withTimeStamp(timestamp)
+        .withNumberOfFiles(1)
+        .withDac(dac)
+        .withCompletedFiles(Collections.singletonList("foobar_removal.txt"))
+        .build();
 
-    NcSubmissionMessage message = new NcSubmissionMessage();
-    message.setDac(dac);
-    message.setTimestamp(timestamp);
-    message.setFileName("foobar_removal.txt");
-    message.setProfile(false);
-    message.setNumberOfFilesInSubmission(1);
-    message.setOperation(Operation.REMOVE);
+    NcSubmissionMessage message = NcSubmissionMessage.builder()
+        .withDac(dac)
+        .withTimestamp(timestamp)
+        .withFileName("foobar_removal.txt")
+        .withProfile(false)
+        .withNumberOfFilesInSubmission(1)
+        .withOperation(Operation.REMOVE)
+        .build();
 
     prepareEmail.expectedMessageCount(1);
 

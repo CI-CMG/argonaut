@@ -14,6 +14,7 @@ import java.nio.file.Path;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -71,12 +72,13 @@ public class SubmissionReportTest {
       String floatId = "190183" + i;
 
       for (String fileName : Arrays.asList(floatId + "_meta.nc", floatId + "_tech.nc", floatId + "_Rtraj.nc")) {
-        NcSubmissionMessage message = new NcSubmissionMessage();
-        message.setFloatId(floatId);
-        message.setDac(dac);
-        message.setTimestamp(timestampStr);
-        message.setFileName(fileName);
-        message.setProfile(false);
+        NcSubmissionMessage message = NcSubmissionMessage.builder()
+            .withFloatId(floatId)
+            .withDac(dac)
+            .withTimestamp(timestampStr)
+            .withFileName(fileName)
+            .withProfile(false)
+            .build();
 
         messages.add(message);
 
@@ -120,14 +122,15 @@ public class SubmissionReportTest {
       String floatId = "190183" + i;
 
       for (String fileName : Arrays.asList("R" + floatId + "_meta.nc", "R" + floatId + "_tech.nc", "R" + floatId + "_Rtraj.nc")) {
-        NcSubmissionMessage message = new NcSubmissionMessage();
-        message.setFloatId(floatId);
-        message.setDac(dac);
-        message.setTimestamp(timestampStr);
-        message.setFileName(fileName);
-        message.setProfile(false);
-        message.getValidationError().add(" this is a bad, bad, profile");
-        message.getValidationError().add("this error message contains \n \",\\ ");
+        NcSubmissionMessage message = NcSubmissionMessage.builder()
+            .withFloatId(floatId)
+            .withDac(dac)
+            .withTimestamp(timestampStr)
+            .withFileName(fileName)
+            .withProfile(false)
+            .addValidationError(" this is a bad, bad, profile")
+            .addValidationError("this error message contains \n \",\\ ")
+            .build();
 
         messages.add(message);
 
@@ -189,13 +192,14 @@ public class SubmissionReportTest {
       String floatId = "190183" + i;
 
       for (String fileName : Arrays.asList(floatId + "_meta.nc", floatId + "_tech.nc", floatId + "_Rtraj.nc")) {
-        NcSubmissionMessage message = new NcSubmissionMessage();
-        message.setFloatId(floatId);
-        message.setDac(dac);
-        message.setTimestamp(timestampStr);
-        message.setFileName(fileName);
-        message.setProfile(false);
-        message.setOperation(Operation.REMOVE);
+        NcSubmissionMessage message = NcSubmissionMessage.builder()
+            .withFloatId(floatId)
+            .withDac(dac)
+            .withTimestamp(timestampStr)
+            .withFileName(fileName)
+            .withProfile(false)
+            .withOperation(Operation.REMOVE)
+            .build();
 
         messages.add(message);
 
@@ -231,14 +235,15 @@ public class SubmissionReportTest {
     String dac = "aoml";
     String timestamp = Instant.now().toString();
 
-    NcSubmissionMessage message = new NcSubmissionMessage();
-    message.setDac(dac);
-    message.setTimestamp(timestamp);
-    message.setFileName("foobar_removal.txt");
-    message.setProfile(false);
-    message.getValidationError().add("removal file name does not match DAC 'aoml' (aoml_removal.txt): foobar_removal.txt");
-    message.setOperation(Operation.REMOVE);
-    message.setNumberOfFilesInSubmission(1);
+    NcSubmissionMessage message = NcSubmissionMessage.builder()
+        .withDac(dac)
+        .withTimestamp(timestamp)
+        .withFileName("foobar_removal.txt")
+        .withProfile(false)
+        .withValidationErrors(Collections.singletonList("removal file name does not match DAC 'aoml' (aoml_removal.txt): foobar_removal.txt"))
+        .withOperation(Operation.REMOVE)
+        .withNumberOfFilesInSubmission(1)
+        .build();
 
     FileTestUtils.emptyDirectory(ArgonautFileUtils.getSubmissionProcessedDirForDac(serviceProperties, dac));
 
@@ -265,7 +270,9 @@ public class SubmissionReportTest {
       }
     }
     assertEquals(1, i);
-    assertEquals(Arrays.asList(timestamp,dac,"","foobar_removal.txt","removal file name does not match DAC 'aoml' (aoml_removal.txt): foobar_removal.txt"), row);
+    assertEquals(
+        Arrays.asList(timestamp, dac, "", "foobar_removal.txt", "removal file name does not match DAC 'aoml' (aoml_removal.txt): foobar_removal.txt"),
+        row);
 
   }
 

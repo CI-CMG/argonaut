@@ -14,6 +14,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.apache.commons.lang3.StringUtils;
@@ -45,16 +46,16 @@ public class RemovalFileValidator implements Processor {
       reader.lines().forEach(line -> {
         if (StringUtils.isNotBlank(line)) {
           ArgonautFileUtils.ncSubmissionMessageFromFileName(line.trim()).ifPresent(message -> {
-            message.setDac(dac);
-            message.setTimestamp(timestamp);
-            message.setOperation(Operation.REMOVE);
-            messages.add(message);
+            messages.add(NcSubmissionMessage.builder(message)
+                .withDac(dac)
+                .withTimestamp(timestamp)
+                .withOperation(Operation.REMOVE)
+                .build());
           });
         }
       });
     }
-    messages.forEach(message -> message.setNumberOfFilesInSubmission(messages.size()));
-    return messages;
+    return messages.stream().map(NcSubmissionMessage::builder).map(builder -> builder.withNumberOfFilesInSubmission(messages.size()).build()).collect(Collectors.toList());
   }
 
   @Override
@@ -65,15 +66,17 @@ public class RemovalFileValidator implements Processor {
     Path submissionProcessedDir = ArgonautFileUtils.getSubmissionProcessedDirForDac(serviceProperties, dac).resolve(timestamp);
     ArgonautFileUtils.createDirectories(submissionProcessedDir);
     try {
-      RemovalMessage output = new RemovalMessage();
-      output.setFileName(ArgonautFileUtils.getRequiredFileName(removalFile));
-      output.setTimestamp(timestamp);
-      output.setDac(dac);
-      exchange.getIn().setBody(output);
-      output.setValidationError(validate(dac, removalFile));
-      if (output.getValidationError().isEmpty()) {
-        output.setFilesToRemove(parse(dac, timestamp, removalFile));
+      RemovalMessage output = RemovalMessage.builder()
+          .withFileName(ArgonautFileUtils.getRequiredFileName(removalFile))
+          .withTimestamp(timestamp)
+          .withDac(dac)
+          .withValidationErrors(validate(dac, removalFile))
+          .build();
+
+      if (output.getValidationErrors().isEmpty()) {
+        output = RemovalMessage.builder(output).withRemovalFiles(parse(dac, timestamp, removalFile)).build();
       }
+      exchange.getIn().setBody(output);
     } finally {
       ArgonautFileUtils.move(removalFile, submissionProcessedDir.resolve(removalFile.getFileName()));
     }
