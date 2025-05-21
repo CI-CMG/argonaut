@@ -16,6 +16,8 @@ import edu.colorado.cires.argonaut.service.SubmissionTimestampService;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import org.apache.camel.AggregationStrategy;
+import org.apache.camel.Exchange;
 import org.apache.camel.builder.AggregationStrategies;
 import org.apache.camel.builder.RouteBuilder;
 import org.slf4j.Logger;
@@ -121,7 +123,7 @@ public class Routes extends RouteBuilder {
         .to(QueueConsts.PREPARE_SUBMISSION_EMAIL);
 
     from(QueueConsts.FLOAT_MERGE_AGG)
-        .aggregate(simple("${body.dac}_${body.floatId}"), AggregationStrategies.useOriginal())
+        .aggregate(simple("${body.dac}_${body.floatId}"), (oldExchange,newExchange)-> oldExchange == null?newExchange:oldExchange)
         .completionInterval(serviceProperties.getFloatMergeQuietTimeout().toMillis())
         .to(QueueConsts.FLOAT_MERGE);
 

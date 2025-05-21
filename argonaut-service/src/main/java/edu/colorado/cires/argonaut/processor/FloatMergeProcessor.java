@@ -79,5 +79,6 @@ public class FloatMergeProcessor implements Processor {
           .collect(Collectors.toList());
 
       floatMergeService.mergeFloats(ArgonautFileUtils.getOutputProfileDir(serviceProperties,dac, floatId, false), sortedCoreProfiles);
+
   }
 }

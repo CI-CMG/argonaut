@@ -32,12 +32,13 @@ class MultiFloatMergeServiceTest {
 
   @AfterEach
   public void after() throws Exception {
-///   FileUtils.deleteQuietly(submissionDir.toFile());
+   FileUtils.deleteQuietly(submissionDir.toFile());
   }
 
   @Test
   public void smokeTest() throws Exception {
     String[] files = new String[]{"D2901615_001.nc", "D2901615_002.nc", "D2901615_003.nc","D2901615_004.nc"};
+
     Path daceDir = submissionDir.resolve("2901615");
     Path profileDir = daceDir.resolve("profiles");
     Path resourceDir = Paths.get("src/test/resources/float_merge/nmdis/2901615/profiles");
