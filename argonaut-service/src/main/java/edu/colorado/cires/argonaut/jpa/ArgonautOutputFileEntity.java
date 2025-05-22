@@ -24,8 +24,10 @@ public class ArgonautOutputFileEntity {
   @Column(nullable = false)
   private Instant timestamp;
 
-  @Column(nullable = false)
-  private boolean profile;
+
+  @Column(name = "file_type", nullable = false, length = 20)
+  private String fileType;
+
 
   @Column(name = "float_id", nullable = false, length = 7)
   private String floatId;
@@ -77,12 +79,12 @@ public class ArgonautOutputFileEntity {
     this.timestamp = timestamp;
   }
 
-  public boolean isProfile() {
-    return profile;
+  public String getFileType() {
+    return fileType;
   }
 
-  public void setProfile(boolean profile) {
-    this.profile = profile;
+  public void setFileType(String fileType) {
+    this.fileType = fileType;
   }
 
   public String getFloatId() {

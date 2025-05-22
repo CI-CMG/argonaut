@@ -3,6 +3,8 @@ package edu.colorado.cires.argonaut.message;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import java.util.Objects;
 
+
+//TODO add JSON any setter / getter
 @JsonDeserialize(builder = FloatMergeGroup.Builder.class)
 public class FloatMergeGroup {
 
@@ -71,5 +73,13 @@ public class FloatMergeGroup {
   @Override
   public int hashCode() {
     return Objects.hash(dac, floatId);
+  }
+
+  @Override
+  public String toString() {
+    return "FloatMergeGroup{" +
+        "dac='" + dac + '\'' +
+        ", floatId='" + floatId + '\'' +
+        '}';
   }
 }

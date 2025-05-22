@@ -10,7 +10,6 @@ public final class QueueConsts {
   public static final String FILE_MOVED = "seda:file-moved";
   public static final String SUBMISSION_COMPLETE_AGG = "seda:submission-complete-agg";
   public static final String PREPARE_SUBMISSION_EMAIL = "seda:prepare-submission-email";
-  public static final String FLOAT_MERGE_AGG = "seda:float-merge-agg";
   public static final String GEO_MERGE_AGG = "seda:geo-merge-agg";
   public static final String LATEST_MERGE_AGG = "seda:latest-merge-agg";
   public static final String UPDATE_INDEX = "seda:update-index";

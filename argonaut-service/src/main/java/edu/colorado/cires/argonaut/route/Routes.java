@@ -129,7 +129,6 @@ public class Routes extends RouteBuilder {
         .to(
             QueueConsts.FILE_OUTPUT,
             QueueConsts.LATEST_MERGE_AGG,
-            QueueConsts.FLOAT_MERGE_AGG,
             QueueConsts.GEO_MERGE_AGG
         );
 
@@ -154,13 +153,6 @@ public class Routes extends RouteBuilder {
         .aggregate(simple("${body.dac}_${body.timestamp}"), submissionCompleteAggregationStrategy)
         .process(serializeMessage)
         .to(QueueConsts.PREPARE_SUBMISSION_EMAIL);
-
-    from(QueueConsts.FLOAT_MERGE_AGG)
-        .process(deserializeNcSubmissionMessage)
-        .aggregate(simple("${body.dac}_${body.floatId}"), (oldExchange,newExchange) -> oldExchange == null ? newExchange : oldExchange)
-        .completionInterval(serviceProperties.getFloatMergeQuietTimeout().toMillis())
-        .process(serializeMessage)
-        .to(QueueConsts.FLOAT_MERGE);
 
     from(QueueConsts.FLOAT_MERGE)
         .process(deserializeNcSubmissionMessage)

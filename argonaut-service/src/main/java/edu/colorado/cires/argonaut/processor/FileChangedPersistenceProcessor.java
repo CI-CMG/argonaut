@@ -21,15 +21,24 @@ public class FileChangedPersistenceProcessor implements Processor {
     this.argonautOutputFileRepository = argonautOutputFileRepository;
   }
 
+  //TODO this is broken, fix me
+  private String resolveFileType(NcSubmissionMessage message) {
+    return message.isProfile() ? "profile" : "other";
+  }
+
   private void addFile(NcSubmissionMessage message) {
     ArgonautOutputFileEntity entity = new ArgonautOutputFileEntity();
     entity.setDac(message.getDac());
     entity.setFileName(message.getFileName());
     entity.setTimestamp(Instant.parse(message.getTimestamp()));
-    entity.setProfile(message.isProfile());
+    entity.setFileType(resolveFileType(message));
     entity.setFloatId(message.getFloatId());
 //    entity.setRegion();
     argonautOutputFileRepository.save(entity);
+  }
+
+  private void floatMerge(NcSubmissionMessage message) {
+    ArgonautOutputFileEntity mergeEntity =
   }
 
   @Override
@@ -40,6 +49,8 @@ public class FileChangedPersistenceProcessor implements Processor {
         addFile(message);
         break;
       case REMOVE:
+        break;
+      case FLOAT_MERGE:
         break;
       default:
         throw new IllegalArgumentException("Operation not supported: " + message.getOperation());

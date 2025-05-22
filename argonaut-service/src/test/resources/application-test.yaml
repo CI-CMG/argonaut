@@ -2,4 +2,3 @@ argonaut:
   work-directory: target/work
   submission-directory: target/submission
   output-directory: target/output
-  float-merge-quiet-timeout: 'PT5S'

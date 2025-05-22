@@ -26,7 +26,8 @@ public class FloatMergeAggregatorProcessor implements Processor {
 
   @Override
   public void process(Exchange exchange) throws Exception {
-    List<ArgonautOutputFileEntity> entities = repository.findAllByFloatMergedFalseAndProfileTrue();
+    //TODO use constant
+    List<ArgonautOutputFileEntity> entities = repository.findAllByFloatMergedFalseAndFileType("profile");
     Set<FloatMergeGroup> groups = entities.stream()
         .map(e -> FloatMergeGroup.builder().withDac(e.getDac()).withFloatId(e.getFloatId()).build())
         .collect(Collectors.toSet());

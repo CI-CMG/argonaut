@@ -40,9 +40,9 @@ public class ServiceProperties implements ArgonautDirectoryConfig {
   @NotBlank
   private String indexCron;
   @NotBlank
+  private String mergeFloatCron;
+  @NotBlank
   private String gdacSyncCron;
-  @NotNull
-  private Duration floatMergeQuietTimeout;
 
   @NotNull
   @Valid
@@ -52,6 +52,14 @@ public class ServiceProperties implements ArgonautDirectoryConfig {
   @Valid
   private FtpServerConfig localOutputFtpServer;
 
+
+  public String getMergeFloatCron() {
+    return mergeFloatCron;
+  }
+
+  public void setMergeFloatCron(String mergeFloatCron) {
+    this.mergeFloatCron = mergeFloatCron;
+  }
 
   public FtpServerConfig getLocalOutputFtpServer() {
     return localOutputFtpServer;
@@ -142,14 +150,6 @@ public class ServiceProperties implements ArgonautDirectoryConfig {
 
   public void setDacs(List<DacConfig> dacs) {
     this.dacs = dacs;
-  }
-
-  public Duration getFloatMergeQuietTimeout() {
-    return floatMergeQuietTimeout;
-  }
-
-  public void setFloatMergeQuietTimeout(Duration floatMergeQuietTimeout) {
-    this.floatMergeQuietTimeout = floatMergeQuietTimeout;
   }
 
   public Duration getFileCheckerTimeout() {
