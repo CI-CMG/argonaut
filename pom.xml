@@ -75,6 +75,8 @@
     <module>argonaut-xml</module>
     <module>argonaut-netcdf</module>
     <module>argonaut-file-checker</module>
+    <module>argonaut-submission</module>
+    <module>argonaut-jpa</module>
     <module>argonaut-index</module>
     <module>argonaut-service</module>
   </modules>
@@ -168,6 +170,11 @@
         <groupId>commons-io</groupId>
         <artifactId>commons-io</artifactId>
         <version>2.19.0</version>
+      </dependency>
+      <dependency>
+        <groupId>io.github.ci-cmg</groupId>
+        <artifactId>mgg-jpa-entity-utils</artifactId>
+        <version>1.5.0</version>
       </dependency>
       <dependency>
         <groupId>org.apache.commons</groupId>

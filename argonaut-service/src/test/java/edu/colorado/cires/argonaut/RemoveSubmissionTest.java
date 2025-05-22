@@ -5,6 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.colorado.cires.argonaut.config.ServiceProperties;
 import edu.colorado.cires.argonaut.message.NcSubmissionMessage;
 import edu.colorado.cires.argonaut.route.QueueConsts;
@@ -55,6 +57,8 @@ public class RemoveSubmissionTest {
 
   @Autowired
   private ServiceProperties serviceProperties;
+  @Autowired
+  private ObjectMapper objectMapper;
 
   @Test
   public void testSubmitCorrectRemovalFile() throws Exception {
@@ -125,7 +129,14 @@ public class RemoveSubmissionTest {
     });
 
     Set<NcSubmissionMessage> receivedMessages = validationSuccess.getExchanges().stream()
-        .map(exchange -> exchange.getIn().getBody(NcSubmissionMessage.class))
+        .map(exchange -> exchange.getIn().getBody(String.class))
+        .map(body -> {
+          try {
+            return objectMapper.readValue(body, NcSubmissionMessage.class);
+          } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+          }
+        })
         .collect(Collectors.toSet());
 
     assertEquals(validationMessages, receivedMessages);
@@ -171,7 +182,14 @@ public class RemoveSubmissionTest {
     MockEndpoint.assertIsSatisfied(validationSuccess, submissionReport);
 
     NcSubmissionMessage receivedMessage = submissionReport.getExchanges().stream()
-        .map(exchange -> exchange.getIn().getBody(NcSubmissionMessage.class))
+        .map(exchange -> exchange.getIn().getBody(String.class))
+        .map(body -> {
+          try {
+            return objectMapper.readValue(body, NcSubmissionMessage.class);
+          } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+          }
+        })
         .findFirst().orElse(null);
 
     NcSubmissionMessage expectedMessage = NcSubmissionMessage.builder()

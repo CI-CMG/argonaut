@@ -2,6 +2,8 @@ package edu.colorado.cires.argonaut;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.colorado.cires.argonaut.config.ServiceProperties;
 import edu.colorado.cires.argonaut.message.NcSubmissionMessage;
 import edu.colorado.cires.argonaut.message.NcSubmissionMessage.Operation;
@@ -59,6 +61,9 @@ public class SubmissionReportTest {
   @Autowired
   private ProducerTemplate producerTemplate;
 
+  @Autowired
+  private ObjectMapper objectMapper;
+
   @Test
   public void testReportHappyPath() throws Exception {
     String dac = "aoml";
@@ -97,7 +102,13 @@ public class SubmissionReportTest {
     submissionCompleteAgg.expectedMessageCount(messages.size());
     updateIndexAgg.expectedMessageCount(messages.size());
 
-    messages.forEach(message -> producerTemplate.sendBody(QueueConsts.FILE_MOVED, message));
+    messages.forEach(message -> {
+      try {
+        producerTemplate.sendBody(QueueConsts.FILE_MOVED, objectMapper.writeValueAsString(message));
+      } catch (JsonProcessingException e) {
+        throw new RuntimeException(e);
+      }
+    });
 
     MockEndpoint.assertIsSatisfied(submissionCompleteAgg, updateIndexAgg);
 
@@ -149,7 +160,13 @@ public class SubmissionReportTest {
     submissionCompleteAgg.expectedMessageCount(messages.size());
     updateIndexAgg.expectedMessageCount(messages.size());
 
-    messages.forEach(message -> producerTemplate.sendBody(QueueConsts.FILE_MOVED, message));
+    messages.forEach(message -> {
+      try {
+        producerTemplate.sendBody(QueueConsts.FILE_MOVED, objectMapper.writeValueAsString(message));
+      } catch (JsonProcessingException e) {
+        throw new RuntimeException(e);
+      }
+    });
 
     MockEndpoint.assertIsSatisfied(submissionCompleteAgg, updateIndexAgg);
 
@@ -218,7 +235,13 @@ public class SubmissionReportTest {
     submissionCompleteAgg.expectedMessageCount(messages.size());
     updateIndexAgg.expectedMessageCount(messages.size());
 
-    messages.forEach(message -> producerTemplate.sendBody(QueueConsts.FILE_MOVED, message));
+    messages.forEach(message -> {
+      try {
+        producerTemplate.sendBody(QueueConsts.FILE_MOVED, objectMapper.writeValueAsString(message));
+      } catch (JsonProcessingException e) {
+        throw new RuntimeException(e);
+      }
+    });
 
     MockEndpoint.assertIsSatisfied(submissionCompleteAgg, updateIndexAgg);
 
@@ -250,7 +273,7 @@ public class SubmissionReportTest {
     submissionCompleteAgg.expectedMessageCount(1);
     updateIndexAgg.expectedMessageCount(1);
 
-    producerTemplate.sendBody(QueueConsts.FILE_MOVED, message);
+    producerTemplate.sendBody(QueueConsts.FILE_MOVED, objectMapper.writeValueAsString(message));
 
     MockEndpoint.assertIsSatisfied(submissionCompleteAgg, updateIndexAgg);
 

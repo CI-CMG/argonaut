@@ -2,6 +2,8 @@ package edu.colorado.cires.argonaut;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.colorado.cires.argonaut.config.ServiceProperties;
 import edu.colorado.cires.argonaut.message.NcSubmissionMessage;
 import edu.colorado.cires.argonaut.message.NcSubmissionMessage.Operation;
@@ -45,6 +47,9 @@ public class SubmissionCompleteAggregatorTest {
   @Autowired
   private ProducerTemplate producerTemplate;
 
+  @Autowired
+  private ObjectMapper objectMapper;
+
   @Test
   public void testDataSubmission() throws Exception {
 
@@ -84,12 +89,25 @@ public class SubmissionCompleteAggregatorTest {
 
     prepareEmail.expectedMessageCount(20);
 
-    messages.forEach(message -> producerTemplate.sendBody(QueueConsts.SUBMISSION_COMPLETE_AGG, message));
+    messages.forEach(message -> {
+      try {
+        producerTemplate.sendBody(QueueConsts.SUBMISSION_COMPLETE_AGG, objectMapper.writeValueAsString(message));
+      } catch (JsonProcessingException e) {
+        throw new RuntimeException(e);
+      }
+    });
 
     prepareEmail.assertIsSatisfied();
 
     Set<SubmissionCompleteMessage> actual = prepareEmail.getExchanges().stream()
-        .map(exchange -> exchange.getIn().getBody(SubmissionCompleteMessage.class))
+        .map(exchange -> exchange.getIn().getBody(String.class))
+        .map(body -> {
+          try {
+            return objectMapper.readValue(body, SubmissionCompleteMessage.class);
+          } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+          }
+        })
         .collect(Collectors.toSet());
 
     assertEquals(expected, actual);
@@ -146,12 +164,25 @@ public class SubmissionCompleteAggregatorTest {
 
     prepareEmail.expectedMessageCount(1);
 
-    messages.forEach(message -> producerTemplate.sendBody(QueueConsts.SUBMISSION_COMPLETE_AGG, message));
+    messages.forEach(message -> {
+      try {
+        producerTemplate.sendBody(QueueConsts.SUBMISSION_COMPLETE_AGG, objectMapper.writeValueAsString(message));
+      } catch (JsonProcessingException e) {
+        throw new RuntimeException(e);
+      }
+    });
 
     prepareEmail.assertIsSatisfied();
 
     SubmissionCompleteMessage actual = prepareEmail.getExchanges().stream()
-        .map(exchange -> exchange.getIn().getBody(SubmissionCompleteMessage.class))
+        .map(exchange -> exchange.getIn().getBody(String.class))
+        .map(body -> {
+          try {
+            return objectMapper.readValue(body, SubmissionCompleteMessage.class);
+          } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+          }
+        })
         .findFirst().orElse(null);
 
     assertEquals(expectedMessage.build(), actual);
@@ -183,12 +214,19 @@ public class SubmissionCompleteAggregatorTest {
 
     prepareEmail.expectedMessageCount(1);
 
-    producerTemplate.sendBody(QueueConsts.SUBMISSION_COMPLETE_AGG, message);
+    producerTemplate.sendBody(QueueConsts.SUBMISSION_COMPLETE_AGG, objectMapper.writeValueAsString(message));
 
     prepareEmail.assertIsSatisfied();
 
     SubmissionCompleteMessage actual = prepareEmail.getExchanges().stream()
-        .map(exchange -> exchange.getIn().getBody(SubmissionCompleteMessage.class))
+        .map(exchange -> exchange.getIn().getBody(String.class))
+        .map(body -> {
+          try {
+            return objectMapper.readValue(body, SubmissionCompleteMessage.class);
+          } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+          }
+        })
         .findFirst().orElse(null);
 
     assertEquals(expectedMessage, actual);

@@ -54,6 +54,9 @@ server:
 camel:
   springboot:
     main-run-controller: true
+  dataformat:
+    jackson:
+      auto-discover-object-mapper: true
 
 spring:
   mvc:
@@ -69,4 +72,20 @@ spring:
   threads:
     virtual:
       enabled: true
+  datasource:
+#      url: jdbc:h2:file:/data/demo
+      url: jdbc:h2:mem:mydb
+      username: sa
+      password: password
+      driverClassName: org.h2.Driver
+  jpa:
+    open-in-view: false
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: true
+    show-sql: true
+
 

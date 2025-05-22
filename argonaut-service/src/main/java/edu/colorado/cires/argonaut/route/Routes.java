@@ -5,20 +5,23 @@ import edu.colorado.cires.argonaut.config.ServiceProperties;
 import edu.colorado.cires.argonaut.message.HeaderConsts;
 import edu.colorado.cires.argonaut.message.NcSubmissionMessagePredicate;
 import edu.colorado.cires.argonaut.message.RemovalMessagePredicate;
+import edu.colorado.cires.argonaut.processor.DeserializeNcSubmissionMessage;
+import edu.colorado.cires.argonaut.processor.DeserializeRemovalMessage;
 import edu.colorado.cires.argonaut.processor.FileMoveProcessor;
 import edu.colorado.cires.argonaut.processor.FloatMergeProcessor;
 import edu.colorado.cires.argonaut.processor.RemovalFileValidator;
 import edu.colorado.cires.argonaut.processor.RemovalMessageTranslator;
-import edu.colorado.cires.argonaut.processor.SubmissionProcessor;
+import edu.colorado.cires.argonaut.processor.SerializeMessage;
 import edu.colorado.cires.argonaut.processor.SubmissionReportProcessor;
 import edu.colorado.cires.argonaut.processor.ValidationProcessor;
 import edu.colorado.cires.argonaut.service.SubmissionTimestampService;
+import edu.colorado.cires.argonaut.submission.SubmissionProcessor;
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import org.apache.camel.AggregationStrategy;
 import org.apache.camel.Exchange;
-import org.apache.camel.builder.AggregationStrategies;
+import org.apache.camel.Processor;
 import org.apache.camel.builder.RouteBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,12 +42,17 @@ public class Routes extends RouteBuilder {
   private final FloatMergeProcessor floatMergeProcessor;
   private final RemovalFileValidator removalFileValidator;
   private final RemovalMessageTranslator removalMessageTranslator;
+  private final DeserializeNcSubmissionMessage deserializeNcSubmissionMessage;
+  private final SerializeMessage serializeMessage;
+  private final DeserializeRemovalMessage deserializeRemovalMessage;
 
   public Routes(ServiceProperties serviceProperties, SubmissionProcessor submissionProcessor, ValidationProcessor validationProcessor,
       SubmissionTimestampService submissionTimestampService,
       FileMoveProcessor fileMoveProcessor, SubmissionReportProcessor submissionReportProcessor,
       SubmissionCompleteAggregationStrategy submissionCompleteAggregationStrategy, FloatMergeProcessor floatMergeProcessor,
-      RemovalFileValidator removalFileValidator, RemovalMessageTranslator removalMessageTranslator) {
+      RemovalFileValidator removalFileValidator, RemovalMessageTranslator removalMessageTranslator,
+      DeserializeNcSubmissionMessage deserializeNcSubmissionMessage, SerializeMessage serializeMessage,
+      DeserializeRemovalMessage deserializeRemovalMessage) {
     this.submissionProcessor = submissionProcessor;
     this.validationProcessor = validationProcessor;
     this.serviceProperties = serviceProperties;
@@ -55,6 +63,9 @@ public class Routes extends RouteBuilder {
     this.floatMergeProcessor = floatMergeProcessor;
     this.removalFileValidator = removalFileValidator;
     this.removalMessageTranslator = removalMessageTranslator;
+    this.deserializeNcSubmissionMessage = deserializeNcSubmissionMessage;
+    this.serializeMessage = serializeMessage;
+    this.deserializeRemovalMessage = deserializeRemovalMessage;
   }
 
   @Override
@@ -89,14 +100,25 @@ public class Routes extends RouteBuilder {
 
     // @formatter:off
 
-    from(QueueConsts.SUBMIT_DATA).process(submissionProcessor).split(body()).to(QueueConsts.VALIDATION);
+    from(QueueConsts.SUBMIT_DATA)
+        .process(new Processor() {@Override public void process(Exchange exchange)throws Exception {
+        exchange.getIn().setBody(exchange.getIn().getBody(File.class).toPath());
+  }})
+//        .transform(simple("${body.toPath()}"))
+        .bean("submissionProcessor", "untarAndMoveToProcessing(${header." + HeaderConsts.DAC +"}, ${header."+ HeaderConsts.SUBMISSION_TIMESTAMP + "}, ${body})")
+        .split(body())
+        .process(serializeMessage)
+        .to(QueueConsts.VALIDATION);
 
     from(QueueConsts.VALIDATION + "?concurrentConsumers=" + serviceProperties.getValidationThreads())
+      .process(deserializeNcSubmissionMessage)
       .process(validationProcessor)
       .choice()
         .when(NcSubmissionMessagePredicate.IS_VALID)
+          .process(serializeMessage)
           .to(QueueConsts.VALIDATION_SUCCESS)
         .otherwise()
+          .process(serializeMessage)
           .to(QueueConsts.FILE_OUTPUT);
 
     from(QueueConsts.VALIDATION_SUCCESS)
@@ -108,36 +130,57 @@ public class Routes extends RouteBuilder {
             QueueConsts.GEO_MERGE_AGG
         );
 
-    from(QueueConsts.FILE_OUTPUT).process(fileMoveProcessor).to(QueueConsts.FILE_MOVED);
+    from(QueueConsts.FILE_OUTPUT)
+        .process(deserializeNcSubmissionMessage)
+        .process(fileMoveProcessor)
+        .process(serializeMessage)
+        .to(QueueConsts.FILE_MOVED);
 
     from(QueueConsts.FILE_MOVED)
         .multicast().parallelProcessing()
         .to(QueueConsts.SUBMISSION_REPORT, QueueConsts.UPDATE_INDEX_AGG);
 
     from(QueueConsts.SUBMISSION_REPORT + "?concurrentConsumers=" + serviceProperties.getSubmissionReportThreads())
+        .process(deserializeNcSubmissionMessage)
         .process(submissionReportProcessor)
+        .process(serializeMessage)
         .to(QueueConsts.SUBMISSION_COMPLETE_AGG);
 
     from(QueueConsts.SUBMISSION_COMPLETE_AGG)
+        .process(deserializeNcSubmissionMessage)
         .aggregate(simple("${body.dac}_${body.timestamp}"), submissionCompleteAggregationStrategy)
+        .process(serializeMessage)
         .to(QueueConsts.PREPARE_SUBMISSION_EMAIL);
 
     from(QueueConsts.FLOAT_MERGE_AGG)
-        .aggregate(simple("${body.dac}_${body.floatId}"), (oldExchange,newExchange)-> oldExchange == null?newExchange:oldExchange)
+        .process(deserializeNcSubmissionMessage)
+        .aggregate(simple("${body.dac}_${body.floatId}"), (oldExchange,newExchange) -> oldExchange == null ? newExchange : oldExchange)
         .completionInterval(serviceProperties.getFloatMergeQuietTimeout().toMillis())
+        .process(serializeMessage)
         .to(QueueConsts.FLOAT_MERGE);
 
-    from(QueueConsts.FLOAT_MERGE).process(floatMergeProcessor).to(QueueConsts.UPDATE_INDEX_AGG);
+    from(QueueConsts.FLOAT_MERGE)
+        .process(deserializeNcSubmissionMessage)
+        .process(floatMergeProcessor)
+        .process(serializeMessage)
+        .to(QueueConsts.UPDATE_INDEX_AGG);
 
-    from(QueueConsts.SUBMIT_REMOVAL).process(removalFileValidator)
+    from(QueueConsts.SUBMIT_REMOVAL)
+        .process(removalFileValidator)
         .choice()
           .when(RemovalMessagePredicate.IS_VALID)
+            .process(serializeMessage)
             .to(QueueConsts.REMOVAL_SPLITTER)
           .otherwise()
             .process(removalMessageTranslator)
+            .process(serializeMessage)
             .to(QueueConsts.SUBMISSION_REPORT);
 
-    from(QueueConsts.REMOVAL_SPLITTER).split(simple("${body.removalFiles}")).to(QueueConsts.VALIDATION_SUCCESS);
+    from(QueueConsts.REMOVAL_SPLITTER)
+        .process(deserializeRemovalMessage)
+        .split(simple("${body.removalFiles}"))
+        .process(serializeMessage)
+        .to(QueueConsts.VALIDATION_SUCCESS);
 
 
     // @formatter:on
