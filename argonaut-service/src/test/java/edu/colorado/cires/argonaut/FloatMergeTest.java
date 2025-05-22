@@ -6,42 +6,35 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.colorado.cires.argonaut.config.ServiceProperties;
 import edu.colorado.cires.argonaut.message.NcSubmissionMessage;
-import edu.colorado.cires.argonaut.processor.FloatMergeProcessor;
 import edu.colorado.cires.argonaut.route.QueueConsts;
 import edu.colorado.cires.argonaut.util.ArgonautFileUtils;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Instant;
-import java.util.Arrays;
-import java.util.List;
 import org.apache.camel.EndpointInject;
-import org.apache.camel.Exchange;
 import org.apache.camel.ProducerTemplate;
 import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.test.spring.junit5.CamelSpringBootTest;
 import org.apache.camel.test.spring.junit5.MockEndpointsAndSkip;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentMatcher;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 @SpringBootTest
 @CamelSpringBootTest
 @DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
 @ActiveProfiles("test")
-@MockEndpointsAndSkip(QueueConsts.UPDATE_INDEX_AGG)
+@MockEndpointsAndSkip(QueueConsts.UPDATE_INDEX)
 public class FloatMergeTest {
 
   static {
     System.setProperty("camel.threads.virtual.enabled", "true");
   }
 
-  @EndpointInject("mock:" + QueueConsts.UPDATE_INDEX_AGG)
+  @EndpointInject("mock:" + QueueConsts.UPDATE_INDEX)
   private MockEndpoint updateIndexAgg;
 
   @Autowired

@@ -13,7 +13,7 @@ public final class QueueConsts {
   public static final String FLOAT_MERGE_AGG = "seda:float-merge-agg";
   public static final String GEO_MERGE_AGG = "seda:geo-merge-agg";
   public static final String LATEST_MERGE_AGG = "seda:latest-merge-agg";
-  public static final String UPDATE_INDEX_AGG = "seda:update-index-agg";
+  public static final String UPDATE_INDEX = "seda:update-index";
   public static final String FLOAT_MERGE = "seda:float-merge";
   public static final String SUBMIT_REMOVAL = "seda:submit-removal";
   public static final String SUBMIT_UNKNOWN = "seda:submit-unknown";

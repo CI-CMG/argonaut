@@ -7,6 +7,7 @@ import edu.colorado.cires.argonaut.message.NcSubmissionMessagePredicate;
 import edu.colorado.cires.argonaut.message.RemovalMessagePredicate;
 import edu.colorado.cires.argonaut.processor.DeserializeNcSubmissionMessage;
 import edu.colorado.cires.argonaut.processor.DeserializeRemovalMessage;
+import edu.colorado.cires.argonaut.processor.FileChangedPersistenceProcessor;
 import edu.colorado.cires.argonaut.processor.FileMoveProcessor;
 import edu.colorado.cires.argonaut.processor.FloatMergeProcessor;
 import edu.colorado.cires.argonaut.processor.RemovalFileValidator;
@@ -45,6 +46,7 @@ public class Routes extends RouteBuilder {
   private final DeserializeNcSubmissionMessage deserializeNcSubmissionMessage;
   private final SerializeMessage serializeMessage;
   private final DeserializeRemovalMessage deserializeRemovalMessage;
+  private final FileChangedPersistenceProcessor fileChangedPersistenceProcessor;
 
   public Routes(ServiceProperties serviceProperties, SubmissionProcessor submissionProcessor, ValidationProcessor validationProcessor,
       SubmissionTimestampService submissionTimestampService,
@@ -52,7 +54,7 @@ public class Routes extends RouteBuilder {
       SubmissionCompleteAggregationStrategy submissionCompleteAggregationStrategy, FloatMergeProcessor floatMergeProcessor,
       RemovalFileValidator removalFileValidator, RemovalMessageTranslator removalMessageTranslator,
       DeserializeNcSubmissionMessage deserializeNcSubmissionMessage, SerializeMessage serializeMessage,
-      DeserializeRemovalMessage deserializeRemovalMessage) {
+      DeserializeRemovalMessage deserializeRemovalMessage, FileChangedPersistenceProcessor fileChangedPersistenceProcessor) {
     this.submissionProcessor = submissionProcessor;
     this.validationProcessor = validationProcessor;
     this.serviceProperties = serviceProperties;
@@ -66,6 +68,7 @@ public class Routes extends RouteBuilder {
     this.deserializeNcSubmissionMessage = deserializeNcSubmissionMessage;
     this.serializeMessage = serializeMessage;
     this.deserializeRemovalMessage = deserializeRemovalMessage;
+    this.fileChangedPersistenceProcessor = fileChangedPersistenceProcessor;
   }
 
   @Override
@@ -138,7 +141,7 @@ public class Routes extends RouteBuilder {
 
     from(QueueConsts.FILE_MOVED)
         .multicast().parallelProcessing()
-        .to(QueueConsts.SUBMISSION_REPORT, QueueConsts.UPDATE_INDEX_AGG);
+        .to(QueueConsts.SUBMISSION_REPORT, QueueConsts.UPDATE_INDEX);
 
     from(QueueConsts.SUBMISSION_REPORT + "?concurrentConsumers=" + serviceProperties.getSubmissionReportThreads())
         .process(deserializeNcSubmissionMessage)
@@ -163,7 +166,7 @@ public class Routes extends RouteBuilder {
         .process(deserializeNcSubmissionMessage)
         .process(floatMergeProcessor)
         .process(serializeMessage)
-        .to(QueueConsts.UPDATE_INDEX_AGG);
+        .to(QueueConsts.UPDATE_INDEX);
 
     from(QueueConsts.SUBMIT_REMOVAL)
         .process(removalFileValidator)
@@ -182,6 +185,9 @@ public class Routes extends RouteBuilder {
         .process(serializeMessage)
         .to(QueueConsts.VALIDATION_SUCCESS);
 
+    from(QueueConsts.UPDATE_INDEX)
+        .process(deserializeNcSubmissionMessage)
+        .process(fileChangedPersistenceProcessor);
 
     // @formatter:on
 

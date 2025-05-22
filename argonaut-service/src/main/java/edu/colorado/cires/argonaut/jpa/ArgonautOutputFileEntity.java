@@ -49,98 +49,87 @@ public class ArgonautOutputFileEntity {
     return id;
   }
 
-  public ArgonautOutputFileEntity withId(Long id) {
+  public void setId(Long id) {
     this.id = id;
-    return this;
   }
 
   public String getDac() {
     return dac;
   }
 
-  public ArgonautOutputFileEntity withDac(String dac) {
+  public void setDac(String dac) {
     this.dac = dac;
-    return this;
   }
 
   public String getFileName() {
     return fileName;
   }
 
-  public ArgonautOutputFileEntity withFileName(String fileName) {
+  public void setFileName(String fileName) {
     this.fileName = fileName;
-    return this;
   }
 
   public Instant getTimestamp() {
     return timestamp;
   }
 
-  public ArgonautOutputFileEntity withTimestamp(Instant timestamp) {
+  public void setTimestamp(Instant timestamp) {
     this.timestamp = timestamp;
-    return this;
   }
 
   public boolean isProfile() {
     return profile;
   }
 
-  public ArgonautOutputFileEntity withProfile(boolean profile) {
+  public void setProfile(boolean profile) {
     this.profile = profile;
-    return this;
   }
 
   public String getFloatId() {
     return floatId;
   }
 
-  public ArgonautOutputFileEntity withFloatId(String floatId) {
+  public void setFloatId(String floatId) {
     this.floatId = floatId;
-    return this;
   }
 
   public String getRegion() {
     return region;
   }
 
-  public ArgonautOutputFileEntity withRegion(String region) {
+  public void setRegion(String region) {
     this.region = region;
-    return this;
   }
 
   public boolean isRemoved() {
     return removed;
   }
 
-  public ArgonautOutputFileEntity withRemoved(boolean removed) {
+  public void setRemoved(boolean removed) {
     this.removed = removed;
-    return this;
   }
 
   public boolean isFloatMerged() {
     return floatMerged;
   }
 
-  public ArgonautOutputFileEntity withFloatMerged(boolean floatMerged) {
+  public void setFloatMerged(boolean floatMerged) {
     this.floatMerged = floatMerged;
-    return this;
   }
 
   public boolean isGeoMerged() {
     return geoMerged;
   }
 
-  public ArgonautOutputFileEntity withGeoMerged(boolean geoMerged) {
+  public void setGeoMerged(boolean geoMerged) {
     this.geoMerged = geoMerged;
-    return this;
   }
 
   public boolean isLatestMerged() {
     return latestMerged;
   }
 
-  public ArgonautOutputFileEntity withLatestMerged(boolean latestMerged) {
+  public void setLatestMerged(boolean latestMerged) {
     this.latestMerged = latestMerged;
-    return this;
   }
 }

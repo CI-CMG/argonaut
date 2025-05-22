@@ -19,7 +19,6 @@ import org.apache.camel.test.spring.junit5.CamelSpringBootTest;
 import org.apache.camel.test.spring.junit5.MockEndpointsAndSkip;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatcher;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
@@ -31,14 +30,14 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 @CamelSpringBootTest
 @DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
 @ActiveProfiles("test")
-@MockEndpointsAndSkip(QueueConsts.UPDATE_INDEX_AGG)
+@MockEndpointsAndSkip(QueueConsts.UPDATE_INDEX)
 public class FloatAggregatorTest {
   static {
     System.setProperty("camel.threads.virtual.enabled", "true");
   }
   @MockitoBean
   private FloatMergeProcessor floatMergeProcessor;
-  @EndpointInject("mock:" + QueueConsts.UPDATE_INDEX_AGG)
+  @EndpointInject("mock:" + QueueConsts.UPDATE_INDEX)
   private MockEndpoint updateIndexAgg;
 
   @Autowired

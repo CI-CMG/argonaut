@@ -42,7 +42,7 @@ import org.springframework.test.context.ActiveProfiles;
 @CamelSpringBootTest
 @DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
 @ActiveProfiles("test")
-@MockEndpointsAndSkip(QueueConsts.SUBMISSION_COMPLETE_AGG + "|" + QueueConsts.UPDATE_INDEX_AGG)
+@MockEndpointsAndSkip(QueueConsts.SUBMISSION_COMPLETE_AGG + "|" + QueueConsts.UPDATE_INDEX)
 public class SubmissionReportTest {
 
   static {
@@ -52,7 +52,7 @@ public class SubmissionReportTest {
   @EndpointInject("mock:" + QueueConsts.SUBMISSION_COMPLETE_AGG)
   private MockEndpoint submissionCompleteAgg;
 
-  @EndpointInject("mock:" + QueueConsts.UPDATE_INDEX_AGG)
+  @EndpointInject("mock:" + QueueConsts.UPDATE_INDEX)
   private MockEndpoint updateIndexAgg;
 
   @Autowired
