@@ -5,6 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.colorado.cires.argonaut.config.ServiceProperties;
 import edu.colorado.cires.argonaut.message.NcSubmissionMessage;
 import edu.colorado.cires.argonaut.route.QueueConsts;
@@ -60,6 +62,8 @@ public class FtpDataSubmissionAndValidationTest {
   @Autowired
   private ServiceProperties serviceProperties;
 
+  @Autowired
+  private ObjectMapper objectMapper;
   @Test
   public void test() throws Exception {
     Thread.sleep(TimeUnit.MINUTES.toMillis(1));
@@ -224,10 +228,20 @@ public class FtpDataSubmissionAndValidationTest {
 
       validationMessages.add(expectedMessage);
     });
-
     Set<NcSubmissionMessage> receivedMessages = validationSuccess.getExchanges().stream()
-        .map(exchange -> exchange.getIn().getBody(NcSubmissionMessage.class))
+        .map(exchange -> exchange.getIn().getBody(String.class))
+        .map(body -> {
+          try {
+            return objectMapper.readValue(body, NcSubmissionMessage.class);
+          } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+          }
+        })
         .collect(Collectors.toSet());
+
+//    Set<NcSubmissionMessage> receivedMessages = validationSuccess.getExchanges().stream()
+//        .map(exchange -> exchange.getIn().getBody(NcSubmissionMessage.class))
+//        .collect(Collectors.toSet());
 
     assertEquals(expectedFiles, processedFiles);
     assertEquals(validationMessages, receivedMessages);
@@ -309,12 +323,34 @@ public class FtpDataSubmissionAndValidationTest {
 
     });
 
+//    Set<NcSubmissionMessage> receivedValidMessages = validationSuccess.getExchanges().stream()
+//        .map(exchange -> exchange.getIn().getBody(NcSubmissionMessage.class))
+//        .collect(Collectors.toSet());
+
     Set<NcSubmissionMessage> receivedValidMessages = validationSuccess.getExchanges().stream()
-        .map(exchange -> exchange.getIn().getBody(NcSubmissionMessage.class))
+        .map(exchange -> exchange.getIn().getBody(String.class))
+        .map(body -> {
+          try {
+            return objectMapper.readValue(body, NcSubmissionMessage.class);
+          } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+          }
+        })
         .collect(Collectors.toSet());
 
+//    NcSubmissionMessage receivedFailedMessage = fileOutput.getExchanges().stream()
+//        .map(exchange -> exchange.getIn().getBody(NcSubmissionMessage.class)).findFirst().orElse(null);
+
     NcSubmissionMessage receivedFailedMessage = fileOutput.getExchanges().stream()
-        .map(exchange -> exchange.getIn().getBody(NcSubmissionMessage.class)).findFirst().orElse(null);
+        .map(exchange -> exchange.getIn().getBody(String.class))
+        .map(body -> {
+          try {
+            return objectMapper.readValue(body, NcSubmissionMessage.class);
+          } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+          }
+        })
+        .findFirst().orElse(null);
 
     assertEquals(expectedFiles, processedFiles);
     assertEquals(validationMessages, receivedValidMessages);
