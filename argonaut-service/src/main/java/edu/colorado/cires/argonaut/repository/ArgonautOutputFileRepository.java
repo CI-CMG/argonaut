@@ -11,4 +11,5 @@ public interface ArgonautOutputFileRepository extends JpaRepository<ArgonautOutp
 
   List<ArgonautOutputFileEntity> findAllByFloatMergedFalseAndFileType(String fileType);
   Optional<ArgonautOutputFileEntity> findByDacAndFloatIdAndFileType(String dac, String floatId, String fileType);
+  Optional<ArgonautOutputFileEntity> findByDacAndFloatIdAndFileName(String dac, String floatId, String filename);
 }
