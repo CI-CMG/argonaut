@@ -9,6 +9,7 @@ import java.io.InputStream;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -57,7 +58,7 @@ public class ArgonautFileUtils {
 
   public static void move(Path src, Path dest) {
     try{
-      Files.move(src, dest);
+      Files.move(src, dest, StandardCopyOption.REPLACE_EXISTING);
     } catch (IOException e) {
       throw new RuntimeException("Unable to move " + src + " to " + dest, e);
     }

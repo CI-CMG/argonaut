@@ -87,31 +87,32 @@ public class Routes extends RouteBuilder {
           }
 
           //TODO add logging
-          from("file:" + dacSubmitDir + "?readLock=changed")
+          from("file:" + dacSubmitDir + "?readLock=changed&delete=true")
             .routeId("dac-submit-" + dac.getName())
             .setHeader(HeaderConsts.DAC, constant(dac.getName()))
             .setHeader(HeaderConsts.SUBMISSION_TIMESTAMP, submissionTimestampService::generateTimestamp)
             .choice()
               .when(simple("${header.CamelFileNameOnly.endsWith('.tar.gz')}"))
+                .process(exchange-> exchange.getIn().setBody(exchange.getIn().getBody(File.class).toPath()))
+                .bean("submissionProcessor", "untarAndMoveToProcessing(${header." + HeaderConsts.DAC +"}, ${header."+ HeaderConsts.SUBMISSION_TIMESTAMP + "}, ${body})")
                 .to(QueueConsts.SUBMIT_DATA)
 //              .when(simple("${header.CamelFileNameOnly.endsWith('_greylist.csv')}"))
 //                .to("seda:submit-greylist")
               .when(simple("${header.CamelFileNameOnly.endsWith('_removal.txt')}"))
-                .to(QueueConsts.SUBMIT_REMOVAL)
+                .process(removalFileValidator)
+                .to(QueueConsts.SUBMIT_REMOVAL+"?blockWhenFull=true")
               .otherwise()
-                .to(QueueConsts.SUBMIT_UNKNOWN);       });
+                .to(QueueConsts.SUBMIT_UNKNOWN);
+        });
 
     // @formatter:off
 
     from(QueueConsts.SUBMIT_DATA)
-        .process(new Processor() {@Override public void process(Exchange exchange)throws Exception {
-        exchange.getIn().setBody(exchange.getIn().getBody(File.class).toPath());
-  }})
-//        .transform(simple("${body.toPath()}"))
-        .bean("submissionProcessor", "untarAndMoveToProcessing(${header." + HeaderConsts.DAC +"}, ${header."+ HeaderConsts.SUBMISSION_TIMESTAMP + "}, ${body})")
+//        .process(exchange-> exchange.getIn().setBody(exchange.getIn().getBody(File.class).toPath()))
+//        .bean("submissionProcessor", "untarAndMoveToProcessing(${header." + HeaderConsts.DAC +"}, ${header."+ HeaderConsts.SUBMISSION_TIMESTAMP + "}, ${body})")
         .split(body())
         .process(serializeMessage)
-        .to(QueueConsts.VALIDATION);
+        .to(QueueConsts.VALIDATION+"?blockWhenFull=true");
 
     from(QueueConsts.VALIDATION + "?concurrentConsumers=" + serviceProperties.getValidationThreads())
       .process(deserializeNcSubmissionMessage)
@@ -119,67 +120,66 @@ public class Routes extends RouteBuilder {
       .choice()
         .when(NcSubmissionMessagePredicate.IS_VALID)
           .process(serializeMessage)
-          .to(QueueConsts.VALIDATION_SUCCESS)
+          .to(QueueConsts.VALIDATION_SUCCESS+"?blockWhenFull=true")
         .otherwise()
           .process(serializeMessage)
-          .to(QueueConsts.FILE_OUTPUT);
+          .to(QueueConsts.FILE_OUTPUT+"?blockWhenFull=true");
 
     from(QueueConsts.VALIDATION_SUCCESS)
       .multicast().parallelProcessing()
         .to(
-            QueueConsts.FILE_OUTPUT,
-            QueueConsts.LATEST_MERGE_AGG,
-            QueueConsts.GEO_MERGE_AGG
+            QueueConsts.FILE_OUTPUT+"?blockWhenFull=true"
+//            QueueConsts.LATEST_MERGE_AGG,
+//            QueueConsts.GEO_MERGE_AGG
         );
 
     from(QueueConsts.FILE_OUTPUT)
         .process(deserializeNcSubmissionMessage)
         .process(fileMoveProcessor)
         .process(serializeMessage)
-        .to(QueueConsts.FILE_MOVED);
+        .to(QueueConsts.FILE_MOVED+"?blockWhenFull=true");
 
     from(QueueConsts.FILE_MOVED)
         .multicast().parallelProcessing()
-        .to(QueueConsts.SUBMISSION_REPORT, QueueConsts.UPDATE_INDEX);
+        .to(QueueConsts.SUBMISSION_REPORT+"?blockWhenFull=true", QueueConsts.UPDATE_INDEX+"?blockWhenFull=true");
 
     from(QueueConsts.SUBMISSION_REPORT + "?concurrentConsumers=" + serviceProperties.getSubmissionReportThreads())
         .process(deserializeNcSubmissionMessage)
         .process(submissionReportProcessor)
-        .process(serializeMessage)
-        .to(QueueConsts.SUBMISSION_COMPLETE_AGG);
+        .process(serializeMessage);
+//        .to(QueueConsts.SUBMISSION_COMPLETE_AGG+"?blockWhenFull=true");
 
-    from(QueueConsts.SUBMISSION_COMPLETE_AGG)
-        .process(deserializeNcSubmissionMessage)
-        .aggregate(simple("${body.dac}_${body.timestamp}"), submissionCompleteAggregationStrategy)
-        .process(serializeMessage)
-        .to(QueueConsts.PREPARE_SUBMISSION_EMAIL);
+//    from(QueueConsts.SUBMISSION_COMPLETE_AGG)
+//        .process(deserializeNcSubmissionMessage)
+//        .aggregate(simple("${body.dac}_${body.timestamp}"), submissionCompleteAggregationStrategy)
+//        .process(serializeMessage)
+//        .to(QueueConsts.PREPARE_SUBMISSION_EMAIL+"?blockWhenFull=true");
 
-    from(QueueConsts.FLOAT_MERGE)
-        .process(deserializeNcSubmissionMessage)
-        .process(floatMergeProcessor)
-        .process(serializeMessage)
-        .to(QueueConsts.UPDATE_INDEX);
+//    from(QueueConsts.FLOAT_MERGE)
+//        .process(deserializeNcSubmissionMessage)
+//        .process(floatMergeProcessor)
+//        .process(serializeMessage)
+//        .to(QueueConsts.UPDATE_INDEX+"?blockWhenFull=true");
 
     from(QueueConsts.SUBMIT_REMOVAL)
-        .process(removalFileValidator)
         .choice()
           .when(RemovalMessagePredicate.IS_VALID)
             .process(serializeMessage)
-            .to(QueueConsts.REMOVAL_SPLITTER)
+            .to(QueueConsts.REMOVAL_SPLITTER+"?blockWhenFull=true")
           .otherwise()
             .process(removalMessageTranslator)
             .process(serializeMessage)
-            .to(QueueConsts.SUBMISSION_REPORT);
+            .to(QueueConsts.SUBMISSION_REPORT+"?blockWhenFull=true");
 
     from(QueueConsts.REMOVAL_SPLITTER)
         .process(deserializeRemovalMessage)
         .split(simple("${body.removalFiles}"))
         .process(serializeMessage)
-        .to(QueueConsts.VALIDATION_SUCCESS);
+        .to(QueueConsts.VALIDATION_SUCCESS+"?blockWhenFull=true");
 
-    from(QueueConsts.UPDATE_INDEX)
-        .process(deserializeNcSubmissionMessage)
-        .process(fileChangedPersistenceProcessor);
+//    from(QueueConsts.UPDATE_INDEX)
+//        .process(deserializeNcSubmissionMessage)
+//        .process(fileChangedPersistenceProcessor);
 
     // @formatter:on
 
