@@ -47,7 +47,7 @@ jobs:
       - name: Get project data
         env:
           GH_TOKEN: ${{ steps.generate-token.outputs.token }}
-          ORGANIZATION: CI-CMH
+          ORGANIZATION: CI-CMG
           PROJECT_NUMBER: 17
         run: |
           gh api graphql -f query='
