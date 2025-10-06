@@ -1,6 +1,13 @@
 name: project change
 
 on:
+  workflow_call:
+  workflow_dispatch:
+  workflow_run:
+    types:
+      - completed
+      - requested
+      - in_progress
   status:
   watch:
     types:
@@ -26,10 +33,10 @@ on:
       - edited
       - deleted
   issue_comment:
-    types:
-      - created
-      - edited
-      - deleted
+#    types:
+#      - created
+#      - edited
+#      - deleted
   issues:
     types:
       - opened
