@@ -1,41 +1,78 @@
 name: project change
 
 on:
-  branch_protection_rule:
-  check_run:
-  check_suite:
-  create:
-  delete:
-  deployment:
-  deployment_status:
-  discussion:
-  discussion_comment:
-  fork:
-  gollum:
-  issue_comment:
-  issues:
-  label:
-  merge_group:
-  milestone:
-  page_build:
-  public:
-  pull_request:
-  pull_request_target:
-  pull_request_review:
-  pull_request_review_comment:
-  push:
-  registry_package:
-  release:
-  repository_dispatch:
-#  schedule:
-  status:
-  watch:
-  workflow_call:
+#  branch_protection_rule:
+#  check_run:
+#  check_suite:
+#  create:
+#  delete:
+#  deployment:
+#  deployment_status:
+#  discussion:
+#  discussion_comment:
+#  fork:
+#  gollum:
+#  issue_comment:
+#  issues:
+#  label:
+#  merge_group:
+#  milestone:
+#  page_build:
+#  public:
+#  pull_request:
+#  pull_request_target:
+#  pull_request_review:
+#  pull_request_review_comment:
+#  push:
+#  registry_package:
+#  release:
+#  repository_dispatch:
+##  schedule:
+#  status:
+#  watch:
+#  workflow_call:
   workflow_dispatch:
-
+    - cron: "0/2 * * * *"
 jobs:
   debug:
     runs-on: ubuntu-latest
     steps:
-      - run: echo "event name is:" ${{ github.event_name }}
-      - run: echo "event type is:" ${{ github.event.action }}
+      - name: Generate token
+        id: generate-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ vars.PROJECT_AUTOMATION_APP_ID }}
+          private-key: ${{ secrets.PROJECT_AUTOMATION_APP_PEM }}
+      - name: Get project data
+        env:
+          GH_TOKEN: ${{ steps.generate-token.outputs.token }}
+          ORGANIZATION: CI-CMH
+          PROJECT_NUMBER: 17
+        run: |
+          gh api graphql -f query='
+            query($org: String!, $number: Int!) {
+              organization(login: $org){
+                projectV2(number: $number) {
+                  id
+                  fields(first:20) {
+                    nodes {
+                      ... on ProjectV2Field {
+                        id
+                        name
+                      }
+                      ... on ProjectV2SingleSelectField {
+                        id
+                        name
+                        options {
+                          id
+                          name
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }' -f org=$ORGANIZATION -F number=$PROJECT_NUMBER > project_data.json
+          cat project_data.json
+#      - run: echo "event name is:" ${{ github.event_name }}
+#      - run: echo "event type is:" ${{ github.event.action }}
