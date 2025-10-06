@@ -3,11 +3,11 @@ name: project change
 on:
   workflow_call:
   workflow_dispatch:
-  workflow_run:
-    types:
-      - completed
-      - requested
-      - in_progress
+#  workflow_run:
+#    types:
+#      - completed
+#      - requested
+#      - in_progress
   status:
   watch:
     types:
