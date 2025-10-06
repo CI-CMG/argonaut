@@ -1,6 +1,10 @@
 name: project change
 
 on:
+  status:
+  watch:
+    types:
+      - started
   discussion:
     types:
       - created
