@@ -1,62 +1,37 @@
 name: project change
 
 on:
-  workflow_call:
-  workflow_dispatch:
-#  workflow_run:
-#    types:
-#      - completed
-#      - requested
-#      - in_progress
+  branch_protection_rule:
+  check_run:
+  check_suite:
+  create:
+  delete:
+  deployment:
+  deployment_status:
+  discussion:
+  discussion_comment:
+  fork:
+  gollum:
+  issue_comment:
+  issues:
+  label:
+  merge_group:
+  milestone:
+  page_build:
+  public:
+  pull_request:
+  pull_request_target:
+  pull_request_review:
+  pull_request_review_comment:
+  push:
+  registry_package:
+  release:
+  repository_dispatch:
+#  schedule:
   status:
   watch:
-#    types:
-#      - started
-  discussion:
-#    types:
-#      - created
-#      - edited
-#      - deleted
-#      - transferred
-#      - pinned
-#      - unpinned
-#      - labeled
-#      - unlabeled
-#      - locked
-#      - unlocked
-#      - category_changed
-#      - answered
-#      - unanswered
-  discussion_comment:
-#    types:
-#      - created
-#      - edited
-#      - deleted
-  issue_comment:
-#    types:
-#      - created
-#      - edited
-#      - deleted
-  issues:
-#    types:
-#      - opened
-#      - edited
-#      - deleted
-#      - transferred
-#      - pinned
-#      - unpinned
-#      - closed
-#      - reopened
-#      - assigned
-#      - unassigned
-#      - labeled
-#      - unlabeled
-#      - locked
-#      - unlocked
-#      - milestoned
-#      - demilestoned
-#      - typed
-#      - untyped
+  workflow_call:
+  workflow_dispatch:
 
 jobs:
   debug:
