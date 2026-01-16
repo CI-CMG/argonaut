@@ -177,9 +177,9 @@ public class Routes extends RouteBuilder {
         .process(serializeMessage)
         .to(QueueConsts.VALIDATION_SUCCESS+"?blockWhenFull=true");
 
-//    from(QueueConsts.UPDATE_INDEX)
-//        .process(deserializeNcSubmissionMessage)
-//        .process(fileChangedPersistenceProcessor);
+    from(QueueConsts.UPDATE_INDEX)
+        .process(deserializeNcSubmissionMessage)
+        .process(fileChangedPersistenceProcessor);
 
     // @formatter:on
 

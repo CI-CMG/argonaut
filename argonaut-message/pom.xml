@@ -5,7 +5,7 @@
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>io.github.ci-cmg.argo</groupId>
-    <artifactId>argonaut</artifactId>
+    <artifactId>argonaut-parent</artifactId>
     <version>0.1.0-SNAPSHOT</version>
   </parent>
 

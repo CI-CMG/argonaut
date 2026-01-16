@@ -28,6 +28,11 @@ Maybe code to create multi float file: https://github.com/euroargodev/Coriolis-d
 
 
 
+Ocean Definitions: https://www.marineregions.org/sources.php#goas
+To cite this product:
+Flanders Marine Institute (2021). Global Oceans and Seas, version 1. Available online at https://www.marineregions.org/. https://doi.org/10.14284/542
+
+
 
 
 Properties file based UserManager implementation. We use user. properties file to store user data.
