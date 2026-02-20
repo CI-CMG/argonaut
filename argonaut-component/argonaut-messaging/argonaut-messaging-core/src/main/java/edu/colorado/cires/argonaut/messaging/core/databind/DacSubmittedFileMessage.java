@@ -20,8 +20,6 @@ public final class DacSubmittedFileMessage {
   public static final class Builder {
 
     private String path;
-    private String processingPath;
-    private String processedPath;
     private Instant timestamp;
     private String dac;
 
@@ -33,16 +31,6 @@ public final class DacSubmittedFileMessage {
       path = source.path;
       timestamp = source.timestamp;
       dac = source.dac;
-    }
-
-    public Builder withProcessingPath(String processingPath) {
-      this.processingPath = processingPath;
-      return this;
-    }
-
-    public Builder withProcessedPath(String processedPath) {
-      this.processedPath = processedPath;
-      return this;
     }
 
     public Builder withPath(String path) {
@@ -61,20 +49,16 @@ public final class DacSubmittedFileMessage {
     }
 
     public DacSubmittedFileMessage build() {
-      return new DacSubmittedFileMessage(path, processingPath, processedPath, timestamp, dac);
+      return new DacSubmittedFileMessage(path, timestamp, dac);
     }
   }
 
   private final String path;
-  private String processingPath;
-  private String processedPath;
   private final Instant timestamp;
   private final String dac;
 
-  private DacSubmittedFileMessage(String path, String processingPath, String processedPath, Instant timestamp, String dac) {
+  private DacSubmittedFileMessage(String path, Instant timestamp, String dac) {
     this.path = path;
-    this.processingPath = processingPath;
-    this.processedPath = processedPath;
     this.timestamp = timestamp;
     this.dac = dac;
   }
@@ -91,38 +75,25 @@ public final class DacSubmittedFileMessage {
     return path;
   }
 
-  public String getProcessingPath() {
-    return processingPath;
-  }
-
-  public String getProcessedPath() {
-    return processedPath;
-  }
-
   @Override
   public boolean equals(Object o) {
-    if (o == null || getClass() != o.getClass()) {
-      return false;
-    }
+    if (o == null || getClass() != o.getClass()) return false;
     DacSubmittedFileMessage that = (DacSubmittedFileMessage) o;
-    return Objects.equals(path, that.path) && Objects.equals(processingPath, that.processingPath) && Objects.equals(
-        processedPath, that.processedPath) && Objects.equals(timestamp, that.timestamp) && Objects.equals(dac, that.dac);
+    return Objects.equals(path, that.path) && Objects.equals(timestamp, that.timestamp) && Objects.equals(dac, that.dac);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(path, processingPath, processedPath, timestamp, dac);
+    return Objects.hash(path, timestamp, dac);
   }
 
   @Override
   public String toString() {
     return "DacSubmittedFileMessage{" +
-        "path='" + path + '\'' +
-        ", processingPath='" + processingPath + '\'' +
-        ", processedPath='" + processedPath + '\'' +
-        ", timestamp=" + timestamp +
-        ", dac='" + dac + '\'' +
-        '}';
+            "path='" + path + '\'' +
+            ", timestamp=" + timestamp +
+            ", dac='" + dac + '\'' +
+            '}';
   }
 
 }

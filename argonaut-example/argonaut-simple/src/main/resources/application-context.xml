@@ -6,33 +6,52 @@
        http://camel.apache.org/schema/spring
        http://camel.apache.org/schema/spring/camel-spring.xsd">
 
-  <bean class="org.apache.camel.spring.spi.BridgePropertyPlaceholderConfigurer">
+  <import resource="classpath:/dac-submission-routes.xml"/>
+
+  <bean class="edu.colorado.cires.argonaut.standalone.CustomBridgePropertyPlaceholderConfigurer">
     <property name="locations">
       <list>
-        <value>classpath:application.properties</value>
+        <value>classpath:argonaut-default.properties</value>
+        <value>file:config/argonaut.properties</value>
+        <value>file:argonaut.properties</value>
       </list>
     </property>
-    <property name="ignoreUnresolvablePlaceholders" value="true"/>
+<!--    <property name="ignoreUnresolvablePlaceholders" value="true"/>-->
+    <property name="ignoreResourceNotFound" value="true"/>
   </bean>
 
   <bean id="jsonMapper" class="edu.colorado.cires.argonaut.messaging.core.util.ArgonautObjectmapperFactory" factory-method="getJsonMapper" />
+
   <bean id="serializationProcessor" class="edu.colorado.cires.argonaut.standalone.SerializationProcessor">
     <property name="jsonMapper" ref="jsonMapper"/>
   </bean>
+
   <bean id="deserializationProcessor" class="edu.colorado.cires.argonaut.standalone.DeserializationProcessor">
     <property name="jsonMapper" ref="jsonMapper"/>
   </bean>
+
   <bean id="messageSender" class="edu.colorado.cires.argonaut.messaging.camel.ArgonautCamelMessageSender">
     <property name="producerTemplateId" value="producerTemplate" />
   </bean>
-  <bean id="localFileStore" class="edu.colorado.cires.argonaut.file.local.LocalFileStore" />
+
+  <bean id="submissionFileStore" class="edu.colorado.cires.argonaut.file.local.LocalFileStore">
+    <property name="rootPath" value="${dac.submission.directory}"/>
+  </bean>
+
+  <bean id="processingFileStore" class="edu.colorado.cires.argonaut.file.local.LocalFileStore">
+    <property name="rootPath" value="${dac.processing.directory}"/>
+  </bean>
+
   <bean id="removalFileValidationProcessor" class="edu.colorado.cires.argonaut.processor.core.DefaultRemovalFileValidationProcessor">
-    <property name="fileStore" ref="localFileStore" />
+    <property name="fileStore" ref="submissionFileStore" />
   </bean>
+
   <bean id="tarballSubmissionProcessor" class="edu.colorado.cires.argonaut.processor.core.DefaultTarballSubmissionProcessor">
-    <property name="localTempDir" value="${temp-directory}"/>
-    <property name="submissionFileStore" ref="localFileStore"/>
+    <property name="localTempDir" value="${work-directory}"/>
+    <property name="submissionFileStore" ref="submissionFileStore"/>
+    <property name="processingFileStore" ref="processingFileStore"/>
   </bean>
+
   <bean id="submitFileRouter" class="edu.colorado.cires.argonaut.processor.core.SubmissionRoutingProcessor">
     <property name="jsonMapper" ref="jsonMapper" />
     <property name="messageSender" ref="messageSender"/>
@@ -41,8 +60,15 @@
     <property name="submitRemovalQueue" value="seda:submit-removal"/>
     <property name="tarballSubmissionProcessor" ref="tarballSubmissionProcessor"/>
   </bean>
+
   <bean id="validationProcessor" class="edu.colorado.cires.argonaut.processor.core.DefaultValidationProcessor" />
-  <bean id="validationResultRouter" class="edu.colorado.cires.argonaut.processor.core.DefaultValidationRouter" />
+
+  <bean id="validationResultRouter" class="edu.colorado.cires.argonaut.processor.core.DefaultValidationRouter">
+    <property name="jsonMapper" ref="jsonMapper"/>
+    <property name="messageSender" ref="messageSender"/>
+    <property name="successQueue" value="seda:validation-success"/>
+    <property name="failureQueue" value="seda:file-output" />
+  </bean>
 
 
 
@@ -51,10 +77,10 @@
 
 
 
-  <bean id="moveSubmitToWorkProcessor" class="edu.colorado.cires.argonaut.standalone.MoveSubmitToWorkProcessor">
-    <property name="fileStore" ref="localFileStore"/>
-    <property name="submitWorkDirectory" value="${dac.submission.directory}"/>
+  <bean id="moveSubmitToProcessingProcessor" class="edu.colorado.cires.argonaut.standalone.MoveSubmitToProcessingDir">
+    <property name="fileStore" ref="submissionFileStore"/>
   </bean>
+
   <bean id="fileToSubmissionMessage" class="edu.colorado.cires.argonaut.standalone.FileToSubmissionMessage"/>
 <!--  <bean id="fileMovedRouter" class="edu.colorado.cires.argonaut.processor.core.DefaultFileMovedRouter" />-->
 <!--  <bean id="submissionReportProcessor" class="edu.colorado.cires.argonaut.processor.core.DefaultSubmissionReportProcessor" />-->
@@ -72,6 +98,7 @@
 
     <route id="validate-submission">
       <from uri="seda:validation"/>
+      <bean ref="deserializationProcessor" method="deserialize(${body}, edu.colorado.cires.argonaut.messaging.core.databind.NcSubmissionMessage)"/>
       <bean ref="validationProcessor" method="validate" />
       <bean ref="validationResultRouter" method="route" />
     </route>

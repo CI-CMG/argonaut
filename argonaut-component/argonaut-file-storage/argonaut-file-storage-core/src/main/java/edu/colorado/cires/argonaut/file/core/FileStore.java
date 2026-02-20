@@ -6,6 +6,8 @@ import java.nio.file.Path;
 
 public interface FileStore {
 
+  String getRoot();
+
   void move(String from, String to);
 
   String appendToPath(String base, String... parts);

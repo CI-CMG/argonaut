@@ -31,25 +31,31 @@ public class DefaultRemovalFileValidationProcessor implements RemovalFileValidat
 
   @Override
   public RemovalMessage validate(DacSubmittedFileMessage message) {
-    String dac = message.getDac();
-    Instant timestamp = message.getTimestamp();
-    String fileName = fileStore.getFileName(message.getPath());
-    RemovalMessage output = null;
-    try {
-      output = RemovalMessage.builder()
-          .withFileName(fileName)
-          .withTimestamp(timestamp)
-          .withDac(dac)
-          .withValidationErrors(validate(dac, message.getPath()))
-          .build();
-
-      if (output.getValidationErrors().isEmpty()) {
-        output = RemovalMessage.builder(output).withRemovalFiles(parse(dac, timestamp, message.getPath())).build();
-      }
-    } finally {
-      fileStore.move(message.getPath(), fileStore.appendToPath(message.getProcessedPath(), timestamp.toString(), fileName));
-    }
-    return output;
+//    String dac = message.getDac();
+//    Instant timestamp = message.getTimestamp();
+//    String fileName = fileStore.getFileName(message.getPath());
+//    String processingPath = fileStore.appendToPath(
+//            fileStore.getRoot(),
+//            "dac",
+//            message.getDac(),
+//            "processing"
+//    );
+//    RemovalMessage output = null;
+//    try {
+//      output = RemovalMessage.builder()
+//          .withFileName(fileName)
+//          .withTimestamp(timestamp)
+//          .withDac(dac)
+//          .withValidationErrors(validate(dac, message.getPath()))
+//          .build();
+//
+//      if (output.getValidationErrors().isEmpty()) {
+//        output = RemovalMessage.builder(output).withRemovalFiles(parse(dac, timestamp, message.getPath())).build();
+//      }
+//    } finally {
+//      fileStore.move(message.getPath(), fileStore.appendToPath(message.getProcessedPath(), timestamp.toString(), fileName));
+//    }
+    return null;
   }
 
   private List<String> validate(String dac, String fileName) {

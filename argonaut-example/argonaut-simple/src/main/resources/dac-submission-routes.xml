@@ -11,7 +11,7 @@
     <route id="aoml-dac-submission">
       <from uri="file:{{dac.submission.directory}}/dac/aoml/submit?readLock=changed&amp;delete=true"/>
       <bean ref="fileToSubmissionMessage" method="convert(${body}, 'aoml')"/>
-      <bean ref="moveSubmitToWorkProcessor" method="moveToWork"/>
+      <bean ref="moveSubmitToProcessingProcessor" method="moveToProcessing"/>
       <bean ref="serializationProcessor" method="serialize"/>
       <to uri="seda:submit-work"/>
     </route>
