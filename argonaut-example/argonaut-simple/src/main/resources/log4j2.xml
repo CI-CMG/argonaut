@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="info">
+
+  <Appenders>
+    <Console name="Console" target="SYSTEM_OUT">
+      <PatternLayout>
+<!--        <Pattern>%d{ISO8601} %5level %36X{MBIngestTraceId} %pid{-} -&#45;&#45; [%15.15t] %c : %m%n%throwable</Pattern>-->
+        <Pattern>
+          %style{%d{ISO8601}}{dim} %highlight{%5level} %36X{MBIngestTraceId} %style{[%15.15t]}{dim} %style{%c}{blue} %style{:}{dim} %highlight{%m%n%throwable}
+        </Pattern>
+      </PatternLayout>
+    </Console>
+  </Appenders>
+  <Loggers>
+    <Logger name="edu.colorado" level="info" additivity="false">
+      <AppenderRef ref="Console"/>
+    </Logger>
+
+    <Root level="info">
+      <AppenderRef ref="Console"/>
+    </Root>
+  </Loggers>
+
+</Configuration>

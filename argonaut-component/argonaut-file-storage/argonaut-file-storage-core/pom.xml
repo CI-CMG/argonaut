@@ -6,12 +6,18 @@
 
   <parent>
     <groupId>io.github.ci-cmg.argo</groupId>
-    <artifactId>argonaut-parent-pom</artifactId>
+    <artifactId>argonaut-file-storage-parent</artifactId>
     <version>1.0.0-SNAPSHOT</version>
   </parent>
 
-  <artifactId>argonaut-service</artifactId>
-  <packaging>pom</packaging>
+  <artifactId>argonaut-file-storage-core</artifactId>
 
+  <dependencies>
+    <dependency>
+      <groupId>io.github.ci-cmg.argo</groupId>
+      <artifactId>argonaut-messaging-core</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+  </dependencies>
 
 </project>

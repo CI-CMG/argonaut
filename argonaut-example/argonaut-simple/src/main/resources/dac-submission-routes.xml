@@ -1,0 +1,34 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="
+       http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://camel.apache.org/schema/spring
+       http://camel.apache.org/schema/spring/camel-spring.xsd">
+
+  <routeContext id="dac-submission-routes" xmlns="http://camel.apache.org/schema/spring">
+
+    <route id="aoml-dac-submission">
+      <from uri="file:{{dac.submission.directory}}/dac/aoml/submit?readLock=changed&amp;delete=true"/>
+      <bean ref="fileToSubmissionMessage" method="convert(${body}, 'aoml')"/>
+      <bean ref="moveSubmitToWorkProcessor" method="moveToWork"/>
+      <bean ref="serializationProcessor" method="serialize"/>
+      <to uri="seda:submit-work"/>
+    </route>
+
+    <!-- DAC submission directory template -->
+    <!-- Replace DAC-CODE with the short name of the DAC.  Ex. 'aoml'.  3 places. -->
+    <!--
+    <route id="DAC-CODE-dac-submission">
+      <from uri="file:{{dac.submission.directory}}/dac/DAC-CODE/submit?readLock=changed&amp;delete=true"/>
+      <bean ref="fileToSubmissionMessage" method="convert(${body}, 'DAC-CODE')"/>
+      <bean ref="moveSubmitToWorkProcessor" method="moveToWork"/>
+      <bean ref="serializationProcessor" method="serialize"/>
+      <to uri="seda:submit-work"/>
+    </route>
+    -->
+
+
+  </routeContext>
+
+</beans>
