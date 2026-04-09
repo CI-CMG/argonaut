@@ -15,6 +15,7 @@
 
   <modules>
     <module>argonaut-metadata-core</module>
+    <module>argonaut-metadata-jpa</module>
   </modules>
 
 

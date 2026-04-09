@@ -4,5 +4,5 @@ import edu.colorado.cires.argonaut.messaging.core.databind.NcSubmissionMessage;
 
 public interface SubmissionReportProcessor {
 
-  void  generateReport(NcSubmissionMessage message);
+  void appendReport(NcSubmissionMessage message);
 }

@@ -3,7 +3,12 @@ package edu.colorado.cires.argonaut.file.local;
 import edu.colorado.cires.argonaut.file.core.FileStore;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.*;
+import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.nio.file.StandardOpenOption;
 
 public class LocalFileStore implements FileStore {
 
@@ -20,7 +25,7 @@ public class LocalFileStore implements FileStore {
 
   @Override
   public void move(String from, String to) {
-    Path toPath = Paths.get(to);
+    Path toPath = validatePath(to);
     Path fromPath = Paths.get(from);
     copy(fromPath, toPath, true);
   }
@@ -66,12 +71,47 @@ public class LocalFileStore implements FileStore {
 
   @Override
   public void uploadLocalFile(Path localFile, String path) throws IOException {
-    Path toPath = Paths.get(path);
+    Path toPath = validatePath(path);
     copy(localFile, toPath, false);
   }
 
   @Override
   public InputStream getInputStream(String path) throws IOException {
-    return Files.newInputStream(Paths.get(path));
+    return Files.newInputStream(validatePath(path));
+  }
+
+  private Path validatePath(String path) {
+    Path rootAbsolutePath = rootPath.toAbsolutePath().normalize();
+    Path toPath = Paths.get(path).toAbsolutePath().normalize();
+    if (!toPath.startsWith(rootAbsolutePath)) {
+      throw new IllegalArgumentException("Path " + toPath + " does not start with " + rootAbsolutePath);
+    }
+    return toPath;
+  }
+
+  @Override
+  public OutputStream getOutputStream(String path) throws IOException {
+    Path toPath = validatePath(path);
+    Path parent = toPath.getParent();
+    if (parent != null) {
+      Files.createDirectories(parent);
+    }
+    return Files.newOutputStream(toPath, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE);
+  }
+
+  @Override
+  public void delete(String path) {
+    Path toPath = validatePath(path);
+    //TODO delete empty directories
+    try {
+      Files.delete(toPath);
+    } catch (IOException e) {
+      throw new RuntimeException("Unable to delete " + toPath, e);
+    }
+  }
+
+  @Override
+  public boolean fileExists(String path) {
+    return Files.isRegularFile(validatePath(path));
   }
 }
