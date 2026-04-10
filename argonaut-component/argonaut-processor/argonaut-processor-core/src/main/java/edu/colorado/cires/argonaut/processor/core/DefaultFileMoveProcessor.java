@@ -2,6 +2,7 @@ package edu.colorado.cires.argonaut.processor.core;
 
 import edu.colorado.cires.argonaut.file.core.FileStore;
 import edu.colorado.cires.argonaut.messaging.core.databind.NcSubmissionMessage;
+import edu.colorado.cires.argonaut.messaging.core.databind.NcSubmissionMessage.FileType;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -56,14 +57,14 @@ public class DefaultFileMoveProcessor implements FileMoveProcessor {
   private void handleAdd(NcSubmissionMessage ncSubmissionMessage) {
     String processingDacDir = processingFileStore.appendToPath(processingFileStore.getRoot(), "dac", ncSubmissionMessage.getDac(),
         ncSubmissionMessage.getTimestamp().toString(), ncSubmissionMessage.getFloatId().toString());
-    if (ncSubmissionMessage.isProfile()) {
+    if (FileType.PROFILE == ncSubmissionMessage.getFileType()) {
       processingDacDir = processingFileStore.appendToPath(processingDacDir, "profiles");
     }
     String processingFile = processingFileStore.appendToPath(processingDacDir, ncSubmissionMessage.getFileName());
     if (ncSubmissionMessage.getValidationErrors().isEmpty()) {
       String destinationDir = outputFileStore.appendToPath(outputFileStore.getRoot(), "dac", ncSubmissionMessage.getDac(),
           ncSubmissionMessage.getFloatId());
-      if (ncSubmissionMessage.isProfile()) {
+      if (FileType.PROFILE == ncSubmissionMessage.getFileType()) {
         destinationDir = outputFileStore.appendToPath(destinationDir, "profiles");
       }
       String destinationFile = outputFileStore.appendToPath(destinationDir, ncSubmissionMessage.getFileName());
@@ -78,7 +79,7 @@ public class DefaultFileMoveProcessor implements FileMoveProcessor {
     } else {
       String destinationDir = submissionFileStore.appendToPath(submissionFileStore.getRoot(), "dac", ncSubmissionMessage.getDac(), "processed",
           ncSubmissionMessage.getTimestamp().toString(), "reject", ncSubmissionMessage.getFloatId().toString());
-      if (ncSubmissionMessage.isProfile()) {
+      if (FileType.PROFILE == ncSubmissionMessage.getFileType()) {
         destinationDir = submissionFileStore.appendToPath(destinationDir, "profiles");
       }
       String destinationFile = submissionFileStore.appendToPath(destinationDir, ncSubmissionMessage.getFileName());

@@ -1,6 +1,7 @@
 package edu.colorado.cires.argonaut.metadata.core;
 
 import edu.colorado.cires.argonaut.messaging.core.databind.MetadataRecord;
+import edu.colorado.cires.argonaut.messaging.core.databind.NcSubmissionMessage.FileType;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -20,8 +21,7 @@ public class DefaultMetadataRecordPage implements MetadataRecordPage {
 
   public static class Builder {
 
-    private int pageNumber = 1;
-    private int pageSize = 200;
+    private IndexPageRequest pageRequest;
     private long totalRecords;
     private List<MetadataRecord> page = Collections.emptyList();
 
@@ -30,19 +30,13 @@ public class DefaultMetadataRecordPage implements MetadataRecordPage {
     }
 
     private Builder(MetadataRecordPage src) {
-      withPageNumber(src.getPageNumber());
-      withPageSize(src.getPageSize());
+      withIndexPageRequest(DefaultIndexPageRequest.builder(src).build());
       withTotalRecords(src.getTotalRecords());
       withPage(src.getPage());
     }
 
-    public Builder withPageNumber(int pageNumber) {
-      this.pageNumber = pageNumber;
-      return this;
-    }
-
-    public Builder withPageSize(int pageSize) {
-      this.pageSize = pageSize;
+    public Builder withIndexPageRequest(IndexPageRequest pageRequest) {
+      this.pageRequest = pageRequest;
       return this;
     }
 
@@ -61,33 +55,46 @@ public class DefaultMetadataRecordPage implements MetadataRecordPage {
     }
 
     public DefaultMetadataRecordPage build() {
-      return new DefaultMetadataRecordPage(pageNumber, pageSize, totalRecords, page);
+      return new DefaultMetadataRecordPage(pageRequest, totalRecords, page);
     }
   }
 
-  private final int pageNumber;
-  private final int pageSize;
+  private final IndexPageRequest pageRequest;
   private final int totalPages;
   private final long totalRecords;
   private final List<MetadataRecord> page;
 
-  private DefaultMetadataRecordPage(int pageNumber, int pageSize, long totalRecords, List<MetadataRecord> page) {
-    this.pageNumber = pageNumber;
-    this.pageSize = pageSize;
+  private DefaultMetadataRecordPage(IndexPageRequest pageRequest, long totalRecords, List<MetadataRecord> page) {
+    this.pageRequest = pageRequest;
     this.totalRecords = totalRecords;
     this.page = page;
-    totalPages = (int) Math.ceil((double) totalRecords / (double) pageSize);
+    totalPages = (int) Math.ceil((double) totalRecords / (double) pageRequest.getPageSize());
   }
 
 
   @Override
   public int getPageNumber() {
-    return pageNumber;
+    return pageRequest.getPageNumber();
   }
 
   @Override
   public int getPageSize() {
-    return pageSize;
+    return pageRequest.getPageSize();
+  }
+
+  @Override
+  public Optional<String> getSearchDacEquals() {
+    return pageRequest.getSearchDacEquals();
+  }
+
+  @Override
+  public Optional<String> getSearchFloatIdEquals() {
+    return pageRequest.getSearchFloatIdEquals();
+  }
+
+  @Override
+  public Optional<FileType> getSearchFileTypeEquals() {
+    return pageRequest.getSearchFileTypeEquals();
   }
 
   @Override
@@ -107,21 +114,20 @@ public class DefaultMetadataRecordPage implements MetadataRecordPage {
 
   @Override
   public Optional<IndexPageRequest> getNextPage() {
-    int nextPageNumber = pageNumber + 1;
+    int nextPageNumber = pageRequest.getPageNumber() + 1;
     if (nextPageNumber > totalPages) {
       return Optional.empty();
     }
     return Optional.of(builder(this)
         .withPage(Collections.emptyList())
-        .withPageNumber(nextPageNumber)
+        .withIndexPageRequest(DefaultIndexPageRequest.builder(this).withPageNumber(nextPageNumber).build())
         .build());
   }
 
   @Override
   public String toString() {
-    return "JpaMetadataRecordPage{" +
-        "pageNumber=" + pageNumber +
-        ", pageSize=" + pageSize +
+    return "DefaultMetadataRecordPage{" +
+        "pageRequest=" + pageRequest +
         ", totalPages=" + totalPages +
         ", totalRecords=" + totalRecords +
         ", page=" + page +
@@ -134,12 +140,12 @@ public class DefaultMetadataRecordPage implements MetadataRecordPage {
       return false;
     }
     DefaultMetadataRecordPage that = (DefaultMetadataRecordPage) o;
-    return pageNumber == that.pageNumber && pageSize == that.pageSize && totalPages == that.totalPages && totalRecords == that.totalRecords
+    return totalPages == that.totalPages && totalRecords == that.totalRecords && Objects.equals(pageRequest, that.pageRequest)
         && Objects.equals(page, that.page);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(pageNumber, pageSize, totalPages, totalRecords, page);
+    return Objects.hash(pageRequest, totalPages, totalRecords, page);
   }
 }

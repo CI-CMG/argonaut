@@ -4,6 +4,7 @@ import edu.colorado.cires.argonaut.file.core.FileStore;
 import edu.colorado.cires.argonaut.messaging.core.databind.MetadataRecord;
 import edu.colorado.cires.argonaut.messaging.core.databind.MetadataRecord.Action;
 import edu.colorado.cires.argonaut.messaging.core.databind.NcSubmissionMessage;
+import edu.colorado.cires.argonaut.messaging.core.databind.NcSubmissionMessage.FileType;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -34,7 +35,7 @@ public class DefaultMetadataRecordTransformationProcessor implements MetadataRec
           .build();
     }
     String file = outputFileStore.appendToPath(message.getDac(), message.getFloatId());
-    if (message.isProfile()) {
+    if (FileType.PROFILE == message.getFileType()) {
       file = outputFileStore.appendToPath(file, "profiles");
     }
     file = outputFileStore.appendToPath(file, message.getFileName());

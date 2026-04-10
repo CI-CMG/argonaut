@@ -21,7 +21,13 @@ public final class NcSubmissionMessage implements Comparable<NcSubmissionMessage
   }
 
   public enum Operation {
-    ADD, REMOVE, FLOAT_MERGE
+    ADD, REMOVE
+  }
+
+  public enum FileType {
+    PROFILE, PROFILE_MERGE,
+    //TODO remove me
+    UNKNOWN
   }
 
   public static final class Builder {
@@ -31,10 +37,10 @@ public final class NcSubmissionMessage implements Comparable<NcSubmissionMessage
     private Instant timestamp;
     private String dac;
     private String fileName;
-    private boolean profile;
+    private FileType fileType;
     private int numberOfFilesInSubmission;
     private Operation operation = Operation.ADD;
-    private List<String> associatedFiles = new ArrayList<>();
+//    private List<String> associatedFiles = new ArrayList<>();
 
     private Builder() {
 
@@ -46,10 +52,10 @@ public final class NcSubmissionMessage implements Comparable<NcSubmissionMessage
       timestamp = source.timestamp;
       dac = source.dac;
       fileName = source.fileName;
-      profile = source.profile;
+      fileType = source.fileType;
       numberOfFilesInSubmission = source.numberOfFilesInSubmission;
       operation = source.operation;
-      this.associatedFiles = new ArrayList<>(source.associatedFiles);
+//      this.associatedFiles = new ArrayList<>(source.associatedFiles);
     }
 
     public Builder withFloatId(String floatId) {
@@ -82,8 +88,8 @@ public final class NcSubmissionMessage implements Comparable<NcSubmissionMessage
       return this;
     }
 
-    public Builder withProfile(boolean profile) {
-      this.profile = profile;
+    public Builder withFileType(FileType fileType) {
+      this.fileType = fileType;
       return this;
     }
 
@@ -97,22 +103,22 @@ public final class NcSubmissionMessage implements Comparable<NcSubmissionMessage
       return this;
     }
 
-    public Builder withAssociatedFiles(List<String> associatedFiles) {
-      this.associatedFiles = MessageUtils.emptyOrCopy(associatedFiles);
-      ;
-      return this;
-    }
-
-    public Builder addAssociatedFile(String associatedFile) {
-      associatedFiles.add(associatedFile);
-      return this;
-    }
+//    public Builder withAssociatedFiles(List<String> associatedFiles) {
+//      this.associatedFiles = MessageUtils.emptyOrCopy(associatedFiles);
+//      ;
+//      return this;
+//    }
+//
+//    public Builder addAssociatedFile(String associatedFile) {
+//      associatedFiles.add(associatedFile);
+//      return this;
+//    }
 
     public NcSubmissionMessage build() {
-      associatedFiles.sort(String::compareTo);
+//      associatedFiles.sort(String::compareTo);
       validationErrors.sort(String::compareTo);
-      return new NcSubmissionMessage(floatId, Collections.unmodifiableList(validationErrors), timestamp, dac, fileName, profile,
-          numberOfFilesInSubmission, operation, Collections.unmodifiableList(associatedFiles));
+      return new NcSubmissionMessage(floatId, Collections.unmodifiableList(validationErrors), timestamp, dac, fileName, fileType,
+          numberOfFilesInSubmission, operation);
     }
   }
 
@@ -121,22 +127,22 @@ public final class NcSubmissionMessage implements Comparable<NcSubmissionMessage
   private final Instant timestamp;
   private final String dac;
   private final String fileName;
-  private final boolean profile;
+  private final FileType fileType;
   private final int numberOfFilesInSubmission;
   private final Operation operation;
-  private final List<String> associatedFiles;
+//  private final List<String> associatedFiles;
 
-  private NcSubmissionMessage(String floatId, List<String> validationErrors, Instant timestamp, String dac, String fileName, boolean profile,
-      int numberOfFilesInSubmission, Operation operation, List<String> associatedFiles) {
+  private NcSubmissionMessage(String floatId, List<String> validationErrors, Instant timestamp, String dac, String fileName, FileType fileType,
+      int numberOfFilesInSubmission, Operation operation) {
     this.floatId = floatId;
     this.validationErrors = validationErrors;
     this.timestamp = timestamp;
     this.dac = dac;
     this.fileName = fileName;
-    this.profile = profile;
+    this.fileType = fileType;
     this.numberOfFilesInSubmission = numberOfFilesInSubmission;
     this.operation = operation;
-    this.associatedFiles = associatedFiles;
+//    this.associatedFiles = associatedFiles;
   }
 
   public Operation getOperation() {
@@ -163,17 +169,17 @@ public final class NcSubmissionMessage implements Comparable<NcSubmissionMessage
     return validationErrors;
   }
 
-  public boolean isProfile() {
-    return profile;
+  public FileType getFileType() {
+    return fileType;
   }
 
   public int getNumberOfFilesInSubmission() {
     return numberOfFilesInSubmission;
   }
 
-  public List<String> getAssociatedFiles() {
-    return associatedFiles;
-  }
+//  public List<String> getAssociatedFiles() {
+//    return associatedFiles;
+//  }
 
   @Override
   public int compareTo(NcSubmissionMessage o) {
@@ -198,15 +204,14 @@ public final class NcSubmissionMessage implements Comparable<NcSubmissionMessage
       return false;
     }
     NcSubmissionMessage that = (NcSubmissionMessage) o;
-    return profile == that.profile && numberOfFilesInSubmission == that.numberOfFilesInSubmission && Objects.equals(floatId, that.floatId)
+    return Objects.equals(fileType, that.fileType) && numberOfFilesInSubmission == that.numberOfFilesInSubmission && Objects.equals(floatId, that.floatId)
         && Objects.equals(validationErrors, that.validationErrors) && Objects.equals(timestamp, that.timestamp)
-        && Objects.equals(dac, that.dac) && Objects.equals(fileName, that.fileName) && operation == that.operation
-        && Objects.equals(associatedFiles, that.associatedFiles);
+        && Objects.equals(dac, that.dac) && Objects.equals(fileName, that.fileName) && operation == that.operation;
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(floatId, validationErrors, timestamp, dac, fileName, profile, numberOfFilesInSubmission, operation, associatedFiles);
+    return Objects.hash(floatId, validationErrors, timestamp, dac, fileName, fileType, numberOfFilesInSubmission, operation);
   }
 
   @Override
@@ -217,10 +222,9 @@ public final class NcSubmissionMessage implements Comparable<NcSubmissionMessage
         ", timestamp='" + timestamp + '\'' +
         ", dac='" + dac + '\'' +
         ", fileName='" + fileName + '\'' +
-        ", profile=" + profile +
+        ", fileType=" + fileType +
         ", numberOfFilesInSubmission=" + numberOfFilesInSubmission +
         ", operation=" + operation +
-        ", associatedFiles=" + associatedFiles +
         '}';
   }
 

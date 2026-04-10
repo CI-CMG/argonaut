@@ -1,5 +1,6 @@
 package edu.colorado.cires.argonaut.messaging.core.databind;
 
+import edu.colorado.cires.argonaut.messaging.core.databind.NcSubmissionMessage.FileType;
 import java.time.Instant;
 import java.util.Objects;
 import tools.jackson.databind.annotation.JsonDeserialize;
@@ -38,6 +39,7 @@ public class MetadataRecord {
     private String parameters;
     private String parameterDataMode;
     private Action action;
+    private FileType fileType;
 
     private Builder() {
 
@@ -59,6 +61,7 @@ public class MetadataRecord {
       parameters = source.parameters;
       parameterDataMode = source.parameterDataMode;
       action = source.action;
+      fileType = source.fileType;
     }
 
     public Builder withFile(String file) {
@@ -136,6 +139,11 @@ public class MetadataRecord {
       return this;
     }
 
+    public Builder withFileType(FileType fileType) {
+      this.fileType = fileType;
+      return this;
+    }
+
     public MetadataRecord build() {
       return new MetadataRecord(
           file,
@@ -152,7 +160,8 @@ public class MetadataRecord {
           dateUpdate,
           parameters,
           parameterDataMode,
-          action
+          action,
+          fileType
       );
     }
 
@@ -173,10 +182,11 @@ public class MetadataRecord {
   private final String parameters;
   private final String parameterDataMode;
   private final Action action;
+  private final FileType fileType;
 
   private MetadataRecord(String file, Instant date, Double latitude, Double latitudeMin, Double latitudeMax, Double longitude, Double longitudeMin,
       Double longitudeMax, ArgoOcean ocean, String profilerType, String institution, Instant dateUpdate, String parameters, String parameterDataMode,
-      Action action) {
+      Action action, FileType fileType) {
     this.file = file;
     this.date = date;
     this.latitude = latitude;
@@ -192,6 +202,7 @@ public class MetadataRecord {
     this.parameters = parameters;
     this.parameterDataMode = parameterDataMode;
     this.action = action;
+    this.fileType = fileType;
   }
 
   public String getFile() {
@@ -254,6 +265,31 @@ public class MetadataRecord {
     return action;
   }
 
+  public FileType getFileType() {
+    return fileType;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+    MetadataRecord that = (MetadataRecord) o;
+    return Objects.equals(file, that.file) && Objects.equals(date, that.date) && Objects.equals(latitude, that.latitude)
+        && Objects.equals(latitudeMin, that.latitudeMin) && Objects.equals(latitudeMax, that.latitudeMax)
+        && Objects.equals(longitude, that.longitude) && Objects.equals(longitudeMin, that.longitudeMin) && Objects.equals(
+        longitudeMax, that.longitudeMax) && ocean == that.ocean && Objects.equals(profilerType, that.profilerType)
+        && Objects.equals(institution, that.institution) && Objects.equals(dateUpdate, that.dateUpdate) && Objects.equals(
+        parameters, that.parameters) && Objects.equals(parameterDataMode, that.parameterDataMode) && action == that.action
+        && fileType == that.fileType;
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(file, date, latitude, latitudeMin, latitudeMax, longitude, longitudeMin, longitudeMax, ocean, profilerType, institution,
+        dateUpdate, parameters, parameterDataMode, action, fileType);
+  }
+
   @Override
   public String toString() {
     return "MetadataRecord{" +
@@ -272,26 +308,8 @@ public class MetadataRecord {
         ", parameters='" + parameters + '\'' +
         ", parameterDataMode='" + parameterDataMode + '\'' +
         ", action=" + action +
+        ", fileType=" + fileType +
         '}';
   }
 
-  @Override
-  public boolean equals(Object o) {
-    if (o == null || getClass() != o.getClass()) {
-      return false;
-    }
-    MetadataRecord that = (MetadataRecord) o;
-    return Objects.equals(file, that.file) && Objects.equals(date, that.date) && Objects.equals(latitude, that.latitude)
-        && Objects.equals(latitudeMin, that.latitudeMin) && Objects.equals(latitudeMax, that.latitudeMax)
-        && Objects.equals(longitude, that.longitude) && Objects.equals(longitudeMin, that.longitudeMin) && Objects.equals(
-        longitudeMax, that.longitudeMax) && ocean == that.ocean && Objects.equals(profilerType, that.profilerType)
-        && Objects.equals(institution, that.institution) && Objects.equals(dateUpdate, that.dateUpdate) && Objects.equals(
-        parameters, that.parameters) && Objects.equals(parameterDataMode, that.parameterDataMode) && action == that.action;
-  }
-
-  @Override
-  public int hashCode() {
-    return Objects.hash(file, date, latitude, latitudeMin, latitudeMax, longitude, longitudeMin, longitudeMax, ocean, profilerType, institution,
-        dateUpdate, parameters, parameterDataMode, action);
-  }
 }

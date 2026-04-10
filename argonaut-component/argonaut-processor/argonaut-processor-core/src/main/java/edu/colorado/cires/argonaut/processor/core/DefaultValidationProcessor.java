@@ -17,7 +17,7 @@ public class DefaultValidationProcessor implements ValidationProcessor {
     String dac = ncSubmissionMessage.getDac();
     String floatId = ncSubmissionMessage.getFloatId();
     String fileName = ncSubmissionMessage.getFileName();
-    boolean isProfile = ncSubmissionMessage.isProfile();
+//    boolean isProfile = ncSubmissionMessage.isProfile();
 //    Path processingDacDir = ArgonautFileUtils.getProcessingProfileDir(serviceProperties, dac, floatId, isProfile);
 //    checkFile(dac, processingDacDir, fileName);
 //    Path fileCheckXmlFile = processingDacDir.resolve(fileName + ".filecheck");

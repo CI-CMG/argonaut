@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import edu.colorado.cires.argonaut.messaging.camel.ArgonautCamelMessageSender;
 import edu.colorado.cires.argonaut.messaging.core.databind.NcSubmissionMessage;
+import edu.colorado.cires.argonaut.messaging.core.databind.NcSubmissionMessage.FileType;
 import edu.colorado.cires.argonaut.processor.core.ValidationProcessor;
 import java.io.IOException;
 import java.io.InputStream;
@@ -279,7 +280,7 @@ public class PostValidationTest {
       Files.createDirectories(floatDir);
       Files.move(timeStampDir.resolve(name), floatDir.resolve(name));
       messageSender.sendJson("seda:validation-success", jsonMapper.writeValueAsString(NcSubmissionMessage.builder()
-          .withProfile(false)
+          .withFileType(FileType.UNKNOWN)
           .withDac("aoml")
           .withFileName(name)
           .withTimestamp(timestamp)
@@ -423,7 +424,7 @@ public class PostValidationTest {
       Files.createDirectories(floatDir);
       Files.move(timeStampDir.resolve(name), floatDir.resolve(name));
       messageSender.sendJson("seda:file-output", jsonMapper.writeValueAsString(NcSubmissionMessage.builder()
-          .withProfile(false)
+          .withFileType(FileType.UNKNOWN)
           .withDac("aoml")
           .withFileName(name)
           .withTimestamp(timestamp)
@@ -470,7 +471,7 @@ public class PostValidationTest {
       Files.createDirectories(floatDir.resolve("profiles"));
       Files.move(timeStampDir.resolve(name), floatDir.resolve("profiles").resolve(name));
       messageSender.sendJson("seda:validation-success", jsonMapper.writeValueAsString(NcSubmissionMessage.builder()
-          .withProfile(true)
+          .withFileType(FileType.PROFILE)
           .withDac("aoml")
           .withFileName(name)
           .withTimestamp(timestamp)
@@ -516,7 +517,7 @@ public class PostValidationTest {
       Files.createDirectories(floatDir.resolve("profiles"));
       Files.move(timeStampDir.resolve(name), floatDir.resolve("profiles").resolve(name));
       messageSender.sendJson("seda:file-output", jsonMapper.writeValueAsString(NcSubmissionMessage.builder()
-          .withProfile(true)
+          .withFileType(FileType.PROFILE)
           .withDac("aoml")
           .withFileName(name)
           .withTimestamp(timestamp)

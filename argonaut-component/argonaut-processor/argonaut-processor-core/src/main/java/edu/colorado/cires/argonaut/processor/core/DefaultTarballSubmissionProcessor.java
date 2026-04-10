@@ -3,6 +3,7 @@ package edu.colorado.cires.argonaut.processor.core;
 import edu.colorado.cires.argonaut.file.core.FileStore;
 import edu.colorado.cires.argonaut.messaging.core.databind.DacSubmittedFileMessage;
 import edu.colorado.cires.argonaut.messaging.core.databind.NcSubmissionMessage;
+import edu.colorado.cires.argonaut.messaging.core.databind.NcSubmissionMessage.FileType;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -115,13 +116,13 @@ public class DefaultTarballSubmissionProcessor implements TarballSubmissionProce
             boolean profile = matcher.group(1) != null;
             NcSubmissionMessage ncSubmissionMessage = NcSubmissionMessage.builder()
                 .withFileName(fileName)
-                .withProfile(profile)
+                .withFileType(profile ? FileType.PROFILE : FileType.UNKNOWN)
                 .withFloatId(floatDir)
                 .withDac(submittedFile.getDac())
                 .withTimestamp(submittedFile.getTimestamp())
                 .build();
             String processingDacDir = processingFileStore.appendToPath(processingFileStore.getRoot(), "dac", submittedFile.getDac(), submittedFile.getTimestamp().toString(), floatDir);
-            if (ncSubmissionMessage.isProfile()) {
+            if (FileType.PROFILE == ncSubmissionMessage.getFileType()) {
               processingDacDir = processingFileStore.appendToPath(processingDacDir, "profiles");
             }
             String ncFile = processingFileStore.appendToPath(processingDacDir, file.getFileName().toString());

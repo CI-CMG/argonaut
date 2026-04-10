@@ -3,6 +3,7 @@ package edu.colorado.cires.argonaut.processor.core;
 import edu.colorado.cires.argonaut.file.core.FileStore;
 import edu.colorado.cires.argonaut.messaging.core.databind.DacSubmittedFileMessage;
 import edu.colorado.cires.argonaut.messaging.core.databind.NcSubmissionMessage;
+import edu.colorado.cires.argonaut.messaging.core.databind.NcSubmissionMessage.FileType;
 import edu.colorado.cires.argonaut.messaging.core.databind.NcSubmissionMessage.Operation;
 import edu.colorado.cires.argonaut.messaging.core.databind.RemovalMessage;
 import java.io.BufferedReader;
@@ -96,7 +97,7 @@ public class DefaultRemovalFileValidationProcessor implements RemovalFileValidat
       boolean profile = matcher.group(1) != null;
       NcSubmissionMessage ncSubmissionMessage = NcSubmissionMessage.builder()
           .withFileName(fileName)
-          .withProfile(profile)
+          .withFileType(profile ? FileType.PROFILE : FileType.UNKNOWN)
           .withFloatId(floatDir)
           .build();
       return Optional.of(ncSubmissionMessage);

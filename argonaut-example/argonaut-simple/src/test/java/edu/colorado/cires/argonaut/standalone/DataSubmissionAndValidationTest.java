@@ -7,6 +7,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 import edu.colorado.cires.argonaut.messaging.core.databind.NcSubmissionMessage;
+import edu.colorado.cires.argonaut.messaging.core.databind.NcSubmissionMessage.FileType;
 import edu.colorado.cires.argonaut.processor.core.ValidationProcessor;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -242,7 +243,7 @@ public class DataSubmissionAndValidationTest {
     for (String file : files) {
       Path floatDir = aomlProcessingDir.resolve(file.split("_")[0]);
       NcSubmissionMessage expectedMessage = NcSubmissionMessage.builder()
-          .withProfile(false)
+          .withFileType(FileType.UNKNOWN)
           .withDac("aoml")
           .withFileName(file)
           .withTimestamp(timestamp)
@@ -278,7 +279,7 @@ public class DataSubmissionAndValidationTest {
       expectedFiles.add(floatDir.resolve(name));
 
       NcSubmissionMessage expectedMessage = NcSubmissionMessage.builder()
-          .withProfile(false)
+          .withFileType(FileType.UNKNOWN)
           .withDac("aoml")
           .withFileName(name)
           .withTimestamp(timestamp)
@@ -321,7 +322,7 @@ public class DataSubmissionAndValidationTest {
     for (String file : files) {
       String floatId = file.replaceAll("R", "").split("_")[0];
       NcSubmissionMessage expectedMessage = NcSubmissionMessage.builder()
-          .withProfile(true)
+          .withFileType(FileType.PROFILE)
           .withDac("aoml")
           .withFileName(file)
           .withTimestamp(timestamp)
@@ -365,7 +366,7 @@ public class DataSubmissionAndValidationTest {
       expectedFiles.add(floatDir.resolve("profiles").resolve(name));
 
       NcSubmissionMessage expectedMessage = NcSubmissionMessage.builder()
-          .withProfile(true)
+          .withFileType(FileType.PROFILE)
           .withDac("aoml")
           .withFileName(name)
           .withTimestamp(timestamp)

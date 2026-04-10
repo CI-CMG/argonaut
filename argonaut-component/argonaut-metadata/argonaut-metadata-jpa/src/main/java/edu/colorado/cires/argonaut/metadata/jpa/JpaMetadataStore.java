@@ -1,8 +1,9 @@
 package edu.colorado.cires.argonaut.metadata.jpa;
 
 import edu.colorado.cires.argonaut.messaging.core.databind.MetadataRecord;
-import edu.colorado.cires.argonaut.metadata.core.IndexPageRequest;
+import edu.colorado.cires.argonaut.metadata.core.DefaultIndexPageRequest;
 import edu.colorado.cires.argonaut.metadata.core.DefaultMetadataRecordPage;
+import edu.colorado.cires.argonaut.metadata.core.IndexPageRequest;
 import edu.colorado.cires.argonaut.metadata.core.MetadataRecordPage;
 import edu.colorado.cires.argonaut.metadata.core.MetadataStore;
 import edu.colorado.cires.argonaut.metadata.jpa.entity.IndexEntity;
@@ -56,8 +57,7 @@ public class JpaMetadataStore implements MetadataStore {
           .setFirstResult((pageRequest.getPageNumber() - 1) * pageRequest.getPageSize())
           .getResultList();
       return DefaultMetadataRecordPage.builder()
-          .withPageNumber(pageRequest.getPageNumber())
-          .withPageSize(pageRequest.getPageSize())
+          .withIndexPageRequest(DefaultIndexPageRequest.builder(pageRequest).build())
           .withTotalRecords(count)
           .withPage(pageResults.stream().map(IndexEntity::toMetadataRecord).collect(Collectors.toList()))
           .build();

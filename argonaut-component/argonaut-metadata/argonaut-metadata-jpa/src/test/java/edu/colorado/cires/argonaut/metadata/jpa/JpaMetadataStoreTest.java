@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import edu.colorado.cires.argonaut.messaging.core.databind.ArgoOcean;
 import edu.colorado.cires.argonaut.messaging.core.databind.MetadataRecord;
 import edu.colorado.cires.argonaut.messaging.core.databind.MetadataRecord.Action;
+import edu.colorado.cires.argonaut.metadata.core.DefaultIndexPageRequest;
 import edu.colorado.cires.argonaut.metadata.core.DefaultMetadataRecordPage;
 import edu.colorado.cires.argonaut.metadata.core.MetadataRecordPage;
 import jakarta.persistence.EntityManagerFactory;
@@ -109,22 +110,25 @@ public class JpaMetadataStoreTest {
     assertEquals(MetadataRecord.builder(record3).withAction(Action.NONE).build(), datastore.findByFile("aoml/13857/profiles/D13857_003.nc").get());
     assertFalse(datastore.findByFile("aoml/13857/profiles/D13857_004.nc").isPresent());
 
-    MetadataRecordPage page = datastore.findPage(DefaultMetadataRecordPage.builder().withPageNumber(1).withPageSize(2).build());
+    MetadataRecordPage page = datastore.findPage(DefaultIndexPageRequest.builder().withPageSize(2).build());
     DefaultMetadataRecordPage expected = DefaultMetadataRecordPage.builder()
-        .withPageSize(2)
-        .withPageNumber(1)
+        .withIndexPageRequest(DefaultIndexPageRequest.builder().withPageSize(2).build())
         .withTotalRecords(3L)
         .withPage(Arrays.asList(
             MetadataRecord.builder(record12).withAction(Action.NONE).build(),
             MetadataRecord.builder(record2).withAction(Action.NONE).build()))
         .build();
     assertEquals(expected, page);
-    assertEquals(DefaultMetadataRecordPage.builder(page).withPageNumber(2).withPage(Collections.emptyList()).build(), page.getNextPage().get());
+    assertEquals(
+        DefaultMetadataRecordPage.builder()
+            .withIndexPageRequest(DefaultIndexPageRequest.builder().withPageNumber(2).withPageSize(2).build())
+            .withTotalRecords(3)
+            .build(),
+        page.getNextPage().get());
 
     page = datastore.findPage(page.getNextPage().get());
     expected = DefaultMetadataRecordPage.builder()
-        .withPageSize(2)
-        .withPageNumber(2)
+        .withIndexPageRequest(DefaultIndexPageRequest.builder().withPageNumber(2).withPageSize(2).build())
         .withTotalRecords(3L)
         .withPage(Arrays.asList(
             MetadataRecord.builder(record3).withAction(Action.NONE).build()))
