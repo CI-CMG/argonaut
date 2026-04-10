@@ -17,6 +17,7 @@
     <module>argonaut-processor-core</module>
     <module>argonaut-processor-report-jpa</module>
     <module>argonaut-processor-report-csv</module>
+    <module>argonaut-processor-geofilter</module>
   </modules>
 
 

@@ -26,6 +26,19 @@
       <name>Unidata All</name>
       <url>https://artifacts.unidata.ucar.edu/repository/unidata-all/</url>
     </repository>
+    <repository>
+      <id>osgeo</id>
+      <name>OSGeo Release Repository</name>
+      <url>https://repo.osgeo.org/repository/release/</url>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+      <releases>
+        <enabled>true</enabled>
+        <updatePolicy>never</updatePolicy>
+        <checksumPolicy>fail</checksumPolicy>
+      </releases>
+    </repository>
   </repositories>
 
   <dependencyManagement>
@@ -76,6 +89,13 @@
         <groupId>org.hibernate.orm</groupId>
         <artifactId>hibernate-platform</artifactId>
         <version>7.3.0.Final</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.geotools</groupId>
+        <artifactId>gt-bom</artifactId>
+        <version>34.3</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>

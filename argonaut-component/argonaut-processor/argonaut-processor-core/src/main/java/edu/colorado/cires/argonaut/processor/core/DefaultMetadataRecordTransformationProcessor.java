@@ -24,6 +24,7 @@ public class DefaultMetadataRecordTransformationProcessor implements MetadataRec
 
   private FileStore outputFileStore;
   private Path localTempDir;
+  private GeoFilter geoFilter;
 
   @Override
   public MetadataRecord transformNcSubmissionMessage(NcSubmissionMessage message) {
@@ -103,6 +104,7 @@ public class DefaultMetadataRecordTransformationProcessor implements MetadataRec
         .withAction(Action.UPDATE)
         .withLatitude(latitude)
         .withLongitude(longitude)
+        .withOcean(geoFilter.determineArgoOcean(longitude, latitude))
         .withProfilerType(profilerType)
         .withInstitution(institution)
         .withDateUpdate(dateUpdate)
@@ -130,5 +132,9 @@ public class DefaultMetadataRecordTransformationProcessor implements MetadataRec
     } catch (IOException e) {
       throw new RuntimeException("Unable to create temp directory: " + localTempDir, e);
     }
+  }
+
+  public void setGeoFilter(GeoFilter geoFilter) {
+    this.geoFilter = geoFilter;
   }
 }

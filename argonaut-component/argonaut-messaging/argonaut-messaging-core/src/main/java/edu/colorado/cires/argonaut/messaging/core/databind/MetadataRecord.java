@@ -14,10 +14,6 @@ public class MetadataRecord {
     return new Builder(source);
   }
 
-  public enum Ocean {
-    A
-  }
-
   public enum Action {
     UPDATE,
     REMOVE,
@@ -34,7 +30,7 @@ public class MetadataRecord {
     private Double longitude;
     private Double longitudeMin;
     private Double longitudeMax;
-    private Ocean ocean;
+    private ArgoOcean ocean;
     private String profilerType;
     private String institution;
     private Instant dateUpdate;
@@ -104,7 +100,7 @@ public class MetadataRecord {
       return this;
     }
 
-    public Builder withOcean(Ocean ocean) {
+    public Builder withOcean(ArgoOcean ocean) {
       this.ocean = ocean;
       return this;
     }
@@ -169,7 +165,7 @@ public class MetadataRecord {
   private final Double longitude;
   private final Double longitudeMin;
   private final Double longitudeMax;
-  private final Ocean ocean;
+  private final ArgoOcean ocean;
   private final String profilerType;
   private final String institution;
   private final Instant dateUpdate;
@@ -178,7 +174,7 @@ public class MetadataRecord {
   private final Action action;
 
   private MetadataRecord(String file, Instant date, Double latitude, Double latitudeMin, Double latitudeMax, Double longitude, Double longitudeMin,
-      Double longitudeMax, Ocean ocean, String profilerType, String institution, Instant dateUpdate, String parameters, String parameterDataMode,
+      Double longitudeMax, ArgoOcean ocean, String profilerType, String institution, Instant dateUpdate, String parameters, String parameterDataMode,
       Action action) {
     this.file = file;
     this.date = date;
@@ -229,7 +225,7 @@ public class MetadataRecord {
     return longitudeMax;
   }
 
-  public Ocean getOcean() {
+  public ArgoOcean getOcean() {
     return ocean;
   }
 
