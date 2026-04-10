@@ -15,4 +15,13 @@ public enum ArgoOcean {
   public String getCode() {
     return code;
   }
+
+  public static ArgoOcean fromCode(String code) {
+    for (ArgoOcean argoOcean : ArgoOcean.values()) {
+      if (argoOcean.getCode().equals(code)) {
+        return argoOcean;
+      }
+    }
+    throw new IllegalArgumentException(String.format("ArgoOcean '%s' does not exist", code));
+  }
 }

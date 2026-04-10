@@ -7,6 +7,7 @@
        http://camel.apache.org/schema/spring/camel-spring.xsd">
 
   <import resource="classpath:/dac-submission-routes.xml"/>
+  <import resource="classpath:/gdac-routes.xml"/>
 
   <bean class="edu.colorado.cires.argonaut.standalone.CustomBridgePropertyPlaceholderConfigurer">
     <property name="locations">
@@ -86,7 +87,7 @@
 
   <bean id="fileToSubmissionMessage" class="edu.colorado.cires.argonaut.standalone.FileToSubmissionMessage"/>
 
-  <bean id="submissionReportEntityManagerFactory" class="jakarta.persistence.Persistence" factory-method="createEntityManagerFactory">
+  <bean id="entityManagerFactory" class="jakarta.persistence.Persistence" factory-method="createEntityManagerFactory">
     <constructor-arg value="argonaut-report"/>
     <constructor-arg>
       <map>
@@ -100,82 +101,31 @@
   </bean>
 
   <bean id="submissionReportAppender" class="edu.colorado.cires.argonaut.processor.report.jpa.JpaFileSubmissionReportProcessor">
-    <property name="entityManagerFactory" ref="submissionReportEntityManagerFactory"/>
+    <property name="entityManagerFactory" ref="entityManagerFactory"/>
   </bean>
 
-  <!--  <bean id="fileMovedRouter" class="edu.colorado.cires.argonaut.processor.core.DefaultFileMovedRouter" />-->
-  <!--  <bean id="submissionReportProcessor" class="edu.colorado.cires.argonaut.processor.core.CsvFileSubmissionReportProcessor" />-->
+  <bean id="geoFilter" class="edu.colorado.cires.argonaut.processor.geofilter.MarineRegionsGeoFilter">
+    <property name="workingDirectory" value="${work-directory}"/>
+  </bean>
+
+  <bean id="metadataTransformProcessor" class="edu.colorado.cires.argonaut.processor.core.DefaultMetadataRecordTransformationProcessor">
+    <property name="outputFileStore" ref="outputFileStore"/>
+    <property name="localTempDir" value="${work-directory}"/>
+    <property name="geoFilter" ref="geoFilter"/>
+  </bean>
+
+  <bean id="metadataStore" class="edu.colorado.cires.argonaut.metadata.jpa.JpaMetadataStore">
+    <property name="entityManagerFactory" ref="entityManagerFactory"/>
+  </bean>
+
+  <bean id="updateIndexProcessor" class="edu.colorado.cires.argonaut.processor.core.DefaultUpdateIndexProcessor">
+    <property name="metadataStore" ref="metadataStore"/>
+  </bean>
 
   <camelContext xmlns="http://camel.apache.org/schema/spring">
     <template id="producerTemplate"/>
-
     <routeContextRef ref="dac-submission-routes"/>
-
-    <route id="dac-submission-work">
-      <from uri="seda:submit-work"/>
-      <bean ref="deserializationProcessor"
-        method="deserialize(${body}, edu.colorado.cires.argonaut.messaging.core.databind.DacSubmittedFileMessage)"/>
-      <bean ref="submitFileRouter" method="choice"/>
-    </route>
-
-    <route id="validate-submission">
-      <from uri="seda:validation"/>
-      <bean ref="deserializationProcessor" method="deserialize(${body}, edu.colorado.cires.argonaut.messaging.core.databind.NcSubmissionMessage)"/>
-      <bean ref="validationProcessor" method="validate"/>
-      <bean ref="validationResultRouter" method="route"/>
-    </route>
-
-    <route id="validation-success">
-      <from uri="seda:validation-success"/>
-      <to uri="seda:file-output"/>
-    </route>
-
-    <route id="file-output">
-      <from uri="seda:file-output"/>
-      <bean ref="deserializationProcessor" method="deserialize(${body}, edu.colorado.cires.argonaut.messaging.core.databind.NcSubmissionMessage)"/>
-      <bean ref="fileMoveProcessor" method="moveFile"/>
-      <bean ref="serializationProcessor" method="serialize"/>
-      <to uri="seda:file-moved"/>
-    </route>
-
-    <route id="file-moved">
-      <from uri="seda:file-moved"/>
-      <to uri="seda:submission-report"/>
-    </route>
-
-    <route id="submission-report-update">
-      <from uri="seda:submission-report"/>
-      <bean ref="deserializationProcessor" method="deserialize(${body}, edu.colorado.cires.argonaut.messaging.core.databind.NcSubmissionMessage)"/>
-      <bean ref="submissionReportAppender" method="appendReport"/>
-    </route>
-
-<!--    <route id="update-index">-->
-<!--      <from uri="seda:update-index"/>-->
-<!--      <bean-->
-<!--    </route>-->
-
-<!--    <route id="submission-report-generate">-->
-<!--      <from uri="cron:generate-reports?schedule={{dac.submission.report.cron}}"/>-->
-<!--      <bean-->
-<!--    </route>-->
-
-    <!--    <route id="file-moved">-->
-    <!--      <from uri="seda:file-moved"/>-->
-    <!--      <bean ref="fileMovedRouter" method="route" />-->
-    <!--    </route>-->
-
-    <!--    <route id="submit-report">-->
-    <!--      <from uri="seda:file-moved"/>-->
-    <!--      <bean ref="deserializationProcessor" method="deserialize(${body}, edu.colorado.cires.argonaut.messaging.core.databind.NcSubmissionMessage)"/>-->
-    <!--      <bean ref="submissionReportProcessor" method="generateReport" />-->
-    <!--    </route>-->
-
-    <!--    <route id="submit-report">-->
-    <!--      <from uri="seda:file-moved"/>-->
-    <!--      <bean ref="deserializationProcessor" method="deserialize(${body}, edu.colorado.cires.argonaut.messaging.core.databind.NcSubmissionMessage)"/>-->
-    <!--      <bean ref="submissionReportProcessor" method="generateReport" />-->
-    <!--    </route>-->
-
+    <routeContextRef ref="gdac-routes"/>
   </camelContext>
 
 </beans>

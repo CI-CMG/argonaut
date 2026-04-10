@@ -29,6 +29,16 @@
       <version>${project.version}</version>
     </dependency>
     <dependency>
+      <groupId>io.github.ci-cmg.argo</groupId>
+      <artifactId>argonaut-processor-geofilter</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>io.github.ci-cmg.argo</groupId>
+      <artifactId>argonaut-metadata-jpa</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
       <groupId>com.h2database</groupId>
       <artifactId>h2</artifactId>
     </dependency>

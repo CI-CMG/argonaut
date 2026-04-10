@@ -30,6 +30,11 @@
       <scope>test</scope>
     </dependency>
     <dependency>
+      <groupId>io.github.ci-cmg.argo</groupId>
+      <artifactId>argonaut-metadata-core</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
     </dependency>

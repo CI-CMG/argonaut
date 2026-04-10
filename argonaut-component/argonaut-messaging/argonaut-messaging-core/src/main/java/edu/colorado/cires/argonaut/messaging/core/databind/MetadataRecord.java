@@ -1,6 +1,7 @@
 package edu.colorado.cires.argonaut.messaging.core.databind;
 
 import java.time.Instant;
+import java.util.Objects;
 import tools.jackson.databind.annotation.JsonDeserialize;
 
 @JsonDeserialize(builder = MetadataRecord.Builder.class)
@@ -251,5 +252,46 @@ public class MetadataRecord {
 
   public Action getAction() {
     return action;
+  }
+
+  @Override
+  public String toString() {
+    return "MetadataRecord{" +
+        "file='" + file + '\'' +
+        ", date=" + date +
+        ", latitude=" + latitude +
+        ", latitudeMin=" + latitudeMin +
+        ", latitudeMax=" + latitudeMax +
+        ", longitude=" + longitude +
+        ", longitudeMin=" + longitudeMin +
+        ", longitudeMax=" + longitudeMax +
+        ", ocean=" + ocean +
+        ", profilerType='" + profilerType + '\'' +
+        ", institution='" + institution + '\'' +
+        ", dateUpdate=" + dateUpdate +
+        ", parameters='" + parameters + '\'' +
+        ", parameterDataMode='" + parameterDataMode + '\'' +
+        ", action=" + action +
+        '}';
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+    MetadataRecord that = (MetadataRecord) o;
+    return Objects.equals(file, that.file) && Objects.equals(date, that.date) && Objects.equals(latitude, that.latitude)
+        && Objects.equals(latitudeMin, that.latitudeMin) && Objects.equals(latitudeMax, that.latitudeMax)
+        && Objects.equals(longitude, that.longitude) && Objects.equals(longitudeMin, that.longitudeMin) && Objects.equals(
+        longitudeMax, that.longitudeMax) && ocean == that.ocean && Objects.equals(profilerType, that.profilerType)
+        && Objects.equals(institution, that.institution) && Objects.equals(dateUpdate, that.dateUpdate) && Objects.equals(
+        parameters, that.parameters) && Objects.equals(parameterDataMode, that.parameterDataMode) && action == that.action;
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(file, date, latitude, latitudeMin, latitudeMax, longitude, longitudeMin, longitudeMax, ocean, profilerType, institution,
+        dateUpdate, parameters, parameterDataMode, action);
   }
 }

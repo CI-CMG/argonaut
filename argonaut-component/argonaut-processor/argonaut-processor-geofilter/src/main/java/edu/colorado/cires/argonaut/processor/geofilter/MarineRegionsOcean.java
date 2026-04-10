@@ -1,6 +1,6 @@
 package edu.colorado.cires.argonaut.processor.geofilter;
 
-public enum MarineRegionsOcean {
+enum MarineRegionsOcean {
   SOUTHERN_OCEAN("Southern Ocean"),
   SOUTH_ATLANTIC_OCEAN("South Atlantic Ocean"),
   SOUTH_PACIFIC_OCEAN("South Pacific Ocean"),
@@ -12,7 +12,7 @@ public enum MarineRegionsOcean {
   NORTH_ATLANTIC_OCEAN("North Atlantic Ocean"),
   ARCTIC_OCEAN("Arctic Ocean");
 
-  public static MarineRegionsOcean getMarineRegionsOcean(String regionName) {
+  static MarineRegionsOcean getMarineRegionsOcean(String regionName) {
     for (MarineRegionsOcean marineRegionsOcean : MarineRegionsOcean.values()) {
       if (marineRegionsOcean.getName().equals(regionName)) {
         return marineRegionsOcean;
@@ -26,7 +26,7 @@ public enum MarineRegionsOcean {
     this.name = name;
   }
 
-  public String getName() {
+  String getName() {
     return name;
   }
 }
