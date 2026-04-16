@@ -8,6 +8,12 @@ import tools.jackson.databind.annotation.JsonDeserialize;
 @JsonDeserialize(builder = MetadataRecord.Builder.class)
 public class MetadataRecord {
 
+
+  public enum FileStatus {
+    ACTIVE,
+    REMOVED
+  }
+
   public static Builder builder() {
     return new Builder();
   }
@@ -19,6 +25,7 @@ public class MetadataRecord {
   public enum Action {
     UPDATE,
     REMOVE,
+    FLOAT_MERGE,
     NONE
   }
 
@@ -40,6 +47,10 @@ public class MetadataRecord {
     private String parameterDataMode;
     private Action action;
     private FileType fileType;
+    private FileStatus fileStatus;
+    private String dac;
+    private String floatId;
+    private boolean floatMerged;
 
     private Builder() {
 
@@ -62,6 +73,10 @@ public class MetadataRecord {
       parameterDataMode = source.parameterDataMode;
       action = source.action;
       fileType = source.fileType;
+      fileStatus = source.fileStatus;
+      dac = source.dac;
+      floatId = source.floatId;
+      floatMerged = source.floatMerged;
     }
 
     public Builder withFile(String file) {
@@ -144,6 +159,26 @@ public class MetadataRecord {
       return this;
     }
 
+    public Builder withFileStatus(FileStatus fileStatus) {
+      this.fileStatus = fileStatus;
+      return this;
+    }
+
+    public Builder withDac(String dac) {
+      this.dac = dac;
+      return this;
+    }
+
+    public Builder withFloatId(String floatId) {
+      this.floatId = floatId;
+      return this;
+    }
+
+    public Builder withFloatMerged(boolean floatMerged) {
+      this.floatMerged = floatMerged;
+      return this;
+    }
+
     public MetadataRecord build() {
       return new MetadataRecord(
           file,
@@ -161,7 +196,11 @@ public class MetadataRecord {
           parameters,
           parameterDataMode,
           action,
-          fileType
+          fileType,
+          fileStatus,
+          dac,
+          floatId,
+          floatMerged
       );
     }
 
@@ -183,10 +222,14 @@ public class MetadataRecord {
   private final String parameterDataMode;
   private final Action action;
   private final FileType fileType;
+  private final FileStatus fileStatus;
+  private final String dac;
+  private final String floatId;
+  private final boolean floatMerged;
 
   private MetadataRecord(String file, Instant date, Double latitude, Double latitudeMin, Double latitudeMax, Double longitude, Double longitudeMin,
       Double longitudeMax, ArgoOcean ocean, String profilerType, String institution, Instant dateUpdate, String parameters, String parameterDataMode,
-      Action action, FileType fileType) {
+      Action action, FileType fileType, FileStatus fileStatus, String dac, String floatId, boolean floatMerged) {
     this.file = file;
     this.date = date;
     this.latitude = latitude;
@@ -203,6 +246,10 @@ public class MetadataRecord {
     this.parameterDataMode = parameterDataMode;
     this.action = action;
     this.fileType = fileType;
+    this.fileStatus = fileStatus;
+    this.dac = dac;
+    this.floatId = floatId;
+    this.floatMerged = floatMerged;
   }
 
   public String getFile() {
@@ -269,25 +316,42 @@ public class MetadataRecord {
     return fileType;
   }
 
+  public FileStatus getFileStatus() {
+    return fileStatus;
+  }
+
+  public String getDac() {
+    return dac;
+  }
+
+  public String getFloatId() {
+    return floatId;
+  }
+
+  public boolean isFloatMerged() {
+    return floatMerged;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
     MetadataRecord that = (MetadataRecord) o;
-    return Objects.equals(file, that.file) && Objects.equals(date, that.date) && Objects.equals(latitude, that.latitude)
-        && Objects.equals(latitudeMin, that.latitudeMin) && Objects.equals(latitudeMax, that.latitudeMax)
-        && Objects.equals(longitude, that.longitude) && Objects.equals(longitudeMin, that.longitudeMin) && Objects.equals(
-        longitudeMax, that.longitudeMax) && ocean == that.ocean && Objects.equals(profilerType, that.profilerType)
-        && Objects.equals(institution, that.institution) && Objects.equals(dateUpdate, that.dateUpdate) && Objects.equals(
-        parameters, that.parameters) && Objects.equals(parameterDataMode, that.parameterDataMode) && action == that.action
-        && fileType == that.fileType;
+    return floatMerged == that.floatMerged && Objects.equals(file, that.file) && Objects.equals(date, that.date)
+        && Objects.equals(latitude, that.latitude) && Objects.equals(latitudeMin, that.latitudeMin) && Objects.equals(
+        latitudeMax, that.latitudeMax) && Objects.equals(longitude, that.longitude) && Objects.equals(longitudeMin,
+        that.longitudeMin) && Objects.equals(longitudeMax, that.longitudeMax) && ocean == that.ocean && Objects.equals(profilerType,
+        that.profilerType) && Objects.equals(institution, that.institution) && Objects.equals(dateUpdate, that.dateUpdate)
+        && Objects.equals(parameters, that.parameters) && Objects.equals(parameterDataMode, that.parameterDataMode)
+        && action == that.action && fileType == that.fileType && fileStatus == that.fileStatus && Objects.equals(dac, that.dac)
+        && Objects.equals(floatId, that.floatId);
   }
 
   @Override
   public int hashCode() {
     return Objects.hash(file, date, latitude, latitudeMin, latitudeMax, longitude, longitudeMin, longitudeMax, ocean, profilerType, institution,
-        dateUpdate, parameters, parameterDataMode, action, fileType);
+        dateUpdate, parameters, parameterDataMode, action, fileType, fileStatus, dac, floatId, floatMerged);
   }
 
   @Override
@@ -309,6 +373,10 @@ public class MetadataRecord {
         ", parameterDataMode='" + parameterDataMode + '\'' +
         ", action=" + action +
         ", fileType=" + fileType +
+        ", fileStatus=" + fileStatus +
+        ", dac='" + dac + '\'' +
+        ", floatId='" + floatId + '\'' +
+        ", floatMerged=" + floatMerged +
         '}';
   }
 

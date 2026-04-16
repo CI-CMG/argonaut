@@ -1,19 +1,18 @@
 package edu.colorado.cires.argonaut.metadata.core;
 
-import edu.colorado.cires.argonaut.messaging.core.databind.MetadataRecord;
+import edu.colorado.cires.argonaut.messaging.core.databind.FloatMergeGroup;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 
-public class DefaultMetadataRecordPage implements MetadataRecordPage {
+public class DefaultFloatMergeGroupPage implements FloatMergeGroupPage {
 
   public static Builder builder() {
     return new Builder();
   }
 
-  public static Builder builder(MetadataRecordPage src) {
+  public static Builder builder(FloatMergeGroupPage src) {
     return new Builder(src);
   }
 
@@ -22,13 +21,13 @@ public class DefaultMetadataRecordPage implements MetadataRecordPage {
 
     private IndexPageRequest pageRequest;
     private long totalRecords;
-    private List<MetadataRecord> page = Collections.emptyList();
+    private List<FloatMergeGroup> page = Collections.emptyList();
 
     private Builder() {
 
     }
 
-    private Builder(MetadataRecordPage src) {
+    private Builder(FloatMergeGroupPage src) {
       withIndexPageRequest(DefaultIndexPageRequest.builder(src).build());
       withTotalRecords(src.getTotalRecords());
       withPage(src.getPage());
@@ -44,7 +43,7 @@ public class DefaultMetadataRecordPage implements MetadataRecordPage {
       return this;
     }
 
-    public Builder withPage(List<MetadataRecord> page) {
+    public Builder withPage(List<FloatMergeGroup> page) {
       if (page == null) {
         this.page = Collections.emptyList();
       } else {
@@ -53,17 +52,17 @@ public class DefaultMetadataRecordPage implements MetadataRecordPage {
       return this;
     }
 
-    public DefaultMetadataRecordPage build() {
-      return new DefaultMetadataRecordPage(pageRequest, totalRecords, page);
+    public DefaultFloatMergeGroupPage build() {
+      return new DefaultFloatMergeGroupPage(pageRequest, totalRecords, page);
     }
   }
 
   private final IndexPageRequest pageRequest;
   private final int totalPages;
   private final long totalRecords;
-  private final List<MetadataRecord> page;
+  private final List<FloatMergeGroup> page;
 
-  private DefaultMetadataRecordPage(IndexPageRequest pageRequest, long totalRecords, List<MetadataRecord> page) {
+  private DefaultFloatMergeGroupPage(IndexPageRequest pageRequest, long totalRecords, List<FloatMergeGroup> page) {
     this.pageRequest = pageRequest;
     this.totalRecords = totalRecords;
     this.page = page;
@@ -92,7 +91,7 @@ public class DefaultMetadataRecordPage implements MetadataRecordPage {
   }
 
   @Override
-  public List<MetadataRecord> getPage() {
+  public List<FloatMergeGroup> getPage() {
     return page;
   }
 
@@ -108,28 +107,5 @@ public class DefaultMetadataRecordPage implements MetadataRecordPage {
         .build());
   }
 
-  @Override
-  public String toString() {
-    return "DefaultMetadataRecordPage{" +
-        "pageRequest=" + pageRequest +
-        ", totalPages=" + totalPages +
-        ", totalRecords=" + totalRecords +
-        ", page=" + page +
-        '}';
-  }
 
-  @Override
-  public boolean equals(Object o) {
-    if (o == null || getClass() != o.getClass()) {
-      return false;
-    }
-    DefaultMetadataRecordPage that = (DefaultMetadataRecordPage) o;
-    return totalPages == that.totalPages && totalRecords == that.totalRecords && Objects.equals(pageRequest, that.pageRequest)
-        && Objects.equals(page, that.page);
-  }
-
-  @Override
-  public int hashCode() {
-    return Objects.hash(pageRequest, totalPages, totalRecords, page);
-  }
 }

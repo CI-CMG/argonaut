@@ -2,7 +2,8 @@ package edu.colorado.cires.argonaut.metadata.jpa.entity;
 
 import edu.colorado.cires.argonaut.messaging.core.databind.ArgoOcean;
 import edu.colorado.cires.argonaut.messaging.core.databind.MetadataRecord;
-import edu.colorado.cires.argonaut.messaging.core.databind.MetadataRecord.Action;
+import edu.colorado.cires.argonaut.messaging.core.databind.MetadataRecord.FileStatus;
+import edu.colorado.cires.argonaut.messaging.core.databind.NcSubmissionMessage.FileType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -18,6 +19,14 @@ public class IndexEntity {
   @Id
   @Column(name = "file", nullable = false, length = 100)
   private String file;
+  @Column(name = "dac", nullable = false, length = 20)
+  private String dac;
+  @Column(name = "float_id", nullable = false, length = 30)
+  private String floatId;
+  @Column(name = "file_type", length = 50, nullable = false)
+  private String fileType;
+  @Column(name = "file_status", length = 50, nullable = false)
+  private String fileStatus;
   @Column(name = "date")
   private ZonedDateTime date;
   @Column(name = "latitude")
@@ -44,6 +53,9 @@ public class IndexEntity {
   private String parameters;
   @Column(name = "parameter_data_mode", length = 100)
   private String parameterDataMode;
+  @Column(name = "float_merged")
+  private boolean floatMerged = false;
+
 
   public String getFile() {
     return file;
@@ -157,30 +169,77 @@ public class IndexEntity {
     this.parameterDataMode = parameterDataMode;
   }
 
+  public String getFileType() {
+    return fileType;
+  }
+
+  public void setFileType(String fileType) {
+    this.fileType = fileType;
+  }
+
+  public String getFileStatus() {
+    return fileStatus;
+  }
+
+  public void setFileStatus(String fileStatus) {
+    this.fileStatus = fileStatus;
+  }
+
+  public boolean isFloatMerged() {
+    return floatMerged;
+  }
+
+  public void setFloatMerged(boolean floatMerged) {
+    this.floatMerged = floatMerged;
+  }
+
+  public String getDac() {
+    return dac;
+  }
+
+  public void setDac(String dac) {
+    this.dac = dac;
+  }
+
+  public String getFloatId() {
+    return floatId;
+  }
+
+  public void setFloatId(String floatId) {
+    this.floatId = floatId;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    IndexEntity that = (IndexEntity) o;
-    return Objects.equals(file, that.file) && Objects.equals(date, that.date) && Objects.equals(latitude, that.latitude)
-        && Objects.equals(latitudeMin, that.latitudeMin) && Objects.equals(latitudeMax, that.latitudeMax)
-        && Objects.equals(longitude, that.longitude) && Objects.equals(longitudeMin, that.longitudeMin) && Objects.equals(
-        longitudeMax, that.longitudeMax) && Objects.equals(ocean, that.ocean) && Objects.equals(profilerType, that.profilerType)
-        && Objects.equals(institution, that.institution) && Objects.equals(dateUpdate, that.dateUpdate) && Objects.equals(
-        parameters, that.parameters) && Objects.equals(parameterDataMode, that.parameterDataMode);
+    IndexEntity entity = (IndexEntity) o;
+    return floatMerged == entity.floatMerged && Objects.equals(file, entity.file) && Objects.equals(dac, entity.dac)
+        && Objects.equals(floatId, entity.floatId) && Objects.equals(fileType, entity.fileType) && Objects.equals(
+        fileStatus, entity.fileStatus) && Objects.equals(date, entity.date) && Objects.equals(latitude, entity.latitude)
+        && Objects.equals(latitudeMin, entity.latitudeMin) && Objects.equals(latitudeMax, entity.latitudeMax)
+        && Objects.equals(longitude, entity.longitude) && Objects.equals(longitudeMin, entity.longitudeMin)
+        && Objects.equals(longitudeMax, entity.longitudeMax) && Objects.equals(ocean, entity.ocean) && Objects.equals(
+        profilerType, entity.profilerType) && Objects.equals(institution, entity.institution) && Objects.equals(dateUpdate,
+        entity.dateUpdate) && Objects.equals(parameters, entity.parameters) && Objects.equals(parameterDataMode,
+        entity.parameterDataMode);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(file, date, latitude, latitudeMin, latitudeMax, longitude, longitudeMin, longitudeMax, ocean, profilerType, institution,
-        dateUpdate, parameters, parameterDataMode);
+    return Objects.hash(file, dac, floatId, fileType, fileStatus, date, latitude, latitudeMin, latitudeMax, longitude, longitudeMin, longitudeMax,
+        ocean, profilerType, institution, dateUpdate, parameters, parameterDataMode, floatMerged);
   }
 
   @Override
   public String toString() {
     return "IndexEntity{" +
         "file='" + file + '\'' +
+        ", dac='" + dac + '\'' +
+        ", floatId='" + floatId + '\'' +
+        ", fileType='" + fileType + '\'' +
+        ", fileStatus='" + fileStatus + '\'' +
         ", date=" + date +
         ", latitude=" + latitude +
         ", latitudeMin=" + latitudeMin +
@@ -194,6 +253,7 @@ public class IndexEntity {
         ", dateUpdate=" + dateUpdate +
         ", parameters='" + parameters + '\'' +
         ", parameterDataMode='" + parameterDataMode + '\'' +
+        ", floatMerged=" + floatMerged +
         '}';
   }
 
@@ -213,6 +273,11 @@ public class IndexEntity {
     entity.setDateUpdate(metadataRecord.getDateUpdate() == null ? null : metadataRecord.getDateUpdate().atOffset(ZoneOffset.UTC).toZonedDateTime());
     entity.setParameters(metadataRecord.getParameters());
     entity.setParameterDataMode(metadataRecord.getParameterDataMode());
+    entity.setFileType(metadataRecord.getFileType().name());
+    entity.setDac(metadataRecord.getDac());
+    entity.setFloatId(metadataRecord.getFloatId());
+    // not setting floatMerged
+    // not setting fileStatus
     return entity;
   }
 
@@ -232,7 +297,11 @@ public class IndexEntity {
         .withDateUpdate(dateUpdate == null ? null : dateUpdate.toInstant())
         .withParameters(parameters)
         .withParameterDataMode(parameterDataMode)
-        .withAction(Action.NONE)
+        .withFileType(FileType.valueOf(fileType))
+        .withFileStatus(FileStatus.valueOf(fileStatus))
+        .withDac(dac)
+        .withFloatId(floatId)
+        .withFloatMerged(floatMerged)
         .build();
   }
 }

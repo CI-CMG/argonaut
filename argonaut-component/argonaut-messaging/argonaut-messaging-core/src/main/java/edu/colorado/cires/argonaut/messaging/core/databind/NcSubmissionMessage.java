@@ -39,7 +39,7 @@ public final class NcSubmissionMessage implements Comparable<NcSubmissionMessage
     private String fileName;
     private FileType fileType;
     private int numberOfFilesInSubmission;
-    private Operation operation = Operation.ADD;
+    private Operation operation;
 //    private List<String> associatedFiles = new ArrayList<>();
 
     private Builder() {
