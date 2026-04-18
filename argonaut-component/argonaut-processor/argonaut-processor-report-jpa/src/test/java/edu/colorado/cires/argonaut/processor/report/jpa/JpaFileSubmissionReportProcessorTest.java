@@ -10,21 +10,14 @@ import edu.colorado.cires.argonaut.processor.report.jpa.entity.SubmissionRecordE
 import edu.colorado.cires.argonaut.processor.report.jpa.entity.SubmissionRecordValidationErrorEntity;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
-import jakarta.persistence.EntityTransaction;
 import jakarta.persistence.Persistence;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.Instant;
-import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
-import java.util.stream.Collectors;
-import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -56,7 +49,7 @@ public class JpaFileSubmissionReportProcessorTest {
         .withFileName("R1902264_173.nc")
         .withFloatId("1")
         .withDac("aoml")
-        .withFileType(FileType.UNKNOWN)
+        .withFileType(FileType.AUXILIARY)
         .withOperation(Operation.ADD)
         .withNumberOfFilesInSubmission(100)
         .withValidationErrors(Arrays.asList("error 1", "error 2"))
@@ -66,7 +59,7 @@ public class JpaFileSubmissionReportProcessorTest {
         .withFileName("R4903218_229.nc")
         .withFloatId("2")
         .withDac("foo")
-        .withFileType(FileType.PROFILE)
+        .withFileType(FileType.CORE_ARGO_PROFILE)
         .withOperation(Operation.REMOVE)
         .withNumberOfFilesInSubmission(10)
         .withTimestamp(Instant.parse("2025-04-03T12:34:57.000Z"))
@@ -75,7 +68,7 @@ public class JpaFileSubmissionReportProcessorTest {
         .withFileName("R4903353_302.nc")
         .withFloatId("3")
         .withDac("bar")
-        .withFileType(FileType.UNKNOWN)
+        .withFileType(FileType.AUXILIARY)
         .withOperation(Operation.ADD)
         .withNumberOfFilesInSubmission(11)
         .withTimestamp(Instant.parse("2025-04-03T12:34:58.000Z"))

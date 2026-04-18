@@ -243,7 +243,7 @@ public class DataSubmissionAndValidationTest {
     for (String file : files) {
       Path floatDir = aomlProcessingDir.resolve(file.split("_")[0]);
       NcSubmissionMessage expectedMessage = NcSubmissionMessage.builder()
-          .withFileType(FileType.UNKNOWN)
+          .withFileType(FileType.AUXILIARY)
           .withDac("aoml")
           .withFileName(file)
           .withTimestamp(timestamp)
@@ -279,7 +279,7 @@ public class DataSubmissionAndValidationTest {
       expectedFiles.add(floatDir.resolve(name));
 
       NcSubmissionMessage expectedMessage = NcSubmissionMessage.builder()
-          .withFileType(FileType.UNKNOWN)
+          .withFileType(FileType.AUXILIARY)
           .withDac("aoml")
           .withFileName(name)
           .withTimestamp(timestamp)
@@ -322,7 +322,7 @@ public class DataSubmissionAndValidationTest {
     for (String file : files) {
       String floatId = file.replaceAll("R", "").split("_")[0];
       NcSubmissionMessage expectedMessage = NcSubmissionMessage.builder()
-          .withFileType(FileType.PROFILE)
+          .withFileType(FileType.CORE_ARGO_PROFILE)
           .withDac("aoml")
           .withFileName(file)
           .withTimestamp(timestamp)
@@ -366,7 +366,7 @@ public class DataSubmissionAndValidationTest {
       expectedFiles.add(floatDir.resolve("profiles").resolve(name));
 
       NcSubmissionMessage expectedMessage = NcSubmissionMessage.builder()
-          .withFileType(FileType.PROFILE)
+          .withFileType(FileType.CORE_ARGO_PROFILE)
           .withDac("aoml")
           .withFileName(name)
           .withTimestamp(timestamp)

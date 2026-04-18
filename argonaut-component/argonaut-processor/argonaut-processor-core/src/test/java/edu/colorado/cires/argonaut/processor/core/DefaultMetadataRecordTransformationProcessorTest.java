@@ -54,7 +54,7 @@ public class DefaultMetadataRecordTransformationProcessorTest {
         .withDac("aoml")
         .withFileName("D13857_001.nc")
         .withFloatId("13857")
-        .withFileType(FileType.PROFILE)
+        .withFileType(FileType.CORE_ARGO_PROFILE)
         .withNumberOfFilesInSubmission(100)
         .build());
 

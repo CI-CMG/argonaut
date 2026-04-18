@@ -25,9 +25,14 @@ public final class NcSubmissionMessage implements Comparable<NcSubmissionMessage
   }
 
   public enum FileType {
-    PROFILE, PROFILE_MERGE,
-    //TODO remove me
-    UNKNOWN
+    CORE_ARGO_PROFILE,
+    B_ARGO_PROFILE,
+    BGC_ARGO_SYNTH_PROFILE,
+    ARGO_TRAJECTORY,
+    METADATA,
+    TECHNICAL_DATA,
+    AUXILIARY,
+    PROFILE_MERGE
   }
 
   public static final class Builder {

@@ -5,7 +5,7 @@ import tools.jackson.databind.DeserializationFeature;
 import tools.jackson.databind.MapperFeature;
 import tools.jackson.databind.json.JsonMapper;
 
-public class ArgonautObjectmapperFactory {
+public class ArgonautJsonMapperFactory {
 
   private static final JsonMapper JSON_MAPPER = JsonMapper.builder()
       .disable(MapperFeature.DEFAULT_VIEW_INCLUSION)

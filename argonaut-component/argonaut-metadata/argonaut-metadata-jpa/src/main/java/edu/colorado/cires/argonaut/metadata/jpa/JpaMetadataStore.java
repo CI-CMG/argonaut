@@ -113,11 +113,11 @@ public class JpaMetadataStore implements MetadataStore {
   @Override
   public MetadataRecordPage findProfilePage(String floatId, String dac, IndexPageRequest pageRequest) {
     try (EntityManager em = entityManagerFactory.createEntityManager()) {
-      long count = em.createQuery("SELECT count(i.id) FROM IndexEntity i WHERE i.fileType = 'PROFILE' AND i.floatId = :floatId AND i.dac = :dac", Long.class)
+      long count = em.createQuery("SELECT count(i.id) FROM IndexEntity i WHERE i.fileType = 'CORE_ARGO_PROFILE' AND i.floatId = :floatId AND i.dac = :dac", Long.class)
           .setParameter("floatId", floatId)
           .setParameter("dac", dac)
           .getSingleResult();
-      List<IndexEntity> pageResults = em.createQuery("SELECT i FROM IndexEntity i WHERE i.fileType = 'PROFILE' AND i.floatId = :floatId AND i.dac = :dac order by i.id asc", IndexEntity.class)
+      List<IndexEntity> pageResults = em.createQuery("SELECT i FROM IndexEntity i WHERE i.fileType = 'CORE_ARGO_PROFILE' AND i.floatId = :floatId AND i.dac = :dac order by i.id asc", IndexEntity.class)
           .setParameter("floatId", floatId)
           .setParameter("dac", dac)
           .setMaxResults(pageRequest.getPageSize())
@@ -134,9 +134,9 @@ public class JpaMetadataStore implements MetadataStore {
   @Override
   public FloatMergeGroupPage findUpdatedOrMissingMergeFilesPage(IndexPageRequest pageRequest) {
     try (EntityManager em = entityManagerFactory.createEntityManager()) {
-      long count = em.createQuery("SELECT COUNT(DISTINCT i.floatId) FROM IndexEntity i WHERE i.fileType = 'PROFILE' AND (i.fileStatus = 'ACTIVE' AND i.floatMerged = false ) OR (i.fileStatus = 'REMOVED' AND i.floatMerged = true)", Long.class)
+      long count = em.createQuery("SELECT COUNT(DISTINCT i.floatId) FROM IndexEntity i WHERE i.fileType = 'CORE_ARGO_PROFILE' AND (i.fileStatus = 'ACTIVE' AND i.floatMerged = false ) OR (i.fileStatus = 'REMOVED' AND i.floatMerged = true)", Long.class)
           .getSingleResult();
-      List<Tuple> pageResults = em.createQuery("SELECT DISTINCT i.dac as dac, i.floatId as floatId FROM IndexEntity i WHERE i.fileType = 'PROFILE' AND (i.fileStatus = 'ACTIVE' AND i.floatMerged = false ) OR (i.fileStatus = 'REMOVED' AND i.floatMerged = true) order by i.floatId", Tuple.class)
+      List<Tuple> pageResults = em.createQuery("SELECT DISTINCT i.dac as dac, i.floatId as floatId FROM IndexEntity i WHERE i.fileType = 'CORE_ARGO_PROFILE' AND (i.fileStatus = 'ACTIVE' AND i.floatMerged = false ) OR (i.fileStatus = 'REMOVED' AND i.floatMerged = true) order by i.floatId", Tuple.class)
           .setMaxResults(pageRequest.getPageSize())
           .setFirstResult((pageRequest.getPageNumber() - 1) * pageRequest.getPageSize())
           .getResultList();

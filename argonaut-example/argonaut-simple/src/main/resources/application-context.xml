@@ -21,7 +21,7 @@
     <property name="ignoreResourceNotFound" value="true"/>
   </bean>
 
-  <bean id="jsonMapper" class="edu.colorado.cires.argonaut.messaging.core.util.ArgonautObjectmapperFactory" factory-method="getJsonMapper"/>
+  <bean id="jsonMapper" class="edu.colorado.cires.argonaut.messaging.core.util.ArgonautJsonMapperFactory" factory-method="getJsonMapper"/>
 
   <bean id="serializationProcessor" class="edu.colorado.cires.argonaut.standalone.SerializationProcessor">
     <property name="jsonMapper" ref="jsonMapper"/>
@@ -120,6 +120,24 @@
 
   <bean id="updateIndexProcessor" class="edu.colorado.cires.argonaut.processor.core.DefaultUpdateIndexProcessor">
     <property name="metadataStore" ref="metadataStore"/>
+  </bean>
+
+  <bean id="floatMergeAggregator" class="edu.colorado.cires.argonaut.processor.core.DefaultFloatMergeAggregator">
+    <property name="jsonMapper" ref="jsonMapper"/>
+    <property name="messageSender" ref="messageSender"/>
+    <property name="floatMergeQueue" value="seda:float-merge"/>
+    <property name="enabled" value="${float-merge.enabled}"/>
+    <property name="pageSize" value="${float-merge.page-size}"/>
+    <property name="metadataStore" ref="metadataStore"/>
+  </bean>
+
+  <bean id="floatMergeProcessor" class="edu.colorado.cires.argonaut.processor.core.DefaultFloatMergeProcessor">
+    <property name="metadataStore" ref="metadataStore"/>
+    <property name="messageSender" ref="messageSender"/>
+    <property name="jsonMapper" ref="jsonMapper"/>
+    <property name="localTempDir" value="${work-directory}"/>
+    <property name="outputFileStore" ref="outputFileStore"/>
+    <property name="updateIndexQueue" value="seda:update-index"/>
   </bean>
 
   <camelContext xmlns="http://camel.apache.org/schema/spring">

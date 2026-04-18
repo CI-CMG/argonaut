@@ -116,13 +116,13 @@ public class DefaultTarballSubmissionProcessor implements TarballSubmissionProce
             boolean profile = matcher.group(1) != null;
             NcSubmissionMessage ncSubmissionMessage = NcSubmissionMessage.builder()
                 .withFileName(fileName)
-                .withFileType(profile ? FileType.PROFILE : FileType.UNKNOWN)
+                .withFileType(profile ? FileType.CORE_ARGO_PROFILE : FileType.AUXILIARY)
                 .withFloatId(floatDir)
                 .withDac(submittedFile.getDac())
                 .withTimestamp(submittedFile.getTimestamp())
                 .build();
             String processingDacDir = processingFileStore.appendToPath(processingFileStore.getRoot(), "dac", submittedFile.getDac(), submittedFile.getTimestamp().toString(), floatDir);
-            if (FileType.PROFILE == ncSubmissionMessage.getFileType()) {
+            if (FileType.CORE_ARGO_PROFILE == ncSubmissionMessage.getFileType()) {
               processingDacDir = processingFileStore.appendToPath(processingDacDir, "profiles");
             }
             String ncFile = processingFileStore.appendToPath(processingDacDir, file.getFileName().toString());

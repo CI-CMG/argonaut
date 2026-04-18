@@ -282,7 +282,7 @@ public class PostValidationTest {
       Files.move(timeStampDir.resolve(name), floatDir.resolve(name));
       messageSender.sendJson("seda:validation-success", jsonMapper.writeValueAsString(NcSubmissionMessage.builder()
           .withOperation(Operation.ADD)
-          .withFileType(FileType.UNKNOWN)
+          .withFileType(FileType.AUXILIARY)
           .withDac("aoml")
           .withFileName(name)
           .withTimestamp(timestamp)
@@ -427,7 +427,7 @@ public class PostValidationTest {
       Files.move(timeStampDir.resolve(name), floatDir.resolve(name));
       messageSender.sendJson("seda:file-output", jsonMapper.writeValueAsString(NcSubmissionMessage.builder()
           .withOperation(Operation.ADD)
-          .withFileType(FileType.UNKNOWN)
+          .withFileType(FileType.AUXILIARY)
           .withDac("aoml")
           .withFileName(name)
           .withTimestamp(timestamp)
@@ -475,7 +475,7 @@ public class PostValidationTest {
       Files.move(timeStampDir.resolve(name), floatDir.resolve("profiles").resolve(name));
       messageSender.sendJson("seda:validation-success", jsonMapper.writeValueAsString(NcSubmissionMessage.builder()
           .withOperation(Operation.ADD)
-          .withFileType(FileType.PROFILE)
+          .withFileType(FileType.CORE_ARGO_PROFILE)
           .withDac("aoml")
           .withFileName(name)
           .withTimestamp(timestamp)
@@ -522,7 +522,7 @@ public class PostValidationTest {
       Files.move(timeStampDir.resolve(name), floatDir.resolve("profiles").resolve(name));
       messageSender.sendJson("seda:file-output", jsonMapper.writeValueAsString(NcSubmissionMessage.builder()
           .withOperation(Operation.ADD)
-          .withFileType(FileType.PROFILE)
+          .withFileType(FileType.CORE_ARGO_PROFILE)
           .withDac("aoml")
           .withFileName(name)
           .withTimestamp(timestamp)

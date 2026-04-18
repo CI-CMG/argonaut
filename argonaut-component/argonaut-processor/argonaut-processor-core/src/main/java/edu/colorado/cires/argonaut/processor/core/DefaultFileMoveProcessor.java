@@ -57,14 +57,14 @@ public class DefaultFileMoveProcessor implements FileMoveProcessor {
   private void handleAdd(NcSubmissionMessage ncSubmissionMessage) {
     String processingDacDir = processingFileStore.appendToPath(processingFileStore.getRoot(), "dac", ncSubmissionMessage.getDac(),
         ncSubmissionMessage.getTimestamp().toString(), ncSubmissionMessage.getFloatId().toString());
-    if (FileType.PROFILE == ncSubmissionMessage.getFileType()) {
+    if (FileType.CORE_ARGO_PROFILE == ncSubmissionMessage.getFileType()) {
       processingDacDir = processingFileStore.appendToPath(processingDacDir, "profiles");
     }
     String processingFile = processingFileStore.appendToPath(processingDacDir, ncSubmissionMessage.getFileName());
     if (ncSubmissionMessage.getValidationErrors().isEmpty()) {
       String destinationDir = outputFileStore.appendToPath(outputFileStore.getRoot(), "dac", ncSubmissionMessage.getDac(),
           ncSubmissionMessage.getFloatId());
-      if (FileType.PROFILE == ncSubmissionMessage.getFileType()) {
+      if (FileType.CORE_ARGO_PROFILE == ncSubmissionMessage.getFileType()) {
         destinationDir = outputFileStore.appendToPath(destinationDir, "profiles");
       }
       String destinationFile = outputFileStore.appendToPath(destinationDir, ncSubmissionMessage.getFileName());
@@ -79,7 +79,7 @@ public class DefaultFileMoveProcessor implements FileMoveProcessor {
     } else {
       String destinationDir = submissionFileStore.appendToPath(submissionFileStore.getRoot(), "dac", ncSubmissionMessage.getDac(), "processed",
           ncSubmissionMessage.getTimestamp().toString(), "reject", ncSubmissionMessage.getFloatId().toString());
-      if (FileType.PROFILE == ncSubmissionMessage.getFileType()) {
+      if (FileType.CORE_ARGO_PROFILE == ncSubmissionMessage.getFileType()) {
         destinationDir = submissionFileStore.appendToPath(destinationDir, "profiles");
       }
       String destinationFile = submissionFileStore.appendToPath(destinationDir, ncSubmissionMessage.getFileName());

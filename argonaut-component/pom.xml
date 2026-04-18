@@ -17,6 +17,7 @@
     <module>argonaut-file-storage</module>
     <module>argonaut-messaging</module>
     <module>argonaut-processor</module>
+    <module>argonaut-core</module>
   </modules>
 
 </project>

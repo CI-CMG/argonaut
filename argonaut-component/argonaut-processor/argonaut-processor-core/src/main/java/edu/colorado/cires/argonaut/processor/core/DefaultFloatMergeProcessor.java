@@ -185,7 +185,7 @@ public class DefaultFloatMergeProcessor implements FloatMergeProcessor {
             jsonMapper.writeValueAsString(MetadataRecord.builder()
                 .withFile(outputFileForMetadata)
                 .withAction(Action.FLOAT_MERGE)
-                .withFileType(FileType.PROFILE)
+                .withFileType(FileType.CORE_ARGO_PROFILE)
                 .build()));
       } catch (IOException e) {
         throw new RuntimeException("Unable to merge " + mergedFile, e);

@@ -76,7 +76,7 @@ public class JpaMetadataStoreTest {
         .withParameters("params")
         .withParameterDataMode("mode")
         .withAction(Action.UPDATE)
-        .withFileType(FileType.PROFILE)
+        .withFileType(FileType.CORE_ARGO_PROFILE)
         .withDac("aoml")
         .withFloatId("13857")
         .build();
@@ -99,7 +99,7 @@ public class JpaMetadataStoreTest {
         .withParameters("params2")
         .withParameterDataMode("mode2")
         .withAction(Action.UPDATE)
-        .withFileType(FileType.PROFILE)
+        .withFileType(FileType.CORE_ARGO_PROFILE)
         .withDac("aoml")
         .withFloatId("13857")
         .build();
@@ -122,7 +122,7 @@ public class JpaMetadataStoreTest {
         .withParameters("params3")
         .withParameterDataMode("mode3")
         .withAction(Action.UPDATE)
-        .withFileType(FileType.PROFILE)
+        .withFileType(FileType.CORE_ARGO_PROFILE)
         .withDac("aoml")
         .withFloatId("13857")
         .build();
@@ -148,7 +148,7 @@ public class JpaMetadataStoreTest {
         .withParameters("params3")
         .withParameterDataMode("mode3")
         .withAction(Action.UPDATE)
-        .withFileType(FileType.PROFILE)
+        .withFileType(FileType.CORE_ARGO_PROFILE)
         .withDac("nnic")
         .withFloatId("13857")
         .build());
@@ -169,7 +169,7 @@ public class JpaMetadataStoreTest {
         .withParameters("params3")
         .withParameterDataMode("mode3")
         .withAction(Action.UPDATE)
-        .withFileType(FileType.PROFILE)
+        .withFileType(FileType.CORE_ARGO_PROFILE)
         .withDac("aoml")
         .withFloatId("13858")
         .build());
@@ -190,7 +190,7 @@ public class JpaMetadataStoreTest {
         .withParameters("params3")
         .withParameterDataMode("mode3")
         .withAction(Action.UPDATE)
-        .withFileType(FileType.PROFILE)
+        .withFileType(FileType.CORE_ARGO_PROFILE)
         .withDac("nnic")
         .withFloatId("1000")
         .build());
@@ -254,7 +254,7 @@ public class JpaMetadataStoreTest {
         .withParameters("params3")
         .withParameterDataMode("mode3")
         .withAction(Action.UPDATE)
-        .withFileType(FileType.PROFILE)
+        .withFileType(FileType.CORE_ARGO_PROFILE)
         .withDac("aoml")
         .withFloatId("13858")
         .build();
@@ -338,7 +338,7 @@ public class JpaMetadataStoreTest {
         .withParameters("params3")
         .withParameterDataMode("mode3")
         .withAction(Action.UPDATE)
-        .withFileType(FileType.PROFILE)
+        .withFileType(FileType.CORE_ARGO_PROFILE)
         .withDac("aoml")
         .withFloatId("13857")
         .build();
@@ -361,7 +361,7 @@ public class JpaMetadataStoreTest {
         .withParameters("params3")
         .withParameterDataMode("mode3")
         .withAction(Action.UPDATE)
-        .withFileType(FileType.PROFILE)
+        .withFileType(FileType.CORE_ARGO_PROFILE)
         .withDac("aoml")
         .withFloatId("13857")
         .build();
@@ -384,7 +384,7 @@ public class JpaMetadataStoreTest {
         .withParameters("params3")
         .withParameterDataMode("mode3")
         .withAction(Action.UPDATE)
-        .withFileType(FileType.PROFILE)
+        .withFileType(FileType.CORE_ARGO_PROFILE)
         .withDac("aoml")
         .withFloatId("13857")
         .build();
@@ -414,7 +414,7 @@ public class JpaMetadataStoreTest {
         .withParameters("params3")
         .withParameterDataMode("mode3")
         .withAction(Action.UPDATE)
-        .withFileType(FileType.PROFILE)
+        .withFileType(FileType.CORE_ARGO_PROFILE)
         .withDac("aoml")
         .withFloatId("13858")
         .build();
@@ -442,7 +442,7 @@ public class JpaMetadataStoreTest {
         .withParameters("params3")
         .withParameterDataMode("mode3")
         .withAction(Action.UPDATE)
-        .withFileType(FileType.PROFILE)
+        .withFileType(FileType.CORE_ARGO_PROFILE)
         .withDac("aoml")
         .withFloatId("13859")
         .build();
@@ -476,7 +476,7 @@ public class JpaMetadataStoreTest {
         .withParameters("params3")
         .withParameterDataMode("mode3")
         .withAction(Action.UPDATE)
-        .withFileType(FileType.PROFILE)
+        .withFileType(FileType.CORE_ARGO_PROFILE)
         .withDac("cats")
         .withFloatId("13860")
         .build();

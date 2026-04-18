@@ -1,15 +1,11 @@
 package edu.colorado.cires.argonaut.processor.core;
 
-import edu.colorado.cires.argonaut.messaging.core.databind.MetadataRecord;
+import edu.colorado.cires.argonaut.messaging.core.databind.FloatMergeGroup;
 import edu.colorado.cires.argonaut.messaging.core.queue.MessageSender;
 import edu.colorado.cires.argonaut.metadata.core.DefaultIndexPageRequest;
 import edu.colorado.cires.argonaut.metadata.core.FloatMergeGroupPage;
 import edu.colorado.cires.argonaut.metadata.core.IndexPageRequest;
-import edu.colorado.cires.argonaut.metadata.core.MetadataRecordPage;
 import edu.colorado.cires.argonaut.metadata.core.MetadataStore;
-import java.time.Instant;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Optional;
 import tools.jackson.databind.json.JsonMapper;
 
@@ -18,6 +14,13 @@ public class DefaultFloatMergeAggregator implements FloatMergeAggregator {
   private MetadataStore metadataStore;
   private MessageSender messageSender;
   private JsonMapper jsonMapper;
+  private String floatMergeQueue;
+  private int pageSize = 200;
+  private boolean enabled = true;
+
+  public void setEnabled(boolean enabled) {
+    this.enabled = enabled;
+  }
 
   public void setMetadataStore(MetadataStore metadataStore) {
     this.metadataStore = metadataStore;
@@ -31,20 +34,31 @@ public class DefaultFloatMergeAggregator implements FloatMergeAggregator {
     this.jsonMapper = jsonMapper;
   }
 
-  private void sendMessages(FloatMergeGroupPage page) {
+  public void setFloatMergeQueue(String floatMergeQueue) {
+    this.floatMergeQueue = floatMergeQueue;
+  }
 
+  public void setPageSize(int pageSize) {
+    this.pageSize = pageSize;
+  }
+
+  private void sendMessages(FloatMergeGroupPage page) {
+    for (FloatMergeGroup fmg : page.getPage()) {
+      messageSender.sendJson(floatMergeQueue, jsonMapper.writeValueAsString(fmg));
+    }
   }
 
   @Override
   public void trigger() {
-    Instant now = Instant.now();
-    FloatMergeGroupPage page = metadataStore.findUpdatedOrMissingMergeFilesPage(DefaultIndexPageRequest.builder().build());
-    sendMessages(page);
-    Optional<IndexPageRequest> maybeNextPage = page.getNextPage();
-    while (maybeNextPage.isPresent()) {
-      page = metadataStore.findUpdatedOrMissingMergeFilesPage(maybeNextPage.get());
+    if (enabled) {
+      FloatMergeGroupPage page = metadataStore.findUpdatedOrMissingMergeFilesPage(DefaultIndexPageRequest.builder().withPageSize(pageSize).build());
       sendMessages(page);
-      maybeNextPage = page.getNextPage();
+      Optional<IndexPageRequest> maybeNextPage = page.getNextPage();
+      while (maybeNextPage.isPresent()) {
+        page = metadataStore.findUpdatedOrMissingMergeFilesPage(DefaultIndexPageRequest.builder(maybeNextPage.get()).build());
+        sendMessages(page);
+        maybeNextPage = page.getNextPage();
+      }
     }
   }
 }

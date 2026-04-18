@@ -97,7 +97,7 @@ public class DefaultRemovalFileValidationProcessor implements RemovalFileValidat
       boolean profile = matcher.group(1) != null;
       NcSubmissionMessage ncSubmissionMessage = NcSubmissionMessage.builder()
           .withFileName(fileName)
-          .withFileType(profile ? FileType.PROFILE : FileType.UNKNOWN)
+          .withFileType(profile ? FileType.CORE_ARGO_PROFILE : FileType.AUXILIARY)
           .withFloatId(floatDir)
           .build();
       return Optional.of(ncSubmissionMessage);

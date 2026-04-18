@@ -63,6 +63,17 @@
       <bean ref="updateIndexProcessor" method="updateIndex"/>
     </route>
 
+    <route id="float-merge-cron">
+      <from uri="cron:float-merge-cron?schedule={{float-merge.cron}}"/>
+      <bean ref="floatMergeAggregator" method="trigger"/>
+    </route>
+
+    <route id="float-merge">
+      <from uri="seda:float-merge"/>
+      <bean ref="deserializationProcessor" method="deserialize(${body}, edu.colorado.cires.argonaut.messaging.core.databind.FloatMergeGroup"/>
+      <bean ref="floatMergeProcessor" method="merge" />
+    </route>
+
   </routeContext>
 
 </beans>

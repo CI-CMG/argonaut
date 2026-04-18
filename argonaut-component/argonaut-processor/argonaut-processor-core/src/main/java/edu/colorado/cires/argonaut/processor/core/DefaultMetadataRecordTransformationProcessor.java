@@ -35,7 +35,7 @@ public class DefaultMetadataRecordTransformationProcessor implements MetadataRec
           .build();
     }
     String file = outputFileStore.appendToPath(message.getDac(), message.getFloatId());
-    if (FileType.PROFILE == message.getFileType()) {
+    if (FileType.CORE_ARGO_PROFILE == message.getFileType()) {
       file = outputFileStore.appendToPath(file, "profiles");
     }
     file = outputFileStore.appendToPath(file, message.getFileName());
