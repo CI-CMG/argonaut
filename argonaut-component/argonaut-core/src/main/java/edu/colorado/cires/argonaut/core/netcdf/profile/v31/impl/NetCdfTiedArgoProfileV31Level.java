@@ -9,7 +9,7 @@ public class NetCdfTiedArgoProfileV31Level implements ArgoProfileV31Level {
   private final NetCdfTiedArgoProfileV31Parameter parent;
   private final int levelIndex;
   private final String parameterName;
-  private final float value;
+  private final Float value;
   private final NetcdfFile netcdf;
   private final Float adjustedValue;
   private final String adjustedQc;
@@ -45,7 +45,7 @@ public class NetCdfTiedArgoProfileV31Level implements ArgoProfileV31Level {
   }
 
   @Override
-  public float getValue() {
+  public Float getValue() {
     return value;
   }
 

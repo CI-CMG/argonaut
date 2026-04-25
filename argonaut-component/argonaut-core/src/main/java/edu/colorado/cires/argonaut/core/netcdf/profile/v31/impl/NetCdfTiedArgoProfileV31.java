@@ -44,6 +44,7 @@ public class NetCdfTiedArgoProfileV31 implements ArgoProfileV31 {
   private final String verticalSamplingScheme;
   private final int configMissionNumber;
   private final int numHistory;
+  private final List<ArgoProfileV31Parameter> parameters;
 
   NetCdfTiedArgoProfileV31(NetCdfTiedArgoMultiProfileV31 parent, int profileIndex) {
     this.profileIndex = profileIndex;
@@ -76,6 +77,11 @@ public class NetCdfTiedArgoProfileV31 implements ArgoProfileV31 {
     verticalSamplingScheme = NetCdfUtils.getLevel1String(netcdf, profileIndex, "VERTICAL_SAMPLING_SCHEME");
     configMissionNumber = NetCdfUtils.getLevel1Integer(netcdf, profileIndex, "CONFIG_MISSION_NUMBER");
     numHistory = NetCdfUtils.getDimensionSize(netcdf, "N_HISTORY");
+    parameters = new ArrayList<>(stationParameters.size());
+    for (int index = 0; index < stationParameters.size(); index++) {
+      String parameterName = stationParameters.get(index);
+      parameters.add(new NetCdfTiedArgoProfileV31Parameter(this, parameterName, index));
+    }
   }
 
   private static Instant calculateJulianDate(NetcdfFile netcdf, int profileIndex, Instant referenceDateTime, String variable) {
@@ -316,11 +322,6 @@ public class NetCdfTiedArgoProfileV31 implements ArgoProfileV31 {
 
   @Override
   public List<ArgoProfileV31Parameter> getParameters() {
-    List<ArgoProfileV31Parameter> parameters = new ArrayList<>(stationParameters.size());
-    for (int index = 0; index < stationParameters.size(); index++) {
-      String parameterName = stationParameters.get(index);
-      parameters.add(new NetCdfTiedArgoProfileV31Parameter(this, parameterName, index));
-    }
     return parameters;
   }
 

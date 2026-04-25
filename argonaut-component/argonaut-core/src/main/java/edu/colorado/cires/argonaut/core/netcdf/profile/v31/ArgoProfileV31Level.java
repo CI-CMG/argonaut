@@ -26,7 +26,7 @@ public interface ArgoProfileV31Level {
   reference table 3
   (https://vocab.nerc.ac.uk/collection/R03
   */
-  float getValue();
+  Float getValue();
 
   /*
 float <PARAM>_ADJUSTED(N_PROF, N_LEVELS);

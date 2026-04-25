@@ -4,6 +4,7 @@ import edu.colorado.cires.argonaut.core.netcdf.profile.v31.ArgoMultiProfileV31;
 import edu.colorado.cires.argonaut.core.netcdf.profile.v31.ArgoProfileV31;
 import edu.colorado.cires.argonaut.core.util.NetCdfUtils;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import ucar.nc2.NetcdfFile;
 
@@ -148,7 +149,11 @@ public class NetCdfTiedArgoMultiProfileV31 implements ArgoMultiProfileV31 {
 
   @Override
   public List<ArgoProfileV31> getProfiles() {
-    return List.of();
+    List<ArgoProfileV31> profiles = new ArrayList<>(numberOfProfiles);
+    for (int profileIndex = 0; profileIndex < numberOfProfiles; profileIndex++) {
+      profiles.add(new NetCdfTiedArgoProfileV31(this, profileIndex));
+    }
+    return profiles;
   }
 
   @Override

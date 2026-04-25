@@ -74,6 +74,10 @@ public final class NetCdfUtils {
           return null;
         }
         return value;
+      } catch (ArrayIndexOutOfBoundsException e) {
+        //TODO log warning
+        return null;
+
       } catch (IOException | InvalidRangeException e) {
         throw new RuntimeException("Unable to read " + variableName, e);
       }
@@ -81,11 +85,14 @@ public final class NetCdfUtils {
   }
 
   private static Float doWithVariableFloat(NetcdfFile netcdf, String variableName, Function<Variable, int[]> getOrigin,  Function<Variable, int[]> getShape) {
-    return doWithVariable(netcdf, variableName, 99999f, attr -> (float) attr.getNumericValue(), variable -> {
+    return doWithVariable(netcdf, variableName, 99999f, attr -> attr.getNumericValue().floatValue(), variable -> {
       int[] origin = getOrigin.apply(variable);
       int[] shape = getShape.apply(variable);
       try {
         return variable.read(origin, shape).getFloat(0);
+      } catch (ArrayIndexOutOfBoundsException e) {
+        //TODO log warning
+        return null;
       } catch (IOException | InvalidRangeException e) {
         throw new RuntimeException("Unable to read " + variableName, e);
       }
@@ -98,6 +105,10 @@ public final class NetCdfUtils {
       int[] shape = getShape.apply(variable);
       try {
         return variable.read(origin, shape).getInt(0);
+      } catch (ArrayIndexOutOfBoundsException e) {
+        //TODO log warning
+        return null;
+
       } catch (IOException | InvalidRangeException e) {
         throw new RuntimeException("Unable to read " + variableName, e);
       }
@@ -110,6 +121,10 @@ public final class NetCdfUtils {
       int[] shape = getShape.apply(variable);
       try {
         return variable.read(origin, shape).getDouble(0);
+      } catch (ArrayIndexOutOfBoundsException e) {
+        //TODO log warning
+        return null;
+
       } catch (IOException | InvalidRangeException e) {
         throw new RuntimeException("Unable to read " + variableName, e);
       }
@@ -174,6 +189,39 @@ public final class NetCdfUtils {
     return LocalDateTime.parse(value, DATE_TIME_FORMATTER).atZone(ZoneId.of("UTC")).toInstant();
   }
 
+  public static List<String> getListOfString(NetcdfFile netcdf, String variableName) {
+    Variable variable = netcdf.findVariable(variableName);
+    if (variable == null) {
+      return null;
+    }
+    String fillValue = " ";
+    Attribute attr = variable.attributes().findAttribute("_FillValue");
+    if (attr != null) {
+      fillValue = attr.getStringValue();
+    }
+    int[] shape = variable.getShape();
+//    shape[0] = 1;
+    Array array;
+    try {
+      array = variable.read(new int[]{0, 0}, shape);
+    } catch (ArrayIndexOutOfBoundsException e) {
+      //TODO log warning
+      return null;
+
+    } catch (InvalidRangeException | IOException e) {
+      throw new RuntimeException("InvalidRangeException for " + variableName, e);
+    }
+    char[][] charArray = (char[][]) array.reduce().copyToNDJavaArray();
+    List<String> result = new ArrayList<>(charArray.length);
+    for(char[] ca : charArray){
+      String value = new String(ca).trim();
+      if (!value.isEmpty() && !value.equals(fillValue)) {
+        result.add(value);
+      }
+    }
+    return result;
+  }
+
 
   public static List<String> getLevel1ListOfString(NetcdfFile netcdf, int level1Index, String variableName) {
     Variable variable = netcdf.findVariable(variableName);
@@ -190,6 +238,10 @@ public final class NetCdfUtils {
     Array array;
     try {
       array = variable.read(new int[]{level1Index, 0, 0}, shape);
+    } catch (ArrayIndexOutOfBoundsException e) {
+      //TODO log warning
+      return null;
+
     } catch (InvalidRangeException | IOException e) {
       throw new RuntimeException("InvalidRangeException for " + variableName, e);
     }

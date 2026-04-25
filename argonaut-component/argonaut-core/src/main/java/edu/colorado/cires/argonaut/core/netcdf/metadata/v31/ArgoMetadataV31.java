@@ -116,4 +116,8 @@ public interface ArgoMetadataV31 {
   Instant getEndMissionDate();
 
   String getEndMissionStatus();
+
+  List<String> getParameterSensors();
+
+  List<String> getParameters();
 }

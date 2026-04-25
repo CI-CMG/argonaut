@@ -65,6 +65,8 @@ public class NetCdfTiedArgoMetadataV31 implements ArgoMetadataV31 {
   private final String deploymentReferenceStationId;
   private final Instant endMissionDate;
   private final String endMissionStatus;
+  private final List<String> parameterSensors;
+  private final List<String> parameters;
 
   public NetCdfTiedArgoMetadataV31(NetcdfFile netcdf) {
     this.netcdf = netcdf;
@@ -121,6 +123,8 @@ public class NetCdfTiedArgoMetadataV31 implements ArgoMetadataV31 {
     deploymentReferenceStationId = NetCdfUtils.getString(netcdf, "DEPLOYMENT_REFERENCE_STATION_ID");
     endMissionDate = NetCdfUtils.getInstant(netcdf, "END_MISSION_DATE");
     endMissionStatus = NetCdfUtils.getString(netcdf, "END_MISSION_STATUS");
+    parameterSensors = NetCdfUtils.getListOfString(netcdf, "PARAMETER_SENSOR");
+    parameters = NetCdfUtils.getListOfString(netcdf, "PARAMETER");
 
     primaryControllerBoard = null;
     secondaryControllerBoard = null;
@@ -390,5 +394,15 @@ public class NetCdfTiedArgoMetadataV31 implements ArgoMetadataV31 {
   @Override
   public String getEndMissionStatus() {
     return endMissionStatus;
+  }
+
+  @Override
+  public List<String> getParameterSensors() {
+    return parameterSensors;
+  }
+
+  @Override
+  public List<String> getParameters() {
+    return parameters;
   }
 }
