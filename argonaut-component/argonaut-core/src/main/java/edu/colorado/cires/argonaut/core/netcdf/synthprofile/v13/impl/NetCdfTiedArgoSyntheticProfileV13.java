@@ -1,15 +1,20 @@
 package edu.colorado.cires.argonaut.core.netcdf.synthprofile.v13.impl;
 
 import edu.colorado.cires.argonaut.core.netcdf.profile.v31.ArgoProfileDirection;
-import edu.colorado.cires.argonaut.core.netcdf.profile.v31.ArgoProfileV31Parameter;
+import edu.colorado.cires.argonaut.core.netcdf.profile.v31.impl.NetCdfTiedArgoProfileV31Parameter;
 import edu.colorado.cires.argonaut.core.netcdf.synthprofile.v13.ArgoSyntheticProfileV13;
 import edu.colorado.cires.argonaut.core.netcdf.synthprofile.v13.ArgoSyntheticProfileV13Parameter;
+import edu.colorado.cires.argonaut.core.util.NetCdfUtils;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import ucar.nc2.NetcdfFile;
 
-public class ArgoSyntheticProfileV13Bean implements ArgoSyntheticProfileV13 {
+public class NetCdfTiedArgoSyntheticProfileV13 implements ArgoSyntheticProfileV13 {
 
+
+  private final NetcdfFile netcdf;
+  private final int profileIndex;
   private String title;
   private String institution;
   private String source;
@@ -47,14 +52,53 @@ public class ArgoSyntheticProfileV13Bean implements ArgoSyntheticProfileV13 {
   private int configMissionNumber;
   private List<ArgoSyntheticProfileV13Parameter> parameters = new ArrayList<>();
 
+  public NetCdfTiedArgoSyntheticProfileV13(NetcdfFile netcdf, int profileIndex) {
+    this.netcdf = netcdf;
+    this.profileIndex = profileIndex;
+    platformNumber = NetCdfUtils.getLevel1String(netcdf, profileIndex, "PLATFORM_NUMBER");
+    projectName = NetCdfUtils.getLevel1String(netcdf, profileIndex, "PROJECT_NAME");
+    principalInvestigatorName = NetCdfUtils.getLevel1String(netcdf, profileIndex, "PI_NAME");
+    stationParameters = NetCdfUtils.getLevel1ListOfString(netcdf, profileIndex, "STATION_PARAMETERS");
+//    cycleNumber = NetCdfUtils.getLevel1Integer(netcdf, profileIndex, "CYCLE_NUMBER");
+//    direction = ArgoProfileDirection.valueOf(NetCdfUtils.getLevel1String(netcdf, profileIndex, "DIRECTION"));
+    dataCenter = NetCdfUtils.getLevel1String(netcdf, profileIndex, "DATA_CENTRE");
+//    dataCenterReference = NetCdfUtils.getLevel1String(netcdf, profileIndex, "DC_REFERENCE");
+//    dataStateIndicator = NetCdfUtils.getLevel1String(netcdf, profileIndex, "DATA_STATE_INDICATOR");
+//    dataMode = ArgoProfileDataMode.valueOf(NetCdfUtils.getLevel1String(netcdf, profileIndex, "DATA_MODE"));
+    platformType = NetCdfUtils.getLevel1String(netcdf, profileIndex, "PLATFORM_TYPE");
+    floatSerialNumber = NetCdfUtils.getLevel1String(netcdf, profileIndex, "FLOAT_SERIAL_NO");
+    firmwareVersion = NetCdfUtils.getLevel1String(netcdf, profileIndex, "FIRMWARE_VERSION");
+    wmoInstrumentType = NetCdfUtils.getLevel1String(netcdf, profileIndex, "WMO_INST_TYPE");
+//    julianDate = calculateJulianDate(netcdf, profileIndex, parent.getReferenceDateTime(), "JULD");
+    julianDateQc = NetCdfUtils.getLevel1String(netcdf, profileIndex, "JULD_QC");
+//    julianDateOfLocation = calculateJulianDate(netcdf, profileIndex, parent.getReferenceDateTime(), "JULD_LOCATION");
+//    latitude = NetCdfUtils.getLevel1Double(netcdf, profileIndex, "LATITUDE");
+//    longitude = NetCdfUtils.getLevel1Double(netcdf, profileIndex, "LONGITUDE");
+    positionQc = NetCdfUtils.getLevel1String(netcdf, profileIndex, "POSITION_QC");
+    positioningSystem = NetCdfUtils.getLevel1String(netcdf, profileIndex, "POSITIONING_SYSTEM");
+//    positionErrorReported = NetCdfUtils.getLevel1Float(netcdf, profileIndex, "POSITION_ERROR_REPORTED");
+//    positionErrorEstimatedComment = NetCdfUtils.getLevel1String(netcdf, profileIndex, "POSITION_ERROR_ESTIMATED_COMMENT");
+//    verticalSamplingScheme = NetCdfUtils.getLevel1String(netcdf, profileIndex, "VERTICAL_SAMPLING_SCHEME");
+//    configMissionNumber = NetCdfUtils.getLevel1Integer(netcdf, profileIndex, "CONFIG_MISSION_NUMBER");
+//    numHistory = NetCdfUtils.getDimensionSize(netcdf, "N_HISTORY");
+    parameters = new ArrayList<>(stationParameters.size());
+    for (int index = 0; index < stationParameters.size(); index++) {
+      String parameterName = stationParameters.get(index);
+      parameters.add(new NetCdfTiedArgoSyntheticProfileV13Parameter(this, parameterName, index));
+    }
+  }
+
+  public NetcdfFile getNetcdf() {
+    return netcdf;
+  }
+
+  public int getProfileIndex() {
+    return profileIndex;
+  }
 
   @Override
   public String getTitle() {
     return title;
-  }
-
-  public void setTitle(String title) {
-    this.title = title;
   }
 
   @Override
@@ -62,17 +106,9 @@ public class ArgoSyntheticProfileV13Bean implements ArgoSyntheticProfileV13 {
     return institution;
   }
 
-  public void setInstitution(String institution) {
-    this.institution = institution;
-  }
-
   @Override
   public String getSource() {
     return source;
-  }
-
-  public void setSource(String source) {
-    this.source = source;
   }
 
   @Override
@@ -80,17 +116,9 @@ public class ArgoSyntheticProfileV13Bean implements ArgoSyntheticProfileV13 {
     return history;
   }
 
-  public void setHistory(String history) {
-    this.history = history;
-  }
-
   @Override
   public String getReferences() {
     return references;
-  }
-
-  public void setReferences(String references) {
-    this.references = references;
   }
 
   @Override
@@ -98,17 +126,9 @@ public class ArgoSyntheticProfileV13Bean implements ArgoSyntheticProfileV13 {
     return id;
   }
 
-  public void setId(String id) {
-    this.id = id;
-  }
-
   @Override
   public String getComment() {
     return comment;
-  }
-
-  public void setComment(String comment) {
-    this.comment = comment;
   }
 
   @Override
@@ -116,17 +136,9 @@ public class ArgoSyntheticProfileV13Bean implements ArgoSyntheticProfileV13 {
     return userManualVersion;
   }
 
-  public void setUserManualVersion(String userManualVersion) {
-    this.userManualVersion = userManualVersion;
-  }
-
   @Override
   public String getConventions() {
     return conventions;
-  }
-
-  public void setConventions(String conventions) {
-    this.conventions = conventions;
   }
 
   @Override
@@ -134,17 +146,9 @@ public class ArgoSyntheticProfileV13Bean implements ArgoSyntheticProfileV13 {
     return featureType;
   }
 
-  public void setFeatureType(String featureType) {
-    this.featureType = featureType;
-  }
-
   @Override
   public String getDataType() {
     return dataType;
-  }
-
-  public void setDataType(String dataType) {
-    this.dataType = dataType;
   }
 
   @Override
@@ -152,17 +156,9 @@ public class ArgoSyntheticProfileV13Bean implements ArgoSyntheticProfileV13 {
     return formatVersion;
   }
 
-  public void setFormatVersion(String formatVersion) {
-    this.formatVersion = formatVersion;
-  }
-
   @Override
   public String getHandbookVersion() {
     return handbookVersion;
-  }
-
-  public void setHandbookVersion(String handbookVersion) {
-    this.handbookVersion = handbookVersion;
   }
 
   @Override
@@ -170,17 +166,9 @@ public class ArgoSyntheticProfileV13Bean implements ArgoSyntheticProfileV13 {
     return referenceDateTime;
   }
 
-  public void setReferenceDateTime(Instant referenceDateTime) {
-    this.referenceDateTime = referenceDateTime;
-  }
-
   @Override
   public Instant getDateCreation() {
     return dateCreation;
-  }
-
-  public void setDateCreation(Instant dateCreation) {
-    this.dateCreation = dateCreation;
   }
 
   @Override
@@ -188,17 +176,9 @@ public class ArgoSyntheticProfileV13Bean implements ArgoSyntheticProfileV13 {
     return dateUpdate;
   }
 
-  public void setDateUpdate(Instant dateUpdate) {
-    this.dateUpdate = dateUpdate;
-  }
-
   @Override
   public String getPlatformNumber() {
     return platformNumber;
-  }
-
-  public void setPlatformNumber(String platformNumber) {
-    this.platformNumber = platformNumber;
   }
 
   @Override
@@ -206,17 +186,9 @@ public class ArgoSyntheticProfileV13Bean implements ArgoSyntheticProfileV13 {
     return projectName;
   }
 
-  public void setProjectName(String projectName) {
-    this.projectName = projectName;
-  }
-
   @Override
   public String getPrincipalInvestigatorName() {
     return principalInvestigatorName;
-  }
-
-  public void setPrincipalInvestigatorName(String principalInvestigatorName) {
-    this.principalInvestigatorName = principalInvestigatorName;
   }
 
   @Override
@@ -224,17 +196,9 @@ public class ArgoSyntheticProfileV13Bean implements ArgoSyntheticProfileV13 {
     return stationParameters;
   }
 
-  public void setStationParameters(List<String> stationParameters) {
-    this.stationParameters = stationParameters;
-  }
-
   @Override
   public int getCycleNumber() {
     return cycleNumber;
-  }
-
-  public void setCycleNumber(int cycleNumber) {
-    this.cycleNumber = cycleNumber;
   }
 
   @Override
@@ -242,17 +206,9 @@ public class ArgoSyntheticProfileV13Bean implements ArgoSyntheticProfileV13 {
     return direction;
   }
 
-  public void setDirection(ArgoProfileDirection direction) {
-    this.direction = direction;
-  }
-
   @Override
   public String getDataCenter() {
     return dataCenter;
-  }
-
-  public void setDataCenter(String dataCenter) {
-    this.dataCenter = dataCenter;
   }
 
   @Override
@@ -260,17 +216,9 @@ public class ArgoSyntheticProfileV13Bean implements ArgoSyntheticProfileV13 {
     return platformType;
   }
 
-  public void setPlatformType(String platformType) {
-    this.platformType = platformType;
-  }
-
   @Override
   public String getFloatSerialNumber() {
     return floatSerialNumber;
-  }
-
-  public void setFloatSerialNumber(String floatSerialNumber) {
-    this.floatSerialNumber = floatSerialNumber;
   }
 
   @Override
@@ -278,17 +226,9 @@ public class ArgoSyntheticProfileV13Bean implements ArgoSyntheticProfileV13 {
     return firmwareVersion;
   }
 
-  public void setFirmwareVersion(String firmwareVersion) {
-    this.firmwareVersion = firmwareVersion;
-  }
-
   @Override
   public String getWmoInstrumentType() {
     return wmoInstrumentType;
-  }
-
-  public void setWmoInstrumentType(String wmoInstrumentType) {
-    this.wmoInstrumentType = wmoInstrumentType;
   }
 
   @Override
@@ -296,17 +236,9 @@ public class ArgoSyntheticProfileV13Bean implements ArgoSyntheticProfileV13 {
     return julianDate;
   }
 
-  public void setJulianDate(Instant julianDate) {
-    this.julianDate = julianDate;
-  }
-
   @Override
   public String getJulianDateQc() {
     return julianDateQc;
-  }
-
-  public void setJulianDateQc(String julianDateQc) {
-    this.julianDateQc = julianDateQc;
   }
 
   @Override
@@ -314,17 +246,9 @@ public class ArgoSyntheticProfileV13Bean implements ArgoSyntheticProfileV13 {
     return julianDateOfLocation;
   }
 
-  public void setJulianDateOfLocation(Instant julianDateOfLocation) {
-    this.julianDateOfLocation = julianDateOfLocation;
-  }
-
   @Override
   public double getLatitude() {
     return latitude;
-  }
-
-  public void setLatitude(double latitude) {
-    this.latitude = latitude;
   }
 
   @Override
@@ -332,17 +256,9 @@ public class ArgoSyntheticProfileV13Bean implements ArgoSyntheticProfileV13 {
     return longitude;
   }
 
-  public void setLongitude(double longitude) {
-    this.longitude = longitude;
-  }
-
   @Override
   public String getPositionQc() {
     return positionQc;
-  }
-
-  public void setPositionQc(String positionQc) {
-    this.positionQc = positionQc;
   }
 
   @Override
@@ -350,25 +266,13 @@ public class ArgoSyntheticProfileV13Bean implements ArgoSyntheticProfileV13 {
     return positioningSystem;
   }
 
-  public void setPositioningSystem(String positioningSystem) {
-    this.positioningSystem = positioningSystem;
-  }
-
   @Override
   public int getConfigMissionNumber() {
     return configMissionNumber;
   }
 
-  public void setConfigMissionNumber(int configMissionNumber) {
-    this.configMissionNumber = configMissionNumber;
-  }
-
   @Override
   public List<ArgoSyntheticProfileV13Parameter> getParameters() {
     return parameters;
-  }
-
-  public void setParameters(List<ArgoSyntheticProfileV13Parameter> parameters) {
-    this.parameters = parameters;
   }
 }

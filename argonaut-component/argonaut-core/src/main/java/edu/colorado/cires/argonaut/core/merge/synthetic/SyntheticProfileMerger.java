@@ -7,9 +7,16 @@ import edu.colorado.cires.argonaut.core.netcdf.profile.v31.ArgoProfileV31;
 import edu.colorado.cires.argonaut.core.netcdf.profile.v31.ArgoProfileV31Level;
 import edu.colorado.cires.argonaut.core.netcdf.profile.v31.ArgoProfileV31Parameter;
 import edu.colorado.cires.argonaut.core.netcdf.profile.v31.ArgoProfileV31Reader;
+import edu.colorado.cires.argonaut.core.netcdf.synthprofile.v13.ArgoSyntheticProfileV13Level;
+import edu.colorado.cires.argonaut.core.netcdf.synthprofile.v13.ArgoSyntheticProfileV13Parameter;
+import edu.colorado.cires.argonaut.core.netcdf.synthprofile.v13.ArgoSyntheticProfileV13Writer;
+import edu.colorado.cires.argonaut.core.netcdf.synthprofile.v13.impl.ArgoSyntheticProfileV13Bean;
+import edu.colorado.cires.argonaut.core.netcdf.synthprofile.v13.impl.ArgoSyntheticProfileV13LevelBean;
+import edu.colorado.cires.argonaut.core.netcdf.synthprofile.v13.impl.ArgoSyntheticProfileV13ParameterBean;
 import java.io.Console;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -27,6 +34,7 @@ import org.apache.commons.math3.analysis.interpolation.LinearInterpolator;
 import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
 import org.apache.commons.math3.exception.MathIllegalNumberException;
 import org.apache.commons.math3.exception.OutOfRangeException;
+import ucar.ma2.InvalidRangeException;
 
 public class SyntheticProfileMerger {
 
@@ -68,13 +76,52 @@ public class SyntheticProfileMerger {
       Set<Long> levels = new TreeSet<>(syntheticPressures);
       levels.addAll(singleCRows.keySet());
 
-      Map<Long, Float> interpolatedTemp = interpolate(singleCRows, levels);
+      Map<Long, Float> interpolatedTemp = interpolateTemperature(singleCRows, levels);
+      writeSProfileFile(interpolatedTemp);
 
     }
 
   }
 
-  private Map<Long, Float> interpolate(Map<Long, SynthRow> singleCRows, Set<Long> levels) {
+  private void writeSProfileFile(Map<Long, Float> temp) throws IOException {
+    ArgoSyntheticProfileV13ParameterBean tempParam = new ArgoSyntheticProfileV13ParameterBean();
+    tempParam.setParameterName("TEMP");
+    List<ArgoSyntheticProfileV13Level> tempLevels = new ArrayList<>();
+    tempParam.setLevels(tempLevels);
+
+    ArgoSyntheticProfileV13ParameterBean pressParam = new ArgoSyntheticProfileV13ParameterBean();
+    pressParam.setParameterName("PRES");
+    List<ArgoSyntheticProfileV13Level> pressLevels = new ArrayList<>();
+    pressParam.setLevels(pressLevels);
+
+    for (Map.Entry<Long, Float> entry : temp.entrySet()) {
+      ArgoSyntheticProfileV13LevelBean pressLevel = new ArgoSyntheticProfileV13LevelBean();
+      pressLevels.add(pressLevel);
+      pressLevel.setValue(new BigDecimal(Long.toString(entry.getKey())).divide(new BigDecimal("1000")).floatValue());
+
+      ArgoSyntheticProfileV13LevelBean tempLevel = new ArgoSyntheticProfileV13LevelBean();
+      tempLevels.add(tempLevel);
+      tempLevel.setValue(entry.getValue());
+    }
+
+    ArgoSyntheticProfileV13Bean profile = new ArgoSyntheticProfileV13Bean();
+    profile.setParameters(Arrays.asList(pressParam, tempParam));
+
+    Path parent = outputPath.getParent();
+    if (parent != null) {
+      Files.createDirectories(parent);
+    }
+
+    // TODO update version
+    try {
+      ArgoSyntheticProfileV13Writer.writeSingleProfile(outputPath, profile, "1.0.0");
+    } catch (InvalidRangeException e) {
+      throw new RuntimeException(e);
+    }
+
+  }
+
+  private Map<Long, Float> interpolateTemperature(Map<Long, SynthRow> singleCRows, Set<Long> levels) {
     Map<Long, Float> result = new TreeMap<>();
     List<Double> xPressure = new ArrayList<>(singleCRows.size());
     List<Double> yTemp = new ArrayList<>(singleCRows.size());

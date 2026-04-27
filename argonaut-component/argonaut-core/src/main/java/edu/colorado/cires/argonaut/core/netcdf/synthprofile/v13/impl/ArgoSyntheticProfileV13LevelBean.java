@@ -61,13 +61,13 @@ public class ArgoSyntheticProfileV13LevelBean  implements ArgoSyntheticProfileV1
     return adjustedQc;
   }
 
-  public void setAdjustedQc(String adjustedQc) {
-    this.adjustedQc = adjustedQc;
+  @Override
+  public Float getAdjustedErrorValue() {
+    return adjustedError;
   }
 
-  @Override
-  public Float getAdjustedError() {
-    return adjustedError;
+  public void setAdjustedQc(String adjustedQc) {
+    this.adjustedQc = adjustedQc;
   }
 
   public void setAdjustedError(Float adjustedError) {

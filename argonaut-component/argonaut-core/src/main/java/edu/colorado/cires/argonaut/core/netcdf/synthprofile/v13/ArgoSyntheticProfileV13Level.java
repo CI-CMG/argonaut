@@ -7,7 +7,7 @@ public interface ArgoSyntheticProfileV13Level {
   String getQc();
   Float getAdjustedValue();
   String getAdjustedQc();
-  Float getAdjustedError();
+  Float getAdjustedErrorValue();
 
 
 

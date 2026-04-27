@@ -5,6 +5,8 @@ import java.util.List;
 
 public interface ArgoSyntheticProfileV13Parameter {
 
+  String getParameterName();
+
   ArgoProfileDataMode getDataMode();
 
   String getQc();

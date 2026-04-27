@@ -8,9 +8,19 @@ import java.util.List;
 public class ArgoSyntheticProfileV13ParameterBean implements ArgoSyntheticProfileV13Parameter {
 
   private ArgoProfileDataMode dataMode;
+  private String parameterName;
   private String qc;
   private List<ArgoSyntheticProfileV13Level> levels;
 
+
+  @Override
+  public String getParameterName() {
+    return parameterName;
+  }
+
+  public void setParameterName(String parameterName) {
+    this.parameterName = parameterName;
+  }
 
   @Override
   public ArgoProfileDataMode getDataMode() {
