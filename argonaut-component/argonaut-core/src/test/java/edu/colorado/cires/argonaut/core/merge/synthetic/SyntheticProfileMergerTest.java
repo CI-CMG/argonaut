@@ -41,11 +41,12 @@ public class SyntheticProfileMergerTest {
       assertEquals(1, profiles.size());
       assertEquals(1, expectedProfiles.size());
       ArgoSyntheticProfileV13 profile = profiles.get(0);
-      ArgoSyntheticProfileV13 expectedProfile = profiles.get(0);
+      ArgoSyntheticProfileV13 expectedProfile = expectedProfiles.get(0);
       List<ArgoSyntheticProfileV13Parameter> parameters = profile.getParameters();
       List<ArgoSyntheticProfileV13Parameter> expectedParameters = expectedProfile.getParameters();
 
-      // TODO only testing PRES and TEMP right now
+      assertEquals(expectedProfile.getStationParameters(), profile.getStationParameters());
+
       ArgoSyntheticProfileV13Parameter pres = parameters.stream().filter(p -> p.getParameterName().equals("PRES")).findFirst().orElseThrow();
       ArgoSyntheticProfileV13Parameter expectedPres = expectedParameters.stream().filter(p -> p.getParameterName().equals("PRES")).findFirst()
           .orElseThrow();
@@ -55,6 +56,41 @@ public class SyntheticProfileMergerTest {
       ArgoSyntheticProfileV13Parameter expectedTemp = expectedParameters.stream().filter(p -> p.getParameterName().equals("TEMP")).findFirst()
           .orElseThrow();
       assertParametersEqual(expectedTemp, temp);
+
+      ArgoSyntheticProfileV13Parameter pSal = parameters.stream().filter(p -> p.getParameterName().equals("PSAL")).findFirst().orElseThrow();
+      ArgoSyntheticProfileV13Parameter expectedPSal = expectedParameters.stream().filter(p -> p.getParameterName().equals("PSAL")).findFirst()
+          .orElseThrow();
+      assertParametersEqual(expectedPSal, pSal);
+
+      ArgoSyntheticProfileV13Parameter downwellingPar = parameters.stream().filter(p -> p.getParameterName().equals("DOWNWELLING_PAR")).findFirst().orElseThrow();
+      ArgoSyntheticProfileV13Parameter expectedDownwellingPar = expectedParameters.stream().filter(p -> p.getParameterName().equals("DOWNWELLING_PAR")).findFirst()
+          .orElseThrow();
+      assertParametersEqual(expectedDownwellingPar, downwellingPar);
+
+      ArgoSyntheticProfileV13Parameter d380 = parameters.stream().filter(p -> p.getParameterName().equals("DOWN_IRRADIANCE380")).findFirst().orElseThrow();
+      ArgoSyntheticProfileV13Parameter expectedD380 = expectedParameters.stream().filter(p -> p.getParameterName().equals("DOWN_IRRADIANCE380")).findFirst()
+          .orElseThrow();
+      assertParametersEqual(expectedD380, d380);
+
+      ArgoSyntheticProfileV13Parameter d412 = parameters.stream().filter(p -> p.getParameterName().equals("DOWN_IRRADIANCE412")).findFirst().orElseThrow();
+      ArgoSyntheticProfileV13Parameter expectedD412 = expectedParameters.stream().filter(p -> p.getParameterName().equals("DOWN_IRRADIANCE412")).findFirst()
+          .orElseThrow();
+      assertParametersEqual(expectedD412, d412);
+
+      ArgoSyntheticProfileV13Parameter d490 = parameters.stream().filter(p -> p.getParameterName().equals("DOWN_IRRADIANCE490")).findFirst().orElseThrow();
+      ArgoSyntheticProfileV13Parameter expectedD490 = expectedParameters.stream().filter(p -> p.getParameterName().equals("DOWN_IRRADIANCE490")).findFirst()
+          .orElseThrow();
+      assertParametersEqual(expectedD490, d490);
+
+      ArgoSyntheticProfileV13Parameter doxyPar = parameters.stream().filter(p -> p.getParameterName().equals("DOXY")).findFirst().orElseThrow();
+      ArgoSyntheticProfileV13Parameter expectedDoxyPar = expectedParameters.stream().filter(p -> p.getParameterName().equals("DOXY")).findFirst()
+          .orElseThrow();
+      assertParametersEqual(expectedDoxyPar, doxyPar);
+
+      ArgoSyntheticProfileV13Parameter nitrate = parameters.stream().filter(p -> p.getParameterName().equals("NITRATE")).findFirst().orElseThrow();
+      ArgoSyntheticProfileV13Parameter expectedNitrate = expectedParameters.stream().filter(p -> p.getParameterName().equals("NITRATE")).findFirst()
+          .orElseThrow();
+      assertParametersEqual(expectedNitrate, nitrate);
 
     }
 

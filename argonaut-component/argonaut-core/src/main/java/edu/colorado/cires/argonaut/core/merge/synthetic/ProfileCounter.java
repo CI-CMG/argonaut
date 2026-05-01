@@ -20,15 +20,17 @@ public class ProfileCounter {
 
   public void updateCounter(int level, SynthRow row) {
     for (SynthProfile profile : row.getProfiles()) {
-      int profileIndex = profile.getIndex();
-      int count = 0;
-      for(SynthParameter parameter : profile.getParameters().values()){
-        if (parameter.getValue() != null) {
-          count++;
+      if (profile != null) {
+        int profileIndex = profile.getIndex();
+        int count = 0;
+        for(SynthParameter parameter : profile.getParameters().values()){
+          if (parameter.getValue() != null) {
+            count++;
+          }
         }
-      }
-      if (count > 0) {
-        counter.get(profileIndex).add(level);
+        if (count > 0) {
+          counter.get(profileIndex).add(level);
+        }
       }
     }
   }

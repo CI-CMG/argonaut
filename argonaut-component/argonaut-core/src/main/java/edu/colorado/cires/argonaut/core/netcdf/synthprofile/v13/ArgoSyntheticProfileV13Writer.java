@@ -332,7 +332,7 @@ public class ArgoSyntheticProfileV13Writer {
       return NITRATE_PARAM_ATTR;
     }
     if ("DOWNWELLING_PAR".equals(parameterName)) {
-      return null;
+      return DOWNWELLING_PAR_PARAM_ATTR;
     }
     if ("PH_IN_SITU_TOTAL".equals(parameterName)) {
       return null;
@@ -341,8 +341,8 @@ public class ArgoSyntheticProfileV13Writer {
       return null;
     }
     Matcher matcher = DOWN_IRRADIANCE_REGEX.matcher(parameterName);
-    String diNum = matcher.group(1);
     if (matcher.matches()) {
+      String diNum = matcher.group(1);
       return new ParameterAttributes<>() {
         @Override
         public String getLongName() {
@@ -373,17 +373,20 @@ public class ArgoSyntheticProfileV13Writer {
 
     matcher = BBP_REGEX.matcher(parameterName);
     if (matcher.matches()) {
-      return null;
+      // TODO
+      throw new UnsupportedOperationException("BBP regular expression not supported");
     }
 
     matcher = CP_REGEX.matcher(parameterName);
     if (matcher.matches()) {
-      return null;
+      // TODO
+      throw new UnsupportedOperationException("CP regular expression not supported");
     }
 
     matcher = UP_RADIANCE_REGEX.matcher(parameterName);
     if (matcher.matches()) {
-      return null;
+      // TODO
+      throw new UnsupportedOperationException("UP-RADIANCE regular expression not supported");
     }
 
     return new ParameterAttributes<>() {
@@ -406,9 +409,11 @@ public class ArgoSyntheticProfileV13Writer {
     }
     ParameterAttributes<Float> attributes = getParameterAttributes(parameterName);
     Variable.Builder vb = builder.addVariable(variableName, DataType.FLOAT, Arrays.asList(nProfDim, nLevelsDim))
-        .addAttribute(new Attribute("long_name", attributes.getLongName()))
-        .addAttribute(new Attribute("standard_name", attributes.getStandardName()))
-        .addAttribute(new Attribute("_FillValue", 99999f));
+        .addAttribute(new Attribute("long_name", attributes.getLongName()));
+    if (attributes.getStandardName() != null) {
+      vb.addAttribute(new Attribute("standard_name", attributes.getStandardName()));
+    }
+    vb.addAttribute(new Attribute("_FillValue", 99999f));
     if (attributes.getUnits() != null) {
       vb.addAttribute(new Attribute("units", attributes.getUnits()));
     }

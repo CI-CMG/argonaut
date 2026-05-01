@@ -221,12 +221,9 @@ public class ArgoSyntheticProfileV13Bean implements ArgoSyntheticProfileV13 {
 
   @Override
   public List<String> getStationParameters() {
-    return stationParameters;
+    return parameters.stream().map(ArgoSyntheticProfileV13Parameter::getParameterName).toList();
   }
 
-  public void setStationParameters(List<String> stationParameters) {
-    this.stationParameters = stationParameters;
-  }
 
   @Override
   public int getCycleNumber() {

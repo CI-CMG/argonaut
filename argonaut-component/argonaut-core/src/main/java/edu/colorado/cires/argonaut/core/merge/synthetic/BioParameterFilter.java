@@ -13,8 +13,12 @@ public final class BioParameterFilter {
   }
 
   public static boolean isSupportedParameter(ArgoProfileV31Parameter parameter) {
+    return isSupportedParameter(parameter.getParameterName());
+  }
+
+  public static boolean isSupportedParameter(String parameterName) {
     for (Pattern pattern : B_PARAM_PATTERNS) {
-      Matcher matcher = pattern.matcher(parameter.getParameterName());
+      Matcher matcher = pattern.matcher(parameterName);
       if (matcher.matches()) {
         return true;
       }
