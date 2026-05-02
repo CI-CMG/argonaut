@@ -256,6 +256,15 @@ public final class NetCdfUtils {
     return result;
   }
 
+  public static Double dateToJulianDate(Instant referenceDateTime, Instant date) {
+    if (date == null || referenceDateTime == null) {
+      return null;
+    }
+    long dateTs = date.toEpochMilli();
+    long refTs = referenceDateTime.toEpochMilli();
+    long diffMs = dateTs - refTs;
+    return (double) diffMs / (double) MS_DAY;
+  }
 
   public static Instant calculateJulianDate(Instant referenceDateTime, Double daysSinceRef) {
     if (daysSinceRef == null || referenceDateTime == null) {

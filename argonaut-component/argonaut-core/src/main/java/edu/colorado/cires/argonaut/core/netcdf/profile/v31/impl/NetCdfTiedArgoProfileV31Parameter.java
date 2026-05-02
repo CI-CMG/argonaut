@@ -19,6 +19,7 @@ public class NetCdfTiedArgoProfileV31Parameter implements ArgoProfileV31Paramete
   private final int numCalibrations;
   private final int paramIndex;
   private final List<ArgoProfileV31Level> levels;
+  private final String dataMode;
 
 
   public NetCdfTiedArgoProfileV31Parameter(NetCdfTiedArgoProfileV31 parent, String parameterName, int paramIndex) {
@@ -34,6 +35,8 @@ public class NetCdfTiedArgoProfileV31Parameter implements ArgoProfileV31Paramete
     for (int levelIndex = 0; levelIndex < numLevels; levelIndex++) {
       levels.add(new NetCdfTiedArgoProfileV31Level(this, levelIndex));
     }
+    dataMode = NetCdfUtils.getLevel2String(netcdf, profileIndex, paramIndex, "PARAMETER_DATA_MODE");
+
   }
 
   NetcdfFile getNetcdf() {
@@ -70,5 +73,10 @@ public class NetCdfTiedArgoProfileV31Parameter implements ArgoProfileV31Paramete
 
   int getParamIndex() {
     return paramIndex;
+  }
+
+  @Override
+  public String getDataMode() {
+    return dataMode;
   }
 }

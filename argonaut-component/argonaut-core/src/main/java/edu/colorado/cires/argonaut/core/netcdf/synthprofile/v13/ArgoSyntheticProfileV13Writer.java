@@ -1,8 +1,13 @@
 package edu.colorado.cires.argonaut.core.netcdf.synthprofile.v13;
 
+import static edu.colorado.cires.argonaut.core.util.NetCdfUtils.dateToJulianDate;
+
 import java.io.IOException;
 import java.nio.file.Path;
 import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -11,7 +16,10 @@ import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import ucar.ma2.ArrayChar;
+import ucar.ma2.ArrayDouble;
 import ucar.ma2.ArrayFloat;
+import ucar.ma2.ArrayInt;
+import ucar.ma2.ArrayString;
 import ucar.ma2.DataType;
 import ucar.ma2.Index;
 import ucar.ma2.InvalidRangeException;
@@ -437,24 +445,67 @@ public class ArgoSyntheticProfileV13Writer {
     }
   }
 
+  private static final DateTimeFormatter DTF = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
+  private static final Instant REFERENCE_DATE = LocalDateTime.parse("19500101000000", DTF).atZone(ZoneId.of("UTC")).toInstant();
 
+  private static void writeLevel1Double(NetcdfFormatWriter writer, String variableName, Double value) throws InvalidRangeException, IOException {
+    Variable variable = writer.findVariable(variableName);
+    double fill = variable.findAttribute("_FillValue").getNumericValue().doubleValue();
+    ArrayDouble array = new ArrayDouble(variable.getShape());
+    Index index = array.getIndex();
+    array.set(index.set(0), Objects.requireNonNullElse(value, fill));
+    writer.write(variable, array);
+  }
+
+  private static void writeLevel1Integer(NetcdfFormatWriter writer, String variableName, Integer value) throws InvalidRangeException, IOException {
+    Variable variable = writer.findVariable(variableName);
+    int fill = variable.findAttribute("_FillValue").getNumericValue().intValue();
+    ArrayInt array = new ArrayInt(variable.getShape(), false);
+    Index index = array.getIndex();
+    array.set(index.set(0), Objects.requireNonNullElse(value, fill));
+    writer.write(variable, array);
+  }
+
+  private static void writeLevel1String(NetcdfFormatWriter writer, String variableName, String value) throws InvalidRangeException, IOException {
+    Variable variable = writer.findVariable(variableName);
+    String strFill = variable.findAttribute("_FillValue").getStringValue();
+    ArrayChar arrayChar = new ArrayChar(variable.getShape());
+    Index index = arrayChar.getIndex();
+    arrayChar.setString(index.set(0), Objects.requireNonNullElse(value, strFill));
+    writer.write(variable, arrayChar);
+  }
+
+  private static void writeLevel1Date(NetcdfFormatWriter writer, String variableName, Instant value) throws InvalidRangeException, IOException {
+    Variable variable = writer.findVariable(variableName);
+    String strFill = variable.findAttribute("_FillValue").getStringValue();
+    ArrayChar arrayChar = new ArrayChar(variable.getShape());
+    Index index = arrayChar.getIndex();
+    String dateString = strFill;
+    if (value != null) {
+      dateString = value.atZone(ZoneId.of("UTC")).toLocalDateTime().format(DTF);
+    }
+    arrayChar.setString(index.set(0), dateString);
+    writer.write(variable, arrayChar);
+  }
 
   public static void writeSingleProfile(Path netCdfFile, ArgoSyntheticProfileV13 profile, String softwareVersion)
       throws IOException, InvalidRangeException {
     // Using NetCDF 3 for thread safety, performance, and ease of use.  If NetCDF 4 is required, it will be added after the POC.
     NetcdfFormatWriter.Builder builder = NetcdfFormatWriter.createNewNetcdf3(netCdfFile.toString());
-    builder.setFill(false);
+//    builder.setFill(false);
 
-//    builder.addAttribute(new Attribute("title", "Argo float vertical profile"));
-//    builder.addAttribute(new Attribute("institution", profile.getInstitution()));
-//    builder.addAttribute(new Attribute("source", "Argo float"));
-//    builder.addAttribute(new Attribute("history", Instant.now().toString() + " creation (Argonaut " + softwareVersion + ")"));
-//    builder.addAttribute(new Attribute("references", "http://www.argodatamgt.org/Documentation, https://github.com/CI-CMG/argonaut"));
-//    builder.addAttribute(new Attribute("user_manual_version", "1.0"));
-//    builder.addAttribute(new Attribute("Conventions", "Argo-3.1 CF-1.6"));
-//    builder.addAttribute(new Attribute("featureType", "trajectoryProfile"));
-//    builder.addAttribute(new Attribute("software_version", softwareVersion + " (Argonaut " + softwareVersion + ")"));
-//    builder.addAttribute(new Attribute("id", "https://doi.org/10.17882/42182"));
+    builder.addAttribute(new Attribute("title", "Argo float vertical profile"));
+    if (profile.getInstitution() != null) {
+      builder.addAttribute(new Attribute("institution", profile.getInstitution()));
+    }
+    builder.addAttribute(new Attribute("source", "Argo float"));
+    builder.addAttribute(new Attribute("history", Instant.now().toString() + " creation (Argonaut " + softwareVersion + ")"));
+    builder.addAttribute(new Attribute("references", "http://www.argodatamgt.org/Documentation, https://github.com/CI-CMG/argonaut"));
+    builder.addAttribute(new Attribute("user_manual_version", "1.0"));
+    builder.addAttribute(new Attribute("Conventions", "Argo-3.1 CF-1.6"));
+    builder.addAttribute(new Attribute("featureType", "trajectoryProfile"));
+    builder.addAttribute(new Attribute("software_version", softwareVersion + " (Argonaut " + softwareVersion + ")"));
+    builder.addAttribute(new Attribute("id", "https://doi.org/10.17882/42182"));
 
     Dimension dateTimeDim = builder.addDimension("DATE_TIME", 14);
     Dimension string256Dim = builder.addDimension("STRING256", 256);
@@ -472,17 +523,14 @@ public class ArgoSyntheticProfileV13Writer {
         .addAttribute(new Attribute("_FillValue", " "))
         .addAttribute(new Attribute("long_name", "Data type"))
         .addAttribute(new Attribute("conventions", "Argo reference table 1"));
-    // TODO ? _ChunkSizes = 32U; // uint
 
     builder.addVariable("FORMAT_VERSION", DataType.CHAR, Collections.singletonList(string4Dim))
         .addAttribute(new Attribute("_FillValue", " "))
         .addAttribute(new Attribute("long_name", "File format version"));
-    //_ChunkSizes = 4U; // uint
 
     builder.addVariable("HANDBOOK_VERSION", DataType.CHAR, Collections.singletonList(string4Dim))
         .addAttribute(new Attribute("_FillValue", " "))
         .addAttribute(new Attribute("long_name", "Data handbook version"));
-    //_ChunkSizes = 4U; // uint
 
     builder.addVariable("REFERENCE_DATE_TIME", DataType.CHAR, Collections.singletonList(dateTimeDim))
         .addAttribute(new Attribute("_FillValue", " "))
@@ -680,10 +728,95 @@ public class ArgoSyntheticProfileV13Writer {
 
     try (NetcdfFormatWriter writer = builder.build()) {
       List<ArgoSyntheticProfileV13Parameter> parameters = profile.getParameters();
+
+      writeLevel1String(writer, "DATA_TYPE", profile.getDataType());
+      writeLevel1String(writer, "FORMAT_VERSION", profile.getFormatVersion());
+      writeLevel1String(writer, "HANDBOOK_VERSION", profile.getHandbookVersion());
+      writeLevel1Date(writer, "REFERENCE_DATE_TIME", profile.getReferenceDateTime() == null ? REFERENCE_DATE : profile.getReferenceDateTime());
+      writeLevel1Date(writer, "DATE_CREATION", profile.getDateCreation() == null ? Instant.now() : profile.getDateCreation());
+      writeLevel1Date(writer, "DATE_UPDATE", profile.getDateUpdate() == null ? Instant.now() : profile.getDateUpdate());
+      writeLevel1String(writer, "PLATFORM_NUMBER", profile.getPlatformNumber());
+      writeLevel1String(writer, "PROJECT_NAME", profile.getProjectName());
+      writeLevel1String(writer, "PI_NAME", profile.getPrincipalInvestigatorName());
+      writeLevel1Integer(writer, "CYCLE_NUMBER", profile.getCycleNumber());
+      writeLevel1String(writer, "DIRECTION", profile.getDirection());
+      writeLevel1String(writer, "DATA_CENTRE", profile.getDataCenter());
+      writeLevel1String(writer, "PLATFORM_TYPE", profile.getPlatformType());
+      writeLevel1String(writer, "FLOAT_SERIAL_NO", profile.getFloatSerialNumber());
+      writeLevel1String(writer, "FIRMWARE_VERSION", profile.getFirmwareVersion());
+      writeLevel1String(writer, "WMO_INST_TYPE", profile.getWmoInstrumentType());
+      writeLevel1String(writer, "JULD_QC", profile.getJulianDateQc());
+      writeLevel1Double(writer, "LATITUDE", profile.getLatitude());
+      writeLevel1Double(writer, "LONGITUDE", profile.getLongitude());
+      writeLevel1String(writer, "POSITION_QC", profile.getPositionQc());
+      writeLevel1String(writer, "POSITIONING_SYSTEM", profile.getPositioningSystem());
+      writeLevel1Integer(writer, "CONFIG_MISSION_NUMBER", profile.getConfigMissionNumber());
+      writeLevel1Double(writer, "JULD", dateToJulianDate(profile.getReferenceDateTime() == null ? REFERENCE_DATE : profile.getReferenceDateTime(), profile.getJulianDate()));
+      writeLevel1Double(writer, "JULD_LOCATION", dateToJulianDate(profile.getReferenceDateTime() == null ? REFERENCE_DATE : profile.getReferenceDateTime(), profile.getJulianDateOfLocation()));
+
+
+      Variable calParamVariable = writer.findVariable("PARAMETER");
+      String calParamVariableFill = calParamVariable.findAttribute("_FillValue").getStringValue();
+      ArrayChar calParamVariableArray = new ArrayChar(calParamVariable.getShape());
+      Index calParamVariableIndex = calParamVariableArray.getIndex();
+
+      Variable calDateVariable = writer.findVariable("SCIENTIFIC_CALIB_DATE");
+      String calDateVariableFill = calDateVariable.findAttribute("_FillValue").getStringValue();
+      ArrayChar calDateVariableArray = new ArrayChar(calDateVariable.getShape());
+      Index calDateVariableIndex = calDateVariableArray.getIndex();
+
+      Variable calCommentVariable = writer.findVariable("SCIENTIFIC_CALIB_COMMENT");
+      String calCommentVariableFill = calCommentVariable.findAttribute("_FillValue").getStringValue();
+      ArrayChar calCommentVariableArray = new ArrayChar(calCommentVariable.getShape());
+      Index calCommentVariableIndex = calCommentVariableArray.getIndex();
+
+      Variable calCoefVariable = writer.findVariable("SCIENTIFIC_CALIB_COEFFICIENT");
+      String calCoefVariableFill = calCoefVariable.findAttribute("_FillValue").getStringValue();
+      ArrayChar calCoefVariableArray = new ArrayChar(calCoefVariable.getShape());
+      Index calCoefVariableIndex = calCoefVariableArray.getIndex();
+
+      Variable calEqVariable = writer.findVariable("SCIENTIFIC_CALIB_EQUATION");
+      String calEqVariableFill = calEqVariable.findAttribute("_FillValue").getStringValue();
+      ArrayChar calEqVariableArray = new ArrayChar(calEqVariable.getShape());
+      Index calEqVariableIndex = calEqVariableArray.getIndex();
+
+      Variable dmVariable = writer.findVariable("PARAMETER_DATA_MODE");
+      String dmVariableFill = dmVariable.findAttribute("_FillValue").getStringValue();
+      ArrayChar dmVariableArray = new ArrayChar.D2(1, dmVariable.getShape()[1]);
+      Index dmVariableArrayIndex = dmVariableArray.getIndex();
+
+
+
       List<String> stationParameters = new ArrayList<>(parameters.size());
+      int parameterIndex = 0;
       for (ArgoSyntheticProfileV13Parameter parameter : parameters) {
         String parameterName = parameter.getParameterName();
         stationParameters.add(parameterName);
+
+        Variable pqcVariable = writer.findVariable("PROFILE_" + parameterName + "_QC");
+        String pqcVariableFill = pqcVariable.findAttribute("_FillValue").getStringValue();
+        ArrayChar pqcVariableArray = new ArrayChar(pqcVariable.getShape());
+        Index pqcVariableIndex = pqcVariableArray.getIndex();
+        pqcVariableArray.setString(pqcVariableIndex.set(0), Objects.requireNonNullElse(parameter.getQc(), pqcVariableFill));
+
+
+        dmVariableArray.setString(dmVariableArrayIndex.set(0, parameterIndex), Objects.requireNonNullElse(parameter.getDataMode(), dmVariableFill));
+
+        List<ArgoSyntheticProfileV13Calibration> calibrations = parameter.getCalibrations();
+        int calibrationIndex = 0;
+        for (ArgoSyntheticProfileV13Calibration calibration : calibrations) {
+          calEqVariableArray.setString(calEqVariableIndex.set(0, calibrationIndex, parameterIndex), Objects.requireNonNullElse(calibration.getEquation(), calEqVariableFill));
+          calParamVariableArray.setString(calParamVariableIndex.set(0, calibrationIndex, parameterIndex), Objects.requireNonNullElse(parameterName, calParamVariableFill));
+          String calDate = calDateVariableFill;
+          if (calibration.getDate() != null) {
+            calDate = calibration.getDate().atZone(ZoneId.of("UTC")).toLocalDateTime().format(DTF);
+          }
+          calDateVariableArray.setString(calDateVariableIndex.set(0, calibrationIndex, parameterIndex), calDate);
+          calCommentVariableArray.setString(calCommentVariableIndex.set(0, calibrationIndex, parameterIndex), Objects.requireNonNullElse(calibration.getComment(), calCommentVariableFill));
+          calCoefVariableArray.setString(calCoefVariableIndex.set(0, calibrationIndex, parameterIndex), Objects.requireNonNullElse(calibration.getCoefficient(), calCoefVariableFill));
+          calibrationIndex++;
+        }
+
         List<ArgoSyntheticProfileV13Level> levels = parameter.getLevels();
 
         Variable paramVariable = writer.findVariable(parameterName);
@@ -725,7 +858,7 @@ public class ArgoSyntheticProfileV13Writer {
         for (int i = 0; i < levels.size(); i++) {
           ArgoSyntheticProfileV13Level level = levels.get(i);
           originalValueArray.setFloat(originalValueIndex.set(0, i), Objects.requireNonNullElse(level.getOriginalValue(), paramFill));
-          qcArray.setString(qcIndex.set(0, i), Objects.requireNonNullElse(level.getQc(), paramQcFill));
+          qcArray.setChar(qcIndex.set(0, i), Objects.requireNonNullElse(level.getQc(), paramQcFill).charAt(0));
           adjustedValueArray.setFloat(adjustedValueIndex.set(0, i), Objects.requireNonNullElse(level.getAdjustedValue(), paramAdjustedFill));
           qcAdjustedArray.setString(qcAdjustedIndex.set(0, i), Objects.requireNonNullElse(level.getAdjustedQc(), paramAdjustedQcFill));
           adjustedErrorArray.setFloat(adjustedErrorIndex.set(0, i), Objects.requireNonNullElse(level.getAdjustedErrorValue(), paramAdjustedErrorFill));
@@ -734,6 +867,7 @@ public class ArgoSyntheticProfileV13Writer {
           }
         }
 
+        writer.write(pqcVariable, pqcVariableArray);
         writer.write(paramVariable, originalValueArray);
         writer.write(paramQcVariable, qcArray);
         writer.write(paramAdjustedVariable, adjustedValueArray);
@@ -743,8 +877,17 @@ public class ArgoSyntheticProfileV13Writer {
           writer.write(paramDPresVariable, dPressArray);
         }
 
+        parameterIndex++;
       }
 
+      writer.write(calCommentVariable, calCommentVariableArray);
+      writer.write(calCoefVariable, calCoefVariableArray);
+      writer.write(calDateVariable, calDateVariableArray);
+      writer.write(calEqVariable, calEqVariableArray);
+      writer.write(calParamVariable, calParamVariableArray);
+
+      writer.write(dmVariable, dmVariableArray);
+      writer.write(calEqVariable, calEqVariableArray);
 
 
       Variable stationParametersVariable = writer.findVariable("STATION_PARAMETERS");
@@ -756,26 +899,7 @@ public class ArgoSyntheticProfileV13Writer {
         stationParametersArray.setString(stationParametersIndex.set(0, i), Objects.requireNonNullElse(stationParameters.get(i), stationParametersFill));
       }
       writer.write(stationParametersVariable, stationParametersArray);
-      /*
-      Variable v = writer.findVariable(varName);
-int[] shape = v.getShape();
-ArrayDouble A = new ArrayDouble.D2(shape[0], shape[1]);
-Index ima = A.getIndex();
-for (int i = 0; i < shape[0]; i++) {
-  for (int j = 0; j < shape[1]; j++) {
-    A.setDouble(ima.set(i, j), (double) (i * 1000000 + j * 1000));
-  }
-}
 
-// 2) Write the data to the temperature Variable, with origin all zeros.
-// Shape is taken from the data Array.
-int[] origin = new int[2]; // initialized to zeros
-try {
-  writer.write(v, origin, A);
-} catch (IOException | InvalidRangeException e) {
-  logger.log(yourWriteNetcdfFileErrorMsgTxt);
-}
-       */
     }
   }
 

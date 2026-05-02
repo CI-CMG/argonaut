@@ -43,5 +43,6 @@ public interface ArgoSyntheticMultiProfileV13 {
 
   List<ArgoSyntheticProfileV13> getProfiles();
 
+  String getSoftwareVersion();
 
 }

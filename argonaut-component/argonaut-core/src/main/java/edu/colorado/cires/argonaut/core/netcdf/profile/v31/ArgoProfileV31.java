@@ -220,7 +220,7 @@ Examples :
   A : ascending profile
   D : descending profile
    */
-  ArgoProfileDirection getDirection();
+  String getDirection();
 
   /*
   char DATA_CENTRE(N_PROF, STRING2);
@@ -285,7 +285,7 @@ Examples :
   D : delayed mode data
   A : real time data with adjusted values
    */
-  ArgoProfileDataMode getDataMode();
+  String getDataMode();
 
   /*
   char PLATFORM_TYPE(N_PROF, STRING32);

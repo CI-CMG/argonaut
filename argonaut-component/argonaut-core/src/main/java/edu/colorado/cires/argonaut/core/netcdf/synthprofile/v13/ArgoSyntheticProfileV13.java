@@ -1,6 +1,5 @@
 package edu.colorado.cires.argonaut.core.netcdf.synthprofile.v13;
 
-import edu.colorado.cires.argonaut.core.netcdf.profile.v31.ArgoProfileDirection;
 import java.time.Instant;
 import java.util.List;
 
@@ -48,7 +47,7 @@ public interface ArgoSyntheticProfileV13 {
 
   int getCycleNumber();
 
-  ArgoProfileDirection getDirection();
+  String getDirection();
 
   String getDataCenter();
 
@@ -77,4 +76,6 @@ public interface ArgoSyntheticProfileV13 {
   int getConfigMissionNumber();
 
   List<ArgoSyntheticProfileV13Parameter> getParameters();
+
+  String getSoftwareVersion();
 }

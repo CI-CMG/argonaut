@@ -1,6 +1,5 @@
 package edu.colorado.cires.argonaut.core.netcdf.synthprofile.v13.impl;
 
-import edu.colorado.cires.argonaut.core.netcdf.profile.v31.ArgoProfileDirection;
 import edu.colorado.cires.argonaut.core.netcdf.profile.v31.impl.NetCdfTiedArgoProfileV31Parameter;
 import edu.colorado.cires.argonaut.core.netcdf.synthprofile.v13.ArgoSyntheticProfileV13;
 import edu.colorado.cires.argonaut.core.netcdf.synthprofile.v13.ArgoSyntheticProfileV13Parameter;
@@ -15,19 +14,6 @@ public class NetCdfTiedArgoSyntheticProfileV13 implements ArgoSyntheticProfileV1
 
   private final NetcdfFile netcdf;
   private final int profileIndex;
-  private String title;
-  private String institution;
-  private String source;
-  private String history;
-  private String references;
-  private String id;
-  private String comment;
-  private String userManualVersion;
-  private String conventions;
-  private String featureType;
-  private String dataType;
-  private String formatVersion;
-  private String handbookVersion;
   private Instant referenceDateTime;
   private Instant dateCreation;
   private Instant dateUpdate;
@@ -36,7 +22,7 @@ public class NetCdfTiedArgoSyntheticProfileV13 implements ArgoSyntheticProfileV1
   private String principalInvestigatorName;
   private List<String> stationParameters;
   private int cycleNumber;
-  private ArgoProfileDirection direction;
+  private String direction;
   private String dataCenter;
   private String platformType;
   private String floatSerialNumber;
@@ -51,41 +37,47 @@ public class NetCdfTiedArgoSyntheticProfileV13 implements ArgoSyntheticProfileV1
   private String positioningSystem;
   private int configMissionNumber;
   private List<ArgoSyntheticProfileV13Parameter> parameters = new ArrayList<>();
+  private final NetCdfTiedArgoSyntheticMultiProfileV13 parent;
 
-  public NetCdfTiedArgoSyntheticProfileV13(NetcdfFile netcdf, int profileIndex) {
+  public NetCdfTiedArgoSyntheticProfileV13(NetcdfFile netcdf, NetCdfTiedArgoSyntheticMultiProfileV13 parent, int profileIndex) {
     this.netcdf = netcdf;
+    this.parent = parent;
     this.profileIndex = profileIndex;
+    configMissionNumber = NetCdfUtils.getLevel1Integer(netcdf, profileIndex, "CONFIG_MISSION_NUMBER");
+    dateCreation = NetCdfUtils.getInstant(netcdf, "DATE_CREATION");
+    dateUpdate = NetCdfUtils.getInstant(netcdf, "DATE_UPDATE");
+    referenceDateTime = NetCdfUtils.getInstant(netcdf, "REFERENCE_DATE_TIME");
     platformNumber = NetCdfUtils.getLevel1String(netcdf, profileIndex, "PLATFORM_NUMBER");
     projectName = NetCdfUtils.getLevel1String(netcdf, profileIndex, "PROJECT_NAME");
     principalInvestigatorName = NetCdfUtils.getLevel1String(netcdf, profileIndex, "PI_NAME");
     stationParameters = NetCdfUtils.getLevel1ListOfString(netcdf, profileIndex, "STATION_PARAMETERS");
-//    cycleNumber = NetCdfUtils.getLevel1Integer(netcdf, profileIndex, "CYCLE_NUMBER");
-//    direction = ArgoProfileDirection.valueOf(NetCdfUtils.getLevel1String(netcdf, profileIndex, "DIRECTION"));
+    cycleNumber = NetCdfUtils.getLevel1Integer(netcdf, profileIndex, "CYCLE_NUMBER");
+    direction = NetCdfUtils.getLevel1String(netcdf, profileIndex, "DIRECTION");
     dataCenter = NetCdfUtils.getLevel1String(netcdf, profileIndex, "DATA_CENTRE");
-//    dataCenterReference = NetCdfUtils.getLevel1String(netcdf, profileIndex, "DC_REFERENCE");
-//    dataStateIndicator = NetCdfUtils.getLevel1String(netcdf, profileIndex, "DATA_STATE_INDICATOR");
-//    dataMode = ArgoProfileDataMode.valueOf(NetCdfUtils.getLevel1String(netcdf, profileIndex, "DATA_MODE"));
     platformType = NetCdfUtils.getLevel1String(netcdf, profileIndex, "PLATFORM_TYPE");
     floatSerialNumber = NetCdfUtils.getLevel1String(netcdf, profileIndex, "FLOAT_SERIAL_NO");
     firmwareVersion = NetCdfUtils.getLevel1String(netcdf, profileIndex, "FIRMWARE_VERSION");
     wmoInstrumentType = NetCdfUtils.getLevel1String(netcdf, profileIndex, "WMO_INST_TYPE");
-//    julianDate = calculateJulianDate(netcdf, profileIndex, parent.getReferenceDateTime(), "JULD");
+    julianDate = calculateJulianDate(netcdf, profileIndex, parent.getReferenceDateTime(), "JULD");
     julianDateQc = NetCdfUtils.getLevel1String(netcdf, profileIndex, "JULD_QC");
-//    julianDateOfLocation = calculateJulianDate(netcdf, profileIndex, parent.getReferenceDateTime(), "JULD_LOCATION");
-//    latitude = NetCdfUtils.getLevel1Double(netcdf, profileIndex, "LATITUDE");
-//    longitude = NetCdfUtils.getLevel1Double(netcdf, profileIndex, "LONGITUDE");
+    julianDateOfLocation = calculateJulianDate(netcdf, profileIndex, parent.getReferenceDateTime(), "JULD_LOCATION");
+    latitude = NetCdfUtils.getLevel1Double(netcdf, profileIndex, "LATITUDE");
+    longitude = NetCdfUtils.getLevel1Double(netcdf, profileIndex, "LONGITUDE");
     positionQc = NetCdfUtils.getLevel1String(netcdf, profileIndex, "POSITION_QC");
     positioningSystem = NetCdfUtils.getLevel1String(netcdf, profileIndex, "POSITIONING_SYSTEM");
-//    positionErrorReported = NetCdfUtils.getLevel1Float(netcdf, profileIndex, "POSITION_ERROR_REPORTED");
-//    positionErrorEstimatedComment = NetCdfUtils.getLevel1String(netcdf, profileIndex, "POSITION_ERROR_ESTIMATED_COMMENT");
-//    verticalSamplingScheme = NetCdfUtils.getLevel1String(netcdf, profileIndex, "VERTICAL_SAMPLING_SCHEME");
-//    configMissionNumber = NetCdfUtils.getLevel1Integer(netcdf, profileIndex, "CONFIG_MISSION_NUMBER");
-//    numHistory = NetCdfUtils.getDimensionSize(netcdf, "N_HISTORY");
     parameters = new ArrayList<>(stationParameters.size());
     for (int index = 0; index < stationParameters.size(); index++) {
       String parameterName = stationParameters.get(index);
       parameters.add(new NetCdfTiedArgoSyntheticProfileV13Parameter(this, parameterName, index));
     }
+  }
+
+  private static Instant calculateJulianDate(NetcdfFile netcdf, int profileIndex, Instant referenceDateTime, String variable) {
+    Double daysSinceRef = NetCdfUtils.getLevel1Double(netcdf, profileIndex, variable);
+    if (daysSinceRef == null) {
+      return null;
+    }
+    return NetCdfUtils.calculateJulianDate(referenceDateTime, daysSinceRef);
   }
 
   public NetcdfFile getNetcdf() {
@@ -98,67 +90,67 @@ public class NetCdfTiedArgoSyntheticProfileV13 implements ArgoSyntheticProfileV1
 
   @Override
   public String getTitle() {
-    return title;
+    return parent.getTitle();
   }
 
   @Override
   public String getInstitution() {
-    return institution;
+    return parent.getInstitution();
   }
 
   @Override
   public String getSource() {
-    return source;
+    return parent.getSource();
   }
 
   @Override
   public String getHistory() {
-    return history;
+    return parent.getHistory();
   }
 
   @Override
   public String getReferences() {
-    return references;
+    return parent.getReferences();
   }
 
   @Override
   public String getId() {
-    return id;
+    return parent.getId();
   }
 
   @Override
   public String getComment() {
-    return comment;
+    return parent.getComment();
   }
 
   @Override
   public String getUserManualVersion() {
-    return userManualVersion;
+    return parent.getUserManualVersion();
   }
 
   @Override
   public String getConventions() {
-    return conventions;
+    return parent.getConventions();
   }
 
   @Override
   public String getFeatureType() {
-    return featureType;
+    return parent.getFeatureType();
   }
 
   @Override
   public String getDataType() {
-    return dataType;
+    return parent.getDataType();
   }
 
   @Override
   public String getFormatVersion() {
-    return formatVersion;
+    return parent.getFormatVersion();
   }
 
   @Override
   public String getHandbookVersion() {
-    return handbookVersion;
+    return parent.getHandbookVersion();
   }
 
   @Override
@@ -202,7 +194,7 @@ public class NetCdfTiedArgoSyntheticProfileV13 implements ArgoSyntheticProfileV1
   }
 
   @Override
-  public ArgoProfileDirection getDirection() {
+  public String getDirection() {
     return direction;
   }
 
@@ -275,4 +267,10 @@ public class NetCdfTiedArgoSyntheticProfileV13 implements ArgoSyntheticProfileV1
   public List<ArgoSyntheticProfileV13Parameter> getParameters() {
     return parameters;
   }
+
+  @Override
+  public String getSoftwareVersion() {
+    return parent.getSoftwareVersion();
+  }
+
 }

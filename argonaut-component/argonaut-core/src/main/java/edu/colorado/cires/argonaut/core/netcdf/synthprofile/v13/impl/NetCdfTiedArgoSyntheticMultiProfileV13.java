@@ -1,8 +1,5 @@
 package edu.colorado.cires.argonaut.core.netcdf.synthprofile.v13.impl;
 
-import edu.colorado.cires.argonaut.core.netcdf.profile.v31.ArgoMultiProfileV31;
-import edu.colorado.cires.argonaut.core.netcdf.profile.v31.ArgoProfileV31;
-import edu.colorado.cires.argonaut.core.netcdf.profile.v31.impl.NetCdfTiedArgoProfileV31;
 import edu.colorado.cires.argonaut.core.netcdf.synthprofile.v13.ArgoSyntheticMultiProfileV13;
 import edu.colorado.cires.argonaut.core.netcdf.synthprofile.v13.ArgoSyntheticProfileV13;
 import edu.colorado.cires.argonaut.core.util.NetCdfUtils;
@@ -32,6 +29,7 @@ public class NetCdfTiedArgoSyntheticMultiProfileV13 implements ArgoSyntheticMult
   private final Instant dateCreation;
   private final Instant dateUpdate;
   private final int numberOfProfiles;
+  private final String softwareVersion;
 
   public NetCdfTiedArgoSyntheticMultiProfileV13(NetcdfFile netcdf) {
     this.netcdf = netcdf;
@@ -53,6 +51,7 @@ public class NetCdfTiedArgoSyntheticMultiProfileV13 implements ArgoSyntheticMult
     referenceDateTime = NetCdfUtils.getInstant(netcdf, "REFERENCE_DATE_TIME");
     dateCreation = NetCdfUtils.getInstant(netcdf, "DATE_CREATION");
     dateUpdate = NetCdfUtils.getInstant(netcdf, "DATE_UPDATE");
+    softwareVersion = NetCdfUtils.getGlobalAttributeString(netcdf, "software_version");
 
   }
 
@@ -154,9 +153,14 @@ public class NetCdfTiedArgoSyntheticMultiProfileV13 implements ArgoSyntheticMult
   public List<ArgoSyntheticProfileV13> getProfiles() {
     List<ArgoSyntheticProfileV13> profiles = new ArrayList<>(numberOfProfiles);
     for (int profileIndex = 0; profileIndex < numberOfProfiles; profileIndex++) {
-      profiles.add(new NetCdfTiedArgoSyntheticProfileV13(netcdf, profileIndex));
+      profiles.add(new NetCdfTiedArgoSyntheticProfileV13(netcdf, this, profileIndex));
     }
     return profiles;
+  }
+
+  @Override
+  public String getSoftwareVersion() {
+    return softwareVersion;
   }
 
 

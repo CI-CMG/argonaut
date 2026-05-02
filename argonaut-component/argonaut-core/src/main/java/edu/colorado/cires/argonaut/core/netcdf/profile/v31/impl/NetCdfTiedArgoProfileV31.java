@@ -1,7 +1,5 @@
 package edu.colorado.cires.argonaut.core.netcdf.profile.v31.impl;
 
-import edu.colorado.cires.argonaut.core.netcdf.profile.v31.ArgoProfileDataMode;
-import edu.colorado.cires.argonaut.core.netcdf.profile.v31.ArgoProfileDirection;
 import edu.colorado.cires.argonaut.core.netcdf.profile.v31.ArgoProfileV31;
 import edu.colorado.cires.argonaut.core.netcdf.profile.v31.ArgoProfileV31History;
 import edu.colorado.cires.argonaut.core.netcdf.profile.v31.ArgoProfileV31Parameter;
@@ -23,11 +21,11 @@ public class NetCdfTiedArgoProfileV31 implements ArgoProfileV31 {
   private final String principalInvestigatorName;
   private final List<String> stationParameters;
   private final int cycleNumber;
-  private final ArgoProfileDirection direction;
+  private final String direction;
   private final String dataCenter;
   private final String dataCenterReference;
   private final String dataStateIndicator;
-  private final ArgoProfileDataMode dataMode;
+  private final String dataMode;
   private final String platformType;
   private final String floatSerialNumber;
   private final String firmwareVersion;
@@ -56,11 +54,11 @@ public class NetCdfTiedArgoProfileV31 implements ArgoProfileV31 {
     principalInvestigatorName = NetCdfUtils.getLevel1String(netcdf, profileIndex, "PI_NAME");
     stationParameters = NetCdfUtils.getLevel1ListOfString(netcdf, profileIndex, "STATION_PARAMETERS");
     cycleNumber = NetCdfUtils.getLevel1Integer(netcdf, profileIndex, "CYCLE_NUMBER");
-    direction = ArgoProfileDirection.valueOf(NetCdfUtils.getLevel1String(netcdf, profileIndex, "DIRECTION"));
+    direction = NetCdfUtils.getLevel1String(netcdf, profileIndex, "DIRECTION");
     dataCenter = NetCdfUtils.getLevel1String(netcdf, profileIndex, "DATA_CENTRE");
     dataCenterReference = NetCdfUtils.getLevel1String(netcdf, profileIndex, "DC_REFERENCE");
     dataStateIndicator = NetCdfUtils.getLevel1String(netcdf, profileIndex, "DATA_STATE_INDICATOR");
-    dataMode = ArgoProfileDataMode.valueOf(NetCdfUtils.getLevel1String(netcdf, profileIndex, "DATA_MODE"));
+    dataMode = NetCdfUtils.getLevel1String(netcdf, profileIndex, "DATA_MODE");
     platformType = NetCdfUtils.getLevel1String(netcdf, profileIndex, "PLATFORM_TYPE");
     floatSerialNumber = NetCdfUtils.getLevel1String(netcdf, profileIndex, "FLOAT_SERIAL_NO");
     firmwareVersion = NetCdfUtils.getLevel1String(netcdf, profileIndex, "FIRMWARE_VERSION");
@@ -207,7 +205,7 @@ public class NetCdfTiedArgoProfileV31 implements ArgoProfileV31 {
   }
 
   @Override
-  public ArgoProfileDirection getDirection() {
+  public String getDirection() {
     return direction;
   }
 
@@ -227,7 +225,7 @@ public class NetCdfTiedArgoProfileV31 implements ArgoProfileV31 {
   }
 
   @Override
-  public ArgoProfileDataMode getDataMode() {
+  public String getDataMode() {
     return dataMode;
   }
 

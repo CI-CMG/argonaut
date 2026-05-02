@@ -30,4 +30,6 @@ public interface ArgoProfileV31Parameter {
   List<ArgoProfileV31Level> getLevels();
 
   List<ArgoProfileV31Calibration> getCalibrations();
+
+  String getDataMode();
 }

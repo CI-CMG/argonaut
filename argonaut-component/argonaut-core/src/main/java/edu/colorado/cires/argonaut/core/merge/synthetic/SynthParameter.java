@@ -5,6 +5,7 @@ class SynthParameter {
   String parameterName;
   Float value;
   Long pDiff;
+  String qc;
 
 
   public String getParameterName() {
@@ -31,4 +32,11 @@ class SynthParameter {
     this.pDiff = pDiff;
   }
 
+  public String getQc() {
+    return qc;
+  }
+
+  public void setQc(String qc) {
+    this.qc = qc;
+  }
 }

@@ -3,8 +3,6 @@ package edu.colorado.cires.argonaut.core.netcdf.metadata.v31.impl;
 import edu.colorado.cires.argonaut.core.netcdf.metadata.v31.ArgoMetadataV31;
 import edu.colorado.cires.argonaut.core.netcdf.metadata.v31.ArgoMetadataV31ControllerBoard;
 import edu.colorado.cires.argonaut.core.netcdf.metadata.v31.ArgoMetadataV31TelecommunicationSystem;
-import edu.colorado.cires.argonaut.core.netcdf.profile.v31.ArgoProfileDataMode;
-import edu.colorado.cires.argonaut.core.netcdf.profile.v31.ArgoProfileDirection;
 import edu.colorado.cires.argonaut.core.util.NetCdfUtils;
 import java.time.Instant;
 import java.util.List;

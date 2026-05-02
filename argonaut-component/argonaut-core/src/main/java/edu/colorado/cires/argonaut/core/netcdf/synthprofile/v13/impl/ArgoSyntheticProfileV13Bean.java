@@ -1,6 +1,5 @@
 package edu.colorado.cires.argonaut.core.netcdf.synthprofile.v13.impl;
 
-import edu.colorado.cires.argonaut.core.netcdf.profile.v31.ArgoProfileDirection;
 import edu.colorado.cires.argonaut.core.netcdf.profile.v31.ArgoProfileV31Parameter;
 import edu.colorado.cires.argonaut.core.netcdf.synthprofile.v13.ArgoSyntheticProfileV13;
 import edu.colorado.cires.argonaut.core.netcdf.synthprofile.v13.ArgoSyntheticProfileV13Parameter;
@@ -31,7 +30,7 @@ public class ArgoSyntheticProfileV13Bean implements ArgoSyntheticProfileV13 {
   private String principalInvestigatorName;
   private List<String> stationParameters;
   private int cycleNumber;
-  private ArgoProfileDirection direction;
+  private String direction;
   private String dataCenter;
   private String platformType;
   private String floatSerialNumber;
@@ -46,6 +45,7 @@ public class ArgoSyntheticProfileV13Bean implements ArgoSyntheticProfileV13 {
   private String positioningSystem;
   private int configMissionNumber;
   private List<ArgoSyntheticProfileV13Parameter> parameters = new ArrayList<>();
+  private String softwareVersion;
 
 
   @Override
@@ -235,11 +235,11 @@ public class ArgoSyntheticProfileV13Bean implements ArgoSyntheticProfileV13 {
   }
 
   @Override
-  public ArgoProfileDirection getDirection() {
+  public String getDirection() {
     return direction;
   }
 
-  public void setDirection(ArgoProfileDirection direction) {
+  public void setDirection(String direction) {
     this.direction = direction;
   }
 
@@ -365,7 +365,17 @@ public class ArgoSyntheticProfileV13Bean implements ArgoSyntheticProfileV13 {
     return parameters;
   }
 
+
   public void setParameters(List<ArgoSyntheticProfileV13Parameter> parameters) {
     this.parameters = parameters;
+  }
+
+  @Override
+  public String getSoftwareVersion() {
+    return softwareVersion;
+  }
+
+  public void setSoftwareVersion(String softwareVersion) {
+    this.softwareVersion = softwareVersion;
   }
 }

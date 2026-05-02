@@ -46,11 +46,11 @@ public class ArgoProfileV31ReaderTest {
       assertEquals("STEPHEN RISER", p0.getPrincipalInvestigatorName());
       assertEquals(Arrays.asList("PRES", "TEMP", "PSAL"), p0.getStationParameters());
       assertEquals(10, p0.getCycleNumber());
-      assertEquals(ArgoProfileDirection.A, p0.getDirection());
+      assertEquals("A", p0.getDirection());
       assertEquals("AO", p0.getDataCenter());
       assertEquals("1726_17964_010", p0.getDataCenterReference());
       assertEquals("2C", p0.getDataStateIndicator());
-      assertEquals(ArgoProfileDataMode.D, p0.getDataMode());
+      assertEquals("D", p0.getDataMode());
       assertEquals("APEX", p0.getPlatformType());
       assertEquals("2596", p0.getFloatSerialNumber());
       assertEquals("012606", p0.getFirmwareVersion());

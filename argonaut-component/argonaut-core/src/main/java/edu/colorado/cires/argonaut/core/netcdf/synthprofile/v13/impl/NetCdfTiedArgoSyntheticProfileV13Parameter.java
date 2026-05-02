@@ -1,6 +1,6 @@
 package edu.colorado.cires.argonaut.core.netcdf.synthprofile.v13.impl;
 
-import edu.colorado.cires.argonaut.core.netcdf.profile.v31.ArgoProfileDataMode;
+import edu.colorado.cires.argonaut.core.netcdf.synthprofile.v13.ArgoSyntheticProfileV13Calibration;
 import edu.colorado.cires.argonaut.core.netcdf.synthprofile.v13.ArgoSyntheticProfileV13Level;
 import edu.colorado.cires.argonaut.core.netcdf.synthprofile.v13.ArgoSyntheticProfileV13Parameter;
 import edu.colorado.cires.argonaut.core.util.NetCdfUtils;
@@ -36,6 +36,14 @@ public class NetCdfTiedArgoSyntheticProfileV13Parameter implements ArgoSynthetic
     }
   }
 
+  int getNumCalibrations() {
+    return numCalibrations;
+  }
+
+  int getParamIndex() {
+    return paramIndex;
+  }
+
   NetcdfFile getNetcdf() {
     return netcdf;
   }
@@ -50,7 +58,7 @@ public class NetCdfTiedArgoSyntheticProfileV13Parameter implements ArgoSynthetic
   }
 
   @Override
-  public ArgoProfileDataMode getDataMode() {
+  public String getDataMode() {
     return null;
   }
 
@@ -64,16 +72,13 @@ public class NetCdfTiedArgoSyntheticProfileV13Parameter implements ArgoSynthetic
     return levels;
   }
 
-//  @Override
-//  public List<ArgoProfileV31Calibration> getCalibrations() {
-//    List<ArgoProfileV31Calibration> calibrations = new ArrayList<>(numCalibrations);
-//    for (int calibrationIndex = 0; calibrationIndex < numCalibrations; calibrationIndex++) {
-//      calibrations.add(new NetCdfTiedArgoProfileV31Calibration(this, calibrationIndex));
-//    }
-//    return calibrations;
-//  }
-//
-//  int getParamIndex() {
-//    return paramIndex;
-//  }
+  @Override
+  public List<ArgoSyntheticProfileV13Calibration> getCalibrations() {
+    List<ArgoSyntheticProfileV13Calibration> calibrations = new ArrayList<>(numCalibrations);
+    for (int calibrationIndex = 0; calibrationIndex < numCalibrations; calibrationIndex++) {
+      calibrations.add(new NetCdfTiedArgoSyntheticProfileV13Calibration(this, calibrationIndex));
+    }
+    return calibrations;
+  }
+
 }
