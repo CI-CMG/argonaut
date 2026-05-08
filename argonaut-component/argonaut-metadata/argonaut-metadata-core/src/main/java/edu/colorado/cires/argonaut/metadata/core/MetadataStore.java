@@ -10,5 +10,6 @@ public interface MetadataStore {
 //  MetadataRecordPage findAllPage(IndexPageRequest pageRequest);
   MetadataRecordPage findProfilePage(String floatId, String dac, IndexPageRequest pageRequest);
   FloatMergeGroupPage findUpdatedOrMissingMergeFilesPage(IndexPageRequest pageRequest);
+  ProfilePage findUpdatedOrMissingSyntheticProfilesPage(IndexPageRequest pageRequest);
 
 }

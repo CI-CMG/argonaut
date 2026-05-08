@@ -139,6 +139,24 @@
     <property name="updateIndexQueue" value="seda:update-index"/>
   </bean>
 
+  <bean id="syntheticProfileAggregator" class="edu.colorado.cires.argonaut.processor.core.DefaultSyntheticProfileAggregator">
+    <property name="jsonMapper" ref="jsonMapper"/>
+    <property name="messageSender" ref="messageSender"/>
+    <property name="syntheticProfileQueue" value="seda:synthetic-profile"/>
+    <property name="enabled" value="${synthetic-profile.enabled}"/>
+    <property name="pageSize" value="${synthetic-profile.page-size}"/>
+    <property name="metadataStore" ref="metadataStore"/>
+  </bean>
+
+  <bean id="syntheticProfileProcessor" class="edu.colorado.cires.argonaut.processor.core.DefaultSyntheticProfileProcessor">
+    <property name="metadataStore" ref="metadataStore"/>
+    <property name="messageSender" ref="messageSender"/>
+    <property name="jsonMapper" ref="jsonMapper"/>
+    <property name="localTempDir" value="${work-directory}"/>
+    <property name="outputFileStore" ref="outputFileStore"/>
+    <property name="updateIndexQueue" value="seda:update-index"/>
+  </bean>
+
   <camelContext xmlns="http://camel.apache.org/schema/spring">
     <template id="producerTemplate"/>
     <routeContextRef ref="dac-submission-routes"/>
