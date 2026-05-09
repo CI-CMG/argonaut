@@ -65,7 +65,16 @@
     <property name="tarballSubmissionProcessor" ref="tarballSubmissionProcessor"/>
   </bean>
 
-  <bean id="validationProcessor" class="edu.colorado.cires.argonaut.processor.core.DefaultValidationProcessor"/>
+  <bean id="validationProcessor" class="edu.colorado.cires.argonaut.processor.core.DefaultValidationProcessor">
+    <property name="workingDirectory" value="${work-directory}"/>
+    <property name="processingFileStore" ref="processingFileStore"/>
+    <property name="useOnlineNvs" value="${file-check.use-online-nvs}"/>
+    <property name="doNulls" value="${file-check.do-nulls}"/>
+    <property name="doFormatOnly" value="${file-check.do-format-only}"/>
+    <property name="doNameCheck" value="${file-check.do-name-check}"/>
+    <property name="doPsalStats" value="${file-check.do-psal-stats}"/>
+    <property name="doFormatOnlyPre31" value="${file-check.do-format-only-pre-31}"/>
+  </bean>
 
   <bean id="validationResultRouter" class="edu.colorado.cires.argonaut.processor.core.DefaultValidationRouter">
     <property name="jsonMapper" ref="jsonMapper"/>

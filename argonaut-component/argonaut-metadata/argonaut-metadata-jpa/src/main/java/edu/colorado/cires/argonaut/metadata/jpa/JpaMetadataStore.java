@@ -12,6 +12,7 @@ import edu.colorado.cires.argonaut.metadata.core.FloatMergeGroupPage;
 import edu.colorado.cires.argonaut.metadata.core.IndexPageRequest;
 import edu.colorado.cires.argonaut.metadata.core.MetadataRecordPage;
 import edu.colorado.cires.argonaut.metadata.core.MetadataStore;
+import edu.colorado.cires.argonaut.metadata.core.ProfilePage;
 import edu.colorado.cires.argonaut.metadata.jpa.entity.IndexEntity;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
@@ -149,6 +150,11 @@ public class JpaMetadataStore implements MetadataStore {
               .build()).collect(Collectors.toList()))
           .build();
     }
+  }
+
+  @Override
+  public ProfilePage findUpdatedOrMissingSyntheticProfilesPage(IndexPageRequest pageRequest) {
+    throw new UnsupportedOperationException("Not supported yet.");
   }
 
 //  @Override

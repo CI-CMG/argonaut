@@ -39,10 +39,28 @@
         <checksumPolicy>fail</checksumPolicy>
       </releases>
     </repository>
+    <repository>
+      <id>ossrh</id>
+      <url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
+      <snapshots>
+        <enabled>true</enabled>
+        <updatePolicy>always</updatePolicy>
+      </snapshots>
+      <releases>
+        <enabled>false</enabled>
+      </releases>
+    </repository>
   </repositories>
 
   <dependencyManagement>
     <dependencies>
+      <dependency>
+        <groupId>com.fasterxml.jackson</groupId>
+        <artifactId>jackson-bom</artifactId>
+        <version>2.21.3</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
       <dependency>
         <groupId>tools.jackson</groupId>
         <artifactId>jackson-bom</artifactId>
@@ -139,6 +157,11 @@
         <artifactId>mockito-core</artifactId>
         <version>5.23.0</version>
         <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>io.github.ci-cmg</groupId>
+        <artifactId>argo-file-checker-exec</artifactId>
+        <version>4.0.0-SNAPSHOT</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
