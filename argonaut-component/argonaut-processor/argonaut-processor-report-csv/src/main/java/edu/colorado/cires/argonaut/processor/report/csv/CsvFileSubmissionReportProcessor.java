@@ -6,7 +6,7 @@ import edu.colorado.cires.argonaut.processor.core.SubmissionReportProcessor;
 
 public class CsvFileSubmissionReportProcessor implements SubmissionReportProcessor {
 
-  private FileStore submissionFileStore;
+//  private FileStore submissionFileStore;
 
   @Override
   public void appendReport(NcSubmissionMessage message) {
@@ -58,21 +58,21 @@ public class CsvFileSubmissionReportProcessor implements SubmissionReportProcess
   }
 
 
-  private static String successMessage(NcSubmissionMessage message) {
-    switch (message.getOperation()) {
-      case ADD:
-        return "added";
-      case REMOVE:
-        return "removed";
-      default:
-        throw new IllegalArgumentException("Operation not supported: " + message.getOperation());
-    }
-  }
-
-  private static String valueOrEmpty(String value) {
-    if (value == null) {
-      return "";
-    }
-    return value.trim();
-  }
+//  private static String successMessage(NcSubmissionMessage message) {
+//    switch (message.getOperation()) {
+//      case ADD:
+//        return "added";
+//      case REMOVE:
+//        return "removed";
+//      default:
+//        throw new IllegalArgumentException("Operation not supported: " + message.getOperation());
+//    }
+//  }
+//
+//  private static String valueOrEmpty(String value) {
+//    if (value == null) {
+//      return "";
+//    }
+//    return value.trim();
+//  }
 }

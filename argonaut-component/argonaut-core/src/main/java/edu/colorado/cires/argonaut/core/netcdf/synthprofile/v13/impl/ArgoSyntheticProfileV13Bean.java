@@ -28,7 +28,6 @@ public class ArgoSyntheticProfileV13Bean implements ArgoSyntheticProfileV13 {
   private String platformNumber;
   private String projectName;
   private String principalInvestigatorName;
-  private List<String> stationParameters;
   private int cycleNumber;
   private String direction;
   private String dataCenter;

@@ -1,4 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <suppressions xmlns="https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.3.xsd">
-
+  <suppress>
+    <notes><![CDATA[
+    file name: org.eclipse.emf.ecore.xmi-2.15.0.jar
+    ]]></notes>
+    <packageUrl regex="true">^pkg:maven/org\.eclipse\.emf/org\.eclipse\.emf\.ecore\.xmi@.*$</packageUrl>
+    <vulnerabilityName>CVE-2023-4218</vulnerabilityName>
+  </suppress>
+  <suppress>
+    <notes><![CDATA[
+    file name: h2-2.4.240.jar
+    ]]></notes>
+    <packageUrl regex="true">^pkg:maven/com\.h2database/h2@.*$</packageUrl>
+    <cpe>cpe:/a:h2database:h2</cpe>
+  </suppress>
+  <suppress>
+    <notes><![CDATA[
+    file name: h2-2.4.240.jar
+    ]]></notes>
+    <packageUrl regex="true">^pkg:maven/com\.h2database/h2@.*$</packageUrl>
+    <vulnerabilityName>CVE-2018-14335</vulnerabilityName>
+  </suppress>
 </suppressions>

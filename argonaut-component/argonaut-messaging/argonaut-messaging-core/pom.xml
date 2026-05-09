@@ -11,7 +11,16 @@
 
   <artifactId>argonaut-messaging-core</artifactId>
 
+  <properties>
+    <project-root>${project.parent.parent.parent.basedir}</project-root>
+  </properties>
+
   <dependencies>
+    <dependency>
+      <groupId>com.github.spotbugs</groupId>
+      <artifactId>spotbugs-annotations</artifactId>
+      <scope>provided</scope>
+    </dependency>
     <dependency>
       <groupId>tools.jackson.core</groupId>
       <artifactId>jackson-databind</artifactId>

@@ -12,6 +12,10 @@
   <artifactId>argonaut-messaging-parent</artifactId>
   <packaging>pom</packaging>
 
+  <properties>
+    <project-root>${project.parent.parent.basedir}</project-root>
+  </properties>
+
   <modules>
     <module>argonaut-messaging-core</module>
     <module>argonaut-messaging-camel</module>

@@ -7,7 +7,6 @@ public class ArgoSyntheticProfileV13LevelBean  implements ArgoSyntheticProfileV1
   Float originalValue;
   Float pressureDisplacement;
   String qc;
-  Float value;
   Float adjustedValue;
   String adjustedQc;
   Float adjustedError;

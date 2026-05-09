@@ -11,6 +11,10 @@
 
   <artifactId>argonaut-metadata-jpa</artifactId>
 
+  <properties>
+    <project-root>${project.parent.parent.parent.basedir}</project-root>
+  </properties>
+
   <dependencies>
     <dependency>
       <groupId>io.github.ci-cmg.argo</groupId>

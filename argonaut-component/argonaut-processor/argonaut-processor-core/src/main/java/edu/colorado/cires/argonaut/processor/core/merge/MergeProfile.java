@@ -468,7 +468,7 @@ class MergeProfile {
 
   void addDirection(String direction) {
     if (this.directions == null) {
-      this.directions = new String();
+      this.directions = "";
     }
     this.directions += direction;
   }
@@ -512,7 +512,7 @@ class MergeProfile {
 
   void addDataModes(String dataMode) {
     if (this.dataModes == null) {
-      this.dataModes = new String();
+      this.dataModes = "";
     }
     this.dataModes += dataMode;
   }
@@ -581,7 +581,7 @@ class MergeProfile {
 
   void addJuldQc(String juldQc) {
     if (this.juldQc == null) {
-      this.juldQc = new String();
+      this.juldQc = "";
     }
     this.juldQc += juldQc;
   }
@@ -637,7 +637,7 @@ class MergeProfile {
 
   void addPositionQcs(String positionQcs) {
     if (this.positionQcs == null) {
-      this.positionQcs = new String();
+      this.positionQcs = "";
     }
     this.positionQcs += positionQcs;
   }
@@ -659,7 +659,7 @@ class MergeProfile {
 
   void addProfilePresQcs(String profilePresQcs) {
     if (this.profilePresQcs == null) {
-      this.profilePresQcs = new String();
+      this.profilePresQcs = "";
     }
     this.profilePresQcs += profilePresQcs;
   }
@@ -670,7 +670,7 @@ class MergeProfile {
 
   void addProfileTempQcs(String profileTempQc) {
     if (this.profileTempQcs == null) {
-      this.profileTempQcs = new String();
+      this.profileTempQcs = "";
     }
     this.profileTempQcs += profileTempQc;
   }
@@ -681,7 +681,7 @@ class MergeProfile {
 
   void addProfilePsalQcs(String profilePsalQc) {
     if (this.profilePsalQcs == null) {
-      this.profilePsalQcs = new String();
+      this.profilePsalQcs = "";
     }
     this.profilePsalQcs += profilePsalQc;
   }

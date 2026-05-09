@@ -11,11 +11,14 @@
 
   <artifactId>argonaut-core</artifactId>
 
+  <properties>
+    <project-root>${project.parent.parent.basedir}</project-root>
+  </properties>
+
   <dependencies>
     <dependency>
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-math3</artifactId>
-      <version>3.6.1</version>
     </dependency>
     <dependency>
       <groupId>org.junit.jupiter</groupId>

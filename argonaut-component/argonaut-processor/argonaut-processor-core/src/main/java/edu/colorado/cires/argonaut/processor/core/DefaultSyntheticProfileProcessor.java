@@ -18,54 +18,54 @@ import tools.jackson.databind.json.JsonMapper;
 
 public class DefaultSyntheticProfileProcessor implements SyntheticProfileProcessor {
 
-  private FileStore outputFileStore;
-  private Path localTempDir;
-  private MetadataStore metadataStore;
-  private MessageSender messageSender;
-  private String updateIndexQueue;
-  private JsonMapper jsonMapper;
+//  private FileStore outputFileStore;
+//  private Path localTempDir;
+//  private MetadataStore metadataStore;
+//  private MessageSender messageSender;
+//  private String updateIndexQueue;
+//  private JsonMapper jsonMapper;
 
-  public void setJsonMapper(JsonMapper jsonMapper) {
-    this.jsonMapper = jsonMapper;
-  }
-
-  public void setUpdateIndexQueue(String updateIndexQueue) {
-    this.updateIndexQueue = updateIndexQueue;
-  }
-
-  public void setOutputFileStore(FileStore outputFileStore) {
-    this.outputFileStore = outputFileStore;
-  }
-
-  public void setLocalTempDir(Path localTempDir) {
-    this.localTempDir = localTempDir;
-    try {
-      Files.createDirectories(localTempDir);
-    } catch (IOException e) {
-      throw new RuntimeException("Unable to create temp directory: " + localTempDir, e);
-    }
-  }
-
-  public void setMetadataStore(MetadataStore metadataStore) {
-    this.metadataStore = metadataStore;
-  }
-
-  public void setMessageSender(MessageSender messageSender) {
-    this.messageSender = messageSender;
-  }
-
-  private List<String> getFiles(String dac, String floatId) {
-    List<String> files = new LinkedList<>();
-    MetadataRecordPage page = metadataStore.findProfilePage(floatId, dac, DefaultIndexPageRequest.builder().build());
-    files.addAll(page.getPage().stream().map(MetadataRecord::getFile).toList());
-    Optional<IndexPageRequest> maybeNextPage = page.getNextPage();
-    while (maybeNextPage.isPresent()) {
-      page = metadataStore.findProfilePage(floatId, dac, maybeNextPage.get());
-      files.addAll(page.getPage().stream().map(MetadataRecord::getFile).toList());
-      maybeNextPage = page.getNextPage();
-    }
-    return files;
-  }
+//  public void setJsonMapper(JsonMapper jsonMapper) {
+//    this.jsonMapper = jsonMapper;
+//  }
+//
+//  public void setUpdateIndexQueue(String updateIndexQueue) {
+//    this.updateIndexQueue = updateIndexQueue;
+//  }
+//
+//  public void setOutputFileStore(FileStore outputFileStore) {
+//    this.outputFileStore = outputFileStore;
+//  }
+//
+//  public void setLocalTempDir(Path localTempDir) {
+//    this.localTempDir = localTempDir;
+//    try {
+//      Files.createDirectories(localTempDir);
+//    } catch (IOException e) {
+//      throw new RuntimeException("Unable to create temp directory: " + localTempDir, e);
+//    }
+//  }
+//
+//  public void setMetadataStore(MetadataStore metadataStore) {
+//    this.metadataStore = metadataStore;
+//  }
+//
+//  public void setMessageSender(MessageSender messageSender) {
+//    this.messageSender = messageSender;
+//  }
+//
+//  private List<String> getFiles(String dac, String floatId) {
+//    List<String> files = new LinkedList<>();
+//    MetadataRecordPage page = metadataStore.findProfilePage(floatId, dac, DefaultIndexPageRequest.builder().build());
+//    files.addAll(page.getPage().stream().map(MetadataRecord::getFile).toList());
+//    Optional<IndexPageRequest> maybeNextPage = page.getNextPage();
+//    while (maybeNextPage.isPresent()) {
+//      page = metadataStore.findProfilePage(floatId, dac, maybeNextPage.get());
+//      files.addAll(page.getPage().stream().map(MetadataRecord::getFile).toList());
+//      maybeNextPage = page.getNextPage();
+//    }
+//    return files;
+//  }
 
   @Override
   public void generateSyntheticProfile(ProfileOperation message) {

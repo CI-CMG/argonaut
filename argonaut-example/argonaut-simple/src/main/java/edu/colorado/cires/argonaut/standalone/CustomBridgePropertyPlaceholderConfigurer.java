@@ -13,14 +13,14 @@ import org.springframework.util.PropertyPlaceholderHelper;
 import java.util.Properties;
 import java.util.function.Predicate;
 
-import static org.apache.camel.component.properties.PropertiesComponent.SYSTEM_PROPERTIES_MODE_FALLBACK;
+//import static org.apache.camel.component.properties.PropertiesComponent.SYSTEM_PROPERTIES_MODE_FALLBACK;
 
 public class CustomBridgePropertyPlaceholderConfigurer extends PropertySourcesPlaceholderConfigurer
         implements PropertiesParser, LoadablePropertiesSource, PropertyPlaceholderHelper.PlaceholderResolver {
 
     private PropertiesParser camelParser;
     private PropertyPlaceholderHelper helper;
-    private int systemPropertiesMode = SYSTEM_PROPERTIES_MODE_FALLBACK;
+//    private int systemPropertiesMode = SYSTEM_PROPERTIES_MODE_FALLBACK;
     private ConfigurablePropertyResolver propertyResolver;
 
     public void setParser(PropertiesParser parser) {

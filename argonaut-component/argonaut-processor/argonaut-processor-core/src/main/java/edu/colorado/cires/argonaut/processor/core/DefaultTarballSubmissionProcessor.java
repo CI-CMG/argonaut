@@ -10,6 +10,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
@@ -109,7 +110,7 @@ public class DefaultTarballSubmissionProcessor implements TarballSubmissionProce
 
       for (Path file : listFiles(tempDir)) {
         if (Files.isRegularFile(file)) {
-          String fileName = file.getFileName().toString();
+          String fileName = Optional.ofNullable(file.getFileName()).orElseThrow().toString();
           Matcher matcher = FILE_NAME_PATTERN.matcher(fileName);
           if (matcher.matches()) {
             String floatDir = matcher.group(2);
@@ -125,7 +126,7 @@ public class DefaultTarballSubmissionProcessor implements TarballSubmissionProce
             if (FileType.CORE_ARGO_PROFILE == ncSubmissionMessage.getFileType()) {
               processingDacDir = processingFileStore.appendToPath(processingDacDir, "profiles");
             }
-            String ncFile = processingFileStore.appendToPath(processingDacDir, file.getFileName().toString());
+            String ncFile = processingFileStore.appendToPath(processingDacDir, fileName);
             LOGGER.info("Adding to processing directory {}", ncFile);
             try {
               processingFileStore.uploadLocalFile(file, ncFile);

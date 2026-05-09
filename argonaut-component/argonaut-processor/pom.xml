@@ -13,6 +13,10 @@
   <artifactId>argonaut-processor-parent</artifactId>
   <packaging>pom</packaging>
 
+  <properties>
+    <project-root>${project.parent.parent.basedir}</project-root>
+  </properties>
+
   <modules>
     <module>argonaut-processor-core</module>
     <module>argonaut-processor-report-jpa</module>

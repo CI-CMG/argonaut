@@ -12,6 +12,10 @@
   <artifactId>argonaut-simple</artifactId>
   <packaging>jar</packaging>
 
+  <properties>
+    <project-root>${project.parent.parent.basedir}</project-root>
+  </properties>
+
   <dependencies>
     <dependency>
       <groupId>io.github.ci-cmg.argo</groupId>

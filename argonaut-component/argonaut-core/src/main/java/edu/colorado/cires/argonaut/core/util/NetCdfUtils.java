@@ -8,6 +8,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Function;
 import ucar.ma2.Array;
 import ucar.ma2.InvalidRangeException;
@@ -100,7 +101,7 @@ public final class NetCdfUtils {
   }
 
   private static Integer doWithVariableInteger(NetcdfFile netcdf, String variableName, Function<Variable, int[]> getOrigin,  Function<Variable, int[]> getShape) {
-    return doWithVariable(netcdf, variableName, 99999, attr -> (int) attr.getNumericValue(), variable -> {
+    return doWithVariable(netcdf, variableName, 99999, attr -> Objects.requireNonNull(attr.getNumericValue()).intValue(), variable -> {
       int[] origin = getOrigin.apply(variable);
       int[] shape = getShape.apply(variable);
       try {
@@ -116,7 +117,7 @@ public final class NetCdfUtils {
   }
 
   private static Double doWithVariableDouble(NetcdfFile netcdf, String variableName, Function<Variable, int[]> getOrigin,  Function<Variable, int[]> getShape) {
-    return doWithVariable(netcdf, variableName, 999999d, attr -> (double) attr.getNumericValue(), variable -> {
+    return doWithVariable(netcdf, variableName, 999999d, attr -> Objects.requireNonNull(attr.getNumericValue()).doubleValue(), variable -> {
       int[] origin = getOrigin.apply(variable);
       int[] shape = getShape.apply(variable);
       try {

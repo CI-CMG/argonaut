@@ -29,6 +29,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
@@ -174,8 +175,9 @@ public class SyntheticProfileMerger {
     List<Long> pressures = new ArrayList<>(known.keySet());
 
     Set<Long> filtered = new HashSet<>();
-    for (Long pressure : singleBRows.keySet()) {
-      SynthRow row = singleBRows.get(pressure);
+    for (Entry<Long, SynthRow> entry : singleBRows.entrySet()) {
+      Long pressure = entry.getKey();
+      SynthRow row = entry.getValue();
       for (SynthProfile profile : row.getProfiles()) {
         if (profile.getParameters().get(parameterName) != null) {
           filtered.add(pressure);
@@ -256,8 +258,9 @@ public class SyntheticProfileMerger {
   private static Float resolvePressureDisplacement(long pressure, String parameterName, Map<Long, SynthRow> rows) {
     Long shallowestPressure = null;
     Long deepestPressure = null;
-    for (long checkPressure : rows.keySet() ) {
-      SynthRow row = rows.get(checkPressure);
+    for (Entry<Long, SynthRow> entry : rows.entrySet()) {
+      long checkPressure = entry.getKey();
+      SynthRow row = entry.getValue();
       if (row.getProfiles().stream().anyMatch(profile -> profile.getParameters().get(parameterName) != null && profile.getParameters().get(parameterName).getValue() != null)) {
         if (checkPressure >= pressure) {
           deepestPressure = checkPressure;

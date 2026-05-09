@@ -12,6 +12,10 @@
   <artifactId>argonaut-example-parent</artifactId>
   <packaging>pom</packaging>
 
+  <properties>
+    <project-root>${project.parent.basedir}</project-root>
+  </properties>
+
   <modules>
     <module>argonaut-aws</module>
     <module>argonaut-simple</module>

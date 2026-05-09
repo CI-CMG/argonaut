@@ -13,6 +13,10 @@
   <artifactId>argonaut-file-storage-parent</artifactId>
   <packaging>pom</packaging>
 
+  <properties>
+    <project-root>${project.parent.parent.basedir}</project-root>
+  </properties>
+
   <modules>
     <module>argonaut-file-storage-core</module>
     <module>argonaut-file-storage-local</module>
