@@ -338,11 +338,11 @@ public class MetadataRecord {
       return false;
     }
     MetadataRecord that = (MetadataRecord) o;
-    return floatMerged == that.floatMerged && Objects.equals(file, that.file) && Objects.equals(date, that.date)
+    return floatMerged == that.floatMerged && Objects.equals(file, that.file)
         && Objects.equals(latitude, that.latitude) && Objects.equals(latitudeMin, that.latitudeMin) && Objects.equals(
         latitudeMax, that.latitudeMax) && Objects.equals(longitude, that.longitude) && Objects.equals(longitudeMin,
         that.longitudeMin) && Objects.equals(longitudeMax, that.longitudeMax) && ocean == that.ocean && Objects.equals(profilerType,
-        that.profilerType) && Objects.equals(institution, that.institution) && Objects.equals(dateUpdate, that.dateUpdate)
+        that.profilerType) && Objects.equals(institution, that.institution)
         && Objects.equals(parameters, that.parameters) && Objects.equals(parameterDataMode, that.parameterDataMode)
         && action == that.action && fileType == that.fileType && fileStatus == that.fileStatus && Objects.equals(dac, that.dac)
         && Objects.equals(floatId, that.floatId);
@@ -350,8 +350,7 @@ public class MetadataRecord {
 
   @Override
   public int hashCode() {
-    return Objects.hash(file, date, latitude, latitudeMin, latitudeMax, longitude, longitudeMin, longitudeMax, ocean, profilerType, institution,
-        dateUpdate, parameters, parameterDataMode, action, fileType, fileStatus, dac, floatId, floatMerged);
+    return Objects.hash(file, latitude, latitudeMin, latitudeMax, longitude, longitudeMin, longitudeMax, ocean, profilerType, institution, parameters, parameterDataMode, action, fileType, fileStatus, dac, floatId, floatMerged);
   }
 
   @Override
