@@ -1,9 +1,9 @@
 package edu.colorado.cires.argonaut.processor.core;
 
-import edu.colorado.cires.argonaut.messaging.core.databind.FloatMergeGroup;
+import edu.colorado.cires.argonaut.messaging.core.databind.ProfileOperation;
 
 public interface FloatMergeProcessor {
 
-  void merge(FloatMergeGroup message);
+  void merge(ProfileOperation message);
 
 }

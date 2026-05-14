@@ -7,6 +7,11 @@
   <persistence-unit name="argonaut-index">
     <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
     <class>edu.colorado.cires.argonaut.metadata.jpa.entity.IndexEntity</class>
+    <class>edu.colorado.cires.argonaut.metadata.jpa.entity.CycleEntity</class>
+    <class>edu.colorado.cires.argonaut.metadata.jpa.entity.DacEntity</class>
+    <class>edu.colorado.cires.argonaut.metadata.jpa.entity.FloatEntity</class>
+    <class>edu.colorado.cires.argonaut.metadata.jpa.entity.MetadataFileEntity</class>
+    <class>edu.colorado.cires.argonaut.metadata.jpa.entity.ProfileFileEntity</class>
     <exclude-unlisted-classes>true</exclude-unlisted-classes>
     <properties>
       <property name="jakarta.persistence.jdbc.url" value=""/>

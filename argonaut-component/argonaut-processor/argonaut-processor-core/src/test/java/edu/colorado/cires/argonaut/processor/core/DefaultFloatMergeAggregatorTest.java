@@ -8,11 +8,11 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import edu.colorado.cires.argonaut.messaging.core.databind.FloatMergeGroup;
+import edu.colorado.cires.argonaut.messaging.core.databind.ProfileOperation;
 import edu.colorado.cires.argonaut.messaging.core.queue.MessageSender;
 import edu.colorado.cires.argonaut.messaging.core.util.ArgonautJsonMapperFactory;
-import edu.colorado.cires.argonaut.metadata.core.DefaultFloatMergeGroupPage;
 import edu.colorado.cires.argonaut.metadata.core.DefaultIndexPageRequest;
+import edu.colorado.cires.argonaut.metadata.core.DefaultProfilePage;
 import edu.colorado.cires.argonaut.metadata.core.IndexPageRequest;
 import edu.colorado.cires.argonaut.metadata.core.MetadataStore;
 import java.util.Arrays;
@@ -38,11 +38,11 @@ public class DefaultFloatMergeAggregatorTest {
 
     when(metadataStore.findUpdatedOrMissingMergeFilesPage(any())).thenAnswer((invocationOnMock) -> {
       IndexPageRequest pageRequest = invocationOnMock.getArgument(0, IndexPageRequest.class);
-      List<FloatMergeGroup> page = Arrays.asList(
-          FloatMergeGroup.builder().withDac("aaaa").withFloatId("" + pageRequest.getPageNumber()).build(),
-          FloatMergeGroup.builder().withDac("bbbb").withFloatId("" + pageRequest.getPageNumber() * 10).build()
+      List<ProfileOperation> page = Arrays.asList(
+          ProfileOperation.builder().withDac("aaaa").withFloatId("" + pageRequest.getPageNumber()).build(),
+          ProfileOperation.builder().withDac("bbbb").withFloatId("" + pageRequest.getPageNumber() * 10).build()
       );
-      return DefaultFloatMergeGroupPage.builder().withTotalRecords(4).withIndexPageRequest(DefaultIndexPageRequest.builder(pageRequest).build())
+      return DefaultProfilePage.builder().withTotalRecords(4).withIndexPageRequest(DefaultIndexPageRequest.builder(pageRequest).build())
           .withPage(page).build();
     });
 
@@ -54,10 +54,10 @@ public class DefaultFloatMergeAggregatorTest {
         eq(DefaultIndexPageRequest.builder().withPageNumber(2).withPageSize(2).build()));
 
     List<String> messages = Arrays.asList(
-        jsonMapper.writeValueAsString(FloatMergeGroup.builder().withDac("aaaa").withFloatId("1").build()),
-        jsonMapper.writeValueAsString(FloatMergeGroup.builder().withDac("bbbb").withFloatId("10").build()),
-        jsonMapper.writeValueAsString(FloatMergeGroup.builder().withDac("aaaa").withFloatId("2").build()),
-        jsonMapper.writeValueAsString(FloatMergeGroup.builder().withDac("bbbb").withFloatId("20").build())
+        jsonMapper.writeValueAsString(ProfileOperation.builder().withDac("aaaa").withFloatId("1").build()),
+        jsonMapper.writeValueAsString(ProfileOperation.builder().withDac("bbbb").withFloatId("10").build()),
+        jsonMapper.writeValueAsString(ProfileOperation.builder().withDac("aaaa").withFloatId("2").build()),
+        jsonMapper.writeValueAsString(ProfileOperation.builder().withDac("bbbb").withFloatId("20").build())
     );
     for (String message : messages) {
       verify(messageSender, times(1)).sendJson(eq(queue), eq(message));

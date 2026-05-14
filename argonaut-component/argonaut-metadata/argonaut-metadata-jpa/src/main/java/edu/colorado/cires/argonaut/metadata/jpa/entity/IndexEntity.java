@@ -23,6 +23,8 @@ public class IndexEntity {
   private String dac;
   @Column(name = "float_id", nullable = false, length = 30)
   private String floatId;
+  @Column(name = "groupId", length = 6)
+  private String groupId;
   @Column(name = "file_type", length = 50, nullable = false)
   private String fileType;
   @Column(name = "file_status", length = 50, nullable = false)
@@ -53,9 +55,14 @@ public class IndexEntity {
   private String parameters;
   @Column(name = "parameter_data_mode", length = 100)
   private String parameterDataMode;
-  @Column(name = "float_merged")
-  private boolean floatMerged = false;
+  @Column(name = "synthetic_merge_time")
+  private ZonedDateTime syntheticMergeTime;
+  @Column(name = "last_updated_time", nullable = false)
+  private ZonedDateTime lastUpdatedTime;
 
+  public String getGroupId() {
+    return groupId;
+  }
 
   public String getFile() {
     return file;
@@ -185,14 +192,6 @@ public class IndexEntity {
     this.fileStatus = fileStatus;
   }
 
-  public boolean isFloatMerged() {
-    return floatMerged;
-  }
-
-  public void setFloatMerged(boolean floatMerged) {
-    this.floatMerged = floatMerged;
-  }
-
   public String getDac() {
     return dac;
   }
@@ -209,27 +208,37 @@ public class IndexEntity {
     this.floatId = floatId;
   }
 
+  public ZonedDateTime getSyntheticMergeTime() {
+    return syntheticMergeTime;
+  }
+
+  public void setSyntheticMergeTime(ZonedDateTime syntheticMergeTime) {
+    this.syntheticMergeTime = syntheticMergeTime;
+  }
+
+  public ZonedDateTime getLastUpdatedTime() {
+    return lastUpdatedTime;
+  }
+
+  public void setLastUpdatedTime(ZonedDateTime lastUpdatedTime) {
+    this.lastUpdatedTime = lastUpdatedTime;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
     IndexEntity entity = (IndexEntity) o;
-    return floatMerged == entity.floatMerged && Objects.equals(file, entity.file) && Objects.equals(dac, entity.dac)
-        && Objects.equals(floatId, entity.floatId) && Objects.equals(fileType, entity.fileType) && Objects.equals(
-        fileStatus, entity.fileStatus) && Objects.equals(date, entity.date) && Objects.equals(latitude, entity.latitude)
-        && Objects.equals(latitudeMin, entity.latitudeMin) && Objects.equals(latitudeMax, entity.latitudeMax)
-        && Objects.equals(longitude, entity.longitude) && Objects.equals(longitudeMin, entity.longitudeMin)
-        && Objects.equals(longitudeMax, entity.longitudeMax) && Objects.equals(ocean, entity.ocean) && Objects.equals(
-        profilerType, entity.profilerType) && Objects.equals(institution, entity.institution) && Objects.equals(dateUpdate,
-        entity.dateUpdate) && Objects.equals(parameters, entity.parameters) && Objects.equals(parameterDataMode,
-        entity.parameterDataMode);
-  }
-
-  @Override
-  public int hashCode() {
-    return Objects.hash(file, dac, floatId, fileType, fileStatus, date, latitude, latitudeMin, latitudeMax, longitude, longitudeMin, longitudeMax,
-        ocean, profilerType, institution, dateUpdate, parameters, parameterDataMode, floatMerged);
+    return Objects.equals(file, entity.file) && Objects.equals(dac, entity.dac) && Objects.equals(floatId, entity.floatId)
+        && Objects.equals(fileType, entity.fileType) && Objects.equals(fileStatus, entity.fileStatus) && Objects.equals(
+        date, entity.date) && Objects.equals(latitude, entity.latitude) && Objects.equals(latitudeMin, entity.latitudeMin)
+        && Objects.equals(latitudeMax, entity.latitudeMax) && Objects.equals(longitude, entity.longitude)
+        && Objects.equals(longitudeMin, entity.longitudeMin) && Objects.equals(longitudeMax, entity.longitudeMax)
+        && Objects.equals(ocean, entity.ocean) && Objects.equals(profilerType, entity.profilerType) && Objects.equals(
+        institution, entity.institution) && Objects.equals(dateUpdate, entity.dateUpdate) && Objects.equals(parameters,
+        entity.parameters) && Objects.equals(parameterDataMode, entity.parameterDataMode) && Objects.equals(syntheticMergeTime,
+        entity.syntheticMergeTime) && Objects.equals(lastUpdatedTime, entity.lastUpdatedTime);
   }
 
   @Override
@@ -253,8 +262,15 @@ public class IndexEntity {
         ", dateUpdate=" + dateUpdate +
         ", parameters='" + parameters + '\'' +
         ", parameterDataMode='" + parameterDataMode + '\'' +
-        ", floatMerged=" + floatMerged +
+        ", syntheticMergeTime=" + syntheticMergeTime +
+        ", lastUpdatedTime=" + lastUpdatedTime +
         '}';
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(file, dac, floatId, fileType, fileStatus, date, latitude, latitudeMin, latitudeMax, longitude, longitudeMin, longitudeMax,
+        ocean, profilerType, institution, dateUpdate, parameters, parameterDataMode, syntheticMergeTime, lastUpdatedTime);
   }
 
   public static IndexEntity fromMetadataRecord(MetadataRecord metadataRecord) {
@@ -301,7 +317,6 @@ public class IndexEntity {
         .withFileStatus(FileStatus.valueOf(fileStatus))
         .withDac(dac)
         .withFloatId(floatId)
-        .withFloatMerged(floatMerged)
         .build();
   }
 }

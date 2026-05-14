@@ -782,7 +782,7 @@ public class ArgoSyntheticProfileV13Writer {
 
       Variable dmVariable = writer.findVariable("PARAMETER_DATA_MODE");
       String dmVariableFill = dmVariable.findAttribute("_FillValue").getStringValue();
-      ArrayChar dmVariableArray = new ArrayChar.D2(1, dmVariable.getShape()[1]);
+      ArrayChar dmVariableArray = new ArrayChar(dmVariable.getShape());
       Index dmVariableArrayIndex = dmVariableArray.getIndex();
 
 
@@ -800,7 +800,7 @@ public class ArgoSyntheticProfileV13Writer {
         pqcVariableArray.setString(pqcVariableIndex.set(0), Objects.requireNonNullElse(parameter.getQc(), pqcVariableFill));
 
 
-        dmVariableArray.setString(dmVariableArrayIndex.set(0, parameterIndex), Objects.requireNonNullElse(parameter.getDataMode(), dmVariableFill));
+        dmVariableArray.setChar(dmVariableArrayIndex.set(0, parameterIndex), Objects.requireNonNullElse(parameter.getDataMode(), dmVariableFill).charAt(0));
 
         List<ArgoSyntheticProfileV13Calibration> calibrations = parameter.getCalibrations();
         int calibrationIndex = 0;

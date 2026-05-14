@@ -17,7 +17,7 @@ import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-public class SyntheticProfileMergerTest {
+public class DefaultSyntheticProfileMergerTest {
 
   @BeforeEach
   public void setup() {
@@ -53,8 +53,8 @@ public class SyntheticProfileMergerTest {
     Path metaPath = Paths.get("src/test/resources/dac/meds/4902691/4902691_meta.nc");
     Path outputPath = Paths.get("target/output/dac/meds/4902691/profiles/SR4902691_034.nc");
     Path expectedPath = Paths.get("src/test/resources/dac/meds/4902691/profiles/SR4902691_034.nc");
-    SyntheticProfileMerger syntheticProfileMerger = new SyntheticProfileMerger(cProfilePath, bProfilePath, metaPath, outputPath);
-    syntheticProfileMerger.mergeProfiles();
+    DefaultSyntheticProfileMerger syntheticProfileMerger = new DefaultSyntheticProfileMerger();
+    syntheticProfileMerger.mergeProfiles(cProfilePath, bProfilePath, metaPath, outputPath);
 
     try (
         ArgoSyntheticProfileV13Reader reader = new ArgoSyntheticProfileV13Reader(outputPath);

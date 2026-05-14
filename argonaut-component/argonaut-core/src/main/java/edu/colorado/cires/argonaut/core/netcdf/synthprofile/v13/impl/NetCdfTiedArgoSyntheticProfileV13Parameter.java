@@ -18,6 +18,7 @@ public class NetCdfTiedArgoSyntheticProfileV13Parameter implements ArgoSynthetic
   private final int numLevels;
   private final int numCalibrations;
   private final int paramIndex;
+  private final String dataMode;
   private final List<ArgoSyntheticProfileV13Level> levels;
 
 
@@ -25,6 +26,7 @@ public class NetCdfTiedArgoSyntheticProfileV13Parameter implements ArgoSynthetic
     this.parent = parent;
     netcdf = parent.getNetcdf();
     this.parameterName = parameterName;
+    dataMode = NetCdfUtils.getLevel2String(netcdf, parent.getProfileIndex(), paramIndex, "PARAMETER_DATA_MODE");
     profileIndex = parent.getProfileIndex();
     numLevels = NetCdfUtils.getDimensionSize(netcdf, "N_LEVELS");
     numCalibrations = NetCdfUtils.getDimensionSize(netcdf, "N_CALIB");
@@ -59,7 +61,7 @@ public class NetCdfTiedArgoSyntheticProfileV13Parameter implements ArgoSynthetic
 
   @Override
   public String getDataMode() {
-    return null;
+    return dataMode;
   }
 
   @Override

@@ -1,7 +1,12 @@
 package edu.colorado.cires.argonaut.messaging.core.databind;
 
+import com.fasterxml.jackson.annotation.JsonAnyGetter;
+import com.fasterxml.jackson.annotation.JsonAnySetter;
 import edu.colorado.cires.argonaut.messaging.core.databind.NcSubmissionMessage.FileType;
 import java.time.Instant;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 import tools.jackson.databind.annotation.JsonDeserialize;
 
@@ -26,6 +31,7 @@ public class MetadataRecord {
     UPDATE,
     REMOVE,
     FLOAT_MERGE,
+    SYNTHETIC_MERGE,
     NONE
   }
 
@@ -45,12 +51,15 @@ public class MetadataRecord {
     private Instant dateUpdate;
     private String parameters;
     private String parameterDataMode;
+    private String direction;
+    private String cycleNumber;
     private Action action;
     private FileType fileType;
     private FileStatus fileStatus;
     private String dac;
     private String floatId;
-    private boolean floatMerged;
+    private Instant actionTimestamp = Instant.now();
+    private Map<String, Object> otherFields = new HashMap<>();
 
     private Builder() {
 
@@ -71,12 +80,25 @@ public class MetadataRecord {
       dateUpdate = source.dateUpdate;
       parameters = source.parameters;
       parameterDataMode = source.parameterDataMode;
+      direction = source.direction;
+      cycleNumber = source.cycleNumber;
       action = source.action;
       fileType = source.fileType;
       fileStatus = source.fileStatus;
       dac = source.dac;
       floatId = source.floatId;
-      floatMerged = source.floatMerged;
+      actionTimestamp = source.actionTimestamp;
+      otherFields.putAll(source.otherFields);
+    }
+
+    public Builder withCycleNumber(String cycleNumber) {
+      this.cycleNumber = cycleNumber;
+      return this;
+    }
+
+    public Builder withDirection(String direction) {
+      this.direction = direction;
+      return this;
     }
 
     public Builder withFile(String file) {
@@ -174,8 +196,19 @@ public class MetadataRecord {
       return this;
     }
 
-    public Builder withFloatMerged(boolean floatMerged) {
-      this.floatMerged = floatMerged;
+    public Builder withActionTimestamp(Instant actionTimestamp) {
+      if (actionTimestamp == null) {
+        this.actionTimestamp = Instant.now();
+      } else {
+        this.actionTimestamp = actionTimestamp;
+      }
+      return this;
+    }
+
+    @Deprecated
+    @JsonAnySetter
+    private Builder withOtherField(String name, Object value) {
+      this.otherFields.put(name, value);
       return this;
     }
 
@@ -195,12 +228,15 @@ public class MetadataRecord {
           dateUpdate,
           parameters,
           parameterDataMode,
+          direction,
+          cycleNumber,
           action,
           fileType,
           fileStatus,
           dac,
           floatId,
-          floatMerged
+          actionTimestamp,
+          otherFields
       );
     }
 
@@ -220,16 +256,20 @@ public class MetadataRecord {
   private final Instant dateUpdate;
   private final String parameters;
   private final String parameterDataMode;
+  private final String direction;
+  private final String cycleNumber;
   private final Action action;
   private final FileType fileType;
   private final FileStatus fileStatus;
   private final String dac;
   private final String floatId;
-  private final boolean floatMerged;
+  private final Instant actionTimestamp;
+  private final Map<String, Object> otherFields;
 
   private MetadataRecord(String file, Instant date, Double latitude, Double latitudeMin, Double latitudeMax, Double longitude, Double longitudeMin,
       Double longitudeMax, ArgoOcean ocean, String profilerType, String institution, Instant dateUpdate, String parameters, String parameterDataMode,
-      Action action, FileType fileType, FileStatus fileStatus, String dac, String floatId, boolean floatMerged) {
+      String direction, String cycleNumber, Action action, FileType fileType, FileStatus fileStatus, String dac, String floatId, Instant actionTimestamp,
+      Map<String, Object> otherFields) {
     this.file = file;
     this.date = date;
     this.latitude = latitude;
@@ -244,12 +284,23 @@ public class MetadataRecord {
     this.dateUpdate = dateUpdate;
     this.parameters = parameters;
     this.parameterDataMode = parameterDataMode;
+    this.direction = direction;
+    this.cycleNumber = cycleNumber;
     this.action = action;
     this.fileType = fileType;
     this.fileStatus = fileStatus;
     this.dac = dac;
     this.floatId = floatId;
-    this.floatMerged = floatMerged;
+    this.actionTimestamp = actionTimestamp;
+    this.otherFields = Collections.unmodifiableMap(new HashMap<>(otherFields));
+  }
+
+  public String getCycleNumber() {
+    return cycleNumber;
+  }
+
+  public String getDirection() {
+    return direction;
   }
 
   public String getFile() {
@@ -328,8 +379,14 @@ public class MetadataRecord {
     return floatId;
   }
 
-  public boolean isFloatMerged() {
-    return floatMerged;
+  public Instant getActionTimestamp() {
+    return actionTimestamp;
+  }
+
+  @Deprecated
+  @JsonAnyGetter
+  public Map<String, Object> getOtherFields() {
+    return otherFields;
   }
 
   @Override
@@ -338,19 +395,21 @@ public class MetadataRecord {
       return false;
     }
     MetadataRecord that = (MetadataRecord) o;
-    return floatMerged == that.floatMerged && Objects.equals(file, that.file)
-        && Objects.equals(latitude, that.latitude) && Objects.equals(latitudeMin, that.latitudeMin) && Objects.equals(
-        latitudeMax, that.latitudeMax) && Objects.equals(longitude, that.longitude) && Objects.equals(longitudeMin,
-        that.longitudeMin) && Objects.equals(longitudeMax, that.longitudeMax) && ocean == that.ocean && Objects.equals(profilerType,
-        that.profilerType) && Objects.equals(institution, that.institution)
-        && Objects.equals(parameters, that.parameters) && Objects.equals(parameterDataMode, that.parameterDataMode)
-        && action == that.action && fileType == that.fileType && fileStatus == that.fileStatus && Objects.equals(dac, that.dac)
-        && Objects.equals(floatId, that.floatId);
+    return Objects.equals(file, that.file) && Objects.equals(date, that.date) && Objects.equals(latitude, that.latitude)
+        && Objects.equals(latitudeMin, that.latitudeMin) && Objects.equals(latitudeMax, that.latitudeMax)
+        && Objects.equals(longitude, that.longitude) && Objects.equals(longitudeMin, that.longitudeMin) && Objects.equals(
+        longitudeMax, that.longitudeMax) && ocean == that.ocean && Objects.equals(profilerType, that.profilerType)
+        && Objects.equals(institution, that.institution) && Objects.equals(dateUpdate, that.dateUpdate) && Objects.equals(
+        parameters, that.parameters) && Objects.equals(parameterDataMode, that.parameterDataMode) && Objects.equals(direction,
+        that.direction) && Objects.equals(cycleNumber, that.cycleNumber) && action == that.action && fileType == that.fileType
+        && fileStatus == that.fileStatus && Objects.equals(dac, that.dac) && Objects.equals(floatId, that.floatId)
+        && Objects.equals(actionTimestamp, that.actionTimestamp) && Objects.equals(otherFields, that.otherFields);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(file, latitude, latitudeMin, latitudeMax, longitude, longitudeMin, longitudeMax, ocean, profilerType, institution, parameters, parameterDataMode, action, fileType, fileStatus, dac, floatId, floatMerged);
+    return Objects.hash(file, date, latitude, latitudeMin, latitudeMax, longitude, longitudeMin, longitudeMax, ocean, profilerType, institution,
+        dateUpdate, parameters, parameterDataMode, direction, cycleNumber, action, fileType, fileStatus, dac, floatId, actionTimestamp, otherFields);
   }
 
   @Override
@@ -370,12 +429,15 @@ public class MetadataRecord {
         ", dateUpdate=" + dateUpdate +
         ", parameters='" + parameters + '\'' +
         ", parameterDataMode='" + parameterDataMode + '\'' +
+        ", direction='" + direction + '\'' +
+        ", cycleNumber='" + cycleNumber + '\'' +
         ", action=" + action +
         ", fileType=" + fileType +
         ", fileStatus=" + fileStatus +
         ", dac='" + dac + '\'' +
         ", floatId='" + floatId + '\'' +
-        ", floatMerged=" + floatMerged +
+        ", actionTimestamp=" + actionTimestamp +
+        ", otherFields=" + otherFields +
         '}';
   }
 

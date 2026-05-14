@@ -7,9 +7,14 @@ public interface MetadataStore {
 
   void updateIndex(MetadataRecord record);
   Optional<MetadataRecord> findByFile(String file);
-//  MetadataRecordPage findAllPage(IndexPageRequest pageRequest);
-  MetadataRecordPage findProfilePage(String floatId, String dac, IndexPageRequest pageRequest);
-  FloatMergeGroupPage findUpdatedOrMissingMergeFilesPage(IndexPageRequest pageRequest);
+  Optional<MetadataRecord> findByFile(String file, boolean includeRemoved);
   ProfilePage findUpdatedOrMissingSyntheticProfilesPage(IndexPageRequest pageRequest);
+  ProfilePage findUpdatedOrMissingMergeFilesPage(IndexPageRequest pageRequest);
+
+
+//  MetadataRecordPage findAllPage(IndexPageRequest pageRequest);
+//  MetadataRecordPage findProfilePage(String floatId, String dac, IndexPageRequest pageRequest);
+//  FloatMergeGroupPage findUpdatedOrMissingMergeFilesPage(IndexPageRequest pageRequest);
+
 
 }
