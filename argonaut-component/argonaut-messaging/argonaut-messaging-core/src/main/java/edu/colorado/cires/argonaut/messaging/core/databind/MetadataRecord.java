@@ -395,15 +395,25 @@ public class MetadataRecord {
       return false;
     }
     MetadataRecord that = (MetadataRecord) o;
-    return Objects.equals(file, that.file) && Objects.equals(date, that.date) && Objects.equals(latitude, that.latitude)
+    return Objects.equals(file, that.file) && instantsEquals(date, that.date) && Objects.equals(latitude, that.latitude)
         && Objects.equals(latitudeMin, that.latitudeMin) && Objects.equals(latitudeMax, that.latitudeMax)
         && Objects.equals(longitude, that.longitude) && Objects.equals(longitudeMin, that.longitudeMin) && Objects.equals(
         longitudeMax, that.longitudeMax) && ocean == that.ocean && Objects.equals(profilerType, that.profilerType)
-        && Objects.equals(institution, that.institution) && Objects.equals(dateUpdate, that.dateUpdate) && Objects.equals(
+        && Objects.equals(institution, that.institution) && instantsEquals(dateUpdate, that.dateUpdate) && Objects.equals(
         parameters, that.parameters) && Objects.equals(parameterDataMode, that.parameterDataMode) && Objects.equals(direction,
         that.direction) && Objects.equals(cycleNumber, that.cycleNumber) && action == that.action && fileType == that.fileType
         && fileStatus == that.fileStatus && Objects.equals(dac, that.dac) && Objects.equals(floatId, that.floatId)
-        && Objects.equals(actionTimestamp, that.actionTimestamp) && Objects.equals(otherFields, that.otherFields);
+        && instantsEquals(actionTimestamp, that.actionTimestamp) && Objects.equals(otherFields, that.otherFields);
+  }
+
+  private static boolean instantsEquals(Instant instant1, Instant instant2) {
+    if (instant1 == null && instant2 == null) {
+      return true;
+    }
+    if (instant1 == null || instant2 == null) {
+      return false;
+    }
+    return instant1.toEpochMilli() == instant2.toEpochMilli();
   }
 
   @Override
