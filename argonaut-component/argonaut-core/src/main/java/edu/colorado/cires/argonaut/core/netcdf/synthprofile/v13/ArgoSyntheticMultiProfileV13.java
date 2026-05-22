@@ -1,9 +1,10 @@
 package edu.colorado.cires.argonaut.core.netcdf.synthprofile.v13;
 
+import edu.colorado.cires.argonaut.core.util.CommonFileValues;
 import java.time.Instant;
 import java.util.List;
 
-public interface ArgoSyntheticMultiProfileV13 {
+public interface ArgoSyntheticMultiProfileV13 extends CommonFileValues {
 
   String getTitle();
 
@@ -26,18 +27,6 @@ public interface ArgoSyntheticMultiProfileV13 {
   String getFeatureType();
 
   String getCommentOnResolution();
-
-  String getDataType();
-
-  String getFormatVersion();
-
-  String getHandbookVersion();
-
-  Instant getReferenceDateTime();
-
-  Instant getDateCreation();
-
-  Instant getDateUpdate();
 
   int getNumberOfProfiles();
 

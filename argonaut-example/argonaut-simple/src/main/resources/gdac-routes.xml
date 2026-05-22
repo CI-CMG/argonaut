@@ -79,11 +79,11 @@
       <bean ref="syntheticProfileAggregator" method="trigger"/>
     </route>
 
-<!--    <route id="synthetic-profile">-->
-<!--      <from uri="seda:synthetic-profile"/>-->
-<!--      <bean ref="deserializationProcessor" method="deserialize(${body}, edu.colorado.cires.argonaut.messaging.core.databind.ProfileOperation"/>-->
-<!--      <bean ref="syntheticProfileProcessor" method="generateSyntheticProfile" />-->
-<!--    </route>-->
+    <route id="synthetic-profile">
+      <from uri="seda:synthetic-profile"/>
+      <bean ref="deserializationProcessor" method="deserialize(${body}, edu.colorado.cires.argonaut.messaging.core.databind.ProfileOperation"/>
+      <bean ref="syntheticProfileProcessor" method="generateSyntheticProfile" />
+    </route>
 
   </routeContext>
 

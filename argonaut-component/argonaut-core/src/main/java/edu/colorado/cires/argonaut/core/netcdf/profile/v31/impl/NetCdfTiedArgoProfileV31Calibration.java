@@ -1,7 +1,7 @@
 package edu.colorado.cires.argonaut.core.netcdf.profile.v31.impl;
 
 import edu.colorado.cires.argonaut.core.netcdf.profile.v31.ArgoProfileV31Calibration;
-import edu.colorado.cires.argonaut.core.util.NetCdfUtils;
+import edu.colorado.cires.argonaut.core.util.NetCdfReadUtils;
 import java.time.Instant;
 
 public class NetCdfTiedArgoProfileV31Calibration implements ArgoProfileV31Calibration {
@@ -16,13 +16,13 @@ public class NetCdfTiedArgoProfileV31Calibration implements ArgoProfileV31Calibr
   public NetCdfTiedArgoProfileV31Calibration(NetCdfTiedArgoProfileV31Parameter parent, int calibrationIndex) {
     this.parent = parent;
     this.calibrationIndex = calibrationIndex;
-    equation = NetCdfUtils.getLevel3String(parent.getNetcdf(), parent.getProfileIndex(), calibrationIndex, parent.getParamIndex(),
+    equation = NetCdfReadUtils.getLevel3String(parent.getNetcdf(), parent.getProfileIndex(), calibrationIndex, parent.getParameterIndex(),
         "SCIENTIFIC_CALIB_EQUATION");
-    coefficient = NetCdfUtils.getLevel3String(parent.getNetcdf(), parent.getProfileIndex(), calibrationIndex, parent.getParamIndex(),
+    coefficient = NetCdfReadUtils.getLevel3String(parent.getNetcdf(), parent.getProfileIndex(), calibrationIndex, parent.getParameterIndex(),
         "SCIENTIFIC_CALIB_COEFFICIENT");
-    comment = NetCdfUtils.getLevel3String(parent.getNetcdf(), parent.getProfileIndex(), calibrationIndex, parent.getParamIndex(),
+    comment = NetCdfReadUtils.getLevel3String(parent.getNetcdf(), parent.getProfileIndex(), calibrationIndex, parent.getParameterIndex(),
         "SCIENTIFIC_CALIB_COMMENT");
-    date = NetCdfUtils.getLevel3Instant(parent.getNetcdf(), parent.getProfileIndex(), calibrationIndex, parent.getParamIndex(),
+    date = NetCdfReadUtils.getLevel3Instant(parent.getNetcdf(), parent.getProfileIndex(), calibrationIndex, parent.getParameterIndex(),
         "SCIENTIFIC_CALIB_DATE");
   }
 

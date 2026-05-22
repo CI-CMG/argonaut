@@ -1,7 +1,7 @@
 package edu.colorado.cires.argonaut.core.netcdf.synthprofile.v13.impl;
 
 import edu.colorado.cires.argonaut.core.netcdf.synthprofile.v13.ArgoSyntheticProfileV13Level;
-import edu.colorado.cires.argonaut.core.util.NetCdfUtils;
+import edu.colorado.cires.argonaut.core.util.NetCdfReadUtils;
 import ucar.nc2.NetcdfFile;
 
 public class NetCdfTiedArgoSyntheticProfileV13Level implements ArgoSyntheticProfileV13Level {
@@ -22,12 +22,12 @@ public class NetCdfTiedArgoSyntheticProfileV13Level implements ArgoSyntheticProf
     this.levelIndex = levelIndex;
     this.parameterName = parent.getParameterName();
     netcdf = parent.getNetcdf();
-    value = NetCdfUtils.getLevel2Float(netcdf, parent.getProfileIndex(), levelIndex, parameterName);
-    adjustedValue = NetCdfUtils.getLevel2Float(netcdf, parent.getProfileIndex(), levelIndex, parameterName + "_ADJUSTED");
-    adjustedQc = NetCdfUtils.getLevel2String(netcdf, parent.getProfileIndex(), levelIndex, parameterName + "_ADJUSTED_QC");
-    adjustedErrorValue = NetCdfUtils.getLevel2Float(netcdf, parent.getProfileIndex(), levelIndex, parameterName + "_ADJUSTED_ERROR");
-    qc = NetCdfUtils.getLevel2String(netcdf, parent.getProfileIndex(), levelIndex, parameterName + "_QC");
-    dPres = NetCdfUtils.getLevel2Float(netcdf, parent.getProfileIndex(), levelIndex, parameterName + "_dPRES");
+    value = NetCdfReadUtils.getLevel2Float(netcdf, parent.getProfileIndex(), levelIndex, parameterName);
+    adjustedValue = NetCdfReadUtils.getLevel2Float(netcdf, parent.getProfileIndex(), levelIndex, parameterName + "_ADJUSTED");
+    adjustedQc = NetCdfReadUtils.getLevel2String(netcdf, parent.getProfileIndex(), levelIndex, parameterName + "_ADJUSTED_QC");
+    adjustedErrorValue = NetCdfReadUtils.getLevel2Float(netcdf, parent.getProfileIndex(), levelIndex, parameterName + "_ADJUSTED_ERROR");
+    qc = NetCdfReadUtils.getLevel2String(netcdf, parent.getProfileIndex(), levelIndex, parameterName + "_QC");
+    dPres = NetCdfReadUtils.getLevel2Float(netcdf, parent.getProfileIndex(), levelIndex, parameterName + "_dPRES");
   }
 
 
@@ -62,7 +62,7 @@ public class NetCdfTiedArgoSyntheticProfileV13Level implements ArgoSyntheticProf
   }
 
   @Override
-  public Float getOriginalValue() {
+  public Float getValue() {
     return value;
   }
 

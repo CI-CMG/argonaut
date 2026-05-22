@@ -3,7 +3,7 @@ package edu.colorado.cires.argonaut.core.netcdf.synthprofile.v13.impl;
 import edu.colorado.cires.argonaut.core.netcdf.synthprofile.v13.ArgoSyntheticProfileV13Calibration;
 import edu.colorado.cires.argonaut.core.netcdf.synthprofile.v13.ArgoSyntheticProfileV13Level;
 import edu.colorado.cires.argonaut.core.netcdf.synthprofile.v13.ArgoSyntheticProfileV13Parameter;
-import edu.colorado.cires.argonaut.core.util.NetCdfUtils;
+import edu.colorado.cires.argonaut.core.util.NetCdfReadUtils;
 import java.util.ArrayList;
 import java.util.List;
 import ucar.nc2.NetcdfFile;
@@ -26,12 +26,12 @@ public class NetCdfTiedArgoSyntheticProfileV13Parameter implements ArgoSynthetic
     this.parent = parent;
     netcdf = parent.getNetcdf();
     this.parameterName = parameterName;
-    dataMode = NetCdfUtils.getLevel2String(netcdf, parent.getProfileIndex(), paramIndex, "PARAMETER_DATA_MODE");
+    dataMode = NetCdfReadUtils.getLevel2String(netcdf, parent.getProfileIndex(), paramIndex, "PARAMETER_DATA_MODE");
     profileIndex = parent.getProfileIndex();
-    numLevels = NetCdfUtils.getDimensionSize(netcdf, "N_LEVELS");
-    numCalibrations = NetCdfUtils.getDimensionSize(netcdf, "N_CALIB");
+    numLevels = NetCdfReadUtils.getDimensionSize(netcdf, "N_LEVELS");
+    numCalibrations = NetCdfReadUtils.getDimensionSize(netcdf, "N_CALIB");
     this.paramIndex = paramIndex;
-    qc = NetCdfUtils.getLevel1String(netcdf, parent.getProfileIndex(), "PROFILE_" + parameterName + "_QC");
+    qc = NetCdfReadUtils.getLevel1String(netcdf, parent.getProfileIndex(), "PROFILE_" + parameterName + "_QC");
     levels = new ArrayList<>(numLevels);
     for (int levelIndex = 0; levelIndex < numLevels; levelIndex++) {
       levels.add(new NetCdfTiedArgoSyntheticProfileV13Level(this, levelIndex));

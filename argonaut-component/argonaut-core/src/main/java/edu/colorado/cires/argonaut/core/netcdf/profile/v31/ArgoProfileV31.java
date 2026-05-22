@@ -1,9 +1,11 @@
 package edu.colorado.cires.argonaut.core.netcdf.profile.v31;
 
+import edu.colorado.cires.argonaut.core.util.CommonFileValues;
+import edu.colorado.cires.argonaut.core.util.CommonProfileValues;
 import java.time.Instant;
 import java.util.List;
 
-public interface ArgoProfileV31 {
+public interface ArgoProfileV31 extends CommonProfileValues, CommonFileValues {
 
   // https://archimer.ifremer.fr/doc/00187/29825/120885.pdf
 

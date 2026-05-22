@@ -21,17 +21,12 @@ public class DefaultSyntheticProfileProcessor implements SyntheticProfileProcess
 
   private FileStore outputFileStore;
   private Path localTempDir;
-  private MetadataStore metadataStore;
   private MessageSender messageSender;
   private String updateIndexQueue;
   private JsonMapper jsonMapper;
   private SyntheticProfileMerger syntheticProfileMerger;
   private GeoFilter geoFilter;
 
-  //TODO remove me
-  public MetadataStore getMetadataStore() {
-    return metadataStore;
-  }
 
   public void setGeoFilter(GeoFilter geoFilter) {
     this.geoFilter = geoFilter;
@@ -60,10 +55,6 @@ public class DefaultSyntheticProfileProcessor implements SyntheticProfileProcess
     } catch (IOException e) {
       throw new RuntimeException("Unable to create temp directory: " + localTempDir, e);
     }
-  }
-
-  public void setMetadataStore(MetadataStore metadataStore) {
-    this.metadataStore = metadataStore;
   }
 
   public void setMessageSender(MessageSender messageSender) {

@@ -1,9 +1,8 @@
 package edu.colorado.cires.argonaut.core.netcdf.synthprofile.v13.impl;
 
-import edu.colorado.cires.argonaut.core.netcdf.profile.v31.impl.NetCdfTiedArgoProfileV31Parameter;
 import edu.colorado.cires.argonaut.core.netcdf.synthprofile.v13.ArgoSyntheticProfileV13;
 import edu.colorado.cires.argonaut.core.netcdf.synthprofile.v13.ArgoSyntheticProfileV13Parameter;
-import edu.colorado.cires.argonaut.core.util.NetCdfUtils;
+import edu.colorado.cires.argonaut.core.util.NetCdfReadUtils;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -43,28 +42,28 @@ public class NetCdfTiedArgoSyntheticProfileV13 implements ArgoSyntheticProfileV1
     this.netcdf = netcdf;
     this.parent = parent;
     this.profileIndex = profileIndex;
-    configMissionNumber = NetCdfUtils.getLevel1Integer(netcdf, profileIndex, "CONFIG_MISSION_NUMBER");
-    dateCreation = NetCdfUtils.getInstant(netcdf, "DATE_CREATION");
-    dateUpdate = NetCdfUtils.getInstant(netcdf, "DATE_UPDATE");
-    referenceDateTime = NetCdfUtils.getInstant(netcdf, "REFERENCE_DATE_TIME");
-    platformNumber = NetCdfUtils.getLevel1String(netcdf, profileIndex, "PLATFORM_NUMBER");
-    projectName = NetCdfUtils.getLevel1String(netcdf, profileIndex, "PROJECT_NAME");
-    principalInvestigatorName = NetCdfUtils.getLevel1String(netcdf, profileIndex, "PI_NAME");
-    stationParameters = NetCdfUtils.getLevel1ListOfString(netcdf, profileIndex, "STATION_PARAMETERS");
-    cycleNumber = NetCdfUtils.getLevel1Integer(netcdf, profileIndex, "CYCLE_NUMBER");
-    direction = NetCdfUtils.getLevel1String(netcdf, profileIndex, "DIRECTION");
-    dataCenter = NetCdfUtils.getLevel1String(netcdf, profileIndex, "DATA_CENTRE");
-    platformType = NetCdfUtils.getLevel1String(netcdf, profileIndex, "PLATFORM_TYPE");
-    floatSerialNumber = NetCdfUtils.getLevel1String(netcdf, profileIndex, "FLOAT_SERIAL_NO");
-    firmwareVersion = NetCdfUtils.getLevel1String(netcdf, profileIndex, "FIRMWARE_VERSION");
-    wmoInstrumentType = NetCdfUtils.getLevel1String(netcdf, profileIndex, "WMO_INST_TYPE");
+    configMissionNumber = NetCdfReadUtils.getLevel1Integer(netcdf, profileIndex, "CONFIG_MISSION_NUMBER");
+    dateCreation = NetCdfReadUtils.getInstant(netcdf, "DATE_CREATION");
+    dateUpdate = NetCdfReadUtils.getInstant(netcdf, "DATE_UPDATE");
+    referenceDateTime = NetCdfReadUtils.getInstant(netcdf, "REFERENCE_DATE_TIME");
+    platformNumber = NetCdfReadUtils.getLevel1String(netcdf, profileIndex, "PLATFORM_NUMBER");
+    projectName = NetCdfReadUtils.getLevel1String(netcdf, profileIndex, "PROJECT_NAME");
+    principalInvestigatorName = NetCdfReadUtils.getLevel1String(netcdf, profileIndex, "PI_NAME");
+    stationParameters = NetCdfReadUtils.getLevel1ListOfString(netcdf, profileIndex, "STATION_PARAMETERS");
+    cycleNumber = NetCdfReadUtils.getLevel1Integer(netcdf, profileIndex, "CYCLE_NUMBER");
+    direction = NetCdfReadUtils.getLevel1String(netcdf, profileIndex, "DIRECTION");
+    dataCenter = NetCdfReadUtils.getLevel1String(netcdf, profileIndex, "DATA_CENTRE");
+    platformType = NetCdfReadUtils.getLevel1String(netcdf, profileIndex, "PLATFORM_TYPE");
+    floatSerialNumber = NetCdfReadUtils.getLevel1String(netcdf, profileIndex, "FLOAT_SERIAL_NO");
+    firmwareVersion = NetCdfReadUtils.getLevel1String(netcdf, profileIndex, "FIRMWARE_VERSION");
+    wmoInstrumentType = NetCdfReadUtils.getLevel1String(netcdf, profileIndex, "WMO_INST_TYPE");
     julianDate = calculateJulianDate(netcdf, profileIndex, parent.getReferenceDateTime(), "JULD");
-    julianDateQc = NetCdfUtils.getLevel1String(netcdf, profileIndex, "JULD_QC");
+    julianDateQc = NetCdfReadUtils.getLevel1String(netcdf, profileIndex, "JULD_QC");
     julianDateOfLocation = calculateJulianDate(netcdf, profileIndex, parent.getReferenceDateTime(), "JULD_LOCATION");
-    latitude = NetCdfUtils.getLevel1Double(netcdf, profileIndex, "LATITUDE");
-    longitude = NetCdfUtils.getLevel1Double(netcdf, profileIndex, "LONGITUDE");
-    positionQc = NetCdfUtils.getLevel1String(netcdf, profileIndex, "POSITION_QC");
-    positioningSystem = NetCdfUtils.getLevel1String(netcdf, profileIndex, "POSITIONING_SYSTEM");
+    latitude = NetCdfReadUtils.getLevel1Double(netcdf, profileIndex, "LATITUDE");
+    longitude = NetCdfReadUtils.getLevel1Double(netcdf, profileIndex, "LONGITUDE");
+    positionQc = NetCdfReadUtils.getLevel1String(netcdf, profileIndex, "POSITION_QC");
+    positioningSystem = NetCdfReadUtils.getLevel1String(netcdf, profileIndex, "POSITIONING_SYSTEM");
     parameters = new ArrayList<>(stationParameters.size());
     for (int index = 0; index < stationParameters.size(); index++) {
       String parameterName = stationParameters.get(index);
@@ -73,11 +72,11 @@ public class NetCdfTiedArgoSyntheticProfileV13 implements ArgoSyntheticProfileV1
   }
 
   private static Instant calculateJulianDate(NetcdfFile netcdf, int profileIndex, Instant referenceDateTime, String variable) {
-    Double daysSinceRef = NetCdfUtils.getLevel1Double(netcdf, profileIndex, variable);
+    Double daysSinceRef = NetCdfReadUtils.getLevel1Double(netcdf, profileIndex, variable);
     if (daysSinceRef == null) {
       return null;
     }
-    return NetCdfUtils.calculateJulianDate(referenceDateTime, daysSinceRef);
+    return NetCdfReadUtils.calculateJulianDate(referenceDateTime, daysSinceRef);
   }
 
   public NetcdfFile getNetcdf() {

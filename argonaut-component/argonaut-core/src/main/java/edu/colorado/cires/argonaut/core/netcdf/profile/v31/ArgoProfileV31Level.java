@@ -1,6 +1,8 @@
 package edu.colorado.cires.argonaut.core.netcdf.profile.v31;
 
-public interface ArgoProfileV31Level {
+import edu.colorado.cires.argonaut.core.util.CommonLevelValues;
+
+public interface ArgoProfileV31Level extends CommonLevelValues {
 
   int getProfileIndex();
 

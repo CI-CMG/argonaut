@@ -12,7 +12,7 @@ public class ArgoSyntheticProfileV13LevelBean  implements ArgoSyntheticProfileV1
   Float adjustedError;
 
   @Override
-  public Float getOriginalValue() {
+  public Float getValue() {
     return originalValue;
   }
 

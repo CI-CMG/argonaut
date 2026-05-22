@@ -1,8 +1,11 @@
 package edu.colorado.cires.argonaut.core.netcdf.profile.v31;
 
+import edu.colorado.cires.argonaut.core.util.CommonParameterValues;
 import java.util.List;
 
-public interface ArgoProfileV31Parameter {
+public interface ArgoProfileV31Parameter extends CommonParameterValues {
+
+  int getParameterIndex();
 
   String getParameterName();
 

@@ -4,6 +4,8 @@ import java.time.Instant;
 
 public interface ArgoProfileV31History {
 
+  int getHistoryIndex();
+
   String getInstitution();
 
   String getStep();

@@ -2,7 +2,7 @@ package edu.colorado.cires.argonaut.core.netcdf.synthprofile.v13.impl;
 
 import edu.colorado.cires.argonaut.core.netcdf.synthprofile.v13.ArgoSyntheticMultiProfileV13;
 import edu.colorado.cires.argonaut.core.netcdf.synthprofile.v13.ArgoSyntheticProfileV13;
-import edu.colorado.cires.argonaut.core.util.NetCdfUtils;
+import edu.colorado.cires.argonaut.core.util.NetCdfReadUtils;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -33,25 +33,25 @@ public class NetCdfTiedArgoSyntheticMultiProfileV13 implements ArgoSyntheticMult
 
   public NetCdfTiedArgoSyntheticMultiProfileV13(NetcdfFile netcdf) {
     this.netcdf = netcdf;
-    title = NetCdfUtils.getGlobalAttributeString(netcdf, "title");
-    institution = NetCdfUtils.getGlobalAttributeString(netcdf, "institution");
-    source = NetCdfUtils.getGlobalAttributeString(netcdf, "source");
-    history = NetCdfUtils.getGlobalAttributeString(netcdf, "history");
-    references = NetCdfUtils.getGlobalAttributeString(netcdf, "references");
-    id = NetCdfUtils.getGlobalAttributeString(netcdf, "id");
-    comment = NetCdfUtils.getGlobalAttributeString(netcdf, "comment");
-    userManualVersion = NetCdfUtils.getGlobalAttributeString(netcdf, "user_manual_version");
-    conventions = NetCdfUtils.getGlobalAttributeString(netcdf, "Conventions");
-    featureType = NetCdfUtils.getGlobalAttributeString(netcdf, "featureType");
-    commentOnResolution = NetCdfUtils.getGlobalAttributeString(netcdf, "comment_on_resolution");
-    numberOfProfiles = NetCdfUtils.getDimensionSize(netcdf, "N_PROF");
-    dataType = NetCdfUtils.getString(netcdf, "DATA_TYPE");
-    formatVersion = NetCdfUtils.getString(netcdf, "FORMAT_VERSION");
-    handbookVersion = NetCdfUtils.getString(netcdf, "HANDBOOK_VERSION");
-    referenceDateTime = NetCdfUtils.getInstant(netcdf, "REFERENCE_DATE_TIME");
-    dateCreation = NetCdfUtils.getInstant(netcdf, "DATE_CREATION");
-    dateUpdate = NetCdfUtils.getInstant(netcdf, "DATE_UPDATE");
-    softwareVersion = NetCdfUtils.getGlobalAttributeString(netcdf, "software_version");
+    title = NetCdfReadUtils.getGlobalAttributeString(netcdf, "title");
+    institution = NetCdfReadUtils.getGlobalAttributeString(netcdf, "institution");
+    source = NetCdfReadUtils.getGlobalAttributeString(netcdf, "source");
+    history = NetCdfReadUtils.getGlobalAttributeString(netcdf, "history");
+    references = NetCdfReadUtils.getGlobalAttributeString(netcdf, "references");
+    id = NetCdfReadUtils.getGlobalAttributeString(netcdf, "id");
+    comment = NetCdfReadUtils.getGlobalAttributeString(netcdf, "comment");
+    userManualVersion = NetCdfReadUtils.getGlobalAttributeString(netcdf, "user_manual_version");
+    conventions = NetCdfReadUtils.getGlobalAttributeString(netcdf, "Conventions");
+    featureType = NetCdfReadUtils.getGlobalAttributeString(netcdf, "featureType");
+    commentOnResolution = NetCdfReadUtils.getGlobalAttributeString(netcdf, "comment_on_resolution");
+    numberOfProfiles = NetCdfReadUtils.getDimensionSize(netcdf, "N_PROF");
+    dataType = NetCdfReadUtils.getString(netcdf, "DATA_TYPE");
+    formatVersion = NetCdfReadUtils.getString(netcdf, "FORMAT_VERSION");
+    handbookVersion = NetCdfReadUtils.getString(netcdf, "HANDBOOK_VERSION");
+    referenceDateTime = NetCdfReadUtils.getInstant(netcdf, "REFERENCE_DATE_TIME");
+    dateCreation = NetCdfReadUtils.getInstant(netcdf, "DATE_CREATION");
+    dateUpdate = NetCdfReadUtils.getInstant(netcdf, "DATE_UPDATE");
+    softwareVersion = NetCdfReadUtils.getGlobalAttributeString(netcdf, "software_version");
 
   }
 

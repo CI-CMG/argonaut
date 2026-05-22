@@ -175,9 +175,9 @@ public class DefaultSyntheticProfileMergerTest {
   }
 
   private static void assertParametersEqual(ArgoSyntheticProfileV13Parameter expectedParam, ArgoSyntheticProfileV13Parameter actualParam) {
-    float[] expected = fromList(expectedParam.getLevels().stream().map(ArgoSyntheticProfileV13Level::getOriginalValue).toList(),
+    float[] expected = fromList(expectedParam.getLevels().stream().map(ArgoSyntheticProfileV13Level::getValue).toList(),
         Float.MAX_VALUE - 1f);
-    float[] actual = fromList(actualParam.getLevels().stream().map(ArgoSyntheticProfileV13Level::getOriginalValue).toList(), Float.MAX_VALUE - 1f);
+    float[] actual = fromList(actualParam.getLevels().stream().map(ArgoSyntheticProfileV13Level::getValue).toList(), Float.MAX_VALUE - 1f);
     assertArrayEquals(expected, actual, 0.0001f);
   }
 

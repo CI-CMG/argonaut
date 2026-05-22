@@ -1,14 +1,9 @@
 package edu.colorado.cires.argonaut.core.netcdf.synthprofile.v13;
 
-public interface ArgoSyntheticProfileV13Level {
+import edu.colorado.cires.argonaut.core.util.CommonLevelValues;
 
-  Float getOriginalValue();
+public interface ArgoSyntheticProfileV13Level extends CommonLevelValues {
+
   Float getPressureDisplacement();
-  String getQc();
-  Float getAdjustedValue();
-  String getAdjustedQc();
-  Float getAdjustedErrorValue();
-
-
 
 }

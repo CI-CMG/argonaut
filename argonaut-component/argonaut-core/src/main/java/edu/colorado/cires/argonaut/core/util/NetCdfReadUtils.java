@@ -17,12 +17,12 @@ import ucar.nc2.Dimension;
 import ucar.nc2.NetcdfFile;
 import ucar.nc2.Variable;
 
-public final class NetCdfUtils {
+public final class NetCdfReadUtils {
 
   private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
   private static final int MS_DAY = 1000 * 60 * 60 * 24;
 
-  private NetCdfUtils() {
+  private NetCdfReadUtils() {
 
   }
 

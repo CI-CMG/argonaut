@@ -2,7 +2,7 @@ package edu.colorado.cires.argonaut.core.netcdf.profile.v31.impl;
 
 import edu.colorado.cires.argonaut.core.netcdf.profile.v31.ArgoProfileV31History;
 import edu.colorado.cires.argonaut.core.netcdf.profile.v31.ArgoProfileV31HistorySoftware;
-import edu.colorado.cires.argonaut.core.util.NetCdfUtils;
+import edu.colorado.cires.argonaut.core.util.NetCdfReadUtils;
 import java.time.Instant;
 import ucar.nc2.NetcdfFile;
 
@@ -20,24 +20,31 @@ public class NetCdfTiedArgoProfileV31History implements ArgoProfileV31History {
   private final Float stopPressure;
   private final Float previousValue;
   private final String qcTest;
+  private final int historyIndex;
 
   public NetCdfTiedArgoProfileV31History(NetCdfTiedArgoProfileV31 parent, int historyIndex) {
     this.parent = parent;
     netcdf = parent.getNetcdf();
-    institution = NetCdfUtils.getLevel2String(netcdf, historyIndex, parent.getProfileIndex(), "HISTORY_INSTITUTION");
-    step = NetCdfUtils.getLevel2String(netcdf, historyIndex, parent.getProfileIndex(), "HISTORY_STEP");
+    this.historyIndex = historyIndex;
+    institution = NetCdfReadUtils.getLevel2String(netcdf, historyIndex, parent.getProfileIndex(), "HISTORY_INSTITUTION");
+    step = NetCdfReadUtils.getLevel2String(netcdf, historyIndex, parent.getProfileIndex(), "HISTORY_STEP");
     software = new NetCdfTiedArgoProfileV31HistorySoftware(
-        NetCdfUtils.getLevel2String(netcdf, historyIndex, parent.getProfileIndex(), "HISTORY_SOFTWARE"),
-        NetCdfUtils.getLevel2String(netcdf, historyIndex, parent.getProfileIndex(), "HISTORY_SOFTWARE_RELEASE"),
-        NetCdfUtils.getLevel2String(netcdf, historyIndex, parent.getProfileIndex(), "HISTORY_REFERENCE")
+        NetCdfReadUtils.getLevel2String(netcdf, historyIndex, parent.getProfileIndex(), "HISTORY_SOFTWARE"),
+        NetCdfReadUtils.getLevel2String(netcdf, historyIndex, parent.getProfileIndex(), "HISTORY_SOFTWARE_RELEASE"),
+        NetCdfReadUtils.getLevel2String(netcdf, historyIndex, parent.getProfileIndex(), "HISTORY_REFERENCE")
     );
-    date = NetCdfUtils.getLevel2Instant(netcdf, historyIndex, parent.getProfileIndex(), "HISTORY_DATE");
-    action = NetCdfUtils.getLevel2String(netcdf, historyIndex, parent.getProfileIndex(), "HISTORY_ACTION");
-    parameter = NetCdfUtils.getLevel2String(netcdf, historyIndex, parent.getProfileIndex(), "HISTORY_PARAMETER");
-    startPressure = NetCdfUtils.getLevel2Float(netcdf, historyIndex, parent.getProfileIndex(), "HISTORY_START_PRES");
-    stopPressure = NetCdfUtils.getLevel2Float(netcdf, historyIndex, parent.getProfileIndex(), "HISTORY_STOP_PRES");
-    previousValue = NetCdfUtils.getLevel2Float(netcdf, historyIndex, parent.getProfileIndex(), "HISTORY_PREVIOUS_VALUE");
-    qcTest = NetCdfUtils.getLevel2String(netcdf, historyIndex, parent.getProfileIndex(), "HISTORY_QCTEST");
+    date = NetCdfReadUtils.getLevel2Instant(netcdf, historyIndex, parent.getProfileIndex(), "HISTORY_DATE");
+    action = NetCdfReadUtils.getLevel2String(netcdf, historyIndex, parent.getProfileIndex(), "HISTORY_ACTION");
+    parameter = NetCdfReadUtils.getLevel2String(netcdf, historyIndex, parent.getProfileIndex(), "HISTORY_PARAMETER");
+    startPressure = NetCdfReadUtils.getLevel2Float(netcdf, historyIndex, parent.getProfileIndex(), "HISTORY_START_PRES");
+    stopPressure = NetCdfReadUtils.getLevel2Float(netcdf, historyIndex, parent.getProfileIndex(), "HISTORY_STOP_PRES");
+    previousValue = NetCdfReadUtils.getLevel2Float(netcdf, historyIndex, parent.getProfileIndex(), "HISTORY_PREVIOUS_VALUE");
+    qcTest = NetCdfReadUtils.getLevel2String(netcdf, historyIndex, parent.getProfileIndex(), "HISTORY_QCTEST");
+  }
+
+  @Override
+  public int getHistoryIndex() {
+    return historyIndex;
   }
 
   @Override

@@ -1,18 +1,10 @@
 package edu.colorado.cires.argonaut.core.netcdf.synthprofile.v13;
 
-import java.time.Instant;
+import edu.colorado.cires.argonaut.core.util.CommonCalibrationValues;
 
-public interface ArgoSyntheticProfileV13Calibration {
+public interface ArgoSyntheticProfileV13Calibration extends CommonCalibrationValues {
 
   String getParameterName();
-
-  String getEquation();
-
-  String getCoefficient();
-
-  String getComment();
-
-  Instant getDate();
 
   int getProfileIndex();
 
