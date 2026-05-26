@@ -28,12 +28,14 @@ public class FloatEntity {
   @JoinColumn(name = "dac", nullable = false)
   private DacEntity dac;
 
-  // No accessors on purpose. For JPQL queries.
   @OneToMany(mappedBy = "floatId", cascade = {CascadeType.DETACH, CascadeType.REFRESH})
   private List<CycleEntity> cycles = new ArrayList<>();
 
   @OneToOne(mappedBy = "floatId")
   private MetadataFileEntity metadata;
+
+  @OneToOne(mappedBy = "floatId")
+  private ProfileMergeFileEntity profileMerge;
 
   public String getId() {
     return id;
@@ -65,5 +67,17 @@ public class FloatEntity {
 
   public void setMetadata(MetadataFileEntity metadata) {
     this.metadata = metadata;
+  }
+
+  public List<CycleEntity> getCycles() {
+    return cycles;
+  }
+
+  public ProfileMergeFileEntity getProfileMerge() {
+    return profileMerge;
+  }
+
+  public void setProfileMerge(ProfileMergeFileEntity profileMerge) {
+    this.profileMerge = profileMerge;
   }
 }

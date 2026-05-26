@@ -10,6 +10,7 @@ import edu.colorado.cires.argonaut.metadata.core.DefaultProfilePage;
 import edu.colorado.cires.argonaut.metadata.core.IndexPageRequest;
 import edu.colorado.cires.argonaut.metadata.core.ProfilePage;
 import edu.colorado.cires.argonaut.metadata.jpa.entity.CycleEntity;
+import edu.colorado.cires.argonaut.metadata.jpa.entity.FloatEntity;
 import edu.colorado.cires.argonaut.metadata.jpa.entity.MetadataFileEntity;
 import edu.colorado.cires.argonaut.metadata.jpa.entity.ProfileFileEntity;
 import jakarta.persistence.EntityManager;
@@ -108,6 +109,50 @@ class Finder {
     return Optional.empty();
   }
 
+  // TODO update to support deleted files
+  ProfilePage findUpdatedOrMissingMergeFilesPage(IndexPageRequest pageRequest) {
+    try (EntityManager em = entityManagerFactory.createEntityManager()) {
+      long count = em.createQuery(
+          """
+                 SELECT COUNT(DISTINCT profile.cycle.floatId.id) FROM ProfileFileEntity profile
+                 WHERE profile.fileStatus = 'ACTIVE' AND
+                       profile.fileType = 'CORE_ARGO_PROFILE' AND
+                       profile.multiFloatMergeTime IS NULL
+              """, Long.class).getSingleResult();
+      List<String> floatIds = em.createQuery(
+              """
+                     SELECT DISTINCT profile.cycle.floatId.id fid FROM ProfileFileEntity profile
+                         WHERE profile.fileStatus = 'ACTIVE' AND 
+                             profile.fileType = 'CORE_ARGO_PROFILE' AND
+                             profile.multiFloatMergeTime IS NULL
+                     order by fid
+                  """, String.class)
+          .setMaxResults(pageRequest.getPageSize())
+          .setFirstResult((pageRequest.getPageNumber() - 1) * pageRequest.getPageSize())
+          .getResultList();
+
+      List<FloatEntity> pageResults = new ArrayList<>(floatIds.size());
+      for (String floatId : floatIds) {
+        pageResults.add(em.find(FloatEntity.class, floatId));
+      }
+
+      return DefaultProfilePage.builder()
+          .withTotalRecords(count)
+          .withIndexPageRequest(DefaultIndexPageRequest.builder(pageRequest).build())
+          .withPage(pageResults.stream().map(floatEntity -> ProfileOperation.builder()
+              .withDac(floatEntity.getDac().getDac())
+              .withFloatId(floatEntity.getFloatId())
+              .withFiles(floatEntity.getCycles().stream().flatMap(cycle -> cycle.getProfiles().stream())
+                  .filter(profile -> FileType.CORE_ARGO_PROFILE.toString().equals(profile.getFileType()))
+                  .filter(profile -> FileStatus.ACTIVE.toString().equals(profile.getFileStatus()))
+                  .map(ProfileFileEntity::getFile).sorted().toList())
+              .build()
+          ).toList()).build();
+    }
+  }
+
+  // TODO update to support deleted files
+  // TODO 'REMOVED' files are included in the list.  Test if this is used properly in the merge processor.
   ProfilePage findUpdatedOrMissingSyntheticProfilesPage(IndexPageRequest pageRequest) {
     try (EntityManager em = entityManagerFactory.createEntityManager()) {
       long count = em.createQuery(

@@ -12,12 +12,14 @@ public class JpaMetadataStore implements MetadataStore {
   private Updater updater;
   private Remover remover;
   private SyntheticMerger syntheticMerger;
+  private MultiFloatMerger multiFloatMerger;
   private Finder finder;
 
   public void setEntityManagerFactory(EntityManagerFactory entityManagerFactory) {
     updater = new Updater(entityManagerFactory);
     remover = new Remover(entityManagerFactory);
     syntheticMerger = new SyntheticMerger(entityManagerFactory);
+    multiFloatMerger = new MultiFloatMerger(entityManagerFactory);
     finder = new Finder(entityManagerFactory);
   }
 
@@ -34,7 +36,8 @@ public class JpaMetadataStore implements MetadataStore {
         syntheticMerger.updateSynthMerge(record);
         break;
       case FLOAT_MERGE:
-        throw new UnsupportedOperationException("Float merge not yet implemented");
+        multiFloatMerger.updateMultiFloatMerge(record);
+        break;
       case NONE:
       default:
         break;
@@ -52,14 +55,10 @@ public class JpaMetadataStore implements MetadataStore {
     return finder.findByFile(file, includeRemoved);
   }
 
-//  @Override
-//  public MetadataRecordPage findProfilePage(String floatId, String dac, IndexPageRequest pageRequest) {
-//    throw new UnsupportedOperationException("Not supported yet.");
-//  }
-//
+
   @Override
   public ProfilePage findUpdatedOrMissingMergeFilesPage(IndexPageRequest pageRequest) {
-    throw new UnsupportedOperationException("Not supported yet.");
+    return finder.findUpdatedOrMissingMergeFilesPage(pageRequest);
   }
 
   @Override

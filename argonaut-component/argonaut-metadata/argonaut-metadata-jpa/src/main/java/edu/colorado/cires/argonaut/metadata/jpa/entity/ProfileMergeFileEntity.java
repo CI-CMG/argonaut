@@ -3,27 +3,24 @@ package edu.colorado.cires.argonaut.metadata.jpa.entity;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.time.ZonedDateTime;
 
 @Entity
-@Table(name = "profile")
-public class ProfileFileEntity {
+@Table(name = "profile_merge")
+public class ProfileMergeFileEntity {
 
   @Id
   @Column(name = "file", nullable = false, length = 100)
   private String file;
 
-  @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.DETACH, CascadeType.REFRESH})
-  @JoinColumn(name = "cycle", nullable = false)
-  private CycleEntity cycle;
+  @OneToOne(cascade = {CascadeType.DETACH, CascadeType.REFRESH})
+  @JoinColumn(name = "float", nullable = false)
+  private FloatEntity floatId;
 
-  @Column(name = "file_type", length = 50, nullable = false)
-  private String fileType;
   @Column(name = "file_status", length = 50, nullable = false)
   private String fileStatus;
   @Column(name = "date")
@@ -52,10 +49,6 @@ public class ProfileFileEntity {
   private String parameters;
   @Column(name = "parameter_data_mode", length = 100)
   private String parameterDataMode;
-  @Column(name = "synthetic_merge_time")
-  private ZonedDateTime syntheticMergeTime;
-  @Column(name = "multi_float_merge_time")
-  private ZonedDateTime multiFloatMergeTime;
   @Column(name = "last_updated_time", nullable = false)
   private ZonedDateTime lastUpdatedTime;
 
@@ -68,20 +61,12 @@ public class ProfileFileEntity {
     this.file = file;
   }
 
-  public CycleEntity getCycle() {
-    return cycle;
+  public FloatEntity getFloatId() {
+    return floatId;
   }
 
-  public void setCycle(CycleEntity cycle) {
-    this.cycle = cycle;
-  }
-
-  public String getFileType() {
-    return fileType;
-  }
-
-  public void setFileType(String fileType) {
-    this.fileType = fileType;
+  public void setFloatId(FloatEntity floatId) {
+    this.floatId = floatId;
   }
 
   public String getFileStatus() {
@@ -196,27 +181,11 @@ public class ProfileFileEntity {
     this.parameterDataMode = parameterDataMode;
   }
 
-  public ZonedDateTime getSyntheticMergeTime() {
-    return syntheticMergeTime;
-  }
-
-  public void setSyntheticMergeTime(ZonedDateTime syntheticMergeTime) {
-    this.syntheticMergeTime = syntheticMergeTime;
-  }
-
   public ZonedDateTime getLastUpdatedTime() {
     return lastUpdatedTime;
   }
 
   public void setLastUpdatedTime(ZonedDateTime lastUpdatedTime) {
     this.lastUpdatedTime = lastUpdatedTime;
-  }
-
-  public ZonedDateTime getMultiFloatMergeTime() {
-    return multiFloatMergeTime;
-  }
-
-  public void setMultiFloatMergeTime(ZonedDateTime multiFloatMergeTime) {
-    this.multiFloatMergeTime = multiFloatMergeTime;
   }
 }
