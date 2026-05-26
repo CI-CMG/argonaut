@@ -38,13 +38,14 @@ public class ArgoSyntheticProfileV13Bean implements ArgoSyntheticProfileV13 {
   private Instant julianDate;
   private String julianDateQc;
   private Instant julianDateOfLocation;
-  private double latitude;
-  private double longitude;
+  private Double latitude;
+  private Double longitude;
   private String positionQc;
   private String positioningSystem;
   private int configMissionNumber;
   private List<ArgoSyntheticProfileV13Parameter> parameters = new ArrayList<>();
   private String softwareVersion;
+  private String dataMode;
 
 
   @Override
@@ -247,6 +248,11 @@ public class ArgoSyntheticProfileV13Bean implements ArgoSyntheticProfileV13 {
     return dataCenter;
   }
 
+  @Override
+  public String getDataCenterReference() {
+    return null;
+  }
+
   public void setDataCenter(String dataCenter) {
     this.dataCenter = dataCenter;
   }
@@ -315,20 +321,20 @@ public class ArgoSyntheticProfileV13Bean implements ArgoSyntheticProfileV13 {
   }
 
   @Override
-  public double getLatitude() {
+  public Double getLatitude() {
     return latitude;
   }
 
-  public void setLatitude(double latitude) {
+  public void setLatitude(Double latitude) {
     this.latitude = latitude;
   }
 
   @Override
-  public double getLongitude() {
+  public Double getLongitude() {
     return longitude;
   }
 
-  public void setLongitude(double longitude) {
+  public void setLongitude(Double longitude) {
     this.longitude = longitude;
   }
 
@@ -355,6 +361,16 @@ public class ArgoSyntheticProfileV13Bean implements ArgoSyntheticProfileV13 {
     return configMissionNumber;
   }
 
+  @Override
+  public String getVerticalSamplingScheme() {
+    return null;
+  }
+
+  @Override
+  public String getDataStateIndicator() {
+    return null;
+  }
+
   public void setConfigMissionNumber(int configMissionNumber) {
     this.configMissionNumber = configMissionNumber;
   }
@@ -376,5 +392,14 @@ public class ArgoSyntheticProfileV13Bean implements ArgoSyntheticProfileV13 {
 
   public void setSoftwareVersion(String softwareVersion) {
     this.softwareVersion = softwareVersion;
+  }
+
+  @Override
+  public String getDataMode() {
+    return dataMode;
+  }
+
+  public void setDataMode(String dataMode) {
+    this.dataMode = dataMode;
   }
 }

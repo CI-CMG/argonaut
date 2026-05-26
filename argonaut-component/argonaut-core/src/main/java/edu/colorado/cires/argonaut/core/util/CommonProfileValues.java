@@ -16,6 +16,8 @@ public interface CommonProfileValues {
 
   String getDataCenter();
 
+  String getDataCenterReference();
+
   String getPlatformType();
 
   String getFloatSerialNumber();
@@ -24,20 +26,26 @@ public interface CommonProfileValues {
 
   String getWmoInstrumentType();
 
+  String getDataMode();
+
   Instant getJulianDate();
 
   String getJulianDateQc();
 
   Instant getJulianDateOfLocation();
 
-  double getLatitude();
+  Double getLatitude();
 
-  double getLongitude();
+  Double getLongitude();
 
   String getPositionQc();
 
   String getPositioningSystem();
 
   int getConfigMissionNumber();
+
+  String getVerticalSamplingScheme();
+
+  String getDataStateIndicator();
 
 }

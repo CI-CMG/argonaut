@@ -13,8 +13,8 @@ import edu.colorado.cires.argonaut.core.netcdf.synthprofile.v13.ArgoSyntheticPro
 import edu.colorado.cires.argonaut.core.netcdf.synthprofile.v13.impl.ArgoSyntheticProfileV13Bean;
 import edu.colorado.cires.argonaut.core.netcdf.synthprofile.v13.impl.ArgoSyntheticProfileV13LevelBean;
 import edu.colorado.cires.argonaut.core.netcdf.synthprofile.v13.impl.ArgoSyntheticProfileV13ParameterBean;
+import edu.colorado.cires.argonaut.core.util.SoftwareVersion;
 import java.io.IOException;
-import java.io.InputStream;
 import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -30,7 +30,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Properties;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -44,18 +43,6 @@ public class DefaultSyntheticProfileMerger implements SyntheticProfileMerger {
   private static final List<String> GOOD_QC = Arrays.asList("1", "2", "5");
   private static final List<String> GOOD_QC_8 = Arrays.asList("1", "2", "5", "8");
   private static final List<String> BAD_QC = Arrays.asList("3", "4");
-
-  private static final String version;
-
-  static {
-    Properties properties = new Properties();
-    try (InputStream in = DefaultSyntheticProfileMerger.class.getClassLoader().getResourceAsStream("edu/colorado/cires/argonaut/core/build.properties")) {
-      properties.load(in);
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
-    version = properties.getProperty("version");
-  }
 
   public void mergeProfiles(Path cProfilePath, Path bProfilePath, Path metaPath, Path outputPath) throws IOException {
     try (
@@ -469,7 +456,7 @@ public class DefaultSyntheticProfileMerger implements SyntheticProfileMerger {
     }
 
     try {
-      ArgoSyntheticProfileV13Writer.writeSingleProfile(outputPath, profile, version);
+      ArgoSyntheticProfileV13Writer.writeSingleProfile(outputPath, profile, SoftwareVersion.getVersion());
     } catch (InvalidRangeException e) {
       throw new RuntimeException(e);
     }

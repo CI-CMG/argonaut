@@ -60,4 +60,5 @@ public class NetCdfTiedArgoSyntheticProfileV13Calibration implements ArgoSynthet
   public Instant getDate() {
     return date;
   }
+
 }

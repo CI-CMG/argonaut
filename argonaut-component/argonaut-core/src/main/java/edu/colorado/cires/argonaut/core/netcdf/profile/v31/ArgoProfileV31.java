@@ -424,7 +424,7 @@ Examples :
   in the trajectory file.
   Example : 44.4991 : 44° 29’ 56.76’’ N
    */
-  double getLatitude();
+  Double getLatitude();
 
   /*
   double LONGITUDE(N_PROF);
@@ -445,7 +445,7 @@ Examples :
   in the trajectory file.
   Example : 16.7222 : 16° 43’ 19.92’’ E
    */
-  double getLongitude();
+  Double getLongitude();
 
   /*
   char POSITION_QC(N_PROF);

@@ -11,11 +11,11 @@ import java.util.List;
 
 public final class ProfileCopyUtils {
 
-  public ArgoProfileV31Bean copyProfileToMemory(ArgoProfileV31 source) {
+  public static ArgoProfileV31Bean copyProfileToMemory(ArgoProfileV31 source) {
     return copyProfileToMemory(source, source.getProfileIndex());
   }
 
-  public ArgoProfileV31Bean copyProfileToMemory(ArgoProfileV31 source, int profileIndex) {
+  public static ArgoProfileV31Bean copyProfileToMemory(ArgoProfileV31 source, int profileIndex) {
     ArgoMultiProfileV31Bean parent = new ArgoMultiProfileV31Bean();
     parent.setTitle(source.getTitle());
     parent.setInstitution(source.getInstitution());
@@ -61,9 +61,10 @@ public final class ProfileCopyUtils {
     profile.setPositionErrorEstimatedComment(source.getPositionErrorEstimatedComment());
     profile.setVerticalSamplingScheme(source.getVerticalSamplingScheme());
     profile.setConfigMissionNumber(source.getConfigMissionNumber());
+    profile.setDataMode(source.getDataMode());
 
-    List<ArgoProfileV31Parameter> parameters = profile.getParameters();
-    for (ArgoProfileV31Parameter sourceParameter : parameters) {
+    List<ArgoProfileV31Parameter> sourceParameters = source.getParameters();
+    for (ArgoProfileV31Parameter sourceParameter : sourceParameters) {
       ArgoProfileV31ParameterBean parameter = new ArgoProfileV31ParameterBean(profile, sourceParameter.getParameterName(),
           sourceParameter.getParameterIndex());
       profile.getParameters().add(parameter);
@@ -97,8 +98,8 @@ public final class ProfileCopyUtils {
 
     }
 
-    List<ArgoProfileV31History> histories = profile.getProfileHistory();
-    for (ArgoProfileV31History sourceHistory : histories) {
+    List<ArgoProfileV31History> sourceHistories = source.getProfileHistory();
+    for (ArgoProfileV31History sourceHistory : sourceHistories) {
       ArgoProfileV31HistoryBean history = new ArgoProfileV31HistoryBean(profile, sourceHistory.getHistoryIndex());
       profile.getProfileHistory().add(history);
 

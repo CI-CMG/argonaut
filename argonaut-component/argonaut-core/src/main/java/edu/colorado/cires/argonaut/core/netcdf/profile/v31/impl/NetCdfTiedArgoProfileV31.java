@@ -32,8 +32,8 @@ public class NetCdfTiedArgoProfileV31 implements ArgoProfileV31 {
   private final String wmoInstrumentType;
   private final Instant julianDate;
   private final String julianDateQc;
-  private final double latitude;
-  private final double longitude;
+  private final Double latitude;
+  private final Double longitude;
   private final Instant julianDateOfLocation;
   private final String positionQc;
   private final String positioningSystem;
@@ -267,12 +267,12 @@ public class NetCdfTiedArgoProfileV31 implements ArgoProfileV31 {
   }
 
   @Override
-  public double getLatitude() {
+  public Double getLatitude() {
     return latitude;
   }
 
   @Override
-  public double getLongitude() {
+  public Double getLongitude() {
     return longitude;
   }
 

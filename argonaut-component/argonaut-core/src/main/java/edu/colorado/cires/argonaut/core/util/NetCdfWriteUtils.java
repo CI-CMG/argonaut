@@ -70,13 +70,15 @@ public final class NetCdfWriteUtils {
 
   public static void writeString(NetcdfFormatWriter writer, int[] origin, String variableName, String value)
       throws InvalidRangeException, IOException {
-    int[] modOrigin = new int[origin.length + 1];
-    for (int i = 0; i < origin.length; i++) {
-      modOrigin[i] = origin[i];
+    if (value != null && !value.isEmpty()) {
+      int[] modOrigin = new int[origin.length + 1];
+      for (int i = 0; i < origin.length; i++) {
+        modOrigin[i] = origin[i];
+      }
+      OriginArray<ArrayChar> oa = resolveOrigin(writer, variableName, ArrayChar::new, true);
+      oa.getArray().setString(oa.getIndex(), value);
+      writer.write(oa.getVariable(), modOrigin, oa.getArray());
     }
-    OriginArray<ArrayChar> oa = resolveOrigin(writer, variableName, ArrayChar::new, true);
-    oa.getArray().setString(oa.getIndex(), value);
-    writer.write(oa.getVariable(), modOrigin, oa.getArray());
   }
 
   public static void writeDate(NetcdfFormatWriter writer, int[] origin, String variableName, Instant value) throws InvalidRangeException, IOException {
@@ -173,11 +175,13 @@ public final class NetCdfWriteUtils {
   public static void writeCommonProfileLevelValues(NetcdfFormatWriter writer, CommonFileValues file, CommonProfileValues profile, int profileIndex)
       throws InvalidRangeException, IOException {
     writeString(writer, new int[] {profileIndex}, "PLATFORM_NUMBER", profile.getPlatformNumber());
+    writeCharacter(writer, new int[] {profileIndex}, "DATA_MODE", profile.getDataMode());
     writeString(writer, new int[] {profileIndex}, "PROJECT_NAME", profile.getProjectName());
     writeString(writer, new int[] {profileIndex}, "PI_NAME", profile.getPrincipalInvestigatorName());
     writeInteger(writer, new int[] {profileIndex}, "CYCLE_NUMBER", profile.getCycleNumber());
     writeCharacter(writer, new int[] {profileIndex}, "DIRECTION", profile.getDirection());
     writeString(writer, new int[] {profileIndex}, "DATA_CENTRE", profile.getDataCenter());
+    writeString(writer, new int[] {profileIndex}, "DC_REFERENCE", profile.getDataCenterReference());
     writeString(writer, new int[] {profileIndex}, "PLATFORM_TYPE", profile.getPlatformType());
     writeString(writer, new int[] {profileIndex}, "FLOAT_SERIAL_NO", profile.getFloatSerialNumber());
     writeString(writer, new int[] {profileIndex}, "FIRMWARE_VERSION", profile.getFirmwareVersion());
@@ -188,6 +192,8 @@ public final class NetCdfWriteUtils {
     writeCharacter(writer, new int[] {profileIndex}, "POSITION_QC", profile.getPositionQc());
     writeString(writer, new int[] {profileIndex}, "POSITIONING_SYSTEM", profile.getPositioningSystem());
     writeInteger(writer, new int[] {profileIndex}, "CONFIG_MISSION_NUMBER", profile.getConfigMissionNumber());
+    writeString(writer, new int[] {profileIndex}, "VERTICAL_SAMPLING_SCHEME", profile.getVerticalSamplingScheme());
+    writeString(writer, new int[] {profileIndex}, "DATA_STATE_INDICATOR", profile.getDataStateIndicator());
     writeDouble(writer, new int[] {profileIndex}, "JULD", dateToJulianDate(file.getReferenceDateTime() == null ? REFERENCE_DATE : file.getReferenceDateTime(), profile.getJulianDate()));
     writeDouble(writer, new int[] {profileIndex}, "JULD_LOCATION", dateToJulianDate(file.getReferenceDateTime() == null ? REFERENCE_DATE : file.getReferenceDateTime(), profile.getJulianDateOfLocation()));
   }

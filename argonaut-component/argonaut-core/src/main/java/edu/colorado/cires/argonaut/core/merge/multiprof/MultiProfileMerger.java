@@ -6,6 +6,6 @@ import java.util.List;
 
 public interface MultiProfileMerger {
 
-  void mergeProfiles(List<Path> inputFiles, Path outputPath) throws IOException;
+  void mergeProfiles(List<LocalPathSupplier> inputFileSuppliers, List<String> validParameterNames, Path outputPath) throws IOException;
 
 }

@@ -26,8 +26,8 @@ public class ArgoProfileV31Bean implements ArgoProfileV31 {
   private String wmoInstrumentType;
   private Instant julianDate;
   private String julianDateQc;
-  private double latitude;
-  private double longitude;
+  private Double latitude;
+  private Double longitude;
   private Instant julianDateOfLocation;
   private String positionQc;
   private String positioningSystem;
@@ -270,20 +270,20 @@ public class ArgoProfileV31Bean implements ArgoProfileV31 {
   }
 
   @Override
-  public double getLatitude() {
+  public Double getLatitude() {
     return latitude;
   }
 
-  public void setLatitude(double latitude) {
+  public void setLatitude(Double latitude) {
     this.latitude = latitude;
   }
 
   @Override
-  public double getLongitude() {
+  public Double getLongitude() {
     return longitude;
   }
 
-  public void setLongitude(double longitude) {
+  public void setLongitude(Double longitude) {
     this.longitude = longitude;
   }
 

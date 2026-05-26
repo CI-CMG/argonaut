@@ -13,28 +13,29 @@ public class NetCdfTiedArgoSyntheticProfileV13 implements ArgoSyntheticProfileV1
 
   private final NetcdfFile netcdf;
   private final int profileIndex;
-  private Instant referenceDateTime;
-  private Instant dateCreation;
-  private Instant dateUpdate;
-  private String platformNumber;
-  private String projectName;
-  private String principalInvestigatorName;
-  private List<String> stationParameters;
-  private int cycleNumber;
-  private String direction;
-  private String dataCenter;
-  private String platformType;
-  private String floatSerialNumber;
-  private String firmwareVersion;
-  private String wmoInstrumentType;
-  private Instant julianDate;
-  private String julianDateQc;
-  private Instant julianDateOfLocation;
-  private double latitude;
-  private double longitude;
-  private String positionQc;
-  private String positioningSystem;
-  private int configMissionNumber;
+  private final Instant referenceDateTime;
+  private final Instant dateCreation;
+  private final Instant dateUpdate;
+  private final String platformNumber;
+  private final String projectName;
+  private final String principalInvestigatorName;
+  private final List<String> stationParameters;
+  private final int cycleNumber;
+  private final String direction;
+  private final String dataCenter;
+  private final String platformType;
+  private final String floatSerialNumber;
+  private final String firmwareVersion;
+  private final String wmoInstrumentType;
+  private final Instant julianDate;
+  private final String julianDateQc;
+  private final Instant julianDateOfLocation;
+  private final Double latitude;
+  private final Double longitude;
+  private final String positionQc;
+  private final String positioningSystem;
+  private final int configMissionNumber;
+  private final String dataMode;
   private List<ArgoSyntheticProfileV13Parameter> parameters = new ArrayList<>();
   private final NetCdfTiedArgoSyntheticMultiProfileV13 parent;
 
@@ -64,6 +65,8 @@ public class NetCdfTiedArgoSyntheticProfileV13 implements ArgoSyntheticProfileV1
     longitude = NetCdfReadUtils.getLevel1Double(netcdf, profileIndex, "LONGITUDE");
     positionQc = NetCdfReadUtils.getLevel1String(netcdf, profileIndex, "POSITION_QC");
     positioningSystem = NetCdfReadUtils.getLevel1String(netcdf, profileIndex, "POSITIONING_SYSTEM");
+    dataMode = NetCdfReadUtils.getLevel1String(netcdf, profileIndex, "DATA_MODE");
+
     parameters = new ArrayList<>(stationParameters.size());
     for (int index = 0; index < stationParameters.size(); index++) {
       String parameterName = stationParameters.get(index);
@@ -203,6 +206,11 @@ public class NetCdfTiedArgoSyntheticProfileV13 implements ArgoSyntheticProfileV1
   }
 
   @Override
+  public String getDataCenterReference() {
+    return null;
+  }
+
+  @Override
   public String getPlatformType() {
     return platformType;
   }
@@ -238,12 +246,12 @@ public class NetCdfTiedArgoSyntheticProfileV13 implements ArgoSyntheticProfileV1
   }
 
   @Override
-  public double getLatitude() {
+  public Double getLatitude() {
     return latitude;
   }
 
   @Override
-  public double getLongitude() {
+  public Double getLongitude() {
     return longitude;
   }
 
@@ -263,6 +271,16 @@ public class NetCdfTiedArgoSyntheticProfileV13 implements ArgoSyntheticProfileV1
   }
 
   @Override
+  public String getVerticalSamplingScheme() {
+    return null;
+  }
+
+  @Override
+  public String getDataStateIndicator() {
+    return null;
+  }
+
+  @Override
   public List<ArgoSyntheticProfileV13Parameter> getParameters() {
     return parameters;
   }
@@ -272,4 +290,8 @@ public class NetCdfTiedArgoSyntheticProfileV13 implements ArgoSyntheticProfileV1
     return parent.getSoftwareVersion();
   }
 
+  @Override
+  public String getDataMode() {
+    return dataMode;
+  }
 }

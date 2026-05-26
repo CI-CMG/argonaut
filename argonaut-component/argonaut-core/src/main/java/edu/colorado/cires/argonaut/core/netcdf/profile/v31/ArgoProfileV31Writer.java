@@ -1,11 +1,15 @@
 package edu.colorado.cires.argonaut.core.netcdf.profile.v31;
 
+import static edu.colorado.cires.argonaut.core.util.NetCdfWriteUtils.REFERENCE_DATE;
+
 import edu.colorado.cires.argonaut.core.util.ArgoNetCdfCreatedDimensions;
 import edu.colorado.cires.argonaut.core.util.ArgoNetCdfDimensions;
+import edu.colorado.cires.argonaut.core.util.CommonFileValues;
 import edu.colorado.cires.argonaut.core.util.CommonParameterAttributes;
 import edu.colorado.cires.argonaut.core.util.NetCdfWriteUtils;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.time.Instant;
 import java.util.Iterator;
 import java.util.List;
 import ucar.ma2.InvalidRangeException;
@@ -32,17 +36,52 @@ public class ArgoProfileV31Writer {
     try (NetcdfFormatWriter writer = builder.build()) {
       while (profileIterator.hasNext()) {
         ArgoProfileV31 profile = profileIterator.next();
-        List<ArgoProfileV31Parameter> parameters = profile.getParameters();
-        NetCdfWriteUtils.writeCommonFileLevelValues(writer, profile);
-        NetCdfWriteUtils.writeCommonProfileLevelValues(writer, profile, profile, 0);
-        for (int parameterIndex = 0; parameterIndex < parameters.size(); parameterIndex++) {
-          ArgoProfileV31Parameter parameter = parameters.get(parameterIndex);
-          String parameterName = parameter.getParameterName();
-          NetCdfWriteUtils.writeCommonParameterLevelValues(writer, parameterName, 0, parameterIndex, parameter);
+        NetCdfWriteUtils.writeCommonFileLevelValues(writer, getCommonFileValues());
+        NetCdfWriteUtils.writeCommonProfileLevelValues(writer, profile, profile, profile.getProfileIndex());
+        for (int parameterIndex = 0; parameterIndex < parameterNames.size(); parameterIndex++) {
+          String parameterName = parameterNames.get(parameterIndex);
+          ArgoProfileV31Parameter parameter = profile.getParameter(parameterName);
+          if (parameter != null) {
+            NetCdfWriteUtils.writeCommonParameterLevelValues(writer, parameterName, profile.getProfileIndex(), parameterIndex, parameter);
+          }
         }
       }
     }
   }
 
+  private static CommonFileValues getCommonFileValues() {
+    Instant now = Instant.now();
+    return new CommonFileValues() {
+      @Override
+      public String getDataType() {
+        return "Argo profile";
+      }
+
+      @Override
+      public String getFormatVersion() {
+        return "3.1";
+      }
+
+      @Override
+      public String getHandbookVersion() {
+        return "1.2";
+      }
+
+      @Override
+      public Instant getReferenceDateTime() {
+        return REFERENCE_DATE;
+      }
+
+      @Override
+      public Instant getDateCreation() {
+        return now;
+      }
+
+      @Override
+      public Instant getDateUpdate() {
+        return now;
+      }
+    };
+  }
 
 }
