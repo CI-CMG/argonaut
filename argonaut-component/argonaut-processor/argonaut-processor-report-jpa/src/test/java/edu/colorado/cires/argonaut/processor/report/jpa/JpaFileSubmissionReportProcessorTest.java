@@ -3,8 +3,8 @@ package edu.colorado.cires.argonaut.processor.report.jpa;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import edu.colorado.cires.argonaut.messaging.core.databind.ArgoFileType;
 import edu.colorado.cires.argonaut.messaging.core.databind.NcSubmissionMessage;
-import edu.colorado.cires.argonaut.messaging.core.databind.NcSubmissionMessage.FileType;
 import edu.colorado.cires.argonaut.messaging.core.databind.NcSubmissionMessage.Operation;
 import edu.colorado.cires.argonaut.processor.report.jpa.entity.SubmissionRecordEntity;
 import edu.colorado.cires.argonaut.processor.report.jpa.entity.SubmissionRecordValidationErrorEntity;
@@ -49,7 +49,7 @@ public class JpaFileSubmissionReportProcessorTest {
         .withFileName("R1902264_173.nc")
         .withFloatId("1")
         .withDac("aoml")
-        .withFileType(FileType.AUXILIARY)
+        .withFileType(ArgoFileType.AUXILIARY)
         .withOperation(Operation.ADD)
         .withNumberOfFilesInSubmission(100)
         .withValidationErrors(Arrays.asList("error 1", "error 2"))
@@ -59,7 +59,7 @@ public class JpaFileSubmissionReportProcessorTest {
         .withFileName("R4903218_229.nc")
         .withFloatId("2")
         .withDac("foo")
-        .withFileType(FileType.CORE_ARGO_PROFILE)
+        .withFileType(ArgoFileType.PROFILE_CORE)
         .withOperation(Operation.REMOVE)
         .withNumberOfFilesInSubmission(10)
         .withTimestamp(Instant.parse("2025-04-03T12:34:57.000Z"))
@@ -68,7 +68,7 @@ public class JpaFileSubmissionReportProcessorTest {
         .withFileName("R4903353_302.nc")
         .withFloatId("3")
         .withDac("bar")
-        .withFileType(FileType.AUXILIARY)
+        .withFileType(ArgoFileType.AUXILIARY)
         .withOperation(Operation.ADD)
         .withNumberOfFilesInSubmission(11)
         .withTimestamp(Instant.parse("2025-04-03T12:34:58.000Z"))

@@ -1,6 +1,5 @@
 package edu.colorado.cires.argonaut.metadata.core;
 
-import edu.colorado.cires.argonaut.messaging.core.databind.NcSubmissionMessage.FileType;
 import java.util.Objects;
 import java.util.Optional;
 

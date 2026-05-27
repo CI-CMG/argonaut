@@ -38,7 +38,7 @@
     <route id="file-moved">
       <from uri="seda:file-moved"/>
       <multicast>
-        <to uri="seda:submission-report"/>
+<!--        <to uri="seda:submission-report"/>-->
         <to uri="seda:submission-index-transform"/>
       </multicast>
     </route>
@@ -59,7 +59,7 @@
 
     <route id="update-index">
       <from uri="seda:update-index"/>
-      <bean ref="deserializationProcessor" method="deserialize(${body}, edu.colorado.cires.argonaut.messaging.core.databind.MetadataRecord"/>
+      <bean ref="deserializationProcessor" method="deserialize(${body}, edu.colorado.cires.argonaut.messaging.core.databind.MetadataRecord)"/>
       <bean ref="updateIndexProcessor" method="updateIndex"/>
     </route>
 
@@ -70,7 +70,7 @@
 
     <route id="float-merge">
       <from uri="seda:float-merge"/>
-      <bean ref="deserializationProcessor" method="deserialize(${body}, edu.colorado.cires.argonaut.messaging.core.databind.FloatMergeGroup"/>
+      <bean ref="deserializationProcessor" method="deserialize(${body}, edu.colorado.cires.argonaut.messaging.core.databind.ProfileOperation)"/>
       <bean ref="floatMergeProcessor" method="merge" />
     </route>
 
@@ -81,7 +81,7 @@
 
     <route id="synthetic-profile">
       <from uri="seda:synthetic-profile"/>
-      <bean ref="deserializationProcessor" method="deserialize(${body}, edu.colorado.cires.argonaut.messaging.core.databind.ProfileOperation"/>
+      <bean ref="deserializationProcessor" method="deserialize(${body}, edu.colorado.cires.argonaut.messaging.core.databind.ProfileOperation)"/>
       <bean ref="syntheticProfileProcessor" method="generateSyntheticProfile" />
     </route>
 

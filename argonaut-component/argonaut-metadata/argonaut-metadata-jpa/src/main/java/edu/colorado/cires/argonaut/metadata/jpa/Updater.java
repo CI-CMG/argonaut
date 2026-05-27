@@ -35,6 +35,7 @@ class Updater {
         try {
           DacEntity entity = em.find(DacEntity.class, dac);
           if (entity != null) {
+            tx.rollback();
             return;
           } else {
             entity = new DacEntity();
@@ -72,6 +73,7 @@ class Updater {
           DacEntity dacEntity = em.find(DacEntity.class, dac);
           FloatEntity entity = em.find(FloatEntity.class, id);
           if (entity != null) {
+            tx.rollback();
             return;
           } else {
             entity = new FloatEntity();
@@ -126,6 +128,7 @@ class Updater {
           FloatEntity floatEntity = em.find(FloatEntity.class, getFloatId(record));
           CycleEntity entity = em.find(CycleEntity.class, id);
           if (entity != null) {
+            tx.rollback();
             return;
           } else {
             entity = new CycleEntity();
@@ -294,16 +297,16 @@ class Updater {
     createFloatIfMissing(record);
 
     switch (record.getFileType()) {
-      case CORE_ARGO_PROFILE:
-      case B_ARGO_PROFILE:
-      case BGC_ARGO_SYNTH_PROFILE:
+      case PROFILE_CORE:
+      case PROFILE_BIOCHEMICAL:
+      case SYNTHETIC_PROFILE_SINGLE_CYCLE:
         createCycleIfMissing(record);
         createOrUpdateProfile(record);
         break;
       case METADATA:
         createOrUpdateMetadata(record);
         break;
-      case PROFILE_MERGE:
+      case PROFILE_MULTI_CYCLE:
         createOrUpdateProfileMergeFile(record);
         break;
       default:

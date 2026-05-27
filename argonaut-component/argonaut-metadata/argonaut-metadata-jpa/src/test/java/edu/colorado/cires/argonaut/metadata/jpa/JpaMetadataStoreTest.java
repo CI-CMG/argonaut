@@ -3,11 +3,11 @@ package edu.colorado.cires.argonaut.metadata.jpa;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
+import edu.colorado.cires.argonaut.messaging.core.databind.ArgoFileType;
 import edu.colorado.cires.argonaut.messaging.core.databind.ArgoOcean;
 import edu.colorado.cires.argonaut.messaging.core.databind.MetadataRecord;
 import edu.colorado.cires.argonaut.messaging.core.databind.MetadataRecord.Action;
 import edu.colorado.cires.argonaut.messaging.core.databind.MetadataRecord.FileStatus;
-import edu.colorado.cires.argonaut.messaging.core.databind.NcSubmissionMessage.FileType;
 import edu.colorado.cires.argonaut.messaging.core.databind.ProfileOperation;
 import edu.colorado.cires.argonaut.metadata.core.DefaultIndexPageRequest;
 import edu.colorado.cires.argonaut.metadata.core.ProfilePage;
@@ -83,7 +83,7 @@ public class JpaMetadataStoreTest {
         .withDateUpdate(dateUpdate1)
         .withParameters("params")
         .withAction(Action.UPDATE)
-        .withFileType(FileType.CORE_ARGO_PROFILE)
+        .withFileType(ArgoFileType.PROFILE_CORE)
         .build();
     datastore.updateIndex(record1);
     Instant date2 = date1.plusSeconds(1);
@@ -108,7 +108,7 @@ public class JpaMetadataStoreTest {
         .withDateUpdate(dateUpdate2)
         .withParameters("params2")
         .withAction(Action.UPDATE)
-        .withFileType(FileType.CORE_ARGO_PROFILE)
+        .withFileType(ArgoFileType.PROFILE_CORE)
         .build();
     datastore.updateIndex(record2);
     Instant date3 = date1.plusSeconds(1);
@@ -133,11 +133,11 @@ public class JpaMetadataStoreTest {
         .withDateUpdate(dateUpdate3)
         .withParameters("params3")
         .withAction(Action.UPDATE)
-        .withFileType(FileType.CORE_ARGO_PROFILE)
+        .withFileType(ArgoFileType.PROFILE_CORE)
         .build();
     datastore.updateIndex(record3);
     datastore.updateIndex(MetadataRecord.builder()
-        .withFileType(FileType.CORE_ARGO_PROFILE)
+        .withFileType(ArgoFileType.PROFILE_CORE)
         .withFile("aoml/13857/profiles/D13857_003.nc")
         .withAction(Action.REMOVE)
         .build());
@@ -162,7 +162,7 @@ public class JpaMetadataStoreTest {
         .withDateUpdate(dateUpdate3)
         .withParameters("params3")
         .withAction(Action.UPDATE)
-        .withFileType(FileType.CORE_ARGO_PROFILE)
+        .withFileType(ArgoFileType.PROFILE_CORE)
         .build());
 
     datastore.updateIndex(MetadataRecord.builder()
@@ -185,7 +185,7 @@ public class JpaMetadataStoreTest {
         .withDateUpdate(dateUpdate3)
         .withParameters("params3")
         .withAction(Action.UPDATE)
-        .withFileType(FileType.CORE_ARGO_PROFILE)
+        .withFileType(ArgoFileType.PROFILE_CORE)
         .build());
 
     datastore.updateIndex(MetadataRecord.builder()
@@ -208,7 +208,7 @@ public class JpaMetadataStoreTest {
         .withDateUpdate(dateUpdate3)
         .withParameters("params3")
         .withAction(Action.UPDATE)
-        .withFileType(FileType.CORE_ARGO_PROFILE)
+        .withFileType(ArgoFileType.PROFILE_CORE)
         .build());
 
     MetadataRecord record12 = MetadataRecord.builder(record1)
@@ -256,7 +256,7 @@ public class JpaMetadataStoreTest {
         .withInstitution("A0")
         .withDateUpdate(date)
         .withAction(Action.UPDATE)
-        .withFileType(FileType.METADATA)
+        .withFileType(ArgoFileType.METADATA)
         .build());
 
     datastore.updateIndex(MetadataRecord.builder()
@@ -280,7 +280,7 @@ public class JpaMetadataStoreTest {
         .withDateUpdate(date)
         .withParameters("params")
         .withAction(Action.UPDATE)
-        .withFileType(FileType.CORE_ARGO_PROFILE)
+        .withFileType(ArgoFileType.PROFILE_CORE)
         .build());
 
     datastore.updateIndex(MetadataRecord.builder()
@@ -304,7 +304,7 @@ public class JpaMetadataStoreTest {
         .withDateUpdate(date)
         .withParameters("params")
         .withAction(Action.UPDATE)
-        .withFileType(FileType.B_ARGO_PROFILE)
+        .withFileType(ArgoFileType.PROFILE_BIOCHEMICAL)
         .build());
 
     // no synth 2
@@ -322,7 +322,7 @@ public class JpaMetadataStoreTest {
         .withInstitution("A0")
         .withDateUpdate(date)
         .withAction(Action.UPDATE)
-        .withFileType(FileType.METADATA)
+        .withFileType(ArgoFileType.METADATA)
         .build());
 
     datastore.updateIndex(MetadataRecord.builder()
@@ -346,7 +346,7 @@ public class JpaMetadataStoreTest {
         .withDateUpdate(date)
         .withParameters("params")
         .withAction(Action.UPDATE)
-        .withFileType(FileType.CORE_ARGO_PROFILE)
+        .withFileType(ArgoFileType.PROFILE_CORE)
         .build());
 
     datastore.updateIndex(MetadataRecord.builder()
@@ -370,7 +370,7 @@ public class JpaMetadataStoreTest {
         .withDateUpdate(date)
         .withParameters("params")
         .withAction(Action.UPDATE)
-        .withFileType(FileType.B_ARGO_PROFILE)
+        .withFileType(ArgoFileType.PROFILE_BIOCHEMICAL)
         .build());
 
 
@@ -397,7 +397,7 @@ public class JpaMetadataStoreTest {
         .withDateUpdate(date)
         .withParameters("params")
         .withAction(Action.UPDATE)
-        .withFileType(FileType.CORE_ARGO_PROFILE)
+        .withFileType(ArgoFileType.PROFILE_CORE)
         .build());
 
     datastore.updateIndex(MetadataRecord.builder()
@@ -421,7 +421,7 @@ public class JpaMetadataStoreTest {
         .withDateUpdate(date)
         .withParameters("params")
         .withAction(Action.UPDATE)
-        .withFileType(FileType.B_ARGO_PROFILE)
+        .withFileType(ArgoFileType.PROFILE_BIOCHEMICAL)
         .build());
 
 
@@ -432,7 +432,7 @@ public class JpaMetadataStoreTest {
         .withDac("aoml")
         .withFloatId("13857")
         .withAction(Action.SYNTHETIC_MERGE)
-        .withFileType(FileType.METADATA)
+        .withFileType(ArgoFileType.METADATA)
         .build());
 
 
@@ -440,7 +440,7 @@ public class JpaMetadataStoreTest {
         .withFile("aoml/13857/profiles/D13857_002.nc")
         .withActionTimestamp(date)
         .withAction(Action.SYNTHETIC_MERGE)
-        .withFileType(FileType.CORE_ARGO_PROFILE)
+        .withFileType(ArgoFileType.PROFILE_CORE)
         .withDac("aoml")
         .withFloatId("13857")
         .build());
@@ -449,7 +449,7 @@ public class JpaMetadataStoreTest {
         .withFile("aoml/13857/profiles/BD13857_002.nc")
         .withActionTimestamp(date)
         .withAction(Action.SYNTHETIC_MERGE)
-        .withFileType(FileType.B_ARGO_PROFILE)
+        .withFileType(ArgoFileType.PROFILE_BIOCHEMICAL)
         .withDac("aoml")
         .withFloatId("13857")
         .build());
@@ -471,7 +471,7 @@ public class JpaMetadataStoreTest {
         .withInstitution("A0")
         .withDateUpdate(date)
         .withAction(Action.UPDATE)
-        .withFileType(FileType.BGC_ARGO_SYNTH_PROFILE)
+        .withFileType(ArgoFileType.SYNTHETIC_PROFILE_SINGLE_CYCLE)
         .build());
 
 
@@ -530,7 +530,7 @@ public class JpaMetadataStoreTest {
         .withInstitution("A0")
         .withDateUpdate(date)
         .withAction(Action.UPDATE)
-        .withFileType(FileType.METADATA)
+        .withFileType(ArgoFileType.METADATA)
         .build());
 
     datastore.updateIndex(MetadataRecord.builder()
@@ -554,7 +554,7 @@ public class JpaMetadataStoreTest {
         .withDateUpdate(date)
         .withParameters("params")
         .withAction(Action.UPDATE)
-        .withFileType(FileType.CORE_ARGO_PROFILE)
+        .withFileType(ArgoFileType.PROFILE_CORE)
         .build());
 
     datastore.updateIndex(MetadataRecord.builder()
@@ -578,7 +578,7 @@ public class JpaMetadataStoreTest {
         .withDateUpdate(date)
         .withParameters("params")
         .withAction(Action.UPDATE)
-        .withFileType(FileType.B_ARGO_PROFILE)
+        .withFileType(ArgoFileType.PROFILE_BIOCHEMICAL)
         .build());
 
     // no synth 2
@@ -596,7 +596,7 @@ public class JpaMetadataStoreTest {
         .withInstitution("A0")
         .withDateUpdate(date)
         .withAction(Action.UPDATE)
-        .withFileType(FileType.METADATA)
+        .withFileType(ArgoFileType.METADATA)
         .build());
 
     datastore.updateIndex(MetadataRecord.builder()
@@ -620,7 +620,7 @@ public class JpaMetadataStoreTest {
         .withDateUpdate(date)
         .withParameters("params")
         .withAction(Action.UPDATE)
-        .withFileType(FileType.CORE_ARGO_PROFILE)
+        .withFileType(ArgoFileType.PROFILE_CORE)
         .build());
 
     datastore.updateIndex(MetadataRecord.builder()
@@ -644,7 +644,7 @@ public class JpaMetadataStoreTest {
         .withDateUpdate(date)
         .withParameters("params")
         .withAction(Action.UPDATE)
-        .withFileType(FileType.B_ARGO_PROFILE)
+        .withFileType(ArgoFileType.PROFILE_BIOCHEMICAL)
         .build());
 
 
@@ -671,7 +671,7 @@ public class JpaMetadataStoreTest {
         .withDateUpdate(date)
         .withParameters("params")
         .withAction(Action.UPDATE)
-        .withFileType(FileType.CORE_ARGO_PROFILE)
+        .withFileType(ArgoFileType.PROFILE_CORE)
         .build());
 
     datastore.updateIndex(MetadataRecord.builder()
@@ -695,7 +695,7 @@ public class JpaMetadataStoreTest {
         .withDateUpdate(date)
         .withParameters("params")
         .withAction(Action.UPDATE)
-        .withFileType(FileType.B_ARGO_PROFILE)
+        .withFileType(ArgoFileType.PROFILE_BIOCHEMICAL)
         .build());
 
 
@@ -706,7 +706,7 @@ public class JpaMetadataStoreTest {
         .withDac("aoml")
         .withFloatId("13857")
         .withAction(Action.SYNTHETIC_MERGE)
-        .withFileType(FileType.METADATA)
+        .withFileType(ArgoFileType.METADATA)
         .build());
 
 
@@ -714,7 +714,7 @@ public class JpaMetadataStoreTest {
         .withFile("aoml/13857/profiles/D13857_002.nc")
         .withActionTimestamp(date)
         .withAction(Action.SYNTHETIC_MERGE)
-        .withFileType(FileType.CORE_ARGO_PROFILE)
+        .withFileType(ArgoFileType.PROFILE_CORE)
         .withDac("aoml")
         .withFloatId("13857")
         .build());
@@ -723,7 +723,7 @@ public class JpaMetadataStoreTest {
         .withFile("aoml/13857/profiles/BD13857_002.nc")
         .withActionTimestamp(date)
         .withAction(Action.SYNTHETIC_MERGE)
-        .withFileType(FileType.B_ARGO_PROFILE)
+        .withFileType(ArgoFileType.PROFILE_BIOCHEMICAL)
         .withDac("aoml")
         .withFloatId("13857")
         .build());
@@ -745,7 +745,7 @@ public class JpaMetadataStoreTest {
         .withInstitution("A0")
         .withDateUpdate(date)
         .withAction(Action.UPDATE)
-        .withFileType(FileType.BGC_ARGO_SYNTH_PROFILE)
+        .withFileType(ArgoFileType.SYNTHETIC_PROFILE_SINGLE_CYCLE)
         .build());
 
     ProfilePage page = datastore.findUpdatedOrMissingSyntheticProfilesPage(DefaultIndexPageRequest.builder().withPageSize(100).build());
@@ -785,7 +785,7 @@ public class JpaMetadataStoreTest {
         .withProfilerType("845")
         .withInstitution("A0")
         .withDateUpdate(date)
-        .withFileType(FileType.METADATA)
+        .withFileType(ArgoFileType.METADATA)
         .withFileStatus(FileStatus.ACTIVE)
         .build(), datastore.findByFile("aoml/13857/13857_meta.nc").get());
 
@@ -795,7 +795,7 @@ public class JpaMetadataStoreTest {
         .withDac("aoml")
         .withFloatId("13857")
         .withAction(Action.REMOVE)
-        .withFileType(FileType.METADATA)
+        .withFileType(ArgoFileType.METADATA)
         .build());
 
     page = datastore.findUpdatedOrMissingSyntheticProfilesPage(DefaultIndexPageRequest.builder().withPageSize(100).build());
@@ -824,7 +824,7 @@ public class JpaMetadataStoreTest {
         .withProfilerType("845")
         .withInstitution("A0")
         .withDateUpdate(date)
-        .withFileType(FileType.METADATA)
+        .withFileType(ArgoFileType.METADATA)
         .withFileStatus(FileStatus.REMOVED)
         .build(), datastore.findByFile("aoml/13857/13857_meta.nc", true).get());
 
@@ -858,7 +858,7 @@ public class JpaMetadataStoreTest {
         .withDateUpdate(date)
         .withParameters("params")
         .withAction(Action.UPDATE)
-        .withFileType(FileType.CORE_ARGO_PROFILE)
+        .withFileType(ArgoFileType.PROFILE_CORE)
         .build());
 
     datastore.updateIndex(MetadataRecord.builder()
@@ -882,7 +882,7 @@ public class JpaMetadataStoreTest {
         .withDateUpdate(date)
         .withParameters("params")
         .withAction(Action.UPDATE)
-        .withFileType(FileType.CORE_ARGO_PROFILE)
+        .withFileType(ArgoFileType.PROFILE_CORE)
         .build());
 
 
@@ -907,7 +907,7 @@ public class JpaMetadataStoreTest {
         .withDateUpdate(date)
         .withParameters("params")
         .withAction(Action.UPDATE)
-        .withFileType(FileType.CORE_ARGO_PROFILE)
+        .withFileType(ArgoFileType.PROFILE_CORE)
         .build());
 
     datastore.updateIndex(MetadataRecord.builder()
@@ -931,7 +931,7 @@ public class JpaMetadataStoreTest {
         .withDateUpdate(date)
         .withParameters("params")
         .withAction(Action.UPDATE)
-        .withFileType(FileType.B_ARGO_PROFILE)
+        .withFileType(ArgoFileType.PROFILE_BIOCHEMICAL)
         .build());
 
 
@@ -971,7 +971,7 @@ public class JpaMetadataStoreTest {
         .withDac("aoml")
         .withFloatId("13857")
         .withAction(Action.FLOAT_MERGE)
-        .withFileType(FileType.METADATA)
+        .withFileType(ArgoFileType.METADATA)
         .build());
 
     datastore.updateIndex(MetadataRecord.builder()
@@ -980,7 +980,7 @@ public class JpaMetadataStoreTest {
         .withDac("aoml")
         .withFloatId("13857")
         .withAction(Action.FLOAT_MERGE)
-        .withFileType(FileType.METADATA)
+        .withFileType(ArgoFileType.METADATA)
         .build());
 
 

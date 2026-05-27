@@ -4,9 +4,9 @@ import edu.colorado.cires.argonaut.core.merge.multiprof.DefaultMultiProfileMerge
 import edu.colorado.cires.argonaut.core.merge.multiprof.LocalPathSupplier;
 import edu.colorado.cires.argonaut.core.merge.multiprof.MultiProfileMerger;
 import edu.colorado.cires.argonaut.file.core.FileStore;
+import edu.colorado.cires.argonaut.messaging.core.databind.ArgoFileType;
 import edu.colorado.cires.argonaut.messaging.core.databind.MetadataRecord;
 import edu.colorado.cires.argonaut.messaging.core.databind.MetadataRecord.Action;
-import edu.colorado.cires.argonaut.messaging.core.databind.NcSubmissionMessage.FileType;
 import edu.colorado.cires.argonaut.messaging.core.databind.ProfileOperation;
 import edu.colorado.cires.argonaut.messaging.core.queue.MessageSender;
 import java.io.IOException;
@@ -137,7 +137,7 @@ public class DefaultFloatMergeProcessor implements FloatMergeProcessor {
                 .withDac(dac)
                 .withFloatId(floatId)
                 .withAction(Action.FLOAT_MERGE)
-                .withFileType(FileType.CORE_ARGO_PROFILE)
+                .withFileType(ArgoFileType.PROFILE_CORE)
                 .withActionTimestamp(now)
                 .build()));
       }
@@ -152,7 +152,7 @@ public class DefaultFloatMergeProcessor implements FloatMergeProcessor {
               .withAction(Action.UPDATE)
               .withDac(dac)
               .withFloatId(floatId)
-              .withFileType(FileType.PROFILE_MERGE)
+              .withFileType(ArgoFileType.PROFILE_MULTI_CYCLE)
               .build()));
 
 

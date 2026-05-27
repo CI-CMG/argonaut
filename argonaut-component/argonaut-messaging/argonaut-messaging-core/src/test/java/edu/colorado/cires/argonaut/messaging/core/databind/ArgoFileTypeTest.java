@@ -1,5 +1,4 @@
-package edu.colorado.cires.argonaut.core.util;
-
+package edu.colorado.cires.argonaut.messaging.core.databind;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 

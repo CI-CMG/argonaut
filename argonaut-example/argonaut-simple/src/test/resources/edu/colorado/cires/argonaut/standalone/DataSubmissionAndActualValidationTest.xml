@@ -20,4 +20,9 @@
     <constructor-arg type="java.lang.Class" value="edu.colorado.cires.argonaut.processor.core.DefaultFloatMergeProcessor"/>
   </bean>
 
+  <bean id="geoFilter" class="org.mockito.Mockito" factory-method="mock">
+    <constructor-arg type="java.lang.Class" value="edu.colorado.cires.argonaut.processor.core.GeoFilter"/>
+  </bean>
+
+
 </beans>

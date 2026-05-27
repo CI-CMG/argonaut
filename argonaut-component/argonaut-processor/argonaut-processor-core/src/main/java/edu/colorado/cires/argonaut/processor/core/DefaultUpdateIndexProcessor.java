@@ -13,26 +13,7 @@ public class DefaultUpdateIndexProcessor implements UpdateIndexProcessor {
 
   @Override
   public void updateIndex(MetadataRecord record) {
-    switch (record.getAction()) {
-      case UPDATE:
-        insertUpdate(record);
-        break;
-      case REMOVE:
-        delete(record);
-        break;
-      case NONE:
-      default:
-        break;
-    }
-
-  }
-
-  private void delete(MetadataRecord record) {
-    //TODO
-    throw new UnsupportedOperationException("Not supported yet.");
-  }
-
-  private void insertUpdate(MetadataRecord record) {
     metadataStore.updateIndex(record);
   }
+
 }

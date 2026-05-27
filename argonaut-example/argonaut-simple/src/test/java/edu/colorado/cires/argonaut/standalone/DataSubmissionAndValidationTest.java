@@ -3,11 +3,12 @@ package edu.colorado.cires.argonaut.standalone;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
+import edu.colorado.cires.argonaut.messaging.core.databind.ArgoFileType;
 import edu.colorado.cires.argonaut.messaging.core.databind.NcSubmissionMessage;
-import edu.colorado.cires.argonaut.messaging.core.databind.NcSubmissionMessage.FileType;
+import edu.colorado.cires.argonaut.messaging.core.databind.NcSubmissionMessage.Operation;
 import edu.colorado.cires.argonaut.processor.core.ValidationProcessor;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -240,19 +241,8 @@ public class DataSubmissionAndValidationTest {
         "7902143_tech.nc"
     };
 
-    for (String file : files) {
-      Path floatDir = aomlProcessingDir.resolve(file.split("_")[0]);
-      NcSubmissionMessage expectedMessage = NcSubmissionMessage.builder()
-          .withFileType(FileType.AUXILIARY)
-          .withDac("aoml")
-          .withFileName(file)
-          .withTimestamp(timestamp)
-          .withFloatId(floatDir.getFileName().toString())
-          .withNumberOfFilesInSubmission(102)
-          .build();
-      // TODO remove mock once validation processor is refactored
-      when(validationProcessor.validate(eq(expectedMessage))).thenReturn(expectedMessage);
-    }
+    // TODO remove mock once validation processor is refactored
+    when(validationProcessor.validate(any())).thenAnswer(i -> i.getArgument(0, NcSubmissionMessage.class));
 
     String fileName = "nc_2025.04.02_16.15.tar.gz";
     Path submittedFile = submitDir.resolve(fileName);
@@ -278,13 +268,21 @@ public class DataSubmissionAndValidationTest {
       Path floatDir = aomlProcessingDir.resolve("2026-02-20T01:02:03Z").resolve(name.split("_")[0]);
       expectedFiles.add(floatDir.resolve(name));
 
+      ArgoFileType type = ArgoFileType.METADATA;
+      if (name.endsWith("traj.nc")) {
+        type = ArgoFileType.TRAJECTORY;
+      } else if (name.endsWith("tech.nc")) {
+        type = ArgoFileType.TECHNICAL_DATA;
+      }
+
       NcSubmissionMessage expectedMessage = NcSubmissionMessage.builder()
-          .withFileType(FileType.AUXILIARY)
+          .withFileType(type)
           .withDac("aoml")
           .withFileName(name)
           .withTimestamp(timestamp)
           .withFloatId(floatDir.getFileName().toString())
           .withNumberOfFilesInSubmission(102)
+          .withOperation(Operation.ADD)
           .build();
 
       validationMessages.add(expectedMessage);
@@ -319,26 +317,14 @@ public class DataSubmissionAndValidationTest {
 
     String badFile = "R5905716_245.nc";
 
-    for (String file : files) {
-      String floatId = file.replaceAll("R", "").split("_")[0];
-      NcSubmissionMessage expectedMessage = NcSubmissionMessage.builder()
-          .withFileType(FileType.CORE_ARGO_PROFILE)
-          .withDac("aoml")
-          .withFileName(file)
-          .withTimestamp(timestamp)
-          .withFloatId(floatId)
-          .withNumberOfFilesInSubmission(files.length)
-          .build();
-      if (file.equals(badFile)) {
-        // TODO remove mock once validation processor is refactored
-        when(validationProcessor.validate(eq(expectedMessage))).thenReturn(
-            NcSubmissionMessage.builder(expectedMessage).withValidationErrors(Collections.singletonList("test error")).build());
-      } else {
-        // TODO remove mock once validation processor is refactored
-        when(validationProcessor.validate(eq(expectedMessage))).thenReturn(expectedMessage);
-      }
-
-    }
+    when(validationProcessor.validate(any())).thenAnswer(i -> {
+          NcSubmissionMessage message = i.getArgument(0, NcSubmissionMessage.class);
+          if (message.getFileName().equals(badFile)) {
+            return NcSubmissionMessage.builder(message).withValidationErrors(Collections.singletonList("test error")).build();
+          }
+          return message;
+        }
+    );
 
     String fileName = "nc_2025.04.16_05.01_w_bad.tar.gz";
     Path submittedFile = submitDir.resolve(fileName);
@@ -366,12 +352,13 @@ public class DataSubmissionAndValidationTest {
       expectedFiles.add(floatDir.resolve("profiles").resolve(name));
 
       NcSubmissionMessage expectedMessage = NcSubmissionMessage.builder()
-          .withFileType(FileType.CORE_ARGO_PROFILE)
+          .withFileType(ArgoFileType.PROFILE_CORE)
           .withDac("aoml")
           .withFileName(name)
           .withTimestamp(timestamp)
           .withFloatId(floatDir.getFileName().toString())
           .withNumberOfFilesInSubmission(files.length)
+          .withOperation(Operation.ADD)
           .build();
 
       if (name.equals(badFile)) {
@@ -404,127 +391,6 @@ public class DataSubmissionAndValidationTest {
 
     assertFalse(Files.exists(submittedFile));
     assertTrue(Files.exists(submissionProcessedDir.resolve(timestamp.toString()).resolve(fileName)));
-
-//      Set<NcSubmissionMessage> validationMessages = new HashSet<>();
-//      Set<Path> expectedFiles = new TreeSet<>();
-//      Streams.of(files).forEach(name -> {
-//          Path floatDir = aomlProcessingDir.resolve("2026-02-20T01:02:03Z").resolve(name.split("_")[0]);
-//          expectedFiles.add(floatDir.resolve(name));
-//
-//          NcSubmissionMessage expectedMessage = NcSubmissionMessage.builder()
-//                  .withProfile(false)
-//                  .withDac("aoml")
-//                  .withFileName(name)
-//                  .withTimestamp(timestamp)
-//                  .withFloatId(floatDir.getFileName().toString())
-//                  .withNumberOfFilesInSubmission(102)
-//                  .build();
-//
-//          validationMessages.add(expectedMessage);
-//      });
-//
-//      Set<NcSubmissionMessage> receivedMessages = new HashSet<>();
-//      for (Exchange exchange : validationSuccess.getExchanges()) {
-//          String json = exchange.getIn().getBody(String.class);
-//          NcSubmissionMessage ncSubmissionMessage = jsonMapper.readValue(json, NcSubmissionMessage.class);
-//          receivedMessages.add(ncSubmissionMessage);
-//      }
-//
-//      assertEquals(expectedFiles, processedFiles);
-//      assertEquals(validationMessages, receivedMessages);
-//
-//      assertFalse(Files.exists(submittedFile));
-//      assertTrue(Files.exists(submissionProcessedDir.resolve(timestamp.toString()).resolve(fileName)));
-//
-//
-
-//    String timestamp = Instant.now().toString();
-//    when(submissionTimestampService.generateTimestamp()).thenReturn(timestamp);
-//
-//    Path submissionDir = serviceProperties.getSubmissionDirectory();
-//    Path aomlDir = submissionDir.resolve("dac").resolve("aoml");
-//    Path submitDir = aomlDir.resolve("submit");
-//
-//    Path submissionProcessingDir = aomlDir.resolve("processing");
-//    Path submissionProcessedDir = aomlDir.resolve("processed");
-//    Path aomlProcessingDir = serviceProperties.getWorkDirectory().resolve("processing/dac/aoml");
-//
-//    FileTestUtils.emptyDirectory(submitDir);
-//    FileTestUtils.emptyDirectory(submissionProcessingDir);
-//    FileTestUtils.emptyDirectory(aomlProcessingDir);
-//    FileTestUtils.emptyDirectory(submissionProcessedDir);
-//
-//    String fileName = "nc_2025.04.16_05.01_w_bad.tar.gz";
-//    Path submittedFile = submitDir.resolve(fileName);
-//    Path copyFile = aomlDir.resolve(fileName);
-//
-//    validationSuccess.expectedMessageCount(files.length - 1);
-//    validationSuccess.setAssertPeriod(2000);
-//    fileOutput.expectedMessageCount(1);
-//    fileOutput.setAssertPeriod(2000);
-
-    // copy before moving to prevent state where file is picked up halfway
-//    Files.copy(Paths.get("src/test/resources").resolve(fileName), copyFile);
-//    Files.move(copyFile, submittedFile);
-
-//    MockEndpoint.assertIsSatisfied(10, TimeUnit.SECONDS, validationSuccess, fileOutput);
-//    Set<Path> processedFiles = new TreeSet<>();
-//    try (Stream<Path> stream = Files.walk(aomlProcessingDir)) {
-//      stream.filter(Files::isRegularFile).forEach(processedFiles::add);
-//    }
-//    Set<NcSubmissionMessage> validationMessages = new HashSet<>();
-//    Set<NcSubmissionMessage> failedMessages = new HashSet<>();
-//    Set<Path> expectedFiles = new TreeSet<>();
-//    Streams.of(files).forEach(name -> {
-//      Path floatDir = aomlProcessingDir.resolve(name.split("_")[0].replaceAll("^[A-Z]+", ""));
-//      expectedFiles.add(floatDir.resolve("profiles").resolve(name));
-//
-//      NcSubmissionMessage expectedMessage = NcSubmissionMessage.builder()
-//          .withProfile(true)
-//          .withDac("aoml")
-//          .withFileName(name)
-//          .withTimestamp(timestamp)
-//          .withFloatId(floatDir.getFileName().toString())
-//          .withNumberOfFilesInSubmission(files.length)
-//          .build();
-//
-//      if (name.equals(badFile)) {
-//        failedMessages.add(expectedMessage);
-//      } else {
-//        validationMessages.add(expectedMessage);
-//      }
-//
-//    });
-//
-//    Set<NcSubmissionMessage> receivedValidMessages = validationSuccess.getExchanges().stream()
-//        .map(exchange -> exchange.getIn().getBody(String.class))
-//        .map(body -> {
-//          try {
-//            return objectMapper.readValue(body, NcSubmissionMessage.class);
-//          } catch (JsonProcessingException e) {
-//            throw new RuntimeException(e);
-//          }
-//        })
-//        .collect(Collectors.toSet());
-//
-//    NcSubmissionMessage receivedFailedMessage = fileOutput.getExchanges().stream()
-//        .map(exchange -> exchange.getIn().getBody(String.class))
-//        .map(body -> {
-//          try {
-//            return objectMapper.readValue(body, NcSubmissionMessage.class);
-//          } catch (JsonProcessingException e) {
-//            throw new RuntimeException(e);
-//          }
-//        })
-//        .findFirst().orElse(null);
-//
-//    assertEquals(expectedFiles, processedFiles);
-//    assertEquals(validationMessages, receivedValidMessages);
-//    assertEquals(badFile, receivedFailedMessage.getFileName());
-//    assertEquals(1, receivedFailedMessage.getValidationErrors().size());
-//
-//    assertFalse(Files.exists(submittedFile));
-//    assertTrue(Files.exists(submissionProcessedDir.resolve(timestamp).resolve(fileName)));
 
   }
 

@@ -4,5 +4,5 @@ import edu.colorado.cires.argonaut.messaging.core.databind.ArgoOcean;
 
 public interface GeoFilter {
 
-  ArgoOcean determineArgoOcean(double longitude, double latitude);
+  ArgoOcean determineArgoOcean(Double longitude, Double latitude);
 }

@@ -36,9 +36,9 @@ class Remover {
 
   private static void remove(EntityManager em, MetadataRecord record) {
     switch (record.getFileType()) {
-      case CORE_ARGO_PROFILE:
-      case B_ARGO_PROFILE:
-      case BGC_ARGO_SYNTH_PROFILE:
+      case PROFILE_CORE:
+      case PROFILE_BIOCHEMICAL:
+      case SYNTHETIC_PROFILE_SINGLE_CYCLE:
         removeProfile(em, record);
         break;
       case METADATA:

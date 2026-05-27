@@ -10,18 +10,6 @@
   <import resource="classpath:/application-context.xml"/>
 
   <!-- Override the specific bean with a new definition -->
-  <bean id="fileToSubmissionMessage" class="edu.colorado.cires.argonaut.standalone.FileToSubmissionMessage">
-    <property name="timestampGenerator">
-      <bean class="edu.colorado.cires.argonaut.standalone.StaticTimestampGenerator"/>
-    </property>
-  </bean>
 
-  <bean id="validationProcessor" class="org.mockito.Mockito" factory-method="mock">
-    <constructor-arg type="java.lang.Class" value="edu.colorado.cires.argonaut.processor.core.ValidationProcessor"/>
-  </bean>
-
-  <bean id="floatMergeProcessor" class="org.mockito.Mockito" factory-method="mock">
-    <constructor-arg type="java.lang.Class" value="edu.colorado.cires.argonaut.processor.core.DefaultFloatMergeProcessor"/>
-  </bean>
 
 </beans>

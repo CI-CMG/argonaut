@@ -16,6 +16,14 @@
       <to uri="seda:submit-work"/>
     </route>
 
+    <route id="meds-dac-submission">
+      <from uri="file:{{dac.submission.directory}}/dac/meds/submit?readLock=changed&amp;delete=true"/>
+      <bean ref="fileToSubmissionMessage" method="convert(${body}, 'meds')"/>
+      <bean ref="moveSubmitToProcessingProcessor" method="moveToProcessing"/>
+      <bean ref="serializationProcessor" method="serialize"/>
+      <to uri="seda:submit-work"/>
+    </route>
+
     <!-- DAC submission directory template -->
     <!-- Replace DAC-CODE with the short name of the DAC.  Ex. 'aoml'.  3 places. -->
     <!--

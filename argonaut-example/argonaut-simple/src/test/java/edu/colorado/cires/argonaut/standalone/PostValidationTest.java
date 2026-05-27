@@ -4,8 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import edu.colorado.cires.argonaut.messaging.camel.ArgonautCamelMessageSender;
+import edu.colorado.cires.argonaut.messaging.core.databind.ArgoFileType;
 import edu.colorado.cires.argonaut.messaging.core.databind.NcSubmissionMessage;
-import edu.colorado.cires.argonaut.messaging.core.databind.NcSubmissionMessage.FileType;
 import edu.colorado.cires.argonaut.messaging.core.databind.NcSubmissionMessage.Operation;
 import edu.colorado.cires.argonaut.processor.core.ValidationProcessor;
 import java.io.IOException;
@@ -282,7 +282,7 @@ public class PostValidationTest {
       Files.move(timeStampDir.resolve(name), floatDir.resolve(name));
       messageSender.sendJson("seda:validation-success", jsonMapper.writeValueAsString(NcSubmissionMessage.builder()
           .withOperation(Operation.ADD)
-          .withFileType(FileType.AUXILIARY)
+          .withFileType(ArgoFileType.AUXILIARY)
           .withDac("aoml")
           .withFileName(name)
           .withTimestamp(timestamp)
@@ -427,7 +427,7 @@ public class PostValidationTest {
       Files.move(timeStampDir.resolve(name), floatDir.resolve(name));
       messageSender.sendJson("seda:file-output", jsonMapper.writeValueAsString(NcSubmissionMessage.builder()
           .withOperation(Operation.ADD)
-          .withFileType(FileType.AUXILIARY)
+          .withFileType(ArgoFileType.AUXILIARY)
           .withDac("aoml")
           .withFileName(name)
           .withTimestamp(timestamp)
@@ -475,7 +475,7 @@ public class PostValidationTest {
       Files.move(timeStampDir.resolve(name), floatDir.resolve("profiles").resolve(name));
       messageSender.sendJson("seda:validation-success", jsonMapper.writeValueAsString(NcSubmissionMessage.builder()
           .withOperation(Operation.ADD)
-          .withFileType(FileType.CORE_ARGO_PROFILE)
+          .withFileType(ArgoFileType.PROFILE_CORE)
           .withDac("aoml")
           .withFileName(name)
           .withTimestamp(timestamp)
@@ -522,7 +522,7 @@ public class PostValidationTest {
       Files.move(timeStampDir.resolve(name), floatDir.resolve("profiles").resolve(name));
       messageSender.sendJson("seda:file-output", jsonMapper.writeValueAsString(NcSubmissionMessage.builder()
           .withOperation(Operation.ADD)
-          .withFileType(FileType.CORE_ARGO_PROFILE)
+          .withFileType(ArgoFileType.PROFILE_CORE)
           .withDac("aoml")
           .withFileName(name)
           .withTimestamp(timestamp)

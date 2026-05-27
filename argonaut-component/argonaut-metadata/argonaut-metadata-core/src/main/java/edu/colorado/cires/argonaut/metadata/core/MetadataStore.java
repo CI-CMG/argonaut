@@ -11,10 +11,4 @@ public interface MetadataStore {
   ProfilePage findUpdatedOrMissingSyntheticProfilesPage(IndexPageRequest pageRequest);
   ProfilePage findUpdatedOrMissingMergeFilesPage(IndexPageRequest pageRequest);
 
-
-//  MetadataRecordPage findAllPage(IndexPageRequest pageRequest);
-//  MetadataRecordPage findProfilePage(String floatId, String dac, IndexPageRequest pageRequest);
-//  FloatMergeGroupPage findUpdatedOrMissingMergeFilesPage(IndexPageRequest pageRequest);
-
-
 }

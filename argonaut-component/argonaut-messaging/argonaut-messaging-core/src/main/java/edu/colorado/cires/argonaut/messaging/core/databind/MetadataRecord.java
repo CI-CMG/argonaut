@@ -2,7 +2,6 @@ package edu.colorado.cires.argonaut.messaging.core.databind;
 
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
-import edu.colorado.cires.argonaut.messaging.core.databind.NcSubmissionMessage.FileType;
 import java.time.Instant;
 import java.util.Collections;
 import java.util.HashMap;
@@ -54,7 +53,7 @@ public class MetadataRecord {
     private String direction;
     private String cycleNumber;
     private Action action;
-    private FileType fileType;
+    private ArgoFileType fileType;
     private FileStatus fileStatus;
     private String dac;
     private String floatId;
@@ -176,7 +175,7 @@ public class MetadataRecord {
       return this;
     }
 
-    public Builder withFileType(FileType fileType) {
+    public Builder withFileType(ArgoFileType fileType) {
       this.fileType = fileType;
       return this;
     }
@@ -259,7 +258,7 @@ public class MetadataRecord {
   private final String direction;
   private final String cycleNumber;
   private final Action action;
-  private final FileType fileType;
+  private final ArgoFileType fileType;
   private final FileStatus fileStatus;
   private final String dac;
   private final String floatId;
@@ -268,7 +267,7 @@ public class MetadataRecord {
 
   private MetadataRecord(String file, Instant date, Double latitude, Double latitudeMin, Double latitudeMax, Double longitude, Double longitudeMin,
       Double longitudeMax, ArgoOcean ocean, String profilerType, String institution, Instant dateUpdate, String parameters, String parameterDataMode,
-      String direction, String cycleNumber, Action action, FileType fileType, FileStatus fileStatus, String dac, String floatId, Instant actionTimestamp,
+      String direction, String cycleNumber, Action action, ArgoFileType fileType, FileStatus fileStatus, String dac, String floatId, Instant actionTimestamp,
       Map<String, Object> otherFields) {
     this.file = file;
     this.date = date;
@@ -363,7 +362,7 @@ public class MetadataRecord {
     return action;
   }
 
-  public FileType getFileType() {
+  public ArgoFileType getFileType() {
     return fileType;
   }
 

@@ -1,7 +1,7 @@
 package edu.colorado.cires.argonaut.metadata.jpa;
 
+import edu.colorado.cires.argonaut.messaging.core.databind.ArgoFileType;
 import edu.colorado.cires.argonaut.messaging.core.databind.MetadataRecord;
-import edu.colorado.cires.argonaut.messaging.core.databind.NcSubmissionMessage.FileType;
 import edu.colorado.cires.argonaut.metadata.jpa.entity.ProfileFileEntity;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
@@ -17,7 +17,7 @@ class SyntheticMerger {
   }
 
   void updateSynthMerge(MetadataRecord record) {
-    if (record.getFileType() == FileType.CORE_ARGO_PROFILE || record.getFileType() == FileType.B_ARGO_PROFILE) {
+    if (record.getFileType() == ArgoFileType.PROFILE_CORE || record.getFileType() == ArgoFileType.PROFILE_BIOCHEMICAL) {
       try (EntityManager em = entityManagerFactory.createEntityManager()) {
         EntityTransaction tx = em.getTransaction();
         tx.begin();

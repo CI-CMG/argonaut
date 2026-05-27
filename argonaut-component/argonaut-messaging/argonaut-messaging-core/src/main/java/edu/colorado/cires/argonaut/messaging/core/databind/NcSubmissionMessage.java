@@ -24,17 +24,6 @@ public final class NcSubmissionMessage implements Comparable<NcSubmissionMessage
     ADD, REMOVE
   }
 
-  public enum FileType {
-    CORE_ARGO_PROFILE,
-    B_ARGO_PROFILE,
-    BGC_ARGO_SYNTH_PROFILE,
-    ARGO_TRAJECTORY,
-    METADATA,
-    TECHNICAL_DATA,
-    AUXILIARY,
-    PROFILE_MERGE
-  }
-
   public static final class Builder {
 
     private String floatId;
@@ -42,7 +31,7 @@ public final class NcSubmissionMessage implements Comparable<NcSubmissionMessage
     private Instant timestamp;
     private String dac;
     private String fileName;
-    private FileType fileType;
+    private ArgoFileType fileType;
     private int numberOfFilesInSubmission;
     private Operation operation;
 //    private List<String> associatedFiles = new ArrayList<>();
@@ -93,7 +82,7 @@ public final class NcSubmissionMessage implements Comparable<NcSubmissionMessage
       return this;
     }
 
-    public Builder withFileType(FileType fileType) {
+    public Builder withFileType(ArgoFileType fileType) {
       this.fileType = fileType;
       return this;
     }
@@ -132,12 +121,12 @@ public final class NcSubmissionMessage implements Comparable<NcSubmissionMessage
   private final Instant timestamp;
   private final String dac;
   private final String fileName;
-  private final FileType fileType;
+  private final ArgoFileType fileType;
   private final int numberOfFilesInSubmission;
   private final Operation operation;
 //  private final List<String> associatedFiles;
 
-  private NcSubmissionMessage(String floatId, List<String> validationErrors, Instant timestamp, String dac, String fileName, FileType fileType,
+  private NcSubmissionMessage(String floatId, List<String> validationErrors, Instant timestamp, String dac, String fileName, ArgoFileType fileType,
       int numberOfFilesInSubmission, Operation operation) {
     this.floatId = floatId;
     this.validationErrors = validationErrors;
@@ -174,7 +163,7 @@ public final class NcSubmissionMessage implements Comparable<NcSubmissionMessage
     return validationErrors;
   }
 
-  public FileType getFileType() {
+  public ArgoFileType getFileType() {
     return fileType;
   }
 

@@ -1,10 +1,10 @@
 package edu.colorado.cires.argonaut.processor.core;
 
 import edu.colorado.cires.argonaut.file.core.FileStore;
+import edu.colorado.cires.argonaut.messaging.core.databind.ArgoFileType;
 import edu.colorado.cires.argonaut.messaging.core.databind.MetadataRecord;
 import edu.colorado.cires.argonaut.messaging.core.databind.MetadataRecord.Action;
 import edu.colorado.cires.argonaut.messaging.core.databind.NcSubmissionMessage;
-import edu.colorado.cires.argonaut.messaging.core.databind.NcSubmissionMessage.FileType;
 import edu.colorado.cires.argonaut.processor.core.transform.NetCdfMetadataRecord;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -25,7 +25,7 @@ public class DefaultMetadataRecordTransformationProcessor implements MetadataRec
           .build();
     }
     String file = outputFileStore.appendToPath(message.getDac(), message.getFloatId());
-    if (FileType.CORE_ARGO_PROFILE == message.getFileType()) {
+    if (ArgoFileType.isProfile(message.getFileType())) {
       file = outputFileStore.appendToPath(file, "profiles");
     }
     file = outputFileStore.appendToPath(file, message.getFileName());
@@ -45,7 +45,7 @@ public class DefaultMetadataRecordTransformationProcessor implements MetadataRec
     }
   }
 
-  private MetadataRecord createUpdateMessage(FileType fileType, String file, String dac) {
+  private MetadataRecord createUpdateMessage(ArgoFileType fileType, String file, String dac) {
     String path = outputFileStore.appendToPath(outputFileStore.getRoot(), "dac", file);
     Path ncFile;
     try {
@@ -61,8 +61,8 @@ public class DefaultMetadataRecordTransformationProcessor implements MetadataRec
       }
       try {
         switch (fileType) {
-          case CORE_ARGO_PROFILE:
-          case B_ARGO_PROFILE:
+          case PROFILE_CORE:
+          case PROFILE_BIOCHEMICAL:
             return NetCdfMetadataRecord.fromV31Profile(file, dac, ncFile, geoFilter);
           case METADATA:
             return NetCdfMetadataRecord.fromV31Metadata(file, dac, ncFile, geoFilter);

@@ -1,9 +1,9 @@
 package edu.colorado.cires.argonaut.metadata.jpa;
 
+import edu.colorado.cires.argonaut.messaging.core.databind.ArgoFileType;
 import edu.colorado.cires.argonaut.messaging.core.databind.ArgoOcean;
 import edu.colorado.cires.argonaut.messaging.core.databind.MetadataRecord;
 import edu.colorado.cires.argonaut.messaging.core.databind.MetadataRecord.FileStatus;
-import edu.colorado.cires.argonaut.messaging.core.databind.NcSubmissionMessage.FileType;
 import edu.colorado.cires.argonaut.messaging.core.databind.ProfileOperation;
 import edu.colorado.cires.argonaut.metadata.core.DefaultIndexPageRequest;
 import edu.colorado.cires.argonaut.metadata.core.DefaultProfilePage;
@@ -44,7 +44,7 @@ class Finder {
         }
 
         return Optional.of(MetadataRecord.builder()
-            .withFileType(FileType.METADATA)
+            .withFileType(ArgoFileType.METADATA)
             .withDac(result.getFloatId().getDac().getDac())
             .withFile(result.getFile())
             .withFloatId(result.getFloatId().getFloatId())
@@ -84,7 +84,7 @@ class Finder {
             .withDirection(result.getCycle().getDirection().toString())
             .withCycleNumber(result.getCycle().getCycleNumber())
             .withParameterDataMode(result.getCycle().getCycleNumber())
-            .withFileType(FileType.valueOf(result.getFileType()))
+            .withFileType(ArgoFileType.valueOf(result.getFileType()))
             .withDac(result.getCycle().getFloatId().getDac().getDac())
             .withFile(result.getFile())
             .withFloatId(result.getCycle().getFloatId().getFloatId())
@@ -116,14 +116,14 @@ class Finder {
           """
                  SELECT COUNT(DISTINCT profile.cycle.floatId.id) FROM ProfileFileEntity profile
                  WHERE profile.fileStatus = 'ACTIVE' AND
-                       profile.fileType = 'CORE_ARGO_PROFILE' AND
+                       profile.fileType = 'PROFILE_CORE' AND
                        profile.multiFloatMergeTime IS NULL
               """, Long.class).getSingleResult();
       List<String> floatIds = em.createQuery(
               """
                      SELECT DISTINCT profile.cycle.floatId.id fid FROM ProfileFileEntity profile
                          WHERE profile.fileStatus = 'ACTIVE' AND 
-                             profile.fileType = 'CORE_ARGO_PROFILE' AND
+                             profile.fileType = 'PROFILE_CORE' AND
                              profile.multiFloatMergeTime IS NULL
                      order by fid
                   """, String.class)
@@ -143,7 +143,7 @@ class Finder {
               .withDac(floatEntity.getDac().getDac())
               .withFloatId(floatEntity.getFloatId())
               .withFiles(floatEntity.getCycles().stream().flatMap(cycle -> cycle.getProfiles().stream())
-                  .filter(profile -> FileType.CORE_ARGO_PROFILE.toString().equals(profile.getFileType()))
+                  .filter(profile -> ArgoFileType.PROFILE_CORE.toString().equals(profile.getFileType()))
                   .filter(profile -> FileStatus.ACTIVE.toString().equals(profile.getFileStatus()))
                   .map(ProfileFileEntity::getFile).sorted().toList())
               .build()
@@ -160,7 +160,7 @@ class Finder {
                  SELECT COUNT(DISTINCT profile.cycle.id) FROM ProfileFileEntity profile
                  WHERE profile.cycle.floatId.metadata.fileStatus = 'ACTIVE' AND
                        profile.fileStatus = 'ACTIVE' AND
-                       (profile.fileType = 'CORE_ARGO_PROFILE' OR profile.fileType = 'B_ARGO_PROFILE') AND
+                       (profile.fileType = 'PROFILE_CORE' OR profile.fileType = 'PROFILE_BIOCHEMICAL') AND
                        profile.syntheticMergeTime IS NULL
               """, Long.class).getSingleResult();
       List<String> cycleIds = em.createQuery(
@@ -168,7 +168,7 @@ class Finder {
                      SELECT DISTINCT profile.cycle.id cid FROM ProfileFileEntity profile
                          WHERE profile.cycle.floatId.metadata.fileStatus = 'ACTIVE' AND 
                              profile.fileStatus = 'ACTIVE' AND 
-                             (profile.fileType = 'CORE_ARGO_PROFILE' OR profile.fileType = 'B_ARGO_PROFILE') AND
+                             (profile.fileType = 'PROFILE_CORE' OR profile.fileType = 'PROFILE_BIOCHEMICAL') AND
                              profile.syntheticMergeTime IS NULL
                      order by cid
                   """, String.class)

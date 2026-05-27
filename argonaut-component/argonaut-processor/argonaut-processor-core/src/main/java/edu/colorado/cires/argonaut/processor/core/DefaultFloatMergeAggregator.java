@@ -7,9 +7,13 @@ import edu.colorado.cires.argonaut.metadata.core.IndexPageRequest;
 import edu.colorado.cires.argonaut.metadata.core.MetadataStore;
 import edu.colorado.cires.argonaut.metadata.core.ProfilePage;
 import java.util.Optional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import tools.jackson.databind.json.JsonMapper;
 
 public class DefaultFloatMergeAggregator implements FloatMergeAggregator {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(DefaultFloatMergeAggregator.class);
 
   private MetadataStore metadataStore;
   private MessageSender messageSender;
@@ -51,14 +55,19 @@ public class DefaultFloatMergeAggregator implements FloatMergeAggregator {
   @Override
   public void trigger() {
     if (enabled) {
-      ProfilePage page = metadataStore.findUpdatedOrMissingMergeFilesPage(DefaultIndexPageRequest.builder().withPageSize(pageSize).build());
+      execute();
+    }
+  }
+
+  public void execute() {
+    LOGGER.info("Triggered Float Merge Aggregator");
+    ProfilePage page = metadataStore.findUpdatedOrMissingMergeFilesPage(DefaultIndexPageRequest.builder().withPageSize(pageSize).build());
+    sendMessages(page);
+    Optional<IndexPageRequest> maybeNextPage = page.getNextPage();
+    while (maybeNextPage.isPresent()) {
+      page = metadataStore.findUpdatedOrMissingMergeFilesPage(DefaultIndexPageRequest.builder(maybeNextPage.get()).build());
       sendMessages(page);
-      Optional<IndexPageRequest> maybeNextPage = page.getNextPage();
-      while (maybeNextPage.isPresent()) {
-        page = metadataStore.findUpdatedOrMissingMergeFilesPage(DefaultIndexPageRequest.builder(maybeNextPage.get()).build());
-        sendMessages(page);
-        maybeNextPage = page.getNextPage();
-      }
+      maybeNextPage = page.getNextPage();
     }
   }
 }

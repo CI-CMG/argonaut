@@ -3,7 +3,6 @@ package edu.colorado.cires.argonaut.processor.core;
 import edu.colorado.cires.argonaut.file.core.FileStore;
 import edu.colorado.cires.argonaut.messaging.core.databind.DacSubmittedFileMessage;
 import edu.colorado.cires.argonaut.messaging.core.databind.NcSubmissionMessage;
-import edu.colorado.cires.argonaut.messaging.core.databind.NcSubmissionMessage.FileType;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -11,21 +10,13 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Stream;
 import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
 import org.apache.commons.io.FileUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class DefaultTarballSubmissionProcessor implements TarballSubmissionProcessor {
-
-  private static final Logger LOGGER = LoggerFactory.getLogger(DefaultTarballSubmissionProcessor.class);
-
-  private static final Pattern FILE_NAME_PATTERN = Pattern.compile("([A-Z]+)?([0-9]+)_(.+)\\.nc(\\.filecheck)?");
 
   private FileStore submissionFileStore;
   private FileStore processingFileStore;
@@ -41,11 +32,11 @@ public class DefaultTarballSubmissionProcessor implements TarballSubmissionProce
 
   public void setLocalTempDir(Path localTempDir) {
     this.localTempDir = localTempDir;
-      try {
-          Files.createDirectories(localTempDir);
-      } catch (IOException e) {
-          throw new RuntimeException("Unable to create temp directory: " + localTempDir, e);
-      }
+    try {
+      Files.createDirectories(localTempDir);
+    } catch (IOException e) {
+      throw new RuntimeException("Unable to create temp directory: " + localTempDir, e);
+    }
   }
 
   private static void unTarGz(Path tarGz, Path tempDir) throws IOException {
@@ -111,35 +102,13 @@ public class DefaultTarballSubmissionProcessor implements TarballSubmissionProce
       for (Path file : listFiles(tempDir)) {
         if (Files.isRegularFile(file)) {
           String fileName = Optional.ofNullable(file.getFileName()).orElseThrow().toString();
-          Matcher matcher = FILE_NAME_PATTERN.matcher(fileName);
-          if (matcher.matches()) {
-            String floatDir = matcher.group(2);
-            boolean profile = matcher.group(1) != null;
-            NcSubmissionMessage ncSubmissionMessage = NcSubmissionMessage.builder()
-                .withFileName(fileName)
-                .withFileType(profile ? FileType.CORE_ARGO_PROFILE : FileType.AUXILIARY)
-                .withFloatId(floatDir)
-                .withDac(submittedFile.getDac())
-                .withTimestamp(submittedFile.getTimestamp())
-                .build();
-            String processingDacDir = processingFileStore.appendToPath(processingFileStore.getRoot(), "dac", submittedFile.getDac(), submittedFile.getTimestamp().toString(), floatDir);
-            if (FileType.CORE_ARGO_PROFILE == ncSubmissionMessage.getFileType()) {
-              processingDacDir = processingFileStore.appendToPath(processingDacDir, "profiles");
-            }
-            String ncFile = processingFileStore.appendToPath(processingDacDir, fileName);
-            LOGGER.info("Adding to processing directory {}", ncFile);
-            try {
-              processingFileStore.uploadLocalFile(file, ncFile);
-            } catch (IOException e) {
-              throw new RuntimeException("Unable to upload file: " + file + " to " + ncFile, e);
-            }
-            output.add(ncSubmissionMessage);
-          }
+          DefaultSubmissionProcessor.moveSingleFile(submittedFile, file, fileName, processingFileStore).ifPresent(output::add);
         }
       }
     } finally {
       FileUtils.deleteQuietly(tempWorkDir.toFile());
-      String processedPath = submissionFileStore.appendToPath(submissionFileStore.getRoot(), "dac", submittedFile.getDac(), "processed", submittedFile.getTimestamp().toString(), tarGzFileFileName);
+      String processedPath = submissionFileStore.appendToPath(submissionFileStore.getRoot(), "dac", submittedFile.getDac(), "processed",
+          submittedFile.getTimestamp().toString(), tarGzFileFileName);
       submissionFileStore.move(submittedFile.getPath(), processedPath);
     }
 

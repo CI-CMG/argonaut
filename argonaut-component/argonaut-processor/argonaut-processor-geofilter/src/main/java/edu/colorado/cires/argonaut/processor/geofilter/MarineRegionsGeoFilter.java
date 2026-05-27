@@ -33,8 +33,12 @@ import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.geom.PrecisionModel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class MarineRegionsGeoFilter implements GeoFilter {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(MarineRegionsGeoFilter.class);
 
   private static final String SHAPE_FILE_DIR = "GOaS_v1_20211214";
   private static final String SHAPE_FILE_ZIP = SHAPE_FILE_DIR + ".zip";
@@ -84,6 +88,7 @@ public class MarineRegionsGeoFilter implements GeoFilter {
   }
 
   public void initialize() throws IOException {
+    LOGGER.info("Initializing MarineRegionsGeoFilter.  This may take a while...");
     lock.writeLock().lock();
     try {
       boolean initialized = true;
@@ -128,10 +133,14 @@ public class MarineRegionsGeoFilter implements GeoFilter {
     } finally {
       lock.writeLock().unlock();
     }
+    LOGGER.info("Done Initializing MarineRegionsGeoFilter.");
   }
 
   @Override
-  public ArgoOcean determineArgoOcean(double longitude, double latitude) {
+  public ArgoOcean determineArgoOcean(Double longitude, Double latitude) {
+    if (longitude == null || latitude == null || longitude < -180d || longitude > 180d || latitude < -90d || latitude > 90d) {
+      return ArgoOcean.UNKNOWN;
+    }
     Point point = geometryFactory.createPoint(new Coordinate(longitude, latitude));
     lock.readLock().lock();
     try {

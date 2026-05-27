@@ -2,12 +2,11 @@ package edu.colorado.cires.argonaut.processor.core;
 
 import edu.colorado.cires.argonaut.core.merge.synthetic.SyntheticProfileMerger;
 import edu.colorado.cires.argonaut.file.core.FileStore;
+import edu.colorado.cires.argonaut.messaging.core.databind.ArgoFileType;
 import edu.colorado.cires.argonaut.messaging.core.databind.MetadataRecord;
 import edu.colorado.cires.argonaut.messaging.core.databind.MetadataRecord.Action;
-import edu.colorado.cires.argonaut.messaging.core.databind.NcSubmissionMessage.FileType;
 import edu.colorado.cires.argonaut.messaging.core.databind.ProfileOperation;
 import edu.colorado.cires.argonaut.messaging.core.queue.MessageSender;
-import edu.colorado.cires.argonaut.metadata.core.MetadataStore;
 import edu.colorado.cires.argonaut.processor.core.transform.NetCdfMetadataRecord;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -80,15 +79,15 @@ public class DefaultSyntheticProfileProcessor implements SyntheticProfileProcess
           Path downloadedFile = tempDir.resolve(fileName);
           String fullFilePath = outputFileStore.appendToPath(outputFileStore.getRoot(), "dac", file);
           outputFileStore.downloadLocalFile(fullFilePath, downloadedFile);
-          downloadedFiles.add(new FileInfo(fileName, file, downloadedFile, resolveFileType(fileName)));
+          downloadedFiles.add(new FileInfo(fileName, file, downloadedFile, ArgoFileType.forFileName(fileName)));
         } catch (IOException e) {
           throw new RuntimeException("Unable to download " + file, e);
         }
       }
 
-      FileInfo cProfile = downloadedFiles.stream().filter(fi -> fi.getFileType() == FileType.CORE_ARGO_PROFILE).findFirst().orElseThrow();
-      FileInfo bProfile = downloadedFiles.stream().filter(fi -> fi.getFileType() == FileType.B_ARGO_PROFILE).findFirst().orElseThrow();
-      FileInfo meta = downloadedFiles.stream().filter(fi -> fi.getFileType() == FileType.METADATA).findFirst().orElseThrow();
+      FileInfo cProfile = downloadedFiles.stream().filter(fi -> fi.getFileType() == ArgoFileType.PROFILE_CORE).findFirst().orElseThrow();
+      FileInfo bProfile = downloadedFiles.stream().filter(fi -> fi.getFileType() == ArgoFileType.PROFILE_BIOCHEMICAL).findFirst().orElseThrow();
+      FileInfo meta = downloadedFiles.stream().filter(fi -> fi.getFileType() == ArgoFileType.METADATA).findFirst().orElseThrow();
       String sProfileFileName = "S" + cProfile.getFileName();
       Path outputPath = tempDir.resolve(sProfileFileName);
 
@@ -137,25 +136,14 @@ public class DefaultSyntheticProfileProcessor implements SyntheticProfileProcess
         .build();
   }
 
-  private static FileType resolveFileType(String fileName) {
-    if (fileName.endsWith("_meta.nc")) {
-      return FileType.METADATA;
-    } else if (fileName.startsWith("B")) {
-      return FileType.B_ARGO_PROFILE;
-    } else if (fileName.startsWith("R") || fileName.startsWith("D")) {
-      return FileType.CORE_ARGO_PROFILE;
-    }
-    throw new IllegalArgumentException("Unknown file type for name: " + fileName);
-  }
-
   private static class FileInfo {
     private final String fileName;
     private final String file;
     private final Path path;
-    private final FileType fileType;
+    private final ArgoFileType fileType;
 
 
-    private FileInfo(String fileName, String file, Path path, FileType fileType) {
+    private FileInfo(String fileName, String file, Path path, ArgoFileType fileType) {
       this.fileName = fileName;
       this.file = file;
       this.path = path;
@@ -174,7 +162,7 @@ public class DefaultSyntheticProfileProcessor implements SyntheticProfileProcess
       return path;
     }
 
-    public FileType getFileType() {
+    public ArgoFileType getFileType() {
       return fileType;
     }
   }

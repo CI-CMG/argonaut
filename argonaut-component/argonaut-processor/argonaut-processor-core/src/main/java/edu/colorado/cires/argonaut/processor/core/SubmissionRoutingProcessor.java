@@ -11,10 +11,15 @@ public class SubmissionRoutingProcessor {
 
   private MessageSender messageSender;
   private TarballSubmissionProcessor tarballSubmissionProcessor;
+  private SubmissionProcessor submissionProcessor;
   private RemovalFileValidationProcessor removalFileValidationProcessor;
   private JsonMapper jsonMapper;
   private String submitDataQueue;
   private String submitRemovalQueue;
+
+  public void setSubmissionProcessor(SubmissionProcessor submissionProcessor) {
+    this.submissionProcessor = submissionProcessor;
+  }
 
   public void setMessageSender(MessageSender messageSender) {
     this.messageSender = messageSender;
@@ -50,6 +55,9 @@ public class SubmissionRoutingProcessor {
       //TODO should this be a list?
       RemovalMessage removalMessage = removalFileValidationProcessor.validate(message);
       messageSender.sendJson(submitRemovalQueue, jsonMapper.writeValueAsString(removalMessage));
+    } else if (message.getPath().endsWith(".nc")) {
+      submissionProcessor.moveToProcessing(message)
+          .ifPresent(submissionMessage -> messageSender.sendJson(submitDataQueue, jsonMapper.writeValueAsString(submissionMessage)));
     } else {
       // TODO
       throw new UnsupportedOperationException("Unsupported file type: " + message.getPath());

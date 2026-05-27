@@ -4,8 +4,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import edu.colorado.cires.argonaut.messaging.core.databind.ArgoFileType;
 import edu.colorado.cires.argonaut.messaging.core.databind.NcSubmissionMessage;
-import edu.colorado.cires.argonaut.messaging.core.databind.NcSubmissionMessage.FileType;
+import edu.colorado.cires.argonaut.messaging.core.databind.NcSubmissionMessage.Operation;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -249,13 +250,21 @@ public class DataSubmissionAndActualValidationTest {
       Path floatDir = aomlProcessingDir.resolve("2026-02-20T01:02:03Z").resolve(name.split("_")[0]);
       expectedFiles.add(floatDir.resolve(name));
 
+      ArgoFileType type = ArgoFileType.METADATA;
+      if (name.endsWith("traj.nc")) {
+        type = ArgoFileType.TRAJECTORY;
+      } else if (name.endsWith("tech.nc")) {
+        type = ArgoFileType.TECHNICAL_DATA;
+      }
+
       NcSubmissionMessage expectedMessage = NcSubmissionMessage.builder()
-          .withFileType(FileType.AUXILIARY)
+          .withFileType(type)
           .withDac("aoml")
           .withFileName(name)
           .withTimestamp(timestamp)
           .withFloatId(floatDir.getFileName().toString())
           .withNumberOfFilesInSubmission(102)
+          .withOperation(Operation.ADD)
           .build();
 
       validationMessages.add(expectedMessage);
@@ -316,12 +325,13 @@ public class DataSubmissionAndActualValidationTest {
       expectedFiles.add(floatDir.resolve("profiles").resolve(name));
 
       NcSubmissionMessage expectedMessage = NcSubmissionMessage.builder()
-          .withFileType(FileType.CORE_ARGO_PROFILE)
+          .withFileType(ArgoFileType.PROFILE_CORE)
           .withDac("aoml")
           .withFileName(name)
           .withTimestamp(timestamp)
           .withFloatId(floatDir.getFileName().toString())
           .withNumberOfFilesInSubmission(files.length)
+          .withOperation(Operation.ADD)
           .build();
 
       if (name.equals(badFile)) {

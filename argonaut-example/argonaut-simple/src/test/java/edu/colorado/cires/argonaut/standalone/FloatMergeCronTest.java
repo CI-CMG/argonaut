@@ -1,36 +1,28 @@
 package edu.colorado.cires.argonaut.standalone;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.awaitility.Awaitility.await;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import edu.colorado.cires.argonaut.messaging.camel.ArgonautCamelMessageSender;
-import edu.colorado.cires.argonaut.messaging.core.databind.NcSubmissionMessage;
-import edu.colorado.cires.argonaut.messaging.core.databind.NcSubmissionMessage.FileType;
-import edu.colorado.cires.argonaut.messaging.core.databind.NcSubmissionMessage.Operation;
-import edu.colorado.cires.argonaut.processor.core.FloatMergeProcessor;
-import edu.colorado.cires.argonaut.processor.core.ValidationProcessor;
-import java.io.IOException;
-import java.io.InputStream;
+import edu.colorado.cires.argonaut.metadata.jpa.entity.ProfileFileEntity;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.EntityTransaction;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.Collections;
+import java.util.Arrays;
+import java.util.List;
 import java.util.stream.Stream;
-import org.apache.camel.EndpointInject;
-import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.test.spring.junit5.CamelSpringTest;
-import org.apache.camel.test.spring.junit5.MockEndpointsAndSkip;
-import org.apache.commons.compress.archivers.ArchiveEntry;
-import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
-import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.test.annotation.DirtiesContext;
@@ -43,29 +35,58 @@ import tools.jackson.databind.json.JsonMapper;
 @TestPropertySource
 @ContextConfiguration({"FloatMergeCronTest.xml"})
 @DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
-@MockEndpointsAndSkip("seda:file-moved")
 public class FloatMergeCronTest {
-
-  @EndpointInject("mock:seda:file-moved")
-  private MockEndpoint fileMoved;
-
-  @Autowired
-  @Qualifier("floatMergeProcessor")
-  private FloatMergeProcessor floatMergeProcessor;
 
   @Autowired
   @Qualifier("jsonMapper")
   private JsonMapper jsonMapper;
 
   @Autowired
-  private ArgonautCamelMessageSender messageSender;
+  @Qualifier("entityManagerFactory")
+  private EntityManagerFactory entityManagerFactory;
 
+  private static final Path processingDir = Paths.get("processing");
   private static final Path workDir = Paths.get("work");
+  private static final Path submissionDir = Paths.get("submission");
   private static final Path outputDir = Paths.get("output");
+
+
+  private static final Path medsProcessingDir = processingDir.resolve("dac/meds");
+  private static final Path submissionMedsDir = submissionDir.resolve("dac/meds");
+  private static final Path submitDir = submissionDir.resolve("dac/meds/submit");
+
+  private static final Path submissionProcessingDir = submissionMedsDir.resolve("processing");
+  private static final Path submissionProcessedDir = submissionMedsDir.resolve("processed");
+  private static final Instant timestamp = LocalDateTime.of(2026, 2, 20, 1, 2, 3).atZone(ZoneId.of("UTC")).toInstant();
+
 
   @BeforeEach
   public void setup() throws Exception {
-    Mockito.reset(floatMergeProcessor);
+
+    try (EntityManager em = entityManagerFactory.createEntityManager()) {
+      EntityTransaction tx = em.getTransaction();
+      tx.begin();
+      try {
+        em.createQuery("delete from ProfileFileEntity").executeUpdate();
+        em.createQuery("delete from ProfileMergeFileEntity ").executeUpdate();
+        em.createQuery("delete from MetadataFileEntity").executeUpdate();
+        em.createQuery("delete from CycleEntity").executeUpdate();
+        em.createQuery("delete from FloatEntity").executeUpdate();
+        em.createQuery("delete from DacEntity").executeUpdate();
+        tx.commit();
+      } catch (Exception e) {
+        tx.rollback();
+        throw e;
+      }
+    }
+
+    if (Files.exists(workDir)) {
+      try (Stream<Path> stream = Files.list(workDir)) {
+        stream.forEach(filedir -> {
+          FileUtils.deleteQuietly(filedir.toFile());
+        });
+      }
+    }
 
     if (Files.exists(outputDir)) {
       try (Stream<Path> stream = Files.list(outputDir)) {
@@ -75,8 +96,32 @@ public class FloatMergeCronTest {
       }
     }
 
-    if (Files.exists(workDir)) {
-      try (Stream<Path> stream = Files.list(workDir)) {
+    if (Files.exists(submitDir)) {
+      try (Stream<Path> stream = Files.list(submitDir)) {
+        stream.forEach(filedir -> {
+          FileUtils.deleteQuietly(filedir.toFile());
+        });
+      }
+    }
+
+    if (Files.exists(submissionProcessingDir)) {
+      try (Stream<Path> stream = Files.list(submissionProcessingDir)) {
+        stream.forEach(filedir -> {
+          FileUtils.deleteQuietly(filedir.toFile());
+        });
+      }
+    }
+
+    if (Files.exists(submissionProcessedDir)) {
+      try (Stream<Path> stream = Files.list(submissionProcessedDir)) {
+        stream.forEach(filedir -> {
+          FileUtils.deleteQuietly(filedir.toFile());
+        });
+      }
+    }
+
+    if (Files.exists(medsProcessingDir)) {
+      try (Stream<Path> stream = Files.list(medsProcessingDir)) {
         stream.forEach(filedir -> {
           FileUtils.deleteQuietly(filedir.toFile());
         });
@@ -90,390 +135,119 @@ public class FloatMergeCronTest {
     setup();
   }
 
+  @Test
+  public void testSubmitAndCreateMultiProf() throws Exception {
+    List<String> fileNames = Arrays.asList("R4902704_001.nc",
+        "R4902704_001D.nc",
+        "R4902704_002.nc",
+        "R4902704_003.nc",
+        "R4902704_004.nc",
+        "R4902704_005.nc",
+        "R4902704_006.nc",
+        "R4902704_007.nc",
+        "R4902704_008.nc",
+        "R4902704_009.nc",
+        "R4902704_010.nc",
+        "R4902704_011.nc",
+        "R4902704_012.nc",
+        "R4902704_013.nc",
+        "R4902704_014.nc",
+        "R4902704_015.nc",
+        "R4902704_016.nc",
+        "R4902704_017.nc",
+        "R4902704_018.nc",
+        "R4902704_019.nc",
+        "R4902704_020.nc",
+        "R4902704_021.nc",
+        "R4902704_022.nc",
+        "R4902704_023.nc",
+        "R4902704_024.nc",
+        "R4902704_025.nc",
+        "R4902704_026.nc",
+        "R4902704_027.nc",
+        "R4902704_028.nc",
+        "R4902704_029.nc",
+        "R4902704_030.nc",
+        "R4902704_031.nc",
+        "R4902704_032.nc",
+        "R4902704_033.nc",
+        "R4902704_034.nc",
+        "R4902704_035.nc",
+        "R4902704_036.nc",
+        "R4902704_054.nc",
+        "R4902704_055.nc",
+        "R4902704_056.nc",
+        "R4902704_057.nc",
+        "R4902704_058.nc",
+        "R4902704_059.nc",
+        "R4902704_060.nc",
+        "R4902704_061.nc",
+        "R4902704_062.nc",
+        "R4902704_063.nc",
+        "R4902704_064.nc",
+        "R4902704_065.nc",
+        "R4902704_066.nc",
+        "R4902704_067.nc",
+        "R4902704_068.nc",
+        "R4902704_069.nc",
+        "R4902704_070.nc",
+        "R4902704_071.nc",
+        "R4902704_072.nc",
+        "R4902704_073.nc",
+        "R4902704_074.nc",
+        "R4902704_075.nc",
+        "R4902704_076.nc",
+        "R4902704_077.nc",
+        "R4902704_078.nc",
+        "R4902704_079.nc",
+        "R4902704_080.nc",
+        "R4902704_081.nc",
+        "R4902704_082.nc",
+        "R4902704_083.nc",
+        "R4902704_084.nc",
+        "R4902704_085.nc",
+        "R4902704_086.nc",
+        "R4902704_087.nc",
+        "R4902704_088.nc",
+        "R4902704_089.nc",
+        "R4902704_090.nc",
+        "R4902704_091.nc",
+        "R4902704_092.nc",
+        "R4902704_093.nc",
+        "R4902704_094.nc",
+        "R4902704_095.nc",
+        "R4902704_096.nc",
+        "R4902704_097.nc",
+        "R4902704_098.nc",
+        "R4902704_099.nc",
+        "R4902704_105.nc",
+        "R4902704_130.nc");
 
-//  @Test
-//  public void testMoveToOutputNoProfiles() throws Exception {
-//    String[] files = new String[]{
-//        "1901830_meta.nc",
-//        "1901830_Rtraj.nc",
-//        "1901830_tech.nc",
-//        "1901843_Rtraj.nc",
-//        "1901843_tech.nc",
-//        "1902195_meta.nc",
-//        "1902195_Rtraj.nc",
-//        "1902195_tech.nc",
-//        "3901276_Rtraj.nc",
-//        "3901276_tech.nc",
-//        "3901471_Rtraj.nc",
-//        "3901471_tech.nc",
-//        "3901480_Rtraj.nc",
-//        "3901480_tech.nc",
-//        "3902534_Rtraj.nc",
-//        "3902534_tech.nc",
-//        "4902337_meta.nc",
-//        "4902337_Rtraj.nc",
-//        "4902337_tech.nc",
-//        "4902349_meta.nc",
-//        "4902349_Rtraj.nc",
-//        "4902349_tech.nc",
-//        "4902907_meta.nc",
-//        "4902907_Rtraj.nc",
-//        "4902907_tech.nc",
-//        "4902951_meta.nc",
-//        "4902951_Rtraj.nc",
-//        "4902951_tech.nc",
-//        "4902997_meta.nc",
-//        "4902997_Rtraj.nc",
-//        "4902997_tech.nc",
-//        "4903000_meta.nc",
-//        "4903000_Rtraj.nc",
-//        "4903000_tech.nc",
-//        "4903180_meta.nc",
-//        "4903180_Rtraj.nc",
-//        "4903180_tech.nc",
-//        "5902487_Rtraj.nc",
-//        "5902487_tech.nc",
-//        "5902490_Rtraj.nc",
-//        "5902490_tech.nc",
-//        "5902499_Rtraj.nc",
-//        "5902499_tech.nc",
-//        "5904627_meta.nc",
-//        "5904627_Rtraj.nc",
-//        "5904627_tech.nc",
-//        "5904773_meta.nc",
-//        "5904773_Rtraj.nc",
-//        "5904773_tech.nc",
-//        "5904774_meta.nc",
-//        "5904774_Rtraj.nc",
-//        "5904774_tech.nc",
-//        "5904810_meta.nc",
-//        "5904810_Rtraj.nc",
-//        "5904810_tech.nc",
-//        "5904812_meta.nc",
-//        "5904812_Rtraj.nc",
-//        "5904812_tech.nc",
-//        "5904941_meta.nc",
-//        "5904941_Rtraj.nc",
-//        "5904941_tech.nc",
-//        "5905098_meta.nc",
-//        "5905098_Rtraj.nc",
-//        "5905098_tech.nc",
-//        "5905244_Rtraj.nc",
-//        "5905244_tech.nc",
-//        "5905248_Rtraj.nc",
-//        "5905248_tech.nc",
-//        "5905289_meta.nc",
-//        "5905289_Rtraj.nc",
-//        "5905289_tech.nc",
-//        "5905315_meta.nc",
-//        "5905315_Rtraj.nc",
-//        "5905315_tech.nc",
-//        "5905316_meta.nc",
-//        "5905316_Rtraj.nc",
-//        "5905316_tech.nc",
-//        "5905669_meta.nc",
-//        "5905669_Rtraj.nc",
-//        "5905669_tech.nc",
-//        "5905670_meta.nc",
-//        "5905670_Rtraj.nc",
-//        "5905670_tech.nc",
-//        "5905746_meta.nc",
-//        "5905746_Rtraj.nc",
-//        "5905746_tech.nc",
-//        "5906936_Rtraj.nc",
-//        "5906936_tech.nc",
-//        "5906945_Rtraj.nc",
-//        "5906945_tech.nc",
-//        "5906946_Rtraj.nc",
-//        "5906946_tech.nc",
-//        "5906947_Rtraj.nc",
-//        "5906947_tech.nc",
-//        "5907024_Rtraj.nc",
-//        "5907024_tech.nc",
-//        "7902059_meta.nc",
-//        "7902059_Rtraj.nc",
-//        "7902059_tech.nc",
-//        "7902143_meta.nc",
-//        "7902143_Rtraj.nc",
-//        "7902143_tech.nc"
-//    };
-//
-//    String fileName = "nc_2025.04.02_16.15.tar.gz";
-//    Path timeStampDir = submissionProcessedDir.resolve(timestamp.toString());
-//    Path submittedTarGz = timeStampDir.resolve(fileName);
-//    Files.createDirectories(timeStampDir);
-//    Files.copy(Paths.get("src/test/resources/aoml").resolve(fileName), submittedTarGz);
-//    unTarGz(submittedTarGz, timeStampDir);
-//    Path aomlProcessingTimestampDir = aomlProcessingDir.resolve("2026-02-20T01:02:03Z");
-//
-//    fileMoved.expectedMessageCount(files.length);
-//    fileMoved.setAssertPeriod(500);
-//
-//    for (String name : files) {
-//      Path floatDir = aomlProcessingTimestampDir.resolve(name.split("_")[0]);
-//      Files.createDirectories(floatDir);
-//      Files.move(timeStampDir.resolve(name), floatDir.resolve(name));
-//      messageSender.sendJson("seda:validation-success", jsonMapper.writeValueAsString(NcSubmissionMessage.builder()
-//          .withOperation(Operation.ADD)
-//          .withFileType(FileType.UNKNOWN)
-//          .withDac("aoml")
-//          .withFileName(name)
-//          .withTimestamp(timestamp)
-//          .withFloatId(floatDir.getFileName().toString())
-//          .withNumberOfFilesInSubmission(102)
-//          .build()));
-//
-//    }
-//
-//    fileMoved.assertIsSatisfied();
-//
-//    for (String name : files) {
-//      String floatId = name.split("_")[0];
-//      Path processing = aomlProcessingTimestampDir.resolve(floatId).resolve(name);
-//      Path output = outputDir.resolve("dac").resolve("aoml").resolve(floatId).resolve(name);
-//      assertTrue(Files.isRegularFile(output), "File " + output + " not found");
-//      assertFalse(Files.exists(processing), "File " + processing + " exists");
-//    }
-//  }
-//
-//  @Test
-//  public void testMoveToRejectNoProfiles() throws Exception {
-//    String[] files = new String[]{
-//        "1901830_meta.nc",
-//        "1901830_Rtraj.nc",
-//        "1901830_tech.nc",
-//        "1901843_Rtraj.nc",
-//        "1901843_tech.nc",
-//        "1902195_meta.nc",
-//        "1902195_Rtraj.nc",
-//        "1902195_tech.nc",
-//        "3901276_Rtraj.nc",
-//        "3901276_tech.nc",
-//        "3901471_Rtraj.nc",
-//        "3901471_tech.nc",
-//        "3901480_Rtraj.nc",
-//        "3901480_tech.nc",
-//        "3902534_Rtraj.nc",
-//        "3902534_tech.nc",
-//        "4902337_meta.nc",
-//        "4902337_Rtraj.nc",
-//        "4902337_tech.nc",
-//        "4902349_meta.nc",
-//        "4902349_Rtraj.nc",
-//        "4902349_tech.nc",
-//        "4902907_meta.nc",
-//        "4902907_Rtraj.nc",
-//        "4902907_tech.nc",
-//        "4902951_meta.nc",
-//        "4902951_Rtraj.nc",
-//        "4902951_tech.nc",
-//        "4902997_meta.nc",
-//        "4902997_Rtraj.nc",
-//        "4902997_tech.nc",
-//        "4903000_meta.nc",
-//        "4903000_Rtraj.nc",
-//        "4903000_tech.nc",
-//        "4903180_meta.nc",
-//        "4903180_Rtraj.nc",
-//        "4903180_tech.nc",
-//        "5902487_Rtraj.nc",
-//        "5902487_tech.nc",
-//        "5902490_Rtraj.nc",
-//        "5902490_tech.nc",
-//        "5902499_Rtraj.nc",
-//        "5902499_tech.nc",
-//        "5904627_meta.nc",
-//        "5904627_Rtraj.nc",
-//        "5904627_tech.nc",
-//        "5904773_meta.nc",
-//        "5904773_Rtraj.nc",
-//        "5904773_tech.nc",
-//        "5904774_meta.nc",
-//        "5904774_Rtraj.nc",
-//        "5904774_tech.nc",
-//        "5904810_meta.nc",
-//        "5904810_Rtraj.nc",
-//        "5904810_tech.nc",
-//        "5904812_meta.nc",
-//        "5904812_Rtraj.nc",
-//        "5904812_tech.nc",
-//        "5904941_meta.nc",
-//        "5904941_Rtraj.nc",
-//        "5904941_tech.nc",
-//        "5905098_meta.nc",
-//        "5905098_Rtraj.nc",
-//        "5905098_tech.nc",
-//        "5905244_Rtraj.nc",
-//        "5905244_tech.nc",
-//        "5905248_Rtraj.nc",
-//        "5905248_tech.nc",
-//        "5905289_meta.nc",
-//        "5905289_Rtraj.nc",
-//        "5905289_tech.nc",
-//        "5905315_meta.nc",
-//        "5905315_Rtraj.nc",
-//        "5905315_tech.nc",
-//        "5905316_meta.nc",
-//        "5905316_Rtraj.nc",
-//        "5905316_tech.nc",
-//        "5905669_meta.nc",
-//        "5905669_Rtraj.nc",
-//        "5905669_tech.nc",
-//        "5905670_meta.nc",
-//        "5905670_Rtraj.nc",
-//        "5905670_tech.nc",
-//        "5905746_meta.nc",
-//        "5905746_Rtraj.nc",
-//        "5905746_tech.nc",
-//        "5906936_Rtraj.nc",
-//        "5906936_tech.nc",
-//        "5906945_Rtraj.nc",
-//        "5906945_tech.nc",
-//        "5906946_Rtraj.nc",
-//        "5906946_tech.nc",
-//        "5906947_Rtraj.nc",
-//        "5906947_tech.nc",
-//        "5907024_Rtraj.nc",
-//        "5907024_tech.nc",
-//        "7902059_meta.nc",
-//        "7902059_Rtraj.nc",
-//        "7902059_tech.nc",
-//        "7902143_meta.nc",
-//        "7902143_Rtraj.nc",
-//        "7902143_tech.nc"
-//    };
-//
-//    String fileName = "nc_2025.04.02_16.15.tar.gz";
-//    Path timeStampDir = submissionProcessedDir.resolve(timestamp.toString());
-//    Path submittedTarGz = timeStampDir.resolve(fileName);
-//    Files.createDirectories(timeStampDir);
-//    Files.copy(Paths.get("src/test/resources/aoml").resolve(fileName), submittedTarGz);
-//    unTarGz(submittedTarGz, timeStampDir);
-//    Path aomlProcessingTimestampDir = aomlProcessingDir.resolve("2026-02-20T01:02:03Z");
-//
-//    fileMoved.expectedMessageCount(files.length);
-//    fileMoved.setAssertPeriod(500);
-//
-//    for (String name : files) {
-//      Path floatDir = aomlProcessingTimestampDir.resolve(name.split("_")[0]);
-//      Files.createDirectories(floatDir);
-//      Files.move(timeStampDir.resolve(name), floatDir.resolve(name));
-//      messageSender.sendJson("seda:file-output", jsonMapper.writeValueAsString(NcSubmissionMessage.builder()
-//          .withOperation(Operation.ADD)
-//          .withFileType(FileType.UNKNOWN)
-//          .withDac("aoml")
-//          .withFileName(name)
-//          .withTimestamp(timestamp)
-//          .withFloatId(floatDir.getFileName().toString())
-//          .withNumberOfFilesInSubmission(102)
-//          .withValidationErrors(Collections.singletonList("test error"))
-//          .build()));
-//
-//    }
-//
-//    fileMoved.assertIsSatisfied();
-//
-//    for (String name : files) {
-//      String floatId = name.split("_")[0];
-//      Path processing = aomlProcessingTimestampDir.resolve(floatId).resolve(name);
-//      Path output = submissionDir.resolve("dac").resolve("aoml").resolve("processed").resolve("2026-02-20T01:02:03Z").resolve("reject").resolve(floatId).resolve(name);
-//      assertTrue(Files.isRegularFile(output), "File " + output + " not found");
-//      assertFalse(Files.exists(processing), "File " + processing + " exists");
-//    }
-//  }
-//
-//  @Test
-//  public void testMoveToOutputWithProfiles() throws Exception {
-//    String[] files = new String[]{
-//        "R1902264_173.nc", "R4903218_229.nc", "R4903353_302.nc", "R4903554_141.nc", "R5904629_350.nc", "R7900846_082.nc",
-//        "R1902264_174.nc", "R4903220_228.nc", "R4903390_130.nc", "R4903554_142.nc", "R5905644_241.nc", "R7900846_083.nc",
-//        "R3902270_175.nc", "R4903220_229.nc", "R4903410_154.nc", "R5902483_313.nc", "R5905716_244.nc",
-//        "R4903218_228.nc", "R4903353_301.nc", "R4903410_155.nc", "R5902483_314.nc", "R5905716_245.nc",
-//    };
-//
-//    String fileName = "nc_2025.04.16_05.01_w_bad.tar.gz";
-//    Path timeStampDir = submissionProcessedDir.resolve(timestamp.toString());
-//    Path submittedTarGz = timeStampDir.resolve(fileName);
-//    Files.createDirectories(timeStampDir);
-//    Files.copy(Paths.get("src/test/resources/aoml").resolve(fileName), submittedTarGz);
-//    unTarGz(submittedTarGz, timeStampDir);
-//    Path aomlProcessingTimestampDir = aomlProcessingDir.resolve("2026-02-20T01:02:03Z");
-//
-//    fileMoved.expectedMessageCount(files.length);
-//    fileMoved.setAssertPeriod(500);
-//
-//    for (String name : files) {
-//      Path floatDir = aomlProcessingTimestampDir.resolve(name.split("_")[0]);
-//      Files.createDirectories(floatDir.resolve("profiles"));
-//      Files.move(timeStampDir.resolve(name), floatDir.resolve("profiles").resolve(name));
-//      messageSender.sendJson("seda:validation-success", jsonMapper.writeValueAsString(NcSubmissionMessage.builder()
-//          .withOperation(Operation.ADD)
-//          .withFileType(FileType.PROFILE)
-//          .withDac("aoml")
-//          .withFileName(name)
-//          .withTimestamp(timestamp)
-//          .withFloatId(floatDir.getFileName().toString())
-//          .withNumberOfFilesInSubmission(102)
-//          .build()));
-//
-//    }
-//
-//    fileMoved.assertIsSatisfied();
-//
-//    for (String name : files) {
-//      String floatId = name.split("_")[0];
-//      Path processing = aomlProcessingTimestampDir.resolve(floatId).resolve("profiles").resolve(name);
-//      Path output = outputDir.resolve("dac").resolve("aoml").resolve(floatId).resolve("profiles").resolve(name);
-//      assertTrue(Files.isRegularFile(output), "File " + output + " not found");
-//      assertFalse(Files.exists(processing), "File " + processing + " exists");
-//    }
-//  }
-//
-//  @Test
-//  public void testMoveToRejectWithProfiles() throws Exception {
-//    String[] files = new String[]{
-//        "R1902264_173.nc", "R4903218_229.nc", "R4903353_302.nc", "R4903554_141.nc", "R5904629_350.nc", "R7900846_082.nc",
-//        "R1902264_174.nc", "R4903220_228.nc", "R4903390_130.nc", "R4903554_142.nc", "R5905644_241.nc", "R7900846_083.nc",
-//        "R3902270_175.nc", "R4903220_229.nc", "R4903410_154.nc", "R5902483_313.nc", "R5905716_244.nc",
-//        "R4903218_228.nc", "R4903353_301.nc", "R4903410_155.nc", "R5902483_314.nc", "R5905716_245.nc",
-//    };
-//
-//    String fileName = "nc_2025.04.16_05.01_w_bad.tar.gz";
-//    Path timeStampDir = submissionProcessedDir.resolve(timestamp.toString());
-//    Path submittedTarGz = timeStampDir.resolve(fileName);
-//    Files.createDirectories(timeStampDir);
-//    Files.copy(Paths.get("src/test/resources/aoml").resolve(fileName), submittedTarGz);
-//    unTarGz(submittedTarGz, timeStampDir);
-//    Path aomlProcessingTimestampDir = aomlProcessingDir.resolve("2026-02-20T01:02:03Z");
-//
-//    fileMoved.expectedMessageCount(files.length);
-//    fileMoved.setAssertPeriod(500);
-//
-//    for (String name : files) {
-//      Path floatDir = aomlProcessingTimestampDir.resolve(name.split("_")[0]);
-//      Files.createDirectories(floatDir.resolve("profiles"));
-//      Files.move(timeStampDir.resolve(name), floatDir.resolve("profiles").resolve(name));
-//      messageSender.sendJson("seda:file-output", jsonMapper.writeValueAsString(NcSubmissionMessage.builder()
-//          .withOperation(Operation.ADD)
-//          .withFileType(FileType.PROFILE)
-//          .withDac("aoml")
-//          .withFileName(name)
-//          .withTimestamp(timestamp)
-//          .withFloatId(floatDir.getFileName().toString())
-//          .withNumberOfFilesInSubmission(102)
-//          .withValidationErrors(Collections.singletonList("test error"))
-//          .build()));
-//
-//    }
-//
-//    fileMoved.assertIsSatisfied();
-//
-//    for (String name : files) {
-//      String floatId = name.split("_")[0];
-//      Path processing = aomlProcessingTimestampDir.resolve(floatId).resolve("profiles").resolve(name);
-//      Path output = submissionDir.resolve("dac").resolve("aoml").resolve("processed").resolve("2026-02-20T01:02:03Z").resolve("reject").resolve(floatId).resolve("profiles").resolve(name);
-//      assertTrue(Files.isRegularFile(output), "File " + output + " not found");
-//      assertFalse(Files.exists(processing), "File " + processing + " exists");
-//    }
-//  }
+    // copy before moving to prevent state where file is picked up halfway
+    for (String fileName : fileNames) {
+      Path copyFile = submissionDir.resolve(fileName);
+      Path submittedFile = submitDir.resolve(fileName);
+      Files.copy(Paths.get("src/test/resources/meds/4902704/profiles").resolve(fileName), copyFile);
+      Files.move(copyFile, submittedFile);
+    }
+
+    await().pollInterval(Duration.ofSeconds(10)).atMost(Duration.ofMinutes(4)).untilAsserted(() -> {
+
+      fileNames.stream().map(fileName -> "meds/4902704/profiles/" + fileName).forEach(path -> {
+        try (EntityManager em = entityManagerFactory.createEntityManager()) {
+          ProfileFileEntity profile = em.find(ProfileFileEntity.class, path);
+          assertNotNull(profile, "missing " + path);
+          assertNotNull(profile.getMultiFloatMergeTime(), "missing merge time " + path);
+          assertNotNull(profile.getCycle().getFloatId().getProfileMerge());
+        }
+      });
+    });
+
+    assertTrue(Files.exists(outputDir.resolve("dac/meds/4902704/4902704_prof.nc")));
+
+    fileNames.stream().map(fileName -> outputDir.resolve("dac/meds/4902704/profiles/").resolve(fileName)).forEach(path -> {
+      assertTrue(Files.exists(path));
+    });
+  }
+
 }

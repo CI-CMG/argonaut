@@ -1,8 +1,8 @@
 package edu.colorado.cires.argonaut.processor.core;
 
 import edu.colorado.cires.argonaut.file.core.FileStore;
+import edu.colorado.cires.argonaut.messaging.core.databind.ArgoFileType;
 import edu.colorado.cires.argonaut.messaging.core.databind.NcSubmissionMessage;
-import edu.colorado.cires.argonaut.messaging.core.databind.NcSubmissionMessage.FileType;
 import edu.colorado.cires.argonaut.xml.filecheck.FileCheckResults;
 import fr.coriolis.checker.core.ApplicationProperties;
 import fr.coriolis.checker.core.ArgoFileCheckExecutor;
@@ -115,7 +115,7 @@ public class DefaultValidationProcessor implements ValidationProcessor {
   private String resolveDownloadPath(NcSubmissionMessage ncSubmissionMessage) {
     String processingDacDir = processingFileStore.appendToPath(processingFileStore.getRoot(), "dac", ncSubmissionMessage.getDac(),
         ncSubmissionMessage.getTimestamp().toString(), ncSubmissionMessage.getFloatId());
-    if (FileType.CORE_ARGO_PROFILE == ncSubmissionMessage.getFileType()) {
+    if (ArgoFileType.PROFILE_CORE == ncSubmissionMessage.getFileType()) {
       processingDacDir = processingFileStore.appendToPath(processingDacDir, "profiles");
     }
     return processingFileStore.appendToPath(processingDacDir, ncSubmissionMessage.getFileName());

@@ -67,7 +67,7 @@ public class GeoFilterTest {
     // Arctic Ocean
     assertEquals(ArgoOcean.PACIFIC_OCEAN, filter.determineArgoOcean(88d, 85.2));
     // Arctic Ocean
-    assertEquals(ArgoOcean.PACIFIC_OCEAN, filter.determineArgoOcean(171d, 82));
+    assertEquals(ArgoOcean.PACIFIC_OCEAN, filter.determineArgoOcean(171d, 82d));
     // Arctic Ocean
     assertEquals(ArgoOcean.PACIFIC_OCEAN, filter.determineArgoOcean(-137d, 79d));
 

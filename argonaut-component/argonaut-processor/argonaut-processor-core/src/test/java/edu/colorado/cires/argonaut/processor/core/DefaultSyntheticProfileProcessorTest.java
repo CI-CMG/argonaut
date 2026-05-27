@@ -14,10 +14,10 @@ import static org.mockito.Mockito.when;
 import edu.colorado.cires.argonaut.core.merge.synthetic.DefaultSyntheticProfileMerger;
 import edu.colorado.cires.argonaut.core.merge.synthetic.SyntheticProfileMerger;
 import edu.colorado.cires.argonaut.file.core.FileStore;
+import edu.colorado.cires.argonaut.messaging.core.databind.ArgoFileType;
 import edu.colorado.cires.argonaut.messaging.core.databind.ArgoOcean;
 import edu.colorado.cires.argonaut.messaging.core.databind.MetadataRecord;
 import edu.colorado.cires.argonaut.messaging.core.databind.MetadataRecord.Action;
-import edu.colorado.cires.argonaut.messaging.core.databind.NcSubmissionMessage.FileType;
 import edu.colorado.cires.argonaut.messaging.core.databind.ProfileOperation;
 import edu.colorado.cires.argonaut.messaging.core.queue.MessageSender;
 import edu.colorado.cires.argonaut.messaging.core.util.ArgonautJsonMapperFactory;
@@ -125,10 +125,8 @@ public class DefaultSyntheticProfileProcessorTest {
     for (String json : jsonCaptor.getAllValues()) {
       MetadataRecord metadataRecord = MetadataRecord.builder(jsonMapper.readValue(json, MetadataRecord.class))
           .withActionTimestamp(now) //override dynamic timestamp to allow for equality assertions
+          .withDateUpdate(now)
           .build();
-      if(metadataRecord.getFileType() == FileType.BGC_ARGO_SYNTH_PROFILE){
-        metadataRecord = MetadataRecord.builder(metadataRecord).withDateUpdate(now).build();
-      }
       jsonMap.put(metadataRecord.getFile(), metadataRecord);
     }
 
@@ -138,7 +136,8 @@ public class DefaultSyntheticProfileProcessorTest {
         .withAction(Action.SYNTHETIC_MERGE)
         .withDac("meds")
         .withFloatId("4902691")
-        .withFileType(FileType.CORE_ARGO_PROFILE)
+        .withFileType(ArgoFileType.PROFILE_CORE)
+        .withDateUpdate(now)
         .build(), jsonMap.get("meds/4902691/profiles/R4902691_034.nc"));
 
     assertEquals(MetadataRecord.builder()
@@ -147,7 +146,8 @@ public class DefaultSyntheticProfileProcessorTest {
         .withAction(Action.SYNTHETIC_MERGE)
         .withDac("meds")
         .withFloatId("4902691")
-        .withFileType(FileType.B_ARGO_PROFILE)
+        .withFileType(ArgoFileType.PROFILE_BIOCHEMICAL)
+        .withDateUpdate(now)
         .build(), jsonMap.get("meds/4902691/profiles/BR4902691_034.nc"));
 
     assertEquals(MetadataRecord.builder()
@@ -156,7 +156,8 @@ public class DefaultSyntheticProfileProcessorTest {
         .withAction(Action.SYNTHETIC_MERGE)
         .withDac("meds")
         .withFloatId("4902691")
-        .withFileType(FileType.METADATA)
+        .withFileType(ArgoFileType.METADATA)
+        .withDateUpdate(now)
         .build(), jsonMap.get("meds/4902691/4902691_meta.nc"));
 
 
@@ -175,7 +176,7 @@ public class DefaultSyntheticProfileProcessorTest {
         .withLongitude(-128.1387481689453)
         .withOcean(ArgoOcean.INDIAN_OCEAN)
         .withProfilerType("834")
-        .withFileType(FileType.BGC_ARGO_SYNTH_PROFILE)
+        .withFileType(ArgoFileType.SYNTHETIC_PROFILE_SINGLE_CYCLE)
         .withInstitution("ME")
         .build(), jsonMap.get("meds/4902691/profiles/SR4902691_034.nc"));
 

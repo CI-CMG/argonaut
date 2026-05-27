@@ -46,11 +46,15 @@
     <property name="rootPath" value="${dac.output.directory}"/>
   </bean>
 
-  <bean id="removalFileValidationProcessor" class="edu.colorado.cires.argonaut.processor.core.DefaultRemovalFileValidationProcessor">
-    <property name="fileStore" ref="submissionFileStore"/>
-  </bean>
+  <bean id="removalFileValidationProcessor" class="edu.colorado.cires.argonaut.processor.core.DefaultRemovalFileValidationProcessor"/>
 
   <bean id="tarballSubmissionProcessor" class="edu.colorado.cires.argonaut.processor.core.DefaultTarballSubmissionProcessor">
+    <property name="localTempDir" value="${work-directory}"/>
+    <property name="submissionFileStore" ref="submissionFileStore"/>
+    <property name="processingFileStore" ref="processingFileStore"/>
+  </bean>
+
+  <bean id="submissionProcessor" class="edu.colorado.cires.argonaut.processor.core.DefaultSubmissionProcessor">
     <property name="localTempDir" value="${work-directory}"/>
     <property name="submissionFileStore" ref="submissionFileStore"/>
     <property name="processingFileStore" ref="processingFileStore"/>
@@ -63,6 +67,7 @@
     <property name="submitDataQueue" value="seda:validation"/>
     <property name="submitRemovalQueue" value="seda:submit-removal"/>
     <property name="tarballSubmissionProcessor" ref="tarballSubmissionProcessor"/>
+    <property name="submissionProcessor" ref="submissionProcessor"/>
   </bean>
 
   <bean id="validationProcessor" class="edu.colorado.cires.argonaut.processor.core.DefaultValidationProcessor">
@@ -96,7 +101,7 @@
   <bean id="fileToSubmissionMessage" class="edu.colorado.cires.argonaut.standalone.FileToSubmissionMessage"/>
 
   <bean id="entityManagerFactory" class="jakarta.persistence.Persistence" factory-method="createEntityManagerFactory">
-    <constructor-arg value="argonaut-report"/>
+    <constructor-arg value="argonaut-index"/>
     <constructor-arg>
       <map>
         <entry key="jakarta.persistence.jdbc.driver" value="org.h2.Driver"/>
@@ -112,7 +117,7 @@
     <property name="entityManagerFactory" ref="entityManagerFactory"/>
   </bean>
 
-  <bean id="geoFilter" class="edu.colorado.cires.argonaut.processor.geofilter.MarineRegionsGeoFilter">
+  <bean id="geoFilter" class="edu.colorado.cires.argonaut.processor.geofilter.MarineRegionsGeoFilter" init-method="initialize">
     <property name="workingDirectory" value="${work-directory}"/>
   </bean>
 
@@ -139,15 +144,6 @@
     <property name="metadataStore" ref="metadataStore"/>
   </bean>
 
-  <bean id="floatMergeProcessor" class="edu.colorado.cires.argonaut.processor.core.DefaultFloatMergeProcessor">
-    <property name="metadataStore" ref="metadataStore"/>
-    <property name="messageSender" ref="messageSender"/>
-    <property name="jsonMapper" ref="jsonMapper"/>
-    <property name="localTempDir" value="${work-directory}"/>
-    <property name="outputFileStore" ref="outputFileStore"/>
-    <property name="updateIndexQueue" value="seda:update-index"/>
-  </bean>
-
   <bean id="syntheticProfileAggregator" class="edu.colorado.cires.argonaut.processor.core.DefaultSyntheticProfileAggregator">
     <property name="jsonMapper" ref="jsonMapper"/>
     <property name="messageSender" ref="messageSender"/>
@@ -167,6 +163,19 @@
     <property name="updateIndexQueue" value="seda:update-index"/>
     <property name="geoFilter" ref="geoFilter"/>
     <property name="syntheticProfileMerger" ref="syntheticProfileMerger"/>
+  </bean>
+
+  <bean id="multiProfileMerger" class="edu.colorado.cires.argonaut.core.merge.multiprof.DefaultMultiProfileMerger">
+    <constructor-arg value="${gdac-institution}"/>
+  </bean>
+
+  <bean id="floatMergeProcessor" class="edu.colorado.cires.argonaut.processor.core.DefaultFloatMergeProcessor">
+    <property name="messageSender" ref="messageSender"/>
+    <property name="jsonMapper" ref="jsonMapper"/>
+    <property name="localTempDir" value="${work-directory}"/>
+    <property name="outputFileStore" ref="outputFileStore"/>
+    <property name="updateIndexQueue" value="seda:update-index"/>
+    <property name="merger" ref="multiProfileMerger"/>
   </bean>
 
   <camelContext xmlns="http://camel.apache.org/schema/spring">

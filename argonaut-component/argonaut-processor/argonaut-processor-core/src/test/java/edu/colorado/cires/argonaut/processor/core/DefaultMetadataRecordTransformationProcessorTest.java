@@ -6,10 +6,10 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import edu.colorado.cires.argonaut.file.local.LocalFileStore;
+import edu.colorado.cires.argonaut.messaging.core.databind.ArgoFileType;
 import edu.colorado.cires.argonaut.messaging.core.databind.ArgoOcean;
 import edu.colorado.cires.argonaut.messaging.core.databind.MetadataRecord;
 import edu.colorado.cires.argonaut.messaging.core.databind.NcSubmissionMessage;
-import edu.colorado.cires.argonaut.messaging.core.databind.NcSubmissionMessage.FileType;
 import edu.colorado.cires.argonaut.messaging.core.databind.NcSubmissionMessage.Operation;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -54,7 +54,7 @@ public class DefaultMetadataRecordTransformationProcessorTest {
         .withDac("aoml")
         .withFileName("D13857_001.nc")
         .withFloatId("13857")
-        .withFileType(FileType.CORE_ARGO_PROFILE)
+        .withFileType(ArgoFileType.PROFILE_CORE)
         .withNumberOfFilesInSubmission(100)
         .build());
 

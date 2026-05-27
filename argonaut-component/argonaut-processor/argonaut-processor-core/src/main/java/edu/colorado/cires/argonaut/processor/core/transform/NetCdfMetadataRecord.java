@@ -9,9 +9,9 @@ import edu.colorado.cires.argonaut.core.netcdf.synthprofile.v13.ArgoSyntheticMul
 import edu.colorado.cires.argonaut.core.netcdf.synthprofile.v13.ArgoSyntheticProfileV13;
 import edu.colorado.cires.argonaut.core.netcdf.synthprofile.v13.ArgoSyntheticProfileV13Parameter;
 import edu.colorado.cires.argonaut.core.netcdf.synthprofile.v13.ArgoSyntheticProfileV13Reader;
+import edu.colorado.cires.argonaut.messaging.core.databind.ArgoFileType;
 import edu.colorado.cires.argonaut.messaging.core.databind.MetadataRecord;
 import edu.colorado.cires.argonaut.messaging.core.databind.MetadataRecord.Action;
-import edu.colorado.cires.argonaut.messaging.core.databind.NcSubmissionMessage.FileType;
 import edu.colorado.cires.argonaut.processor.core.GeoFilter;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -36,21 +36,26 @@ public final class NetCdfMetadataRecord {
       if (profile == null) {
         throw new IllegalArgumentException("Pressure profile could not be found");
       }
-      FileType fileType;
+      ArgoFileType fileType;
       switch (multiProfile.getDataType()) {
         case "B-Argo profile":
-          fileType = FileType.B_ARGO_PROFILE;
+          fileType = ArgoFileType.PROFILE_BIOCHEMICAL;
           break;
         default:
-          fileType = FileType.CORE_ARGO_PROFILE;
+          fileType = ArgoFileType.PROFILE_CORE;
           break;
+      }
+
+      String dataMode = profile.getParameter("PRES").getDataMode();
+      if (dataMode == null) {
+        dataMode = profile.getDataMode();
       }
 
       return MetadataRecord.builder()
           .withFile(file)
           .withDac(dac)
           .withFloatId(profile.getPlatformNumber())
-          .withParameterDataMode(profile.getParameter("PRES").getDataMode())
+          .withParameterDataMode(dataMode)
           .withDirection(profile.getDirection())
           .withCycleNumber(formatCycleNumber(profile.getCycleNumber()))
           .withDate(profile.getJulianDate())
@@ -97,7 +102,7 @@ public final class NetCdfMetadataRecord {
           .withProfilerType(profile.getWmoInstrumentType())
           .withInstitution(profile.getDataCenter())
           .withDateUpdate(profile.getDateUpdate())
-          .withFileType(FileType.BGC_ARGO_SYNTH_PROFILE)
+          .withFileType(ArgoFileType.SYNTHETIC_PROFILE_SINGLE_CYCLE)
 
           .build();
     }
@@ -119,7 +124,7 @@ public final class NetCdfMetadataRecord {
           .withProfilerType(metadata.getWmoInstrumentType())
           .withInstitution(metadata.getDataCenter())
           .withDateUpdate(metadata.getDateUpdate())
-          .withFileType(FileType.METADATA)
+          .withFileType(ArgoFileType.METADATA)
           .build();
     }
 
