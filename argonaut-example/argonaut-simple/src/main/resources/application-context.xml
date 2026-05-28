@@ -178,6 +178,16 @@
     <property name="merger" ref="multiProfileMerger"/>
   </bean>
 
+  <bean id="fileReceivedAuditSender" class="edu.colorado.cires.argonaut.processor.core.AuditSender">
+    <property name="jsonMapper" ref="jsonMapper"/>
+    <property name="messageSender" ref="messageSender"/>
+    <property name="auditQueue" value="seda:audit"/>
+  </bean>
+
+  <bean id="prepareErrorAuditProcessor" class="edu.colorado.cires.argonaut.standalone.PrepareErrorAuditProcessor">
+    <property name="jsonMapper" ref="jsonMapper"/>
+  </bean>
+
   <camelContext xmlns="http://camel.apache.org/schema/spring">
     <template id="producerTemplate"/>
     <routeContextRef ref="dac-submission-routes"/>

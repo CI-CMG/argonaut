@@ -85,6 +85,12 @@
       <bean ref="syntheticProfileProcessor" method="generateSyntheticProfile" />
     </route>
 
+    <route id="audit">
+      <from uri="seda:audit"/>
+      <bean ref="deserializationProcessor" method="deserialize(${body}, edu.colorado.cires.argonaut.messaging.core.databind.AuditMessage)"/>
+      <log message="${body}"/>
+    </route>
+
   </routeContext>
 
 </beans>

@@ -5,24 +5,18 @@
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>io.github.ci-cmg.argo</groupId>
-    <artifactId>argonaut-parent-pom</artifactId>
+    <artifactId>argonaut-component-parent</artifactId>
     <version>1.0.0-SNAPSHOT</version>
   </parent>
 
-  <artifactId>argonaut-component-parent</artifactId>
+  <artifactId>argonaut-audit-parent</artifactId>
   <packaging>pom</packaging>
+  <modules>
+    <module>argonaut-audit-core</module>
+  </modules>
 
   <properties>
-    <project-root>${project.parent.basedir}</project-root>
+    <project-root>${project.parent.parent.basedir}</project-root>
   </properties>
-
-  <modules>
-    <module>argonaut-metadata</module>
-    <module>argonaut-file-storage</module>
-    <module>argonaut-messaging</module>
-    <module>argonaut-processor</module>
-    <module>argonaut-core</module>
-    <module>argonaut-audit</module>
-  </modules>
 
 </project>
