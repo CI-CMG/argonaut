@@ -133,6 +133,8 @@ public class DefaultFloatMergeProcessor implements FloatMergeProcessor {
         messageSender.sendJson(
             updateIndexQueue,
             jsonMapper.writeValueAsString(MetadataRecord.builder()
+                .withTraceId(message.getTraceId())
+                .withFileName(outputFileStore.getFileName(filePath))
                 .withFile(filePath)
                 .withDac(dac)
                 .withFloatId(floatId)
@@ -145,7 +147,9 @@ public class DefaultFloatMergeProcessor implements FloatMergeProcessor {
       messageSender.sendJson(
           updateIndexQueue,
           jsonMapper.writeValueAsString(MetadataRecord.builder()
+              .withTraceId(message.getTraceId())
               .withActionTimestamp(now)
+              .withFileName(fileName)
               .withFile(outputFileForMetadata)
               .withDate(now)
               .withDateUpdate(now)

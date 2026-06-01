@@ -51,8 +51,8 @@ public class NetCdfTiedArgoMetadataV31 implements ArgoMetadataV31 {
   private final String operatingInstitution;
   private final String customization;
   private final Instant launchDate;
-  private final double launchLatitude;
-  private final double launchLongitude;
+  private final Double launchLatitude;
+  private final Double launchLongitude;
   private final String launchQc;
   private final Instant startDate;
   private final String startDateQc;
@@ -335,12 +335,12 @@ public class NetCdfTiedArgoMetadataV31 implements ArgoMetadataV31 {
   }
 
   @Override
-  public double getLaunchLatitude() {
+  public Double getLaunchLatitude() {
     return launchLatitude;
   }
 
   @Override
-  public double getLaunchLongitude() {
+  public Double getLaunchLongitude() {
     return launchLongitude;
   }
 

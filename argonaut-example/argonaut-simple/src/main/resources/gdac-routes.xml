@@ -8,59 +8,103 @@
 
   <routeContext id="gdac-routes" xmlns="http://camel.apache.org/schema/spring">
 
+
     <route id="dac-submission-work">
+      <errorHandler>
+        <deadLetterChannel deadLetterUri="seda:audit" onPrepareFailureRef="prepareErrorAuditProcessor"/>
+      </errorHandler>
       <from uri="seda:submit-work"/>
-      <bean ref="deserializationProcessor"
-        method="deserialize(${body}, edu.colorado.cires.argonaut.messaging.core.databind.DacSubmittedFileMessage)"/>
+      <setHeader name="AuditEventProcessor">
+        <constant>ROUTING</constant>
+      </setHeader>
+      <bean ref="deserializationProcessor" method="deserialize(${body}, edu.colorado.cires.argonaut.messaging.core.databind.DacSubmittedFileMessage)"/>
       <bean ref="submitFileRouter" method="choice"/>
     </route>
 
     <route id="validate-submission">
+      <errorHandler>
+        <deadLetterChannel deadLetterUri="seda:audit" onPrepareFailureRef="prepareErrorAuditProcessor"/>
+      </errorHandler>
       <from uri="seda:validation"/>
+      <setHeader name="AuditEventProcessor">
+        <constant>VALIDATION</constant>
+      </setHeader>
       <bean ref="deserializationProcessor" method="deserialize(${body}, edu.colorado.cires.argonaut.messaging.core.databind.NcSubmissionMessage)"/>
+      <bean ref="auditSender" method="validationStarted"/>
       <bean ref="validationProcessor" method="validate"/>
       <bean ref="validationResultRouter" method="route"/>
     </route>
 
     <route id="validation-success">
+      <errorHandler>
+        <deadLetterChannel deadLetterUri="seda:audit" onPrepareFailureRef="prepareErrorAuditProcessor"/>
+      </errorHandler>
       <from uri="seda:validation-success"/>
+      <setHeader name="AuditEventProcessor">
+        <constant>VALIDATION</constant>
+      </setHeader>
+      <bean ref="deserializationProcessor" method="deserialize(${body}, edu.colorado.cires.argonaut.messaging.core.databind.NcSubmissionMessage)"/>
+      <bean ref="auditSender" method="validationSuccess"/>
+      <bean ref="serializationProcessor" method="serialize"/>
       <to uri="seda:file-output"/>
     </route>
 
-    <route id="file-output">
-      <from uri="seda:file-output"/>
+    <route id="validation-failure">
+      <errorHandler>
+        <deadLetterChannel deadLetterUri="seda:audit" onPrepareFailureRef="prepareErrorAuditProcessor"/>
+      </errorHandler>
+      <from uri="seda:validation-failure"/>
+      <setHeader name="AuditEventProcessor">
+        <constant>VALIDATION</constant>
+      </setHeader>
+      <bean ref="deserializationProcessor" method="deserialize(${body}, edu.colorado.cires.argonaut.messaging.core.databind.NcSubmissionMessage)"/>
+      <bean ref="auditSender" method="validationFailure"/>
+      <bean ref="serializationProcessor" method="serialize"/>
+      <to uri="seda:file-output-failure"/>
+    </route>
+
+    <route id="file-output-failure">
+      <errorHandler>
+        <deadLetterChannel deadLetterUri="seda:audit" onPrepareFailureRef="prepareErrorAuditProcessor"/>
+      </errorHandler>
+      <from uri="seda:file-output-failure"/>
+      <setHeader name="AuditEventProcessor">
+        <constant>ROUTING</constant>
+      </setHeader>
       <bean ref="deserializationProcessor" method="deserialize(${body}, edu.colorado.cires.argonaut.messaging.core.databind.NcSubmissionMessage)"/>
       <bean ref="fileMoveProcessor" method="moveFile"/>
       <bean ref="serializationProcessor" method="serialize"/>
-      <to uri="seda:file-moved"/>
     </route>
 
-    <route id="file-moved">
-      <from uri="seda:file-moved"/>
-      <multicast>
-<!--        <to uri="seda:submission-report"/>-->
-        <to uri="seda:submission-index-transform"/>
-      </multicast>
-    </route>
-
-    <route id="submission-report-update">
-      <from uri="seda:submission-report"/>
+    <route id="file-output">
+      <errorHandler>
+        <deadLetterChannel deadLetterUri="seda:audit" onPrepareFailureRef="prepareErrorAuditProcessor"/>
+      </errorHandler>
+      <from uri="seda:file-output"/>
+      <setHeader name="AuditEventProcessor">
+        <constant>ROUTING</constant>
+      </setHeader>
       <bean ref="deserializationProcessor" method="deserialize(${body}, edu.colorado.cires.argonaut.messaging.core.databind.NcSubmissionMessage)"/>
-      <bean ref="submissionReportAppender" method="appendReport"/>
-    </route>
-
-    <route id="submission-index-transform">
-      <from uri="seda:submission-index-transform"/>
-      <bean ref="deserializationProcessor" method="deserialize(${body}, edu.colorado.cires.argonaut.messaging.core.databind.NcSubmissionMessage)"/>
+      <bean ref="auditSender" method="movingFileToOutput"/>
+      <bean ref="fileMoveProcessor" method="moveFile"/>
       <bean ref="metadataTransformProcessor" method="transformNcSubmissionMessage"/>
+      <bean ref="auditSender" method="fileMovedToOutput"/>
       <bean ref="serializationProcessor" method="serialize"/>
       <to uri="seda:update-index"/>
     </route>
 
     <route id="update-index">
+      <errorHandler>
+        <deadLetterChannel deadLetterUri="seda:audit" onPrepareFailureRef="prepareErrorAuditProcessor"/>
+      </errorHandler>
       <from uri="seda:update-index"/>
+      <setHeader name="AuditEventProcessor">
+        <constant>INDEXING</constant>
+      </setHeader>
       <bean ref="deserializationProcessor" method="deserialize(${body}, edu.colorado.cires.argonaut.messaging.core.databind.MetadataRecord)"/>
+      <bean ref="auditSender" method="updatingIndex"/>
       <bean ref="updateIndexProcessor" method="updateIndex"/>
+      <bean ref="auditSender" method="updatedIndex"/>
     </route>
 
     <route id="float-merge-cron">
@@ -69,9 +113,17 @@
     </route>
 
     <route id="float-merge">
+      <errorHandler>
+        <deadLetterChannel deadLetterUri="seda:audit" onPrepareFailureRef="prepareErrorAuditProcessor"/>
+      </errorHandler>
       <from uri="seda:float-merge"/>
+      <setHeader name="AuditEventProcessor">
+        <constant>FILE_GENERATION</constant>
+      </setHeader>
       <bean ref="deserializationProcessor" method="deserialize(${body}, edu.colorado.cires.argonaut.messaging.core.databind.ProfileOperation)"/>
+      <bean ref="auditSender" method="generatingProfileMerge"/>
       <bean ref="floatMergeProcessor" method="merge" />
+      <bean ref="auditSender" method="generatedProfileMerge"/>
     </route>
 
     <route id="synthetic-profile-cron">
@@ -80,15 +132,23 @@
     </route>
 
     <route id="synthetic-profile">
+      <errorHandler>
+        <deadLetterChannel deadLetterUri="seda:audit" onPrepareFailureRef="prepareErrorAuditProcessor"/>
+      </errorHandler>
       <from uri="seda:synthetic-profile"/>
+      <setHeader name="AuditEventProcessor">
+        <constant>FILE_GENERATION</constant>
+      </setHeader>
       <bean ref="deserializationProcessor" method="deserialize(${body}, edu.colorado.cires.argonaut.messaging.core.databind.ProfileOperation)"/>
+      <bean ref="auditSender" method="generatingSyntheticProfile"/>
       <bean ref="syntheticProfileProcessor" method="generateSyntheticProfile" />
+      <bean ref="auditSender" method="generatedSyntheticProfile"/>
     </route>
 
     <route id="audit">
       <from uri="seda:audit"/>
       <bean ref="deserializationProcessor" method="deserialize(${body}, edu.colorado.cires.argonaut.messaging.core.databind.AuditMessage)"/>
-      <log message="${body}"/>
+      <bean ref="auditProcessor" method="recordEvent"/>
     </route>
 
   </routeContext>

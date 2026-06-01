@@ -14,6 +14,9 @@
     <property name="timestampGenerator">
       <bean class="edu.colorado.cires.argonaut.standalone.StaticTimestampGenerator"/>
     </property>
+    <property name="traceIdGenerator">
+      <bean class="edu.colorado.cires.argonaut.standalone.StaticTraceIdGenerator"/>
+    </property>
   </bean>
 
   <bean id="floatMergeProcessor" class="org.mockito.Mockito" factory-method="mock">
@@ -23,6 +26,5 @@
   <bean id="geoFilter" class="org.mockito.Mockito" factory-method="mock">
     <constructor-arg type="java.lang.Class" value="edu.colorado.cires.argonaut.processor.core.GeoFilter"/>
   </bean>
-
 
 </beans>

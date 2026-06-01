@@ -17,7 +17,7 @@
         <constant>FILE_RECEIVED</constant>
       </setHeader>
       <bean ref="fileToSubmissionMessage" method="convert(${body}, 'aoml')"/>
-      <bean ref="fileReceivedAuditSender" method="fileReceived"/>
+      <bean ref="auditSender" method="fileReceived"/>
       <bean ref="moveSubmitToProcessingProcessor" method="moveToProcessing"/>
       <bean ref="serializationProcessor" method="serialize"/>
       <to uri="seda:submit-work"/>
@@ -32,7 +32,7 @@
         <constant>FILE_RECEIVED</constant>
       </setHeader>
       <bean ref="fileToSubmissionMessage" method="convert(${body}, 'bodc')"/>
-      <bean ref="fileReceivedAuditSender" method="fileReceived"/>
+      <bean ref="auditSender" method="fileReceived"/>
       <bean ref="moveSubmitToProcessingProcessor" method="moveToProcessing"/>
       <bean ref="serializationProcessor" method="serialize"/>
       <to uri="seda:submit-work"/>
@@ -47,7 +47,7 @@
         <constant>FILE_RECEIVED</constant>
       </setHeader>
       <bean ref="fileToSubmissionMessage" method="convert(${body}, 'coriolis')"/>
-      <bean ref="fileReceivedAuditSender" method="fileReceived"/>
+      <bean ref="auditSender" method="fileReceived"/>
       <bean ref="moveSubmitToProcessingProcessor" method="moveToProcessing"/>
       <bean ref="serializationProcessor" method="serialize"/>
       <to uri="seda:submit-work"/>
@@ -62,7 +62,7 @@
         <constant>FILE_RECEIVED</constant>
       </setHeader>
       <bean ref="fileToSubmissionMessage" method="convert(${body}, 'csio')"/>
-      <bean ref="fileReceivedAuditSender" method="fileReceived"/>
+      <bean ref="auditSender" method="fileReceived"/>
       <bean ref="moveSubmitToProcessingProcessor" method="moveToProcessing"/>
       <bean ref="serializationProcessor" method="serialize"/>
       <to uri="seda:submit-work"/>
@@ -77,7 +77,7 @@
         <constant>FILE_RECEIVED</constant>
       </setHeader>
       <bean ref="fileToSubmissionMessage" method="convert(${body}, 'csiro')"/>
-      <bean ref="fileReceivedAuditSender" method="fileReceived"/>
+      <bean ref="auditSender" method="fileReceived"/>
       <bean ref="moveSubmitToProcessingProcessor" method="moveToProcessing"/>
       <bean ref="serializationProcessor" method="serialize"/>
       <to uri="seda:submit-work"/>
@@ -92,7 +92,7 @@
         <constant>FILE_RECEIVED</constant>
       </setHeader>
       <bean ref="fileToSubmissionMessage" method="convert(${body}, 'incois')"/>
-      <bean ref="fileReceivedAuditSender" method="fileReceived"/>
+      <bean ref="auditSender" method="fileReceived"/>
       <bean ref="moveSubmitToProcessingProcessor" method="moveToProcessing"/>
       <bean ref="serializationProcessor" method="serialize"/>
       <to uri="seda:submit-work"/>
@@ -107,7 +107,7 @@
         <constant>FILE_RECEIVED</constant>
       </setHeader>
       <bean ref="fileToSubmissionMessage" method="convert(${body}, 'jma')"/>
-      <bean ref="fileReceivedAuditSender" method="fileReceived"/>
+      <bean ref="auditSender" method="fileReceived"/>
       <bean ref="moveSubmitToProcessingProcessor" method="moveToProcessing"/>
       <bean ref="serializationProcessor" method="serialize"/>
       <to uri="seda:submit-work"/>
@@ -122,7 +122,7 @@
         <constant>FILE_RECEIVED</constant>
       </setHeader>
       <bean ref="fileToSubmissionMessage" method="convert(${body}, 'kiost')"/>
-      <bean ref="fileReceivedAuditSender" method="fileReceived"/>
+      <bean ref="auditSender" method="fileReceived"/>
       <bean ref="moveSubmitToProcessingProcessor" method="moveToProcessing"/>
       <bean ref="serializationProcessor" method="serialize"/>
       <to uri="seda:submit-work"/>
@@ -137,7 +137,7 @@
         <constant>FILE_RECEIVED</constant>
       </setHeader>
       <bean ref="fileToSubmissionMessage" method="convert(${body}, 'kma')"/>
-      <bean ref="fileReceivedAuditSender" method="fileReceived"/>
+      <bean ref="auditSender" method="fileReceived"/>
       <bean ref="moveSubmitToProcessingProcessor" method="moveToProcessing"/>
       <bean ref="serializationProcessor" method="serialize"/>
       <to uri="seda:submit-work"/>
@@ -152,7 +152,7 @@
         <constant>FILE_RECEIVED</constant>
       </setHeader>
       <bean ref="fileToSubmissionMessage" method="convert(${body}, 'meds')"/>
-      <bean ref="fileReceivedAuditSender" method="fileReceived"/>
+      <bean ref="auditSender" method="fileReceived"/>
       <bean ref="moveSubmitToProcessingProcessor" method="moveToProcessing"/>
       <bean ref="serializationProcessor" method="serialize"/>
       <to uri="seda:submit-work"/>
@@ -167,7 +167,7 @@
         <constant>FILE_RECEIVED</constant>
       </setHeader>
       <bean ref="fileToSubmissionMessage" method="convert(${body}, 'nmdis')"/>
-      <bean ref="fileReceivedAuditSender" method="fileReceived"/>
+      <bean ref="auditSender" method="fileReceived"/>
       <bean ref="moveSubmitToProcessingProcessor" method="moveToProcessing"/>
       <bean ref="serializationProcessor" method="serialize"/>
       <to uri="seda:submit-work"/>

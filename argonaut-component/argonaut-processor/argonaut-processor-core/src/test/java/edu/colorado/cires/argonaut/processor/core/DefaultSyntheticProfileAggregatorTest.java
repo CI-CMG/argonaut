@@ -9,15 +9,18 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import edu.colorado.cires.argonaut.file.core.FileStore;
 import edu.colorado.cires.argonaut.messaging.core.databind.ProfileOperation;
 import edu.colorado.cires.argonaut.messaging.core.queue.MessageSender;
 import edu.colorado.cires.argonaut.messaging.core.util.ArgonautJsonMapperFactory;
 import edu.colorado.cires.argonaut.metadata.core.DefaultProfilePage;
 import edu.colorado.cires.argonaut.metadata.core.IndexPageRequest;
 import edu.colorado.cires.argonaut.metadata.core.MetadataStore;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import tools.jackson.databind.json.JsonMapper;
@@ -31,9 +34,12 @@ public class DefaultSyntheticProfileAggregatorTest {
     int pageSize = 5;
     int maxResults = pageSize + 1;
 
-
+    UUID traceId = UUID.randomUUID();
     MessageSender messageSender = mock(MessageSender.class);
     MetadataStore metadataStore = mock(MetadataStore.class);
+    FileStore fileStore = mock(FileStore.class);
+
+    when(fileStore.getFileName(any())).thenAnswer(i -> Paths.get(i.getArgument(0, String.class)).getFileName().toString());
 
     List<ProfileOperation> expected = new ArrayList<>(maxResults);
     when(metadataStore.findUpdatedOrMissingSyntheticProfilesPage(any())).thenAnswer(invocation -> {
@@ -45,6 +51,8 @@ public class DefaultSyntheticProfileAggregatorTest {
         ProfileOperation profileOperation = ProfileOperation.builder()
             .withFloatId("" + i)
             .withDac("aoml")
+            .withTraceId(traceId)
+            .withFileName("SR" + i + "_001.nc")
             .withFiles(Arrays.asList(
                 "aoml/" + i + "/profiles/R" + i + "_001.nc",
                 "aoml/" + i + "/profiles/BR" + i + "_001.nc",
@@ -69,6 +77,8 @@ public class DefaultSyntheticProfileAggregatorTest {
     aggregator.setMessageSender(messageSender);
     aggregator.setMetadataStore(metadataStore);
     aggregator.setPageSize(5);
+    aggregator.setOutputFileStore(fileStore);
+    aggregator.setTraceIdGenerator(() -> traceId);
 
     aggregator.trigger();
 

@@ -116,6 +116,7 @@ public class DefaultTarballSubmissionProcessor implements TarballSubmissionProce
     for (NcSubmissionMessage ncSubmissionMessage : output) {
       NcSubmissionMessage finalNcSubmissionMessage = NcSubmissionMessage.builder(ncSubmissionMessage)
           .withNumberOfFilesInSubmission(output.size())
+          .withTraceId(submittedFile.getTraceId())
           .build();
       result.add(finalNcSubmissionMessage);
     }

@@ -7,10 +7,11 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.UUID;
 import tools.jackson.databind.annotation.JsonDeserialize;
 
 @JsonDeserialize(builder = MetadataRecord.Builder.class)
-public class MetadataRecord {
+public class MetadataRecord implements TracedMessage {
 
 
   public enum FileStatus {
@@ -58,6 +59,8 @@ public class MetadataRecord {
     private String dac;
     private String floatId;
     private Instant actionTimestamp = Instant.now();
+    private UUID traceId;
+    private String fileName;
     private Map<String, Object> otherFields = new HashMap<>();
 
     private Builder() {
@@ -87,6 +90,8 @@ public class MetadataRecord {
       dac = source.dac;
       floatId = source.floatId;
       actionTimestamp = source.actionTimestamp;
+      traceId = source.traceId;
+      fileName = source.fileName;
       otherFields.putAll(source.otherFields);
     }
 
@@ -204,6 +209,16 @@ public class MetadataRecord {
       return this;
     }
 
+    public Builder withTraceId(UUID traceId) {
+      this.traceId = traceId;
+      return this;
+    }
+
+    public Builder withFileName(String fileName) {
+      this.fileName = fileName;
+      return this;
+    }
+
     @Deprecated
     @JsonAnySetter
     private Builder withOtherField(String name, Object value) {
@@ -235,6 +250,8 @@ public class MetadataRecord {
           dac,
           floatId,
           actionTimestamp,
+          traceId,
+          fileName,
           otherFields
       );
     }
@@ -263,11 +280,14 @@ public class MetadataRecord {
   private final String dac;
   private final String floatId;
   private final Instant actionTimestamp;
+  private final UUID traceId;
+  private final String fileName;
   private final Map<String, Object> otherFields;
 
   private MetadataRecord(String file, Instant date, Double latitude, Double latitudeMin, Double latitudeMax, Double longitude, Double longitudeMin,
       Double longitudeMax, ArgoOcean ocean, String profilerType, String institution, Instant dateUpdate, String parameters, String parameterDataMode,
       String direction, String cycleNumber, Action action, ArgoFileType fileType, FileStatus fileStatus, String dac, String floatId, Instant actionTimestamp,
+      UUID traceId, String fileName,
       Map<String, Object> otherFields) {
     this.file = file;
     this.date = date;
@@ -291,6 +311,8 @@ public class MetadataRecord {
     this.dac = dac;
     this.floatId = floatId;
     this.actionTimestamp = actionTimestamp;
+    this.traceId = traceId;
+    this.fileName = fileName;
     this.otherFields = Collections.unmodifiableMap(new HashMap<>(otherFields));
   }
 
@@ -374,6 +396,16 @@ public class MetadataRecord {
     return dac;
   }
 
+  @Override
+  public String getFileName() {
+    return fileName;
+  }
+
+  @Override
+  public UUID getTraceId() {
+    return traceId;
+  }
+
   public String getFloatId() {
     return floatId;
   }
@@ -402,7 +434,15 @@ public class MetadataRecord {
         parameters, that.parameters) && Objects.equals(parameterDataMode, that.parameterDataMode) && Objects.equals(direction,
         that.direction) && Objects.equals(cycleNumber, that.cycleNumber) && action == that.action && fileType == that.fileType
         && fileStatus == that.fileStatus && Objects.equals(dac, that.dac) && Objects.equals(floatId, that.floatId)
-        && instantsEquals(actionTimestamp, that.actionTimestamp) && Objects.equals(otherFields, that.otherFields);
+        && instantsEquals(actionTimestamp, that.actionTimestamp) && Objects.equals(traceId, that.traceId)
+        && Objects.equals(fileName, that.fileName) && Objects.equals(otherFields, that.otherFields);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(file, date, latitude, latitudeMin, latitudeMax, longitude, longitudeMin, longitudeMax, ocean, profilerType, institution,
+        dateUpdate, parameters, parameterDataMode, direction, cycleNumber, action, fileType, fileStatus, dac, floatId, actionTimestamp, traceId,
+        fileName, otherFields);
   }
 
   private static boolean instantsEquals(Instant instant1, Instant instant2) {
@@ -413,12 +453,6 @@ public class MetadataRecord {
       return false;
     }
     return instant1.toEpochMilli() == instant2.toEpochMilli();
-  }
-
-  @Override
-  public int hashCode() {
-    return Objects.hash(file, date, latitude, latitudeMin, latitudeMax, longitude, longitudeMin, longitudeMax, ocean, profilerType, institution,
-        dateUpdate, parameters, parameterDataMode, direction, cycleNumber, action, fileType, fileStatus, dac, floatId, actionTimestamp, otherFields);
   }
 
   @Override
@@ -446,6 +480,8 @@ public class MetadataRecord {
         ", dac='" + dac + '\'' +
         ", floatId='" + floatId + '\'' +
         ", actionTimestamp=" + actionTimestamp +
+        ", traceId=" + traceId +
+        ", fileName='" + fileName + '\'' +
         ", otherFields=" + otherFields +
         '}';
   }

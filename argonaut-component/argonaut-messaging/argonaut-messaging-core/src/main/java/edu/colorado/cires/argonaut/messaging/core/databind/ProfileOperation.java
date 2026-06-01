@@ -8,10 +8,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.UUID;
 import tools.jackson.databind.annotation.JsonDeserialize;
 
 @JsonDeserialize(builder = ProfileOperation.Builder.class)
-public class ProfileOperation {
+public class ProfileOperation implements TracedMessage{
 
   public static Builder builder() {
     return new Builder();
@@ -24,17 +25,31 @@ public class ProfileOperation {
   private final String dac;
   private final String floatId;
   private final List<String> files;
+  private final UUID traceId;
+  private final String fileName;
   private final Map<String, Object> otherFields;
 
-  private ProfileOperation(String dac, String floatId, List<String> files, Map<String, Object> otherFields) {
+  private ProfileOperation(String dac, String floatId, List<String> files, UUID traceId, String fileName, Map<String, Object> otherFields) {
     this.dac = dac;
     this.floatId = floatId;
     this.files = files;
+    this.traceId = traceId;
+    this.fileName = fileName;
     this.otherFields = Collections.unmodifiableMap(new HashMap<>(otherFields));
   }
 
   public String getDac() {
     return dac;
+  }
+
+  @Override
+  public String getFileName() {
+    return fileName;
+  }
+
+  @Override
+  public UUID getTraceId() {
+    return traceId;
   }
 
   public String getFloatId() {
@@ -58,12 +73,13 @@ public class ProfileOperation {
     }
     ProfileOperation that = (ProfileOperation) o;
     return Objects.equals(dac, that.dac) && Objects.equals(floatId, that.floatId) && Objects.equals(files, that.files)
-        && Objects.equals(otherFields, that.otherFields);
+        && Objects.equals(traceId, that.traceId) && Objects.equals(fileName, that.fileName) && Objects.equals(otherFields,
+        that.otherFields);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(dac, floatId, files, otherFields);
+    return Objects.hash(dac, floatId, files, traceId, fileName, otherFields);
   }
 
   @Override
@@ -72,6 +88,8 @@ public class ProfileOperation {
         "dac='" + dac + '\'' +
         ", floatId='" + floatId + '\'' +
         ", files=" + files +
+        ", traceId=" + traceId +
+        ", fileName='" + fileName + '\'' +
         ", otherFields=" + otherFields +
         '}';
   }
@@ -80,6 +98,8 @@ public class ProfileOperation {
     private String dac;
     private String floatId;
     private List<String> files = Collections.emptyList();
+    private UUID traceId;
+    private String fileName;
     private Map<String, Object> otherFields = new HashMap<>();
 
     private Builder() {
@@ -90,6 +110,8 @@ public class ProfileOperation {
       dac = source.dac;
       floatId = source.floatId;
       files = source.files;
+      traceId = source.traceId;
+      fileName = source.fileName;
       otherFields.putAll(source.otherFields);
     }
 
@@ -112,6 +134,16 @@ public class ProfileOperation {
       return this;
     }
 
+    public Builder withTraceId(UUID traceId) {
+      this.traceId = traceId;
+      return this;
+    }
+
+    public Builder withFileName(String fileName) {
+      this.fileName = fileName;
+      return this;
+    }
+
     @Deprecated
     @JsonAnySetter
     private Builder withOtherField(String name, Object value) {
@@ -120,7 +152,7 @@ public class ProfileOperation {
     }
 
     public ProfileOperation build() {
-      return new ProfileOperation(dac, floatId, files, otherFields);
+      return new ProfileOperation(dac, floatId, files, traceId, fileName, otherFields);
     }
   }
 }

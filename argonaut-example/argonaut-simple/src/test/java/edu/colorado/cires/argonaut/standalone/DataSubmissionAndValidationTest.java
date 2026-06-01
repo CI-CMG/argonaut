@@ -47,7 +47,7 @@ import tools.jackson.databind.json.JsonMapper;
 @TestPropertySource
 @ContextConfiguration({"DataSubmissionAndValidationTest.xml"})
 @DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
-@MockEndpointsAndSkip("seda:validation-success|seda:file-output")
+@MockEndpointsAndSkip("seda:validation-success|seda:file-output-failure")
 public class DataSubmissionAndValidationTest {
 
   //TODO
@@ -58,7 +58,7 @@ public class DataSubmissionAndValidationTest {
   @EndpointInject("mock:seda:validation-success")
   private MockEndpoint validationSuccess;
 
-  @EndpointInject("mock:seda:file-output")
+  @EndpointInject("mock:seda:file-output-failure")
   private MockEndpoint fileOutput;
 
   @Autowired
@@ -279,6 +279,7 @@ public class DataSubmissionAndValidationTest {
           .withFileType(type)
           .withDac("aoml")
           .withFileName(name)
+          .withTraceId(StaticTraceIdGenerator.TRACE_ID)
           .withTimestamp(timestamp)
           .withFloatId(floatDir.getFileName().toString())
           .withNumberOfFilesInSubmission(102)
@@ -356,6 +357,7 @@ public class DataSubmissionAndValidationTest {
           .withDac("aoml")
           .withFileName(name)
           .withTimestamp(timestamp)
+          .withTraceId(StaticTraceIdGenerator.TRACE_ID)
           .withFloatId(floatDir.getFileName().toString())
           .withNumberOfFilesInSubmission(files.length)
           .withOperation(Operation.ADD)

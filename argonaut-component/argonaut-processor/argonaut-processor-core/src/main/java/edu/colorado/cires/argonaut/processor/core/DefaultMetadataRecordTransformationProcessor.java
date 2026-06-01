@@ -9,6 +9,7 @@ import edu.colorado.cires.argonaut.processor.core.transform.NetCdfMetadataRecord
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.UUID;
 import org.apache.commons.io.FileUtils;
 
 public class DefaultMetadataRecordTransformationProcessor implements MetadataRecordTransformationProcessor {
@@ -19,11 +20,6 @@ public class DefaultMetadataRecordTransformationProcessor implements MetadataRec
 
   @Override
   public MetadataRecord transformNcSubmissionMessage(NcSubmissionMessage message) {
-    if (message.getValidationErrors() != null && !message.getValidationErrors().isEmpty()) {
-      return MetadataRecord.builder()
-          .withAction(Action.NONE)
-          .build();
-    }
     String file = outputFileStore.appendToPath(message.getDac(), message.getFloatId());
     if (ArgoFileType.isProfile(message.getFileType())) {
       file = outputFileStore.appendToPath(file, "profiles");
@@ -31,7 +27,7 @@ public class DefaultMetadataRecordTransformationProcessor implements MetadataRec
     file = outputFileStore.appendToPath(file, message.getFileName());
     switch (message.getOperation()) {
       case ADD:
-        return createUpdateMessage(message.getFileType(), file, message.getDac());
+        return createUpdateMessage(message.getFileType(), file, message.getDac(), message.getFileName(), message.getTraceId());
       case REMOVE:
         return MetadataRecord.builder()
             .withFile(file)
@@ -45,7 +41,7 @@ public class DefaultMetadataRecordTransformationProcessor implements MetadataRec
     }
   }
 
-  private MetadataRecord createUpdateMessage(ArgoFileType fileType, String file, String dac) {
+  private MetadataRecord createUpdateMessage(ArgoFileType fileType, String file, String dac, String fileName, UUID traceId) {
     String path = outputFileStore.appendToPath(outputFileStore.getRoot(), "dac", file);
     Path ncFile;
     try {
@@ -59,13 +55,16 @@ public class DefaultMetadataRecordTransformationProcessor implements MetadataRec
       } catch (IOException e) {
         throw new RuntimeException("Unable to download " + path, e);
       }
+      MetadataRecord metadataRecord;
       try {
         switch (fileType) {
           case PROFILE_CORE:
           case PROFILE_BIOCHEMICAL:
-            return NetCdfMetadataRecord.fromV31Profile(file, dac, ncFile, geoFilter);
+            metadataRecord = NetCdfMetadataRecord.fromV31Profile(file, dac, ncFile, geoFilter);
+            break;
           case METADATA:
-            return NetCdfMetadataRecord.fromV31Metadata(file, dac, ncFile, geoFilter);
+            metadataRecord = NetCdfMetadataRecord.fromV31Metadata(file, dac, ncFile, geoFilter);
+            break;
           default:
             // TODO Traj files etc.
             throw new UnsupportedOperationException("Unsupported file type: " + fileType);
@@ -73,6 +72,10 @@ public class DefaultMetadataRecordTransformationProcessor implements MetadataRec
       } catch (IOException e) {
         throw new RuntimeException("Unable to parse NetCDF file " + path, e);
       }
+      return MetadataRecord.builder(metadataRecord)
+          .withTraceId(traceId)
+          .withFileName(fileName)
+          .build();
     } finally {
       FileUtils.deleteQuietly(ncFile.toFile());
     }

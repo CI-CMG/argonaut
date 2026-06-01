@@ -42,14 +42,14 @@ import tools.jackson.databind.json.JsonMapper;
 @TestPropertySource
 @ContextConfiguration({"DataSubmissionAndActualValidationTest.xml"})
 @DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
-@MockEndpointsAndSkip("seda:validation-success|seda:file-output")
+@MockEndpointsAndSkip("seda:validation-success|seda:file-output-failure")
 public class DataSubmissionAndActualValidationTest {
 
   @EndpointInject("mock:seda:validation-success")
   private MockEndpoint validationSuccess;
 
-  @EndpointInject("mock:seda:file-output")
-  private MockEndpoint fileOutput;
+  @EndpointInject("mock:seda:file-output-failure")
+  private MockEndpoint validationFailure;
 
   @Autowired
   @Qualifier("jsonMapper")
@@ -232,14 +232,14 @@ public class DataSubmissionAndActualValidationTest {
 
     validationSuccess.expectedMessageCount(102);
     validationSuccess.setAssertPeriod(2000);
-    fileOutput.expectedMessageCount(0);
-    fileOutput.setAssertPeriod(2000);
+    validationFailure.expectedMessageCount(0);
+    validationFailure.setAssertPeriod(2000);
 
     // copy before moving to prevent state where file is picked up halfway
     Files.copy(Paths.get("src/test/resources/aoml").resolve(fileName), copyFile);
     Files.move(copyFile, submittedFile);
 
-    MockEndpoint.assertIsSatisfied(2, TimeUnit.MINUTES, validationSuccess, fileOutput);
+    MockEndpoint.assertIsSatisfied(2, TimeUnit.MINUTES, validationSuccess, validationFailure);
     Set<Path> processedFiles = new TreeSet<>();
     try (Stream<Path> stream = Files.walk(aomlProcessingDir)) {
       stream.filter(Files::isRegularFile).forEach(processedFiles::add);
@@ -261,6 +261,7 @@ public class DataSubmissionAndActualValidationTest {
           .withFileType(type)
           .withDac("aoml")
           .withFileName(name)
+          .withTraceId(StaticTraceIdGenerator.TRACE_ID)
           .withTimestamp(timestamp)
           .withFloatId(floatDir.getFileName().toString())
           .withNumberOfFilesInSubmission(102)
@@ -305,14 +306,14 @@ public class DataSubmissionAndActualValidationTest {
 
     validationSuccess.expectedMessageCount(files.length - 1);
     validationSuccess.setAssertPeriod(2000);
-    fileOutput.expectedMessageCount(1);
-    fileOutput.setAssertPeriod(2000);
+    validationFailure.expectedMessageCount(1);
+    validationFailure.setAssertPeriod(2000);
 
     // copy before moving to prevent state where file is picked up halfway
     Files.copy(Paths.get("src/test/resources/aoml").resolve(fileName), copyFile);
     Files.move(copyFile, submittedFile);
 
-    MockEndpoint.assertIsSatisfied(2, TimeUnit.MINUTES, validationSuccess, fileOutput);
+    MockEndpoint.assertIsSatisfied(2, TimeUnit.MINUTES, validationSuccess, validationFailure);
     Set<Path> processedFiles = new TreeSet<>();
     try (Stream<Path> stream = Files.walk(aomlProcessingDir)) {
       stream.filter(Files::isRegularFile).forEach(processedFiles::add);
@@ -326,6 +327,7 @@ public class DataSubmissionAndActualValidationTest {
 
       NcSubmissionMessage expectedMessage = NcSubmissionMessage.builder()
           .withFileType(ArgoFileType.PROFILE_CORE)
+          .withTraceId(StaticTraceIdGenerator.TRACE_ID)
           .withDac("aoml")
           .withFileName(name)
           .withTimestamp(timestamp)
@@ -350,7 +352,7 @@ public class DataSubmissionAndActualValidationTest {
     }
 
     List<NcSubmissionMessage> receivedFailedMessages = new ArrayList<>(1);
-    for (Exchange exchange : fileOutput.getExchanges()) {
+    for (Exchange exchange : validationFailure.getExchanges()) {
       String json = exchange.getIn().getBody(String.class);
       NcSubmissionMessage ncSubmissionMessage = jsonMapper.readValue(json, NcSubmissionMessage.class);
       receivedFailedMessages.add(ncSubmissionMessage);

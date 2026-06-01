@@ -12,7 +12,7 @@ import java.util.UUID;
 import tools.jackson.databind.annotation.JsonDeserialize;
 
 @JsonDeserialize(builder = DacSubmittedFileMessage.Builder.class)
-public final class DacSubmittedFileMessage {
+public final class DacSubmittedFileMessage implements TracedMessage {
 
   public static Builder builder() {
     return new Builder();

@@ -18,6 +18,7 @@ import edu.colorado.cires.argonaut.metadata.core.MetadataStore;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import tools.jackson.databind.json.JsonMapper;
 
@@ -30,12 +31,14 @@ public class DefaultFloatMergeAggregatorTest {
     MetadataStore metadataStore = mock(MetadataStore.class);
     String queue = "seda:float-merge";
 
+    UUID traceId = UUID.randomUUID();
     DefaultFloatMergeAggregator aggregator = new DefaultFloatMergeAggregator();
     aggregator.setFloatMergeQueue(queue);
     aggregator.setMessageSender(messageSender);
     aggregator.setJsonMapper(jsonMapper);
     aggregator.setMetadataStore(metadataStore);
     aggregator.setPageSize(2);
+    aggregator.setTraceIdGenerator(() -> traceId);
 
     when(metadataStore.findUpdatedOrMissingMergeFilesPage(any())).thenAnswer((invocationOnMock) -> {
       IndexPageRequest pageRequest = invocationOnMock.getArgument(0, IndexPageRequest.class);
@@ -55,10 +58,10 @@ public class DefaultFloatMergeAggregatorTest {
         eq(DefaultIndexPageRequest.builder().withPageNumber(2).withPageSize(2).build()));
 
     List<String> messages = Arrays.asList(
-        jsonMapper.writeValueAsString(ProfileOperation.builder().withDac("aaaa").withFloatId("1").withFiles(Collections.singletonList("aaaa/profiles/1.nc")).build()),
-        jsonMapper.writeValueAsString(ProfileOperation.builder().withDac("bbbb").withFloatId("10").withFiles(Collections.singletonList("aaaa/profiles/10.nc")).build()),
-        jsonMapper.writeValueAsString(ProfileOperation.builder().withDac("aaaa").withFloatId("2").withFiles(Collections.singletonList("aaaa/profiles/2.nc")).build()),
-        jsonMapper.writeValueAsString(ProfileOperation.builder().withDac("bbbb").withFloatId("20").withFiles(Collections.singletonList("aaaa/profiles/20.nc")).build())
+        jsonMapper.writeValueAsString(ProfileOperation.builder().withDac("aaaa").withFloatId("1").withTraceId(traceId).withFileName("1_prof.nc").withFiles(Collections.singletonList("aaaa/profiles/1.nc")).build()),
+        jsonMapper.writeValueAsString(ProfileOperation.builder().withDac("bbbb").withFloatId("10").withTraceId(traceId).withFileName("10_prof.nc").withFiles(Collections.singletonList("aaaa/profiles/10.nc")).build()),
+        jsonMapper.writeValueAsString(ProfileOperation.builder().withDac("aaaa").withFloatId("2").withTraceId(traceId).withFileName("2_prof.nc").withFiles(Collections.singletonList("aaaa/profiles/2.nc")).build()),
+        jsonMapper.writeValueAsString(ProfileOperation.builder().withDac("bbbb").withFloatId("20").withTraceId(traceId).withFileName("20_prof.nc").withFiles(Collections.singletonList("aaaa/profiles/20.nc")).build())
     );
     for (String message : messages) {
       verify(messageSender, times(1)).sendJson(eq(queue), eq(message));

@@ -128,6 +128,8 @@ public class DefaultSyntheticProfileProcessor implements SyntheticProfileProcess
 
   private static MetadataRecord createMetadataRecord(FileInfo fileInfo, ProfileOperation message) {
     return MetadataRecord.builder()
+        .withTraceId(message.getTraceId())
+        .withFileName(fileInfo.getFileName())
         .withFile(fileInfo.getFile())
         .withAction(Action.SYNTHETIC_MERGE)
         .withDac(message.getDac())

@@ -93,9 +93,9 @@ public interface ArgoMetadataV31 {
 
   Instant getLaunchDate();
 
-  double getLaunchLatitude();
+  Double getLaunchLatitude();
 
-  double getLaunchLongitude();
+  Double getLaunchLongitude();
 
   String getLaunchQc();
 

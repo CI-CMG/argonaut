@@ -13,10 +13,13 @@
   <packaging>pom</packaging>
   <modules>
     <module>argonaut-audit-core</module>
+    <module>argonaut-audit-jpa</module>
   </modules>
 
   <properties>
     <project-root>${project.parent.parent.basedir}</project-root>
   </properties>
+
+
 
 </project>

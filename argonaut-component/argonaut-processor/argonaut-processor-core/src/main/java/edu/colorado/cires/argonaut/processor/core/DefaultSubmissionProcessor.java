@@ -52,6 +52,7 @@ public class DefaultSubmissionProcessor implements SubmissionProcessor {
           .withFloatId(floatDir)
           .withDac(submittedFile.getDac())
           .withTimestamp(submittedFile.getTimestamp())
+          .withTraceId(submittedFile.getTraceId())
           .build();
       String processingDacDir = processingFileStore.appendToPath(processingFileStore.getRoot(), "dac", submittedFile.getDac(),
           submittedFile.getTimestamp().toString(), floatDir);

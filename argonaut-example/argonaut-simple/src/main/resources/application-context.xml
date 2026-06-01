@@ -85,7 +85,7 @@
     <property name="jsonMapper" ref="jsonMapper"/>
     <property name="messageSender" ref="messageSender"/>
     <property name="successQueue" value="seda:validation-success"/>
-    <property name="failureQueue" value="seda:file-output"/>
+    <property name="failureQueue" value="seda:validation-failure"/>
   </bean>
 
   <bean id="fileMoveProcessor" class="edu.colorado.cires.argonaut.processor.core.DefaultFileMoveProcessor">
@@ -105,7 +105,7 @@
     <constructor-arg>
       <map>
         <entry key="jakarta.persistence.jdbc.driver" value="org.h2.Driver"/>
-        <entry key="jakarta.persistence.jdbc.url" value="jdbc:h2:${dac.submission.database-file}"/>
+        <entry key="jakarta.persistence.jdbc.url" value="jdbc:h2:${dac.index.database-file}"/>
         <entry key="jakarta.persistence.jdbc.user" value="sa"/>
         <entry key="jakarta.persistence.jdbc.password" value=""/>
         <entry key="hibernate.hbm2ddl.auto" value="update"/>
@@ -113,8 +113,17 @@
     </constructor-arg>
   </bean>
 
-  <bean id="submissionReportAppender" class="edu.colorado.cires.argonaut.processor.report.jpa.JpaFileSubmissionReportProcessor">
-    <property name="entityManagerFactory" ref="entityManagerFactory"/>
+  <bean id="auditEntityManagerFactory" class="jakarta.persistence.Persistence" factory-method="createEntityManagerFactory">
+    <constructor-arg value="argonaut-audit"/>
+    <constructor-arg>
+      <map>
+        <entry key="jakarta.persistence.jdbc.driver" value="org.h2.Driver"/>
+        <entry key="jakarta.persistence.jdbc.url" value="jdbc:h2:${dac.audit.database-file}"/>
+        <entry key="jakarta.persistence.jdbc.user" value="sa"/>
+        <entry key="jakarta.persistence.jdbc.password" value=""/>
+        <entry key="hibernate.hbm2ddl.auto" value="update"/>
+      </map>
+    </constructor-arg>
   </bean>
 
   <bean id="geoFilter" class="edu.colorado.cires.argonaut.processor.geofilter.MarineRegionsGeoFilter" init-method="initialize">
@@ -151,6 +160,7 @@
     <property name="enabled" value="${synthetic-profile.enabled}"/>
     <property name="pageSize" value="${synthetic-profile.page-size}"/>
     <property name="metadataStore" ref="metadataStore"/>
+    <property name="outputFileStore" ref="outputFileStore"/>
   </bean>
 
   <bean id="syntheticProfileMerger" class="edu.colorado.cires.argonaut.core.merge.synthetic.DefaultSyntheticProfileMerger"/>
@@ -178,7 +188,7 @@
     <property name="merger" ref="multiProfileMerger"/>
   </bean>
 
-  <bean id="fileReceivedAuditSender" class="edu.colorado.cires.argonaut.processor.core.AuditSender">
+  <bean id="auditSender" class="edu.colorado.cires.argonaut.processor.core.AuditSender">
     <property name="jsonMapper" ref="jsonMapper"/>
     <property name="messageSender" ref="messageSender"/>
     <property name="auditQueue" value="seda:audit"/>
@@ -186,6 +196,10 @@
 
   <bean id="prepareErrorAuditProcessor" class="edu.colorado.cires.argonaut.standalone.PrepareErrorAuditProcessor">
     <property name="jsonMapper" ref="jsonMapper"/>
+  </bean>
+
+  <bean id="auditProcessor" class="edu.colorado.cires.argonaut.audit.jpa.JpaAuditStorageProcessor">
+    <property name="entityManagerFactory" ref="auditEntityManagerFactory"/>
   </bean>
 
   <camelContext xmlns="http://camel.apache.org/schema/spring">

@@ -18,10 +18,13 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Collections;
 import java.util.stream.Stream;
+import org.apache.camel.CamelContext;
 import org.apache.camel.EndpointInject;
+import org.apache.camel.builder.AdviceWith;
 import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.test.spring.junit5.CamelSpringTest;
 import org.apache.camel.test.spring.junit5.MockEndpointsAndSkip;
+import org.apache.camel.test.spring.junit5.UseAdviceWith;
 import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
@@ -42,7 +45,8 @@ import tools.jackson.databind.json.JsonMapper;
 @TestPropertySource
 @ContextConfiguration({"PostValidationTest.xml"})
 @DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
-@MockEndpointsAndSkip("seda:file-moved")
+@MockEndpointsAndSkip("seda:update-index")
+@UseAdviceWith
 public class PostValidationTest {
 
   //TODO
@@ -50,7 +54,10 @@ public class PostValidationTest {
 //    System.setProperty("camel.threads.virtual.enabled", "true");
 //  }
 
-  @EndpointInject("mock:seda:file-moved")
+  @Autowired
+  private CamelContext camelContext;
+
+  @EndpointInject("mock:seda:update-index")
   private MockEndpoint fileMoved;
 
   @Autowired
@@ -82,6 +89,18 @@ public class PostValidationTest {
 
   @BeforeEach
   public void setup() throws Exception {
+    cleanup();
+
+    AdviceWith.adviceWith(camelContext, "file-output-failure", advice -> {
+      advice.getOriginalRoute().to("mock:seda:update-index");
+    });
+
+    camelContext.start();
+
+  }
+
+  @AfterEach
+  public void cleanup() throws Exception {
     Mockito.reset(validationProcessor);
 
     if (Files.exists(outputDir)) {
@@ -131,12 +150,6 @@ public class PostValidationTest {
         });
       }
     }
-
-  }
-
-  @AfterEach
-  public void cleanup() throws Exception {
-    setup();
   }
 
   private static void unTarGz(Path tarGz, Path tempDir) throws IOException {
@@ -282,7 +295,7 @@ public class PostValidationTest {
       Files.move(timeStampDir.resolve(name), floatDir.resolve(name));
       messageSender.sendJson("seda:validation-success", jsonMapper.writeValueAsString(NcSubmissionMessage.builder()
           .withOperation(Operation.ADD)
-          .withFileType(ArgoFileType.AUXILIARY)
+          .withFileType(ArgoFileType.METADATA)
           .withDac("aoml")
           .withFileName(name)
           .withTimestamp(timestamp)
@@ -425,9 +438,9 @@ public class PostValidationTest {
       Path floatDir = aomlProcessingTimestampDir.resolve(name.split("_")[0]);
       Files.createDirectories(floatDir);
       Files.move(timeStampDir.resolve(name), floatDir.resolve(name));
-      messageSender.sendJson("seda:file-output", jsonMapper.writeValueAsString(NcSubmissionMessage.builder()
+      messageSender.sendJson("seda:validation-failure", jsonMapper.writeValueAsString(NcSubmissionMessage.builder()
           .withOperation(Operation.ADD)
-          .withFileType(ArgoFileType.AUXILIARY)
+          .withFileType(ArgoFileType.METADATA)
           .withDac("aoml")
           .withFileName(name)
           .withTimestamp(timestamp)
@@ -466,7 +479,7 @@ public class PostValidationTest {
     unTarGz(submittedTarGz, timeStampDir);
     Path aomlProcessingTimestampDir = aomlProcessingDir.resolve("2026-02-20T01:02:03Z");
 
-    fileMoved.expectedMessageCount(files.length);
+    fileMoved.expectedMessageCount(files.length - 1); //R5905716_245.nc is bad
     fileMoved.setAssertPeriod(500);
 
     for (String name : files) {
@@ -520,7 +533,7 @@ public class PostValidationTest {
       Path floatDir = aomlProcessingTimestampDir.resolve(name.split("_")[0]);
       Files.createDirectories(floatDir.resolve("profiles"));
       Files.move(timeStampDir.resolve(name), floatDir.resolve("profiles").resolve(name));
-      messageSender.sendJson("seda:file-output", jsonMapper.writeValueAsString(NcSubmissionMessage.builder()
+      messageSender.sendJson("seda:validation-failure", jsonMapper.writeValueAsString(NcSubmissionMessage.builder()
           .withOperation(Operation.ADD)
           .withFileType(ArgoFileType.PROFILE_CORE)
           .withDac("aoml")

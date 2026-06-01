@@ -7,6 +7,8 @@ import edu.colorado.cires.argonaut.metadata.core.IndexPageRequest;
 import edu.colorado.cires.argonaut.metadata.core.MetadataStore;
 import edu.colorado.cires.argonaut.metadata.core.ProfilePage;
 import java.util.Optional;
+import java.util.UUID;
+import java.util.function.Supplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tools.jackson.databind.json.JsonMapper;
@@ -15,12 +17,18 @@ public class DefaultFloatMergeAggregator implements FloatMergeAggregator {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(DefaultFloatMergeAggregator.class);
 
+
+  private Supplier<UUID> traceIdGenerator = () -> UUID.randomUUID();
   private MetadataStore metadataStore;
   private MessageSender messageSender;
   private JsonMapper jsonMapper;
   private String floatMergeQueue;
   private int pageSize = 200;
   private boolean enabled = true;
+
+  public void setTraceIdGenerator(Supplier<UUID> traceIdGenerator) {
+    this.traceIdGenerator = traceIdGenerator;
+  }
 
   public void setEnabled(boolean enabled) {
     this.enabled = enabled;
@@ -48,7 +56,11 @@ public class DefaultFloatMergeAggregator implements FloatMergeAggregator {
 
   private void sendMessages(ProfilePage page) {
     for (ProfileOperation fmg : page.getPage()) {
-      messageSender.sendJson(floatMergeQueue, jsonMapper.writeValueAsString(fmg));
+      messageSender.sendJson(floatMergeQueue, jsonMapper.writeValueAsString(
+          ProfileOperation.builder(fmg)
+              .withFileName(fmg.getFloatId() + "_prof.nc")
+              .withTraceId(traceIdGenerator.get())
+              .build()));
     }
   }
 
