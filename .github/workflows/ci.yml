@@ -36,6 +36,11 @@ jobs:
         with:
           name: zip
           path: "argonaut-example/argonaut-simple/target/argonaut-simple-${{ env.version }}.zip"
+      - name: Upload Tar.gz
+        uses: actions/upload-artifact@v4
+        with:
+          name: targz
+          path: "argonaut-example/argonaut-simple/target/argonaut-simple-${{ env.version }}.tar.gz"
   release:
     needs:
       - build
@@ -44,6 +49,7 @@ jobs:
       - uses: actions/download-artifact@v4
       - run: mkdir release
       - run: cp zip/* release/argonaut-simple-${{ needs.build.outputs.version }}.zip
+      - run: cp targz/* release/argonaut-simple-${{ needs.build.outputs.version }}.tar.gz
       - name: Update branch release
         uses: eine/tip@master
         with:
