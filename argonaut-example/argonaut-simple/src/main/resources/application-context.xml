@@ -9,7 +9,7 @@
   <import resource="classpath:/dac-submission-routes.xml"/>
   <import resource="classpath:/gdac-routes.xml"/>
 
-  <bean class="edu.colorado.cires.argonaut.standalone.CustomBridgePropertyPlaceholderConfigurer">
+  <bean id="propertiesLoader" class="org.apache.camel.spring.spi.BridgePropertyPlaceholderConfigurer">
     <property name="locations">
       <list>
         <value>classpath:argonaut-default.properties</value>
@@ -18,6 +18,12 @@
       </list>
     </property>
     <property name="ignoreResourceNotFound" value="true"/>
+  </bean>
+
+  <!--  default SEDA queue properties-->
+  <bean id="seda" class="org.apache.camel.component.seda.SedaComponent" >
+    <property name="defaultBlockWhenFull" value="${camel.seda.block-when-full}"/>
+    <property name="queueSize" value="${camel.seda.queue-size}"/>
   </bean>
 
   <bean id="jsonMapper" class="edu.colorado.cires.argonaut.messaging.core.util.ArgonautJsonMapperFactory" factory-method="getJsonMapper"/>

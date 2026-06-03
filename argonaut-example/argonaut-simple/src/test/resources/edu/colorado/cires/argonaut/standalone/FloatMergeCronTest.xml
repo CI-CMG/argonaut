@@ -11,5 +11,16 @@
 
   <!-- Override the specific bean with a new definition -->
 
+  <bean id="propertiesLoader" class="org.apache.camel.spring.spi.BridgePropertyPlaceholderConfigurer">
+    <property name="locations">
+      <list>
+        <value>classpath:argonaut-default.properties</value>
+        <value>classpath:/edu/colorado/cires/argonaut/standalone/argonaut-test.properties</value>
+        <value>classpath:/edu/colorado/cires/argonaut/standalone/FloatMergeCronTest.properties</value>
+      </list>
+    </property>
+    <property name="ignoreResourceNotFound" value="true"/>
+  </bean>
+
 
 </beans>
