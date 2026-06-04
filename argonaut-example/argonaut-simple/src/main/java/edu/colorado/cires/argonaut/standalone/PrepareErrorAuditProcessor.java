@@ -25,7 +25,7 @@ public class PrepareErrorAuditProcessor implements Processor {
     Exception cause = exchange.getProperty(Exchange.EXCEPTION_CAUGHT, Exception.class);
     LOGGER.error("Error caught: ", cause);
     Object sourceMessage = exchange.getIn().getBody();
-    AuditMessage auditMessage = ErrorMessageAuditUtils.buildErrorMessageAuditMessage(cause, sourceMessage, processor);
+    AuditMessage auditMessage = ErrorMessageAuditUtils.buildErrorMessageAuditMessage(cause, sourceMessage, processor, jsonMapper);
     exchange.getIn().setBody(jsonMapper.writeValueAsString(auditMessage));
   }
 }
