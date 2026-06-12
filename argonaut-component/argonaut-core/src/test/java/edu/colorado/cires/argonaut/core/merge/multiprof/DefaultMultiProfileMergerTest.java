@@ -12,6 +12,7 @@ import edu.colorado.cires.argonaut.core.netcdf.profile.v31.ArgoProfileV31Calibra
 import edu.colorado.cires.argonaut.core.netcdf.profile.v31.ArgoProfileV31Level;
 import edu.colorado.cires.argonaut.core.netcdf.profile.v31.ArgoProfileV31Reader;
 import edu.colorado.cires.argonaut.core.util.NetCdfReadUtils;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -27,8 +28,9 @@ public class DefaultMultiProfileMergerTest {
   private final Path outputDir = Paths.get("target/output");
 
   @BeforeEach
-  public void setup() {
+  public void setup() throws IOException {
     FileUtils.deleteQuietly(outputDir.toFile());
+    Files.createDirectories(outputDir);
   }
 
   @Test

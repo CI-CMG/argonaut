@@ -28,6 +28,7 @@ public class ArgoProfileV31Writer {
   ) throws IOException, InvalidRangeException {
     // Using NetCDF 3 for thread safety, performance, and ease of use.  If NetCDF 4 is required, it will be added after the POC.
     NetcdfFormatWriter.Builder builder = NetcdfFormatWriter.createNewNetcdf3(netCdfFile.toString());
+    builder.setFill(true);
     CommonParameterAttributes.addGlobalAttributes(builder, institution, softwareVersion);
 
     ArgoNetCdfCreatedDimensions dimensions = CommonParameterAttributes.addCommonDimensions(builder, dimensionSpec);

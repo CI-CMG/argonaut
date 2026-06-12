@@ -61,10 +61,12 @@ class MultiProfileIterator implements Iterator<ArgoProfileV31>, Closeable {
 
   @Override
   public void close() throws IOException {
-    try {
-      next.cleanUp();
-    } catch (Exception e) {
-      LOGGER.warn("An error occurred when cleaning up profile merge source  " + next.getFileName(), e);
+    if (next != null) {
+      try {
+        next.cleanUp();
+      } catch (Exception e) {
+        LOGGER.warn("An error occurred when cleaning up profile merge source  " + next.getFileName(), e);
+      }
     }
   }
 }

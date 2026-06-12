@@ -3490,7 +3490,7 @@ public final class CommonParameterAttributes {
     Dimension nParamDim = builder.addDimension("N_PARAM", dimensions.getParameters());
     Dimension nLevelsDim = builder.addDimension("N_LEVELS", dimensions.getLevels());
     Dimension nCalibDim = builder.addDimension("N_CALIB", dimensions.getCalibrations());
-    Dimension nHistoryDim = builder.addDimension("N_HISTORY", dimensions.getHistories());
+    Dimension nHistoryDim = dimensions.getHistories() > 0 ? builder.addDimension("N_HISTORY", dimensions.getHistories()) : builder.addUnlimitedDimension("N_HISTORY");
     return new ArgoNetCdfCreatedDimensions(
         dateTimeDim, string256Dim, string64Dim, string32Dim, string16Dim, string8Dim,
         string4Dim, string2Dim, nProfDim, nParamDim, nLevelsDim, nCalibDim,

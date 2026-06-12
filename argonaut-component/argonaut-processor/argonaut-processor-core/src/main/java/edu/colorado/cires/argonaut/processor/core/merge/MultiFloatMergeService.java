@@ -28,6 +28,7 @@ public final class MultiFloatMergeService {
     mergeProfile.setDimension();
 
     NetcdfFormatWriter.Builder builder = NetcdfFormatWriter.createNewNetcdf3(outputFile.toString());
+    builder.setFill(true);
 
     Dimension dateTimeDim = builder.addDimension("DATE_TIME", ProfileNcConsts.DATE_TIME);
     Dimension string256Dim = builder.addDimension("STRING256", ProfileNcConsts.STRING256);
@@ -435,7 +436,6 @@ public final class MultiFloatMergeService {
     builder.addAttribute(new Attribute("Conventions", "Argo-3.1 CF-1.6"));
     builder.addAttribute(new Attribute("featureType", "trajectoryProfile"));
 
-    builder.setFill(true);
     try (NetcdfFormatWriter writer = builder.build()) {
 
       mergeProfile.setVariables();
