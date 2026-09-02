@@ -29,15 +29,15 @@
   <Loggers>
 
     <Logger name="edu.colorado.cires" level="info" additivity="false">
-      <AppenderRef ref="File"/>
+      <AppenderRef ref="Console"/>
     </Logger>
 
     <Logger name="org.springframework" level="info" additivity="false">
-      <AppenderRef ref="File"/>
+      <AppenderRef ref="Console"/>
     </Logger>
 
     <Root level="info">
-      <AppenderRef ref="File"/>
+      <AppenderRef ref="Console"/>
     </Root>
   </Loggers>
 
