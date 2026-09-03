@@ -13,7 +13,7 @@
     <property name="locations">
       <list>
         <value>classpath:argonaut-default.properties</value>
-        <value>file:#{systemEnvironment['ARGONAUT_PROPERTIES']:config/argonaut.properties}</value>
+        <value>file:#{systemProperties['argonaut.properties']:config/argonaut.properties}</value>
       </list>
     </property>
     <property name="ignoreResourceNotFound" value="true"/>
