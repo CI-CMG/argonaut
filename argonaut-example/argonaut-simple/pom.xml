@@ -29,11 +29,6 @@
     </dependency>
     <dependency>
       <groupId>io.github.ci-cmg.argo</groupId>
-      <artifactId>argonaut-processor-report-jpa</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>io.github.ci-cmg.argo</groupId>
       <artifactId>argonaut-processor-geofilter</artifactId>
       <version>${project.version}</version>
     </dependency>
