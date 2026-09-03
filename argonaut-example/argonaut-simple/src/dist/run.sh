@@ -46,9 +46,13 @@ JVM_OPTS=()
 JAVA=
 EXE_JAR=
 
+if [ -z "${ARGONAUT_JVM_OPTIONS}" ]; then
+    ARGONAUT_JVM_OPTIONS="$SVC_HOME/config/jvm.options"
+fi
+
 set_svc_home
 set_java
-set_java_opts "$SVC_HOME/config/jvm.options"
+set_java_opts "$ARGONAUT_JVM_OPTIONS"
 
 cd "$SVC_HOME"
 "$JAVA" "${JAVA_OPTS[@]}" -cp "lib/*" edu.colorado.cires.argonaut.standalone.Application
