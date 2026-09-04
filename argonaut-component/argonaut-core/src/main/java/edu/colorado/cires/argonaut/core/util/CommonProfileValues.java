@@ -42,7 +42,7 @@ public interface CommonProfileValues {
 
   String getPositioningSystem();
 
-  int getConfigMissionNumber();
+  Integer getConfigMissionNumber();
 
   String getVerticalSamplingScheme();
 

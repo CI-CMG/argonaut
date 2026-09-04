@@ -42,7 +42,7 @@ public class ArgoSyntheticProfileV13Bean implements ArgoSyntheticProfileV13 {
   private Double longitude;
   private String positionQc;
   private String positioningSystem;
-  private int configMissionNumber;
+  private Integer configMissionNumber;
   private List<ArgoSyntheticProfileV13Parameter> parameters = new ArrayList<>();
   private String softwareVersion;
   private String dataMode;
@@ -357,7 +357,7 @@ public class ArgoSyntheticProfileV13Bean implements ArgoSyntheticProfileV13 {
   }
 
   @Override
-  public int getConfigMissionNumber() {
+  public Integer getConfigMissionNumber() {
     return configMissionNumber;
   }
 
@@ -371,7 +371,7 @@ public class ArgoSyntheticProfileV13Bean implements ArgoSyntheticProfileV13 {
     return null;
   }
 
-  public void setConfigMissionNumber(int configMissionNumber) {
+  public void setConfigMissionNumber(Integer configMissionNumber) {
     this.configMissionNumber = configMissionNumber;
   }
 

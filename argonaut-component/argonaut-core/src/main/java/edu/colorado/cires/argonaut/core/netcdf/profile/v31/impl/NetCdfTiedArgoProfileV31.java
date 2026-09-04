@@ -41,7 +41,7 @@ public class NetCdfTiedArgoProfileV31 implements ArgoProfileV31 {
   private final Float positionErrorEstimated;
   private final String positionErrorEstimatedComment;
   private final String verticalSamplingScheme;
-  private final int configMissionNumber;
+  private final Integer configMissionNumber;
   private final int numHistory;
   private final List<ArgoProfileV31Parameter> parameters;
 
@@ -307,7 +307,7 @@ public class NetCdfTiedArgoProfileV31 implements ArgoProfileV31 {
   }
 
   @Override
-  public int getConfigMissionNumber() {
+  public Integer getConfigMissionNumber() {
     return configMissionNumber;
   }
 

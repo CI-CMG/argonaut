@@ -207,7 +207,7 @@
     <property name="entityManagerFactory" ref="auditEntityManagerFactory"/>
   </bean>
 
-  <camelContext xmlns="http://camel.apache.org/schema/spring">
+  <camelContext id="argonaut-camel" xmlns="http://camel.apache.org/schema/spring">
     <template id="producerTemplate"/>
     <routeContextRef ref="dac-submission-routes"/>
     <routeContextRef ref="gdac-routes"/>

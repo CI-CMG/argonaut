@@ -34,7 +34,7 @@ public class NetCdfTiedArgoSyntheticProfileV13 implements ArgoSyntheticProfileV1
   private final Double longitude;
   private final String positionQc;
   private final String positioningSystem;
-  private final int configMissionNumber;
+  private final Integer configMissionNumber;
   private final String dataMode;
   private List<ArgoSyntheticProfileV13Parameter> parameters = new ArrayList<>();
   private final NetCdfTiedArgoSyntheticMultiProfileV13 parent;
@@ -266,7 +266,7 @@ public class NetCdfTiedArgoSyntheticProfileV13 implements ArgoSyntheticProfileV1
   }
 
   @Override
-  public int getConfigMissionNumber() {
+  public Integer getConfigMissionNumber() {
     return configMissionNumber;
   }
 

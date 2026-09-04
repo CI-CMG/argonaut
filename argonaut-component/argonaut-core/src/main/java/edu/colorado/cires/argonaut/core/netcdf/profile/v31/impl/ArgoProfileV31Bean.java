@@ -35,7 +35,7 @@ public class ArgoProfileV31Bean implements ArgoProfileV31 {
   private Float positionErrorEstimated;
   private String positionErrorEstimatedComment;
   private String verticalSamplingScheme;
-  private int configMissionNumber;
+  private Integer configMissionNumber;
   private List<ArgoProfileV31Parameter> parameters = new ArrayList<>();
   private List<ArgoProfileV31History> history = new ArrayList<>();
 
@@ -333,7 +333,7 @@ public class ArgoProfileV31Bean implements ArgoProfileV31 {
   }
 
   @Override
-  public int getConfigMissionNumber() {
+  public Integer getConfigMissionNumber() {
     return configMissionNumber;
   }
 
@@ -342,7 +342,7 @@ public class ArgoProfileV31Bean implements ArgoProfileV31 {
     return parameters.stream().filter(p -> parameterName.equals(p.getParameterName())).findFirst().orElse(null);
   }
 
-  public void setConfigMissionNumber(int configMissionNumber) {
+  public void setConfigMissionNumber(Integer configMissionNumber) {
     this.configMissionNumber = configMissionNumber;
   }
 

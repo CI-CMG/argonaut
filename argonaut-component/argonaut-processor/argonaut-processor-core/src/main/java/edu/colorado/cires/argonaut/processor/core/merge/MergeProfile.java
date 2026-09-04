@@ -707,7 +707,7 @@ class MergeProfile {
     return data;
   }
 
-  void addConfigMissionNumbers(int configMissionNumber) {
+  void addConfigMissionNumbers(Integer configMissionNumber) {
     if (this.configMissionNumbers == null) {
       this.configMissionNumbers = new ArrayList<>();
     }

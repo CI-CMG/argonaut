@@ -560,7 +560,7 @@ Examples :
   The number 0 (zero) can be used to denote the
   float’s mission prelude, if it exists.
    */
-  int getConfigMissionNumber();
+  Integer getConfigMissionNumber();
 
   ArgoProfileV31Parameter getParameter(String parameterName);
 
