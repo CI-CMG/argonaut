@@ -23,9 +23,7 @@
 <!--      <to uri="seda:submit-work"/>-->
 <!--    </route>-->
 
-    <route id="debug">
-      <from uri="file:/data/debug/submit?readLock=changed&amp;delete=true"/>
-    </route>
+
 
     <route id="bodc-dac-submission">
       <errorHandler>
