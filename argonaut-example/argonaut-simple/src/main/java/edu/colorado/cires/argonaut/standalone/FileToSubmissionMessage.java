@@ -5,8 +5,12 @@ import java.io.File;
 import java.time.Instant;
 import java.util.UUID;
 import java.util.function.Supplier;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class FileToSubmissionMessage {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(FileToSubmissionMessage.class);
 
   private Supplier<Instant> timestampGenerator = Instant::now;
   private Supplier<UUID> traceIdGenerator = UUID::randomUUID;
@@ -20,6 +24,7 @@ public class FileToSubmissionMessage {
   }
 
   public DacSubmittedFileMessage convert(File file, String dac) {
+    LOGGER.info("Processing file {}", file.getAbsolutePath());
     return DacSubmittedFileMessage.builder()
         .withTraceId(traceIdGenerator.get())
         .withFileName(file.getName())
