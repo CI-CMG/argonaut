@@ -27,7 +27,7 @@
       <errorHandler>
         <deadLetterChannel deadLetterUri="seda:audit" onPrepareFailureRef="prepareErrorAuditProcessor"/>
       </errorHandler>
-      <from uri="file:{{dac.submission.directory}}/dac/bodc/submit?readLock=changed&amp;delete=true"/>
+      <from uri="file:{{dac.submission.directory}}/dac/bodc/submit2?readLock=changed&amp;delete=true"/>
       <setHeader name="AuditEventProcessor">
         <constant>FILE_RECEIVED</constant>
       </setHeader>
