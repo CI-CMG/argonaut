@@ -211,9 +211,6 @@
     <template id="producerTemplate"/>
     <routeContextRef ref="dac-submission-routes"/>
     <routeContextRef ref="gdac-routes"/>
-    <route id="debug">
-      <from uri="file:/data/debug/submit?readLock=changed&amp;delete=true"/>
-    </route>
   </camelContext>
 
 </beans>

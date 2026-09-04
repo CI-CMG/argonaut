@@ -8,28 +8,26 @@
 
   <routeContext id="dac-submission-routes" xmlns="http://camel.apache.org/schema/spring">
 
-<!--    <route id="aoml-dac-submission">-->
-<!--      <errorHandler>-->
-<!--        <deadLetterChannel deadLetterUri="seda:audit" onPrepareFailureRef="prepareErrorAuditProcessor"/>-->
-<!--      </errorHandler>-->
-<!--      <from uri="file:{{dac.submission.directory}}/dac/aoml/submit?readLock=changed&amp;delete=true"/>-->
-<!--      <setHeader name="AuditEventProcessor">-->
-<!--        <constant>FILE_RECEIVED</constant>-->
-<!--      </setHeader>-->
-<!--      <bean ref="fileToSubmissionMessage" method="convert(${body}, 'aoml')"/>-->
-<!--      <bean ref="auditSender" method="fileReceived"/>-->
-<!--      <bean ref="moveSubmitToProcessingProcessor" method="moveToProcessing"/>-->
-<!--      <bean ref="serializationProcessor" method="serialize"/>-->
-<!--      <to uri="seda:submit-work"/>-->
-<!--    </route>-->
-
-
+    <route id="aoml-dac-submission">
+      <errorHandler>
+        <deadLetterChannel deadLetterUri="seda:audit" onPrepareFailureRef="prepareErrorAuditProcessor"/>
+      </errorHandler>
+      <from uri="file:{{dac.submission.directory}}/dac/aoml/submit?readLock=changed&amp;delete=true&amp;maxMessagesPerPoll=10&amp;shuffle=true"/>
+      <setHeader name="AuditEventProcessor">
+        <constant>FILE_RECEIVED</constant>
+      </setHeader>
+      <bean ref="fileToSubmissionMessage" method="convert(${body}, 'aoml')"/>
+      <bean ref="auditSender" method="fileReceived"/>
+      <bean ref="moveSubmitToProcessingProcessor" method="moveToProcessing"/>
+      <bean ref="serializationProcessor" method="serialize"/>
+      <to uri="seda:submit-work"/>
+    </route>
 
     <route id="bodc-dac-submission">
       <errorHandler>
         <deadLetterChannel deadLetterUri="seda:audit" onPrepareFailureRef="prepareErrorAuditProcessor"/>
       </errorHandler>
-      <from uri="file:{{dac.submission.directory}}/dac/bodc/submit2?readLock=changed&amp;delete=true"/>
+      <from uri="file:{{dac.submission.directory}}/dac/bodc/submit?readLock=changed&amp;delete=true&amp;maxMessagesPerPoll=10&amp;shuffle=true"/>
       <setHeader name="AuditEventProcessor">
         <constant>FILE_RECEIVED</constant>
       </setHeader>
@@ -40,140 +38,140 @@
       <to uri="seda:submit-work"/>
     </route>
 
-<!--    <route id="coriolis-dac-submission">-->
-<!--      <errorHandler>-->
-<!--        <deadLetterChannel deadLetterUri="seda:audit" onPrepareFailureRef="prepareErrorAuditProcessor"/>-->
-<!--      </errorHandler>-->
-<!--      <from uri="file:{{dac.submission.directory}}/dac/coriolis/submit?readLock=changed&amp;delete=true"/>-->
-<!--      <setHeader name="AuditEventProcessor">-->
-<!--        <constant>FILE_RECEIVED</constant>-->
-<!--      </setHeader>-->
-<!--      <bean ref="fileToSubmissionMessage" method="convert(${body}, 'coriolis')"/>-->
-<!--      <bean ref="auditSender" method="fileReceived"/>-->
-<!--      <bean ref="moveSubmitToProcessingProcessor" method="moveToProcessing"/>-->
-<!--      <bean ref="serializationProcessor" method="serialize"/>-->
-<!--      <to uri="seda:submit-work"/>-->
-<!--    </route>-->
+    <route id="coriolis-dac-submission">
+      <errorHandler>
+        <deadLetterChannel deadLetterUri="seda:audit" onPrepareFailureRef="prepareErrorAuditProcessor"/>
+      </errorHandler>
+      <from uri="file:{{dac.submission.directory}}/dac/coriolis/submit?readLock=changed&amp;delete=true&amp;maxMessagesPerPoll=10&amp;shuffle=true"/>
+      <setHeader name="AuditEventProcessor">
+        <constant>FILE_RECEIVED</constant>
+      </setHeader>
+      <bean ref="fileToSubmissionMessage" method="convert(${body}, 'coriolis')"/>
+      <bean ref="auditSender" method="fileReceived"/>
+      <bean ref="moveSubmitToProcessingProcessor" method="moveToProcessing"/>
+      <bean ref="serializationProcessor" method="serialize"/>
+      <to uri="seda:submit-work"/>
+    </route>
 
-<!--    <route id="csio-dac-submission">-->
-<!--      <errorHandler>-->
-<!--        <deadLetterChannel deadLetterUri="seda:audit" onPrepareFailureRef="prepareErrorAuditProcessor"/>-->
-<!--      </errorHandler>-->
-<!--      <from uri="file:{{dac.submission.directory}}/dac/csio/submit?readLock=changed&amp;delete=true"/>-->
-<!--      <setHeader name="AuditEventProcessor">-->
-<!--        <constant>FILE_RECEIVED</constant>-->
-<!--      </setHeader>-->
-<!--      <bean ref="fileToSubmissionMessage" method="convert(${body}, 'csio')"/>-->
-<!--      <bean ref="auditSender" method="fileReceived"/>-->
-<!--      <bean ref="moveSubmitToProcessingProcessor" method="moveToProcessing"/>-->
-<!--      <bean ref="serializationProcessor" method="serialize"/>-->
-<!--      <to uri="seda:submit-work"/>-->
-<!--    </route>-->
+    <route id="csio-dac-submission">
+      <errorHandler>
+        <deadLetterChannel deadLetterUri="seda:audit" onPrepareFailureRef="prepareErrorAuditProcessor"/>
+      </errorHandler>
+      <from uri="file:{{dac.submission.directory}}/dac/csio/submit?readLock=changed&amp;delete=true&amp;maxMessagesPerPoll=10&amp;shuffle=true"/>
+      <setHeader name="AuditEventProcessor">
+        <constant>FILE_RECEIVED</constant>
+      </setHeader>
+      <bean ref="fileToSubmissionMessage" method="convert(${body}, 'csio')"/>
+      <bean ref="auditSender" method="fileReceived"/>
+      <bean ref="moveSubmitToProcessingProcessor" method="moveToProcessing"/>
+      <bean ref="serializationProcessor" method="serialize"/>
+      <to uri="seda:submit-work"/>
+    </route>
 
-<!--    <route id="csiro-dac-submission">-->
-<!--      <errorHandler>-->
-<!--        <deadLetterChannel deadLetterUri="seda:audit" onPrepareFailureRef="prepareErrorAuditProcessor"/>-->
-<!--      </errorHandler>-->
-<!--      <from uri="file:{{dac.submission.directory}}/dac/csiro/submit?readLock=changed&amp;delete=true"/>-->
-<!--      <setHeader name="AuditEventProcessor">-->
-<!--        <constant>FILE_RECEIVED</constant>-->
-<!--      </setHeader>-->
-<!--      <bean ref="fileToSubmissionMessage" method="convert(${body}, 'csiro')"/>-->
-<!--      <bean ref="auditSender" method="fileReceived"/>-->
-<!--      <bean ref="moveSubmitToProcessingProcessor" method="moveToProcessing"/>-->
-<!--      <bean ref="serializationProcessor" method="serialize"/>-->
-<!--      <to uri="seda:submit-work"/>-->
-<!--    </route>-->
+    <route id="csiro-dac-submission">
+      <errorHandler>
+        <deadLetterChannel deadLetterUri="seda:audit" onPrepareFailureRef="prepareErrorAuditProcessor"/>
+      </errorHandler>
+      <from uri="file:{{dac.submission.directory}}/dac/csiro/submit?readLock=changed&amp;delete=true&amp;maxMessagesPerPoll=10&amp;shuffle=true"/>
+      <setHeader name="AuditEventProcessor">
+        <constant>FILE_RECEIVED</constant>
+      </setHeader>
+      <bean ref="fileToSubmissionMessage" method="convert(${body}, 'csiro')"/>
+      <bean ref="auditSender" method="fileReceived"/>
+      <bean ref="moveSubmitToProcessingProcessor" method="moveToProcessing"/>
+      <bean ref="serializationProcessor" method="serialize"/>
+      <to uri="seda:submit-work"/>
+    </route>
 
-<!--    <route id="incois-dac-submission">-->
-<!--      <errorHandler>-->
-<!--        <deadLetterChannel deadLetterUri="seda:audit" onPrepareFailureRef="prepareErrorAuditProcessor"/>-->
-<!--      </errorHandler>-->
-<!--      <from uri="file:{{dac.submission.directory}}/dac/incois/submit?readLock=changed&amp;delete=true"/>-->
-<!--      <setHeader name="AuditEventProcessor">-->
-<!--        <constant>FILE_RECEIVED</constant>-->
-<!--      </setHeader>-->
-<!--      <bean ref="fileToSubmissionMessage" method="convert(${body}, 'incois')"/>-->
-<!--      <bean ref="auditSender" method="fileReceived"/>-->
-<!--      <bean ref="moveSubmitToProcessingProcessor" method="moveToProcessing"/>-->
-<!--      <bean ref="serializationProcessor" method="serialize"/>-->
-<!--      <to uri="seda:submit-work"/>-->
-<!--    </route>-->
+    <route id="incois-dac-submission">
+      <errorHandler>
+        <deadLetterChannel deadLetterUri="seda:audit" onPrepareFailureRef="prepareErrorAuditProcessor"/>
+      </errorHandler>
+      <from uri="file:{{dac.submission.directory}}/dac/incois/submit?readLock=changed&amp;delete=true&amp;maxMessagesPerPoll=10&amp;shuffle=true"/>
+      <setHeader name="AuditEventProcessor">
+        <constant>FILE_RECEIVED</constant>
+      </setHeader>
+      <bean ref="fileToSubmissionMessage" method="convert(${body}, 'incois')"/>
+      <bean ref="auditSender" method="fileReceived"/>
+      <bean ref="moveSubmitToProcessingProcessor" method="moveToProcessing"/>
+      <bean ref="serializationProcessor" method="serialize"/>
+      <to uri="seda:submit-work"/>
+    </route>
 
-<!--    <route id="jma-dac-submission">-->
-<!--      <errorHandler>-->
-<!--        <deadLetterChannel deadLetterUri="seda:audit" onPrepareFailureRef="prepareErrorAuditProcessor"/>-->
-<!--      </errorHandler>-->
-<!--      <from uri="file:{{dac.submission.directory}}/dac/jma/submit?readLock=changed&amp;delete=true"/>-->
-<!--      <setHeader name="AuditEventProcessor">-->
-<!--        <constant>FILE_RECEIVED</constant>-->
-<!--      </setHeader>-->
-<!--      <bean ref="fileToSubmissionMessage" method="convert(${body}, 'jma')"/>-->
-<!--      <bean ref="auditSender" method="fileReceived"/>-->
-<!--      <bean ref="moveSubmitToProcessingProcessor" method="moveToProcessing"/>-->
-<!--      <bean ref="serializationProcessor" method="serialize"/>-->
-<!--      <to uri="seda:submit-work"/>-->
-<!--    </route>-->
+    <route id="jma-dac-submission">
+      <errorHandler>
+        <deadLetterChannel deadLetterUri="seda:audit" onPrepareFailureRef="prepareErrorAuditProcessor"/>
+      </errorHandler>
+      <from uri="file:{{dac.submission.directory}}/dac/jma/submit?readLock=changed&amp;delete=true&amp;maxMessagesPerPoll=10&amp;shuffle=true"/>
+      <setHeader name="AuditEventProcessor">
+        <constant>FILE_RECEIVED</constant>
+      </setHeader>
+      <bean ref="fileToSubmissionMessage" method="convert(${body}, 'jma')"/>
+      <bean ref="auditSender" method="fileReceived"/>
+      <bean ref="moveSubmitToProcessingProcessor" method="moveToProcessing"/>
+      <bean ref="serializationProcessor" method="serialize"/>
+      <to uri="seda:submit-work"/>
+    </route>
 
-<!--    <route id="kiost-dac-submission">-->
-<!--      <errorHandler>-->
-<!--        <deadLetterChannel deadLetterUri="seda:audit" onPrepareFailureRef="prepareErrorAuditProcessor"/>-->
-<!--      </errorHandler>-->
-<!--      <from uri="file:{{dac.submission.directory}}/dac/kiost/submit?readLock=changed&amp;delete=true"/>-->
-<!--      <setHeader name="AuditEventProcessor">-->
-<!--        <constant>FILE_RECEIVED</constant>-->
-<!--      </setHeader>-->
-<!--      <bean ref="fileToSubmissionMessage" method="convert(${body}, 'kiost')"/>-->
-<!--      <bean ref="auditSender" method="fileReceived"/>-->
-<!--      <bean ref="moveSubmitToProcessingProcessor" method="moveToProcessing"/>-->
-<!--      <bean ref="serializationProcessor" method="serialize"/>-->
-<!--      <to uri="seda:submit-work"/>-->
-<!--    </route>-->
+    <route id="kiost-dac-submission">
+      <errorHandler>
+        <deadLetterChannel deadLetterUri="seda:audit" onPrepareFailureRef="prepareErrorAuditProcessor"/>
+      </errorHandler>
+      <from uri="file:{{dac.submission.directory}}/dac/kiost/submit?readLock=changed&amp;delete=true&amp;maxMessagesPerPoll=10&amp;shuffle=true"/>
+      <setHeader name="AuditEventProcessor">
+        <constant>FILE_RECEIVED</constant>
+      </setHeader>
+      <bean ref="fileToSubmissionMessage" method="convert(${body}, 'kiost')"/>
+      <bean ref="auditSender" method="fileReceived"/>
+      <bean ref="moveSubmitToProcessingProcessor" method="moveToProcessing"/>
+      <bean ref="serializationProcessor" method="serialize"/>
+      <to uri="seda:submit-work"/>
+    </route>
 
-<!--    <route id="kma-dac-submission">-->
-<!--      <errorHandler>-->
-<!--        <deadLetterChannel deadLetterUri="seda:audit" onPrepareFailureRef="prepareErrorAuditProcessor"/>-->
-<!--      </errorHandler>-->
-<!--      <from uri="file:{{dac.submission.directory}}/dac/kma/submit?readLock=changed&amp;delete=true"/>-->
-<!--      <setHeader name="AuditEventProcessor">-->
-<!--        <constant>FILE_RECEIVED</constant>-->
-<!--      </setHeader>-->
-<!--      <bean ref="fileToSubmissionMessage" method="convert(${body}, 'kma')"/>-->
-<!--      <bean ref="auditSender" method="fileReceived"/>-->
-<!--      <bean ref="moveSubmitToProcessingProcessor" method="moveToProcessing"/>-->
-<!--      <bean ref="serializationProcessor" method="serialize"/>-->
-<!--      <to uri="seda:submit-work"/>-->
-<!--    </route>-->
+    <route id="kma-dac-submission">
+      <errorHandler>
+        <deadLetterChannel deadLetterUri="seda:audit" onPrepareFailureRef="prepareErrorAuditProcessor"/>
+      </errorHandler>
+      <from uri="file:{{dac.submission.directory}}/dac/kma/submit?readLock=changed&amp;delete=true&amp;maxMessagesPerPoll=10&amp;shuffle=true"/>
+      <setHeader name="AuditEventProcessor">
+        <constant>FILE_RECEIVED</constant>
+      </setHeader>
+      <bean ref="fileToSubmissionMessage" method="convert(${body}, 'kma')"/>
+      <bean ref="auditSender" method="fileReceived"/>
+      <bean ref="moveSubmitToProcessingProcessor" method="moveToProcessing"/>
+      <bean ref="serializationProcessor" method="serialize"/>
+      <to uri="seda:submit-work"/>
+    </route>
 
-<!--    <route id="meds-dac-submission">-->
-<!--      <errorHandler>-->
-<!--        <deadLetterChannel deadLetterUri="seda:audit" onPrepareFailureRef="prepareErrorAuditProcessor"/>-->
-<!--      </errorHandler>-->
-<!--      <from uri="file:{{dac.submission.directory}}/dac/meds/submit?readLock=changed&amp;delete=true"/>-->
-<!--      <setHeader name="AuditEventProcessor">-->
-<!--        <constant>FILE_RECEIVED</constant>-->
-<!--      </setHeader>-->
-<!--      <bean ref="fileToSubmissionMessage" method="convert(${body}, 'meds')"/>-->
-<!--      <bean ref="auditSender" method="fileReceived"/>-->
-<!--      <bean ref="moveSubmitToProcessingProcessor" method="moveToProcessing"/>-->
-<!--      <bean ref="serializationProcessor" method="serialize"/>-->
-<!--      <to uri="seda:submit-work"/>-->
-<!--    </route>-->
+    <route id="meds-dac-submission">
+      <errorHandler>
+        <deadLetterChannel deadLetterUri="seda:audit" onPrepareFailureRef="prepareErrorAuditProcessor"/>
+      </errorHandler>
+      <from uri="file:{{dac.submission.directory}}/dac/meds/submit?readLock=changed&amp;delete=true&amp;maxMessagesPerPoll=10&amp;shuffle=true"/>
+      <setHeader name="AuditEventProcessor">
+        <constant>FILE_RECEIVED</constant>
+      </setHeader>
+      <bean ref="fileToSubmissionMessage" method="convert(${body}, 'meds')"/>
+      <bean ref="auditSender" method="fileReceived"/>
+      <bean ref="moveSubmitToProcessingProcessor" method="moveToProcessing"/>
+      <bean ref="serializationProcessor" method="serialize"/>
+      <to uri="seda:submit-work"/>
+    </route>
 
-<!--    <route id="nmdis-dac-submission">-->
-<!--      <errorHandler>-->
-<!--        <deadLetterChannel deadLetterUri="seda:audit" onPrepareFailureRef="prepareErrorAuditProcessor"/>-->
-<!--      </errorHandler>-->
-<!--      <from uri="file:{{dac.submission.directory}}/dac/nmdis/submit?readLock=changed&amp;delete=true"/>-->
-<!--      <setHeader name="AuditEventProcessor">-->
-<!--        <constant>FILE_RECEIVED</constant>-->
-<!--      </setHeader>-->
-<!--      <bean ref="fileToSubmissionMessage" method="convert(${body}, 'nmdis')"/>-->
-<!--      <bean ref="auditSender" method="fileReceived"/>-->
-<!--      <bean ref="moveSubmitToProcessingProcessor" method="moveToProcessing"/>-->
-<!--      <bean ref="serializationProcessor" method="serialize"/>-->
-<!--      <to uri="seda:submit-work"/>-->
-<!--    </route>-->
+    <route id="nmdis-dac-submission">
+      <errorHandler>
+        <deadLetterChannel deadLetterUri="seda:audit" onPrepareFailureRef="prepareErrorAuditProcessor"/>
+      </errorHandler>
+      <from uri="file:{{dac.submission.directory}}/dac/nmdis/submit?readLock=changed&amp;delete=true&amp;maxMessagesPerPoll=10&amp;shuffle=true"/>
+      <setHeader name="AuditEventProcessor">
+        <constant>FILE_RECEIVED</constant>
+      </setHeader>
+      <bean ref="fileToSubmissionMessage" method="convert(${body}, 'nmdis')"/>
+      <bean ref="auditSender" method="fileReceived"/>
+      <bean ref="moveSubmitToProcessingProcessor" method="moveToProcessing"/>
+      <bean ref="serializationProcessor" method="serialize"/>
+      <to uri="seda:submit-work"/>
+    </route>
 
     <!-- DAC submission directory template -->
     <!-- Replace DAC-CODE with the short name of the DAC.  Ex. 'aoml'.  3 places. -->
@@ -182,7 +180,7 @@
       <errorHandler>
         <deadLetterChannel deadLetterUri="seda:audit" onPrepareFailureRef="prepareErrorAuditProcessor"/>
       </errorHandler>
-      <from uri="file:{{dac.submission.directory}}/dac/DAC-CODE/submit?readLock=changed&amp;delete=true"/>
+      <from uri="file:{{dac.submission.directory}}/dac/DAC-CODE/submit?readLock=changed&amp;delete=true&amp;maxMessagesPerPoll=10&amp;shuffle=true"/>
       <setHeader name="AuditEventProcessor">
         <constant>FILE_RECEIVED</constant>
       </setHeader>
