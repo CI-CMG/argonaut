@@ -32,6 +32,7 @@ public class MetadataRecord implements TracedMessage {
     REMOVE,
     FLOAT_MERGE,
     SYNTHETIC_MERGE,
+    GEO_MERGE,
     NONE
   }
 

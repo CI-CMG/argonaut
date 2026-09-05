@@ -1,6 +1,7 @@
 package edu.colorado.cires.argonaut.metadata.jpa;
 
 import edu.colorado.cires.argonaut.messaging.core.databind.MetadataRecord;
+import edu.colorado.cires.argonaut.metadata.core.GeoMergePage;
 import edu.colorado.cires.argonaut.metadata.core.IndexPageRequest;
 import edu.colorado.cires.argonaut.metadata.core.MetadataStore;
 import edu.colorado.cires.argonaut.metadata.core.ProfilePage;
@@ -38,12 +39,14 @@ public class JpaMetadataStore implements MetadataStore {
       case FLOAT_MERGE:
         multiFloatMerger.updateMultiFloatMerge(record);
         break;
+      case GEO_MERGE:
+        multiFloatMerger.updateGeoFloatMerge(record);
+        break;
       case NONE:
       default:
         break;
     }
   }
-
 
   @Override
   public Optional<MetadataRecord> findByFile(String file) {
@@ -59,6 +62,11 @@ public class JpaMetadataStore implements MetadataStore {
   @Override
   public ProfilePage findUpdatedOrMissingMergeFilesPage(IndexPageRequest pageRequest) {
     return finder.findUpdatedOrMissingMergeFilesPage(pageRequest);
+  }
+
+  @Override
+  public GeoMergePage findUpdatedOrMissingGeoMergeFilesPage(IndexPageRequest pageRequest) {
+    return finder.findUpdatedOrMissingGeoMergeFilesPage(pageRequest);
   }
 
   @Override

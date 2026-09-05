@@ -112,28 +112,6 @@ public class DefaultMultiProfileMerger implements MultiProfileMerger {
         return Integer.compare(c1, c2);
       }
     }).toList();
-
-//    return inputFiles.stream().sorted((file1, file2) -> {
-//      try(
-//          ArgoProfileV31Reader reader1 = new ArgoProfileV31Reader(file1);
-//          ArgoProfileV31Reader reader2 = new ArgoProfileV31Reader(file2);
-//      ) {
-//        ArgoProfileV31 profile1 = reader1.getMultiProfile().getProfile(0);
-//        ArgoProfileV31 profile2 = reader2.getMultiProfile().getProfile(0);
-//        String d1 = profile1.getDirection();
-//        String d2 = profile2.getDirection();
-//        int c1 = profile1.getCycleNumber();
-//        int c2 = profile2.getCycleNumber();
-//        if (c1 == c2) {
-//          // D before A
-//          return d2.compareTo(d1);
-//        } else {
-//          return Integer.compare(c1, c2);
-//        }
-//      } catch (IOException e) {
-//        throw new IllegalArgumentException("Unable to read NetCDF files " + file1 + ", " + file2, e);
-//      }
-//    }).toList();
   }
 
   private static void populateDimensionsAndParameters(Path path, SimpleArgoNetCdfDimensions dimensions, Set<String> parameterNames) {

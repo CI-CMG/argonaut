@@ -8,6 +8,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.Version;
 import java.time.ZonedDateTime;
 
 @Entity
@@ -17,6 +18,10 @@ public class ProfileFileEntity {
   @Id
   @Column(name = "file", nullable = false, length = 100)
   private String file;
+
+  @Version
+  @Column(name = "version", nullable = false)
+  private int version;
 
   @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.DETACH, CascadeType.REFRESH})
   @JoinColumn(name = "cycle", nullable = false)
@@ -28,6 +33,12 @@ public class ProfileFileEntity {
   private String fileStatus;
   @Column(name = "date")
   private ZonedDateTime date;
+  @Column(name = "date_year")
+  private Integer year;
+  @Column(name = "date_month")
+  private Integer month;
+  @Column(name = "date_day")
+  private Integer day;
   @Column(name = "latitude")
   private Double latitude;
   @Column(name = "latitude_min")
@@ -56,6 +67,8 @@ public class ProfileFileEntity {
   private ZonedDateTime syntheticMergeTime;
   @Column(name = "multi_float_merge_time")
   private ZonedDateTime multiFloatMergeTime;
+  @Column(name = "geo_merge_time")
+  private ZonedDateTime geoMergeTime;
   @Column(name = "last_updated_time", nullable = false)
   private ZonedDateTime lastUpdatedTime;
 
@@ -218,5 +231,41 @@ public class ProfileFileEntity {
 
   public void setMultiFloatMergeTime(ZonedDateTime multiFloatMergeTime) {
     this.multiFloatMergeTime = multiFloatMergeTime;
+  }
+
+  public ZonedDateTime getGeoMergeTime() {
+    return geoMergeTime;
+  }
+
+  public void setGeoMergeTime(ZonedDateTime geoMergeTime) {
+    this.geoMergeTime = geoMergeTime;
+  }
+
+  public int getVersion() {
+    return version;
+  }
+
+  public Integer getYear() {
+    return year;
+  }
+
+  public void setYear(Integer year) {
+    this.year = year;
+  }
+
+  public Integer getMonth() {
+    return month;
+  }
+
+  public void setMonth(Integer month) {
+    this.month = month;
+  }
+
+  public Integer getDay() {
+    return day;
+  }
+
+  public void setDay(Integer day) {
+    this.day = day;
   }
 }

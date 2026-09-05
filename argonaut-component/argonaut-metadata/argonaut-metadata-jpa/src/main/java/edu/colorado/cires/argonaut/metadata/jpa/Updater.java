@@ -12,7 +12,10 @@ import edu.colorado.cires.argonaut.metadata.jpa.entity.ProfileMergeFileEntity;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.EntityTransaction;
+import jakarta.persistence.LockModeType;
+import jakarta.persistence.OptimisticLockException;
 import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.Objects;
 
 class Updater {
@@ -157,50 +160,67 @@ class Updater {
   private void createOrUpdateProfile(MetadataRecord record) {
     String cycleId = getCycleId(record);
     String file = Objects.requireNonNull(record.getFile());
-    try (EntityManager em = entityManagerFactory.createEntityManager()) {
-      EntityTransaction tx = em.getTransaction();
-      tx.begin();
-      try {
-        CycleEntity cycle = em.find(CycleEntity.class, cycleId);
-        ProfileFileEntity entity = em.find(ProfileFileEntity.class, file);
-        boolean add = (entity == null);
+    while (true) {
+      try (EntityManager em = entityManagerFactory.createEntityManager()) {
+        EntityTransaction tx = em.getTransaction();
+        tx.begin();
+        try {
+          CycleEntity cycle = em.find(CycleEntity.class, cycleId);
+          ProfileFileEntity entity = em.find(ProfileFileEntity.class, file, LockModeType.OPTIMISTIC);
+          boolean add = (entity == null);
 
-        if (add) {
-          entity = new ProfileFileEntity();
-          entity.setFile(file);
-          entity.setCycle(cycle);
+          if (add) {
+            entity = new ProfileFileEntity();
+            entity.setFile(file);
+            entity.setCycle(cycle);
+          }
+
+          entity.setFileType(record.getFileType().toString());
+          entity.setFileStatus(ACTIVE.toString());
+          if (record.getDate() == null) {
+            entity.setDate(null);
+            entity.setYear(null);
+            entity.setMonth(null);
+            entity.setDay(null);
+          } else {
+            ZonedDateTime date = record.getDate().atOffset(ZoneOffset.UTC).toZonedDateTime();
+            entity.setDate(date);
+            entity.setYear(date.getYear());
+            entity.setMonth(date.getMonthValue());
+            entity.setDay(date.getDayOfMonth());
+          }
+          entity.setLatitude(record.getLatitude());
+          entity.setLatitudeMin(record.getLatitudeMin());
+          entity.setLatitudeMax(record.getLatitudeMax());
+          entity.setLongitude(record.getLongitude());
+          entity.setLongitudeMin(record.getLongitudeMin());
+          entity.setLongitudeMax(record.getLongitudeMax());
+          entity.setOcean(record.getOcean() == null ? null : record.getOcean().getCode());
+          entity.setProfilerType(record.getProfilerType());
+          entity.setInstitution(record.getInstitution());
+          entity.setDateUpdate(record.getDateUpdate() == null ? null : record.getDateUpdate().atOffset(ZoneOffset.UTC).toZonedDateTime());
+          entity.setParameters(record.getParameters());
+          entity.setParameterDataMode(record.getParameterDataMode());
+          entity.setSyntheticMergeTime(null);
+          entity.setMultiFloatMergeTime(null);
+          entity.setGeoMergeTime(null);
+          entity.setLastUpdatedTime(record.getActionTimestamp().atOffset(ZoneOffset.UTC).toZonedDateTime());
+
+          if (add) {
+            em.persist(entity);
+          }
+
+          tx.commit();
+          break;
+        } catch (OptimisticLockException e) {
+          tx.rollback();
+        } catch (Exception e) {
+          tx.rollback();
+          throw e;
         }
-
-        entity.setFileType(record.getFileType().toString());
-        entity.setFileStatus(ACTIVE.toString());
-        entity.setDate(record.getDate() == null ? null : record.getDate().atOffset(ZoneOffset.UTC).toZonedDateTime());
-        entity.setLatitude(record.getLatitude());
-        entity.setLatitudeMin(record.getLatitudeMin());
-        entity.setLatitudeMax(record.getLatitudeMax());
-        entity.setLongitude(record.getLongitude());
-        entity.setLongitudeMin(record.getLongitudeMin());
-        entity.setLongitudeMax(record.getLongitudeMax());
-        entity.setOcean(record.getOcean() == null ? null : record.getOcean().getCode());
-        entity.setProfilerType(record.getProfilerType());
-        entity.setInstitution(record.getInstitution());
-        entity.setDateUpdate(record.getDateUpdate() == null ? null : record.getDateUpdate().atOffset(ZoneOffset.UTC).toZonedDateTime());
-        entity.setParameters(record.getParameters());
-        entity.setParameterDataMode(record.getParameterDataMode());
-        entity.setSyntheticMergeTime(null);
-        entity.setMultiFloatMergeTime(null);
-        entity.setLastUpdatedTime(record.getActionTimestamp().atOffset(ZoneOffset.UTC).toZonedDateTime());
-
-        if (add) {
-          em.persist(entity);
-        }
-
-        tx.commit();
-
-      } catch (Exception e) {
-        tx.rollback();
-        throw e;
       }
     }
+
   }
 
   private void createOrUpdateProfileMergeFile(MetadataRecord record) {

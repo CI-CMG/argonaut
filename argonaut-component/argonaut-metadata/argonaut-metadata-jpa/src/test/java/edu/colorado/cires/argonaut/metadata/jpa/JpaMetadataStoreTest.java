@@ -5,11 +5,14 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 
 import edu.colorado.cires.argonaut.messaging.core.databind.ArgoFileType;
 import edu.colorado.cires.argonaut.messaging.core.databind.ArgoOcean;
+import edu.colorado.cires.argonaut.messaging.core.databind.DacFloatFilePath;
+import edu.colorado.cires.argonaut.messaging.core.databind.GeoMergeInfo;
 import edu.colorado.cires.argonaut.messaging.core.databind.MetadataRecord;
 import edu.colorado.cires.argonaut.messaging.core.databind.MetadataRecord.Action;
 import edu.colorado.cires.argonaut.messaging.core.databind.MetadataRecord.FileStatus;
 import edu.colorado.cires.argonaut.messaging.core.databind.ProfileOperation;
 import edu.colorado.cires.argonaut.metadata.core.DefaultIndexPageRequest;
+import edu.colorado.cires.argonaut.metadata.core.GeoMergePage;
 import edu.colorado.cires.argonaut.metadata.core.ProfilePage;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
@@ -995,6 +998,199 @@ public class JpaMetadataStoreTest {
             .withFloatId("123")
             .withFiles(Arrays.asList(
                 "aoml/123/profiles/D123_001.nc"
+            ))
+            .build()),
+        page1.getPage());
+
+  }
+
+  @Test
+  public void testFindUpdatedOrMissingGeoMergeFilesPage() throws Exception {
+
+    Instant date = Instant.parse("2020-01-02T00:00:00.00Z");
+    Instant now = Instant.now();
+
+
+    datastore.updateIndex(MetadataRecord.builder()
+        .withFile("aoml/13857/profiles/D13857_001.nc")
+        .withDac("aoml")
+        .withFloatId("13857")
+        .withCycleNumber("001")
+        .withDirection("A")
+        .withParameterDataMode("D")
+        .withActionTimestamp(now)
+        .withDate(date)
+        .withLatitude(0.267)
+        .withLatitudeMin(0.1)
+        .withLatitudeMax(0.4)
+        .withLongitude(-16.032)
+        .withLongitudeMin(-17.0)
+        .withLongitudeMax(-14.0)
+        .withOcean(ArgoOcean.INDIAN_OCEAN)
+        .withProfilerType("845")
+        .withInstitution("A0")
+        .withDateUpdate(now)
+        .withParameters("params")
+        .withAction(Action.UPDATE)
+        .withFileType(ArgoFileType.PROFILE_CORE)
+        .build());
+
+    datastore.updateIndex(MetadataRecord.builder()
+        .withFile("aoml/13857/profiles/D13857_002.nc")
+        .withDac("aoml")
+        .withFloatId("13857")
+        .withCycleNumber("002")
+        .withDirection("A")
+        .withParameterDataMode("D")
+        .withActionTimestamp(now)
+        .withDate(date)
+        .withLatitude(0.267)
+        .withLatitudeMin(0.1)
+        .withLatitudeMax(0.4)
+        .withLongitude(-16.032)
+        .withLongitudeMin(-17.0)
+        .withLongitudeMax(-14.0)
+        .withOcean(ArgoOcean.INDIAN_OCEAN)
+        .withProfilerType("845")
+        .withInstitution("A0")
+        .withDateUpdate(now)
+        .withParameters("params")
+        .withAction(Action.UPDATE)
+        .withFileType(ArgoFileType.PROFILE_CORE)
+        .build());
+
+
+    datastore.updateIndex(MetadataRecord.builder()
+        .withFile("aoml/123/profiles/D123_001.nc")
+        .withDac("aoml")
+        .withFloatId("123")
+        .withCycleNumber("001")
+        .withDirection("A")
+        .withParameterDataMode("D")
+        .withActionTimestamp(now)
+        .withDate(date)
+        .withLatitude(0.267)
+        .withLatitudeMin(0.1)
+        .withLatitudeMax(0.4)
+        .withLongitude(-16.032)
+        .withLongitudeMin(-17.0)
+        .withLongitudeMax(-14.0)
+        .withOcean(ArgoOcean.ATLANTIC_OCEAN)
+        .withProfilerType("845")
+        .withInstitution("A0")
+        .withDateUpdate(now)
+        .withParameters("params")
+        .withAction(Action.UPDATE)
+        .withFileType(ArgoFileType.PROFILE_CORE)
+        .build());
+
+    datastore.updateIndex(MetadataRecord.builder()
+        .withFile("aoml/123/profiles/BD123_001.nc")
+        .withDac("aoml")
+        .withFloatId("123")
+        .withCycleNumber("001")
+        .withDirection("A")
+        .withParameterDataMode("D")
+        .withActionTimestamp(now)
+        .withDate(date)
+        .withLatitude(0.267)
+        .withLatitudeMin(0.1)
+        .withLatitudeMax(0.4)
+        .withLongitude(-16.032)
+        .withLongitudeMin(-17.0)
+        .withLongitudeMax(-14.0)
+        .withOcean(ArgoOcean.ATLANTIC_OCEAN)
+        .withProfilerType("845")
+        .withInstitution("A0")
+        .withDateUpdate(now)
+        .withParameters("params")
+        .withAction(Action.UPDATE)
+        .withFileType(ArgoFileType.PROFILE_BIOCHEMICAL)
+        .build());
+
+
+    GeoMergePage page1 = datastore.findUpdatedOrMissingGeoMergeFilesPage(DefaultIndexPageRequest.builder().withPageSize(1).build());
+    assertEquals(2, page1.getTotalRecords());
+    assertEquals(2, page1.getTotalPages());
+    assertEquals(1, page1.getPageSize());
+    assertEquals(1, page1.getPageNumber());
+    assertEquals(Collections.singletonList(GeoMergeInfo.builder()
+            .withYear(2020)
+            .withMonth(1)
+            .withDay(2)
+            .withOcean(ArgoOcean.ATLANTIC_OCEAN)
+            .withFiles(Arrays.asList(
+                DacFloatFilePath.builder()
+                    .withFile("aoml/123/profiles/D123_001.nc")
+                    .withDac("aoml")
+                    .withFloatId("123")
+                    .build()
+            ))
+            .build()),
+        page1.getPage());
+
+    GeoMergePage page2 = datastore.findUpdatedOrMissingGeoMergeFilesPage(page1.getNextPage().get());
+    assertEquals(2, page2.getTotalRecords());
+    assertEquals(2, page2.getTotalPages());
+    assertEquals(1, page2.getPageSize());
+    assertEquals(2, page2.getPageNumber());
+    assertEquals(Collections.singletonList(GeoMergeInfo.builder()
+            .withYear(2020)
+            .withMonth(1)
+            .withDay(2)
+            .withOcean(ArgoOcean.INDIAN_OCEAN)
+            .withFiles(Arrays.asList(
+                DacFloatFilePath.builder()
+                    .withFile("aoml/13857/profiles/D13857_001.nc")
+                    .withDac("aoml")
+                    .withFloatId("13857")
+                    .build(),
+                DacFloatFilePath.builder()
+                    .withFile("aoml/13857/profiles/D13857_002.nc")
+                    .withDac("aoml")
+                    .withFloatId("13857")
+                    .build()
+            ))
+            .build()),
+        page2.getPage());
+
+
+    datastore.updateIndex(MetadataRecord.builder()
+        .withFile("aoml/13857/profiles/D13857_001.nc")
+        .withActionTimestamp(date)
+        .withDac("aoml")
+        .withFloatId("13857")
+        .withAction(Action.GEO_MERGE)
+        .withFileType(ArgoFileType.METADATA)
+        .build());
+
+    datastore.updateIndex(MetadataRecord.builder()
+        .withFile("aoml/13857/profiles/D13857_002.nc")
+        .withActionTimestamp(date)
+        .withDac("aoml")
+        .withFloatId("13857")
+        .withAction(Action.GEO_MERGE)
+        .withFileType(ArgoFileType.METADATA)
+        .build());
+
+
+
+    page1 = datastore.findUpdatedOrMissingGeoMergeFilesPage(DefaultIndexPageRequest.builder().withPageSize(1).build());
+    assertEquals(2, page1.getTotalRecords());
+    assertEquals(2, page1.getTotalPages());
+    assertEquals(1, page1.getPageSize());
+    assertEquals(1, page1.getPageNumber());
+    assertEquals(Collections.singletonList(GeoMergeInfo.builder()
+            .withYear(2020)
+            .withMonth(1)
+            .withDay(2)
+            .withOcean(ArgoOcean.ATLANTIC_OCEAN)
+            .withFiles(Arrays.asList(
+                DacFloatFilePath.builder()
+                    .withFile("aoml/123/profiles/D123_001.nc")
+                    .withDac("aoml")
+                    .withFloatId("123")
+                    .build()
             ))
             .build()),
         page1.getPage());

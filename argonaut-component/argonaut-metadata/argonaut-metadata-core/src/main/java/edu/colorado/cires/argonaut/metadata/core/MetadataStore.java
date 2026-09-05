@@ -10,5 +10,6 @@ public interface MetadataStore {
   Optional<MetadataRecord> findByFile(String file, boolean includeRemoved);
   ProfilePage findUpdatedOrMissingSyntheticProfilesPage(IndexPageRequest pageRequest);
   ProfilePage findUpdatedOrMissingMergeFilesPage(IndexPageRequest pageRequest);
+  GeoMergePage findUpdatedOrMissingGeoMergeFilesPage(IndexPageRequest pageRequest);
 
 }

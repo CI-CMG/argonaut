@@ -7,6 +7,7 @@ import edu.colorado.cires.argonaut.metadata.jpa.entity.ProfileFileEntity;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.EntityTransaction;
+import jakarta.persistence.LockModeType;
 
 class Remover {
 
