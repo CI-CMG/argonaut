@@ -21,10 +21,13 @@ class MultiProfileIterator implements Iterator<ArgoProfileV31>, Closeable {
   private LinkedList<ArgoProfileV31> nextProfiles = new LinkedList<>();
   private int index = 0;
   private int profileIndex = 0;
+  private final boolean readOnlyFirstProfileInFile;
 
-  MultiProfileIterator(List<LocalPathSupplier> inputFileSuppliers) {
+  MultiProfileIterator(List<LocalPathSupplier> inputFileSuppliers, boolean readOnlyFirstProfileInFile) {
     this.inputFileSuppliers = inputFileSuppliers;
+    this.readOnlyFirstProfileInFile = readOnlyFirstProfileInFile;
   }
+
 
   @Override
   public boolean hasNext() {
@@ -48,6 +51,9 @@ class MultiProfileIterator implements Iterator<ArgoProfileV31>, Closeable {
       ) {
         ArgoMultiProfileV31 multiProfile = reader.getMultiProfile();
         List<ArgoProfileV31> profiles = multiProfile.getProfiles();
+        if (readOnlyFirstProfileInFile) {
+          profiles = profiles.subList(0, 1);
+        }
         nextProfiles = new LinkedList<>();
         for (ArgoProfileV31 profile : profiles) {
           nextProfiles.add(ProfileCopyUtils.copyProfileToMemory(profile, profileIndex++));

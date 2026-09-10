@@ -68,6 +68,11 @@ public class DefaultFloatMergeProcessor implements FloatMergeProcessor {
         private Path tempFile = null;
 
         @Override
+        public String getDac() {
+          return message.getDac();
+        }
+
+        @Override
         public String getFileName() {
           return outputFileStore.getFileName(file);
         }

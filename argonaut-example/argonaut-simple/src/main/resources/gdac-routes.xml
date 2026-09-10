@@ -126,6 +126,27 @@
       <bean ref="auditSender" method="generatedProfileMerge"/>
     </route>
 
+    <route id="geo-merge-cron">
+      <from uri="cron:geo-merge-cron?schedule={{geo-merge.cron}}"/>
+      <bean ref="geoMergeAggregator" method="trigger"/>
+    </route>
+
+    <route id="geo-merge">
+      <!--      TODO how to audit this?-->
+<!--      <errorHandler>-->
+<!--        <deadLetterChannel deadLetterUri="seda:audit" onPrepareFailureRef="prepareErrorAuditProcessor"/>-->
+<!--      </errorHandler>-->
+      <from uri="seda:geo-merge"/>
+<!--      <setHeader name="AuditEventProcessor">-->
+<!--        <constant>FILE_GENERATION</constant>-->
+<!--      </setHeader>-->
+      <bean ref="deserializationProcessor" method="deserialize(${body}, edu.colorado.cires.argonaut.messaging.core.databind.GeoMergeInfo)"/>
+<!--      TODO how to audit this?-->
+<!--      <bean ref="auditSender" method="generatingGeoMerge"/>-->
+      <bean ref="geoMergeProcessor" method="merge" />
+<!--      <bean ref="auditSender" method="generatedGeoMerge"/>-->
+    </route>
+
     <route id="synthetic-profile-cron">
       <from uri="cron:synthetic-profile-cron?schedule={{synthetic-profile.cron}}"/>
       <bean ref="syntheticProfileAggregator" method="trigger"/>

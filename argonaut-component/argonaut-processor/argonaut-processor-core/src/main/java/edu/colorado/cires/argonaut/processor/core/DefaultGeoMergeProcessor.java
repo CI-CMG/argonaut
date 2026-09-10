@@ -17,9 +17,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import org.apache.commons.io.FileUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import tools.jackson.databind.json.JsonMapper;
 
 public class DefaultGeoMergeProcessor implements GeoMergeProcessor {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(DefaultGeoMergeProcessor.class);
 
   private static final List<String> PARAMETERS = Arrays.asList("PRES", "TEMP", "PSAL");
 
@@ -68,6 +72,11 @@ public class DefaultGeoMergeProcessor implements GeoMergeProcessor {
         private Path tempFile = null;
 
         @Override
+        public String getDac() {
+          return dacPath.getDac();
+        }
+
+        @Override
         public String getFileName() {
           return outputFileStore.getFileName(dacPath.getFile());
         }
@@ -102,6 +111,13 @@ public class DefaultGeoMergeProcessor implements GeoMergeProcessor {
   @Override
   public void merge(GeoMergeInfo message) {
     if (message.getOcean().getDirectory() != null) {
+
+      LOGGER.info("Geo merge executing: {} {}/{}/{}", message.getOcean(), message.getYear(), message.getMonth(), message.getDay());
+      if (LOGGER.isDebugEnabled()) {
+        LOGGER.debug("Geo merge executing: {}", message);
+      }
+
+
       String fileName = String.format("%04d%02d%02d_prof.nc", message.getYear(), message.getMonth(), message.getDay());
       String outputFile = outputFileStore.appendToPath(
           outputFileStore.getRoot(),

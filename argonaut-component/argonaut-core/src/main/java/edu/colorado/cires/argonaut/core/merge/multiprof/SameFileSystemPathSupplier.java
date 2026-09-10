@@ -6,9 +6,16 @@ import java.util.Objects;
 public class SameFileSystemPathSupplier implements LocalPathSupplier {
 
   private final Path path;
+  private final String dac;
 
-  public SameFileSystemPathSupplier(Path path) {
+  public SameFileSystemPathSupplier(Path path, String dac) {
     this.path = path;
+    this.dac = dac;
+  }
+
+  @Override
+  public String getDac() {
+    return dac;
   }
 
   @Override

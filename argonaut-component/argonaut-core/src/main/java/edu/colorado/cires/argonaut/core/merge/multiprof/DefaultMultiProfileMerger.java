@@ -27,12 +27,14 @@ public class DefaultMultiProfileMerger implements MultiProfileMerger {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(DefaultMultiProfileMerger.class);
 
-  private static final Pattern FILE_NAME_REGEX = Pattern.compile("[A-Z]*[0-9]+_([0-9]+)(D?)\\.nc");
+  private static final Pattern FILE_NAME_REGEX = Pattern.compile("[A-Z]*([0-9]+)_([0-9]+)(D?)\\.nc");
 
   private final String institution;
+  private final boolean readOnlyFirstProfileInFile;
 
-  public DefaultMultiProfileMerger(String institution) {
+  public DefaultMultiProfileMerger(String institution, boolean readOnlyFirstProfileInFile) {
     this.institution = institution;
+    this.readOnlyFirstProfileInFile = readOnlyFirstProfileInFile;
   }
 
   @Override
@@ -74,7 +76,7 @@ public class DefaultMultiProfileMerger implements MultiProfileMerger {
         filteredParameterNames.add(parameterName);
       }
     }
-    try (MultiProfileIterator iterator = new MultiProfileIterator(orderedInputFileSuppliers)) {
+    try (MultiProfileIterator iterator = new MultiProfileIterator(orderedInputFileSuppliers, readOnlyFirstProfileInFile)) {
       ArgoProfileV31Writer.writeMultiProfile(
           outputPath,
           SoftwareVersion.getVersion(),
@@ -92,34 +94,51 @@ public class DefaultMultiProfileMerger implements MultiProfileMerger {
   private static List<String> orderByCycleNumberAndDirection(List<LocalPathSupplier> inputFileSuppliers) {
     // use file name, rather than reading data as an optimization when files are not located
     // on the same file system, like S3
-    return inputFileSuppliers.stream().map(LocalPathSupplier::getFileName).sorted((file1, file2) -> {
-      Matcher matcher1 = FILE_NAME_REGEX.matcher(file1);
-      if (!matcher1.matches()) {
-        throw new IllegalArgumentException("Invalid file name: " + file1);
-      }
-      Matcher matcher2 = FILE_NAME_REGEX.matcher(file2);
-      if (!matcher2.matches()) {
-        throw new IllegalArgumentException("Invalid file name: " + file2);
-      }
-      String d1 = matcher1.group(2).isEmpty() ? "A" : "D";
-      String d2 = matcher2.group(2).isEmpty() ? "A" : "D";
-      int c1 = Integer.parseInt(matcher1.group(1));
-      int c2 = Integer.parseInt(matcher2.group(1));
-      if (c1 == c2) {
-        // D before A
-        return d2.compareTo(d1);
+    return inputFileSuppliers.stream().sorted((lps1, lps2) -> {
+      if (lps1.getDac().equals(lps2.getDac())) {
+        String file1 = lps1.getFileName();
+        String file2 = lps2.getFileName();
+        Matcher matcher1 = FILE_NAME_REGEX.matcher(file1);
+        if (!matcher1.matches()) {
+          throw new IllegalArgumentException("Invalid file name: " + file1);
+        }
+        Matcher matcher2 = FILE_NAME_REGEX.matcher(file2);
+        if (!matcher2.matches()) {
+          throw new IllegalArgumentException("Invalid file name: " + file2);
+        }
+        long floatId1 = Long.parseLong(matcher1.group(1));
+        long floatId2 = Long.parseLong(matcher2.group(1));
+        if (floatId1 == floatId2) {
+          String d1 = matcher1.group(3).isEmpty() ? "A" : "D";
+          String d2 = matcher2.group(3).isEmpty() ? "A" : "D";
+          int c1 = Integer.parseInt(matcher1.group(2));
+          int c2 = Integer.parseInt(matcher2.group(2));
+          if (c1 == c2) {
+            // D before A
+            return d2.compareTo(d1);
+          } else {
+            return Integer.compare(c1, c2);
+          }
+        } else {
+          return Long.compare(floatId1, floatId2);
+        }
       } else {
-        return Integer.compare(c1, c2);
+        return lps1.getDac().compareTo(lps2.getDac());
       }
-    }).toList();
+
+    }).map(LocalPathSupplier::getFileName).toList();
   }
 
-  private static void populateDimensionsAndParameters(Path path, SimpleArgoNetCdfDimensions dimensions, Set<String> parameterNames) {
+  private void populateDimensionsAndParameters(Path path, SimpleArgoNetCdfDimensions dimensions, Set<String> parameterNames) {
     try (
         ArgoProfileV31Reader reader = new ArgoProfileV31Reader(path);
     ) {
       ArgoMultiProfileV31 multiProfile = reader.getMultiProfile();
-      dimensions.setProfiles(dimensions.getProfiles() + multiProfile.getNumberOfProfiles());
+      int numProfiles = multiProfile.getNumberOfProfiles();
+      if (readOnlyFirstProfileInFile) {
+        numProfiles = 1;
+      }
+      dimensions.setProfiles(dimensions.getProfiles() + numProfiles);
       ArgoProfileV31 profile = multiProfile.getProfile(0);
       for (ArgoProfileV31Parameter parameter : profile.getParameters()) {
         parameterNames.add(parameter.getParameterName());

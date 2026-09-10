@@ -16,6 +16,15 @@
       <AppenderRef ref="Console"/>
     </Logger>
 
+    <Logger name="ArgoDataFile" level="warn" additivity="false">
+      <AppenderRef ref="Console"/>
+    </Logger>
+
+    <Logger name="ArgoFileValidator" level="error" additivity="false">
+      <AppenderRef ref="Console"/>
+    </Logger>
+
+
     <Root level="info">
       <AppenderRef ref="Console"/>
     </Root>

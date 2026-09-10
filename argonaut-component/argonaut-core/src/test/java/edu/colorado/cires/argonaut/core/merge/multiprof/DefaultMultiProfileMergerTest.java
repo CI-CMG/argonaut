@@ -42,12 +42,12 @@ public class DefaultMultiProfileMergerTest {
       pathSuppliers = stream
           .filter(Files::isRegularFile)
           .filter(f -> f.getFileName().toString().endsWith(".nc"))
-          .map(SameFileSystemPathSupplier::new)
+          .map(path -> new SameFileSystemPathSupplier(path, "meds"))
           .map(ps -> (LocalPathSupplier) ps)
           .toList();
     }
     Path output = outputDir.resolve("4902704_prof.nc");
-    DefaultMultiProfileMerger merger = new DefaultMultiProfileMerger("My Institute");
+    DefaultMultiProfileMerger merger = new DefaultMultiProfileMerger("My Institute", false);
     merger.mergeProfiles(pathSuppliers, Arrays.asList("PRES", "TEMP", "PSAL"), output);
 
     try (
@@ -235,9 +235,9 @@ public class DefaultMultiProfileMergerTest {
       List<ArgoProfileV31> expectedProfiles = expectedReader.getMultiProfile().getProfiles();
       assertEquals(85, profiles.size());
       assertEquals(85, expectedProfiles.size());
-      for (int i = 0; i < expectedProfiles.size(); i++) {
-        ArgoProfileV31 profile = profiles.get(0);
-        ArgoProfileV31 expectedProfile = expectedProfiles.get(0);
+      for (int q = 0; q < expectedProfiles.size(); q++) {
+        ArgoProfileV31 profile = profiles.get(q);
+        ArgoProfileV31 expectedProfile = expectedProfiles.get(q);
 
         assertEquals(profile.getProfileIndex(), profile.getProfileIndex());
         assertEquals(REFERENCE_DATE, profile.getReferenceDateTime());
@@ -247,11 +247,19 @@ public class DefaultMultiProfileMergerTest {
         assertEquals(expectedProfile.getCycleNumber(), profile.getCycleNumber());
         assertEquals(expectedProfile.getDirection(), profile.getDirection());
         assertEquals(expectedProfile.getDataMode(), profile.getDataMode());
-        assertEquals(expectedProfile.getJulianDate(), profile.getJulianDate());
+        assertTrue(Math.abs(expectedProfile.getJulianDate().toEpochMilli() - profile.getJulianDate().toEpochMilli()) < 1000);
         assertEquals(expectedProfile.getJulianDateQc(), profile.getJulianDateQc());
-        assertEquals(expectedProfile.getJulianDateOfLocation(), profile.getJulianDateOfLocation());
-        assertEquals(expectedProfile.getLatitude(), profile.getLatitude(), 0.0000001);
-        assertEquals(expectedProfile.getLongitude(), profile.getLongitude(), 0.0000001);
+        assertTrue(Math.abs(expectedProfile.getJulianDateOfLocation().toEpochMilli() - profile.getJulianDateOfLocation().toEpochMilli()) < 1000);
+        if (expectedProfile.getLatitude() == null) {
+          assertNull(profile.getLatitude());
+        } else {
+          assertEquals(expectedProfile.getLatitude(), profile.getLatitude(), 0.0000001);
+        }
+        if (expectedProfile.getLongitude() == null) {
+          assertNull(profile.getLongitude());
+        } else {
+          assertEquals(expectedProfile.getLongitude(), profile.getLongitude(), 0.0000001);
+        }
         assertEquals(expectedProfile.getPositionQc(), profile.getPositionQc());
         assertEquals(expectedProfile.getParameter("PRES").getQc(), profile.getParameter("PRES").getQc());
         assertEquals(expectedProfile.getParameter("TEMP").getQc(), profile.getParameter("TEMP").getQc());

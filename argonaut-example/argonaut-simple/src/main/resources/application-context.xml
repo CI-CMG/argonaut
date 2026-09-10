@@ -158,6 +158,15 @@
     <property name="metadataStore" ref="metadataStore"/>
   </bean>
 
+  <bean id="geoMergeAggregator" class="edu.colorado.cires.argonaut.processor.core.DefaultGeoMergeAggregator">
+    <property name="jsonMapper" ref="jsonMapper"/>
+    <property name="messageSender" ref="messageSender"/>
+    <property name="geoMergeQueue" value="seda:geo-merge"/>
+    <property name="enabled" value="${geo-merge.enabled}"/>
+    <property name="pageSize" value="${geo-merge.page-size}"/>
+    <property name="metadataStore" ref="metadataStore"/>
+  </bean>
+
   <bean id="syntheticProfileAggregator" class="edu.colorado.cires.argonaut.processor.core.DefaultSyntheticProfileAggregator">
     <property name="jsonMapper" ref="jsonMapper"/>
     <property name="messageSender" ref="messageSender"/>
@@ -182,6 +191,12 @@
 
   <bean id="multiProfileMerger" class="edu.colorado.cires.argonaut.core.merge.multiprof.DefaultMultiProfileMerger">
     <constructor-arg value="${gdac-institution}"/>
+    <constructor-arg value="false"/>
+  </bean>
+
+  <bean id="onePerFileMultiProfileMerger" class="edu.colorado.cires.argonaut.core.merge.multiprof.DefaultMultiProfileMerger">
+    <constructor-arg value="${gdac-institution}"/>
+    <constructor-arg value="true"/>
   </bean>
 
   <bean id="floatMergeProcessor" class="edu.colorado.cires.argonaut.processor.core.DefaultFloatMergeProcessor">
@@ -191,6 +206,15 @@
     <property name="outputFileStore" ref="outputFileStore"/>
     <property name="updateIndexQueue" value="seda:update-index"/>
     <property name="merger" ref="multiProfileMerger"/>
+  </bean>
+
+  <bean id="geoMergeProcessor" class="edu.colorado.cires.argonaut.processor.core.DefaultGeoMergeProcessor">
+    <property name="messageSender" ref="messageSender"/>
+    <property name="jsonMapper" ref="jsonMapper"/>
+    <property name="localTempDir" value="${work-directory}"/>
+    <property name="outputFileStore" ref="outputFileStore"/>
+    <property name="updateIndexQueue" value="seda:update-index"/>
+    <property name="merger" ref="onePerFileMultiProfileMerger"/>
   </bean>
 
   <bean id="auditSender" class="edu.colorado.cires.argonaut.processor.core.AuditSender">
