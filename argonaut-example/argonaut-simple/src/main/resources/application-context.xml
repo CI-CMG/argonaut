@@ -68,7 +68,6 @@
   <bean id="submitFileRouter" class="edu.colorado.cires.argonaut.processor.core.SubmissionRoutingProcessor">
     <property name="jsonMapper" ref="jsonMapper"/>
     <property name="messageSender" ref="messageSender"/>
-    <property name="removalFileValidationProcessor" ref="removalFileValidationProcessor"/>
     <property name="submitDataQueue" value="seda:validation"/>
     <property name="submitRemovalQueue" value="seda:submit-removal"/>
     <property name="tarballSubmissionProcessor" ref="tarballSubmissionProcessor"/>

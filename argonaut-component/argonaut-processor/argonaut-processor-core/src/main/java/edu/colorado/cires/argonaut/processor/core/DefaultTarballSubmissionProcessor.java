@@ -100,9 +100,11 @@ public class DefaultTarballSubmissionProcessor implements TarballSubmissionProce
       }
 
       for (Path file : listFiles(tempDir)) {
-        if (Files.isRegularFile(file) && (file.getFileName().toString().endsWith(".nc") || file.getFileName().toString().endsWith("_removal.txt"))) {
+        if (Files.isRegularFile(file)) {
           String fileName = Optional.ofNullable(file.getFileName()).orElseThrow().toString();
-          DefaultSubmissionProcessor.moveSingleFile(submittedFile, file, fileName, processingFileStore).ifPresent(output::add);
+          if (fileName.endsWith(".nc") || fileName.endsWith("_removal.txt")) {
+            DefaultSubmissionProcessor.moveSingleFile(submittedFile, file, fileName, processingFileStore).ifPresent(output::add);
+          }
         }
       }
     } finally {
