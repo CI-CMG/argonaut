@@ -15,8 +15,10 @@ public enum ArgoFileType {
   METADATA,
   TECHNICAL_DATA,
   AUXILIARY,
-  PROFILE_MULTI_CYCLE;
+  PROFILE_MULTI_CYCLE,
+  REMOVAL_TXT;
 
+  private static final Pattern REMOVAL_TXT_REGEX = Pattern.compile("([a-z]+)_removal\\.txt");
   private static final Pattern PROFILE_MULTI_CYCLE_REGEX = Pattern.compile("([0-9]+)_prof\\.nc");
   private static final Pattern PROFILE_CORE_REGEX = Pattern.compile("([RD])([0-9]+)_([0-9]+)(D?)\\.nc");
   private static final Pattern PROFILE_BIOCHEMICAL_REGEX = Pattern.compile("B([RD])([0-9]+)_([0-9]+)(D?)\\.nc");
@@ -96,6 +98,10 @@ public enum ArgoFileType {
     matcher = SYNTHETIC_PROFILE_MULTI_CYCLE_REGEX.matcher(fileName);
     if (matcher.matches()) {
       return new ArgoFileTypeDetails(ArgoFileType.SYNTHETIC_PROFILE_MULTI_CYCLE, null, matcher.group(1), null, null);
+    }
+    matcher = REMOVAL_TXT_REGEX.matcher(fileName);
+    if (matcher.matches()) {
+      return new ArgoFileTypeDetails(ArgoFileType.REMOVAL_TXT, null, null, null, null);
     }
     return new ArgoFileTypeDetails(ArgoFileType.AUXILIARY, null, null, null, null);
   }

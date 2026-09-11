@@ -2,7 +2,6 @@ package edu.colorado.cires.argonaut.processor.core;
 
 import edu.colorado.cires.argonaut.messaging.core.databind.DacSubmittedFileMessage;
 import edu.colorado.cires.argonaut.messaging.core.databind.NcSubmissionMessage;
-import edu.colorado.cires.argonaut.messaging.core.databind.RemovalMessage;
 import edu.colorado.cires.argonaut.messaging.core.queue.MessageSender;
 import java.util.List;
 import tools.jackson.databind.json.JsonMapper;
@@ -12,7 +11,6 @@ public class SubmissionRoutingProcessor {
   private MessageSender messageSender;
   private TarballSubmissionProcessor tarballSubmissionProcessor;
   private SubmissionProcessor submissionProcessor;
-  private RemovalFileValidationProcessor removalFileValidationProcessor;
   private JsonMapper jsonMapper;
   private String submitDataQueue;
   private String submitRemovalQueue;
@@ -27,10 +25,6 @@ public class SubmissionRoutingProcessor {
 
   public void setTarballSubmissionProcessor(TarballSubmissionProcessor tarballSubmissionProcessor) {
     this.tarballSubmissionProcessor = tarballSubmissionProcessor;
-  }
-
-  public void setRemovalFileValidationProcessor(RemovalFileValidationProcessor removalFileValidationProcessor) {
-    this.removalFileValidationProcessor = removalFileValidationProcessor;
   }
 
   public void setJsonMapper(JsonMapper jsonMapper) {
@@ -49,17 +43,17 @@ public class SubmissionRoutingProcessor {
     if (message.getPath().endsWith(".tar.gz")) {
       List<NcSubmissionMessage> submissionMessages = tarballSubmissionProcessor.untarAndMoveToProcessing(message);
       for (NcSubmissionMessage submissionMessage : submissionMessages) {
-        messageSender.sendJson(submitDataQueue, jsonMapper.writeValueAsString(submissionMessage));
+        if (submissionMessage.getFileName().endsWith("_removal.txt")) {
+          messageSender.sendJson(submitRemovalQueue, jsonMapper.writeValueAsString(submissionMessage));
+        } else {
+          messageSender.sendJson(submitDataQueue, jsonMapper.writeValueAsString(submissionMessage));
+        }
       }
     } else if (message.getPath().endsWith("_removal.txt")) {
-      //TODO should this be a list?
-      RemovalMessage removalMessage = removalFileValidationProcessor.validate(message);
-      messageSender.sendJson(submitRemovalQueue, jsonMapper.writeValueAsString(removalMessage));
+      submissionProcessor.moveToProcessing(message).ifPresent(submissionMessage -> messageSender.sendJson(submitRemovalQueue, jsonMapper.writeValueAsString(submissionMessage)));
     } else if (message.getPath().endsWith(".nc")) {
-      submissionProcessor.moveToProcessing(message)
-          .ifPresent(submissionMessage -> messageSender.sendJson(submitDataQueue, jsonMapper.writeValueAsString(submissionMessage)));
+      submissionProcessor.moveToProcessing(message).ifPresent(submissionMessage -> messageSender.sendJson(submitDataQueue, jsonMapper.writeValueAsString(submissionMessage)));
     } else {
-      // TODO
       throw new UnsupportedOperationException("Unsupported file type: " + message.getPath());
     }
   }

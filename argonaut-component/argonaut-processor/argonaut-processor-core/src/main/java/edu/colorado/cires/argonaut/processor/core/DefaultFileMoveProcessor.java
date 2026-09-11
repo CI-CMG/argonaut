@@ -7,8 +7,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import org.apache.commons.io.IOUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class DefaultFileMoveProcessor implements FileMoveProcessor {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(DefaultFileMoveProcessor.class);
 
   private FileStore submissionFileStore;
   private FileStore processingFileStore;
@@ -40,18 +44,24 @@ public class DefaultFileMoveProcessor implements FileMoveProcessor {
     }
   }
 
-  private void handleRemove(NcSubmissionMessage message) {
-    //TODO
-    throw new UnsupportedOperationException("Remove operation is not supported");
-    /*
-        Path source = ArgonautFileUtils.getOutputProfileDir(serviceProperties, message.getDac(), message.getFloatId(), message.isProfile())
-        .resolve(message.getFileName());
-    Path destDir = ArgonautFileUtils.getRemovedProfileDir(serviceProperties, message.getDac(), message.getTimestamp(), message.getFloatId(), message.isProfile());
-    ArgonautFileUtils.createDirectories(destDir);
-    Path dest = destDir.resolve(message.getFileName());
-    LOGGER.info("Moving file {} to {}", source, dest);
-    ArgonautFileUtils.move(source, dest);
-     */
+  private String resolveOutputFile(NcSubmissionMessage ncSubmissionMessage) {
+    String destinationDir = outputFileStore.appendToPath(outputFileStore.getRoot(), "dac", ncSubmissionMessage.getDac(),
+        ncSubmissionMessage.getFloatId());
+    if (ArgoFileType.isProfile(ncSubmissionMessage.getFileType())) {
+      destinationDir = outputFileStore.appendToPath(destinationDir, "profiles");
+    }
+    return outputFileStore.appendToPath(destinationDir, ncSubmissionMessage.getFileName());
+  }
+
+  private String resolveRemovedFile(NcSubmissionMessage ncSubmissionMessage) {
+    return outputFileStore.appendToPath(outputFileStore.getRoot(), "etc", "removed", ncSubmissionMessage.getDac(), ncSubmissionMessage.getFileName());
+  }
+
+  private void handleRemove(NcSubmissionMessage ncSubmissionMessage) {
+    String source = resolveOutputFile(ncSubmissionMessage);
+    String destination = resolveRemovedFile(ncSubmissionMessage);
+    outputFileStore.move(source, destination);
+    LOGGER.info("Moved removed file from {} to {}", source, destination);
   }
 
   private void handleAdd(NcSubmissionMessage ncSubmissionMessage) {
@@ -62,12 +72,7 @@ public class DefaultFileMoveProcessor implements FileMoveProcessor {
     }
     String processingFile = processingFileStore.appendToPath(processingDacDir, ncSubmissionMessage.getFileName());
     if (ncSubmissionMessage.getValidationErrors().isEmpty()) {
-      String destinationDir = outputFileStore.appendToPath(outputFileStore.getRoot(), "dac", ncSubmissionMessage.getDac(),
-          ncSubmissionMessage.getFloatId());
-      if (ArgoFileType.isProfile(ncSubmissionMessage.getFileType())) {
-        destinationDir = outputFileStore.appendToPath(destinationDir, "profiles");
-      }
-      String destinationFile = outputFileStore.appendToPath(destinationDir, ncSubmissionMessage.getFileName());
+      String destinationFile = resolveOutputFile(ncSubmissionMessage);
       try (InputStream inputStream = processingFileStore.getInputStream(processingFile);
           OutputStream outputStream = outputFileStore.getOutputStream(destinationFile)
       ) {
@@ -79,7 +84,7 @@ public class DefaultFileMoveProcessor implements FileMoveProcessor {
     } else {
       String destinationDir = submissionFileStore.appendToPath(submissionFileStore.getRoot(), "dac", ncSubmissionMessage.getDac(), "processed",
           ncSubmissionMessage.getTimestamp().toString(), "reject", ncSubmissionMessage.getFloatId().toString());
-      if (ArgoFileType.PROFILE_CORE == ncSubmissionMessage.getFileType()) {
+      if (ArgoFileType.isProfile(ncSubmissionMessage.getFileType())) {
         destinationDir = submissionFileStore.appendToPath(destinationDir, "profiles");
       }
       String destinationFile = submissionFileStore.appendToPath(destinationDir, ncSubmissionMessage.getFileName());

@@ -197,10 +197,10 @@ public final class NcSubmissionMessage implements Comparable<NcSubmissionMessage
       return false;
     }
     NcSubmissionMessage that = (NcSubmissionMessage) o;
-    return numberOfFilesInSubmission == that.numberOfFilesInSubmission && Objects.equals(floatId, that.floatId) && Objects.equals(
-        validationErrors, that.validationErrors) && Objects.equals(timestamp, that.timestamp) && Objects.equals(dac, that.dac)
-        && Objects.equals(fileName, that.fileName) && fileType == that.fileType && operation == that.operation && Objects.equals(
-        traceId, that.traceId);
+    return numberOfFilesInSubmission == that.numberOfFilesInSubmission && Objects.equals(floatId, that.floatId)
+        && Objects.equals(validationErrors, that.validationErrors) && Objects.equals(timestamp, that.timestamp)
+        && Objects.equals(dac, that.dac) && Objects.equals(fileName, that.fileName) && fileType == that.fileType
+        && operation == that.operation && Objects.equals(traceId, that.traceId);
   }
 
   @Override

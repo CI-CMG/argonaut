@@ -1,0 +1,10 @@
+1234_tech.nc
+R1234_001.nc
+BR1234_001.nc
+
+
+1234_Rtraj.nc
+1234_meta.nc
+
+
+

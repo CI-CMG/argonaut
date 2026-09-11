@@ -115,7 +115,7 @@ public class DefaultValidationProcessor implements ValidationProcessor {
   private String resolveDownloadPath(NcSubmissionMessage ncSubmissionMessage) {
     String processingDacDir = processingFileStore.appendToPath(processingFileStore.getRoot(), "dac", ncSubmissionMessage.getDac(),
         ncSubmissionMessage.getTimestamp().toString(), ncSubmissionMessage.getFloatId());
-    if (ArgoFileType.PROFILE_CORE == ncSubmissionMessage.getFileType()) {
+    if (ArgoFileType.isProfile(ncSubmissionMessage.getFileType())) {
       processingDacDir = processingFileStore.appendToPath(processingDacDir, "profiles");
     }
     return processingFileStore.appendToPath(processingDacDir, ncSubmissionMessage.getFileName());

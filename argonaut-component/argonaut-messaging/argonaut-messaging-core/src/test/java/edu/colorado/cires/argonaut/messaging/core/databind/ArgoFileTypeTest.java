@@ -28,7 +28,7 @@ public class ArgoFileTypeTest {
     assertEquals(ArgoFileType.SYNTHETIC_PROFILE_SINGLE_CYCLE, ArgoFileType.forFileName("SR6901439_001D.nc"));
     assertEquals(ArgoFileType.SYNTHETIC_PROFILE_SINGLE_CYCLE, ArgoFileType.forFileName("SD6901439_001.nc"));
     assertEquals(ArgoFileType.SYNTHETIC_PROFILE_SINGLE_CYCLE, ArgoFileType.forFileName("SD6901439_001D.nc"));
-
+    assertEquals(ArgoFileType.REMOVAL_TXT, ArgoFileType.forFileName("aoml_removal.txt"));
   }
 
 

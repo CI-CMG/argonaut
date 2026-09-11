@@ -34,39 +34,77 @@ public class DefaultSubmissionProcessor implements SubmissionProcessor {
     this.processingFileStore = processingFileStore;
   }
 
-  static Optional<NcSubmissionMessage> moveSingleFile(DacSubmittedFileMessage submittedFile, Path file, String fileName,
-      FileStore processingFileStore) {
+  private static boolean isSubmittableDataFile(String fileName) {
     ArgoFileTypeDetails fileTypeDetails = ArgoFileType.getFileNameDetails(fileName);
-    if (fileTypeDetails.getType() == ArgoFileType.TECHNICAL_DATA ||
+    return fileTypeDetails.getType() == ArgoFileType.TECHNICAL_DATA ||
         fileTypeDetails.getType() == ArgoFileType.PROFILE_CORE ||
         fileTypeDetails.getType() == ArgoFileType.PROFILE_BIOCHEMICAL ||
         fileTypeDetails.getType() == ArgoFileType.TRAJECTORY ||
-        fileTypeDetails.getType() == ArgoFileType.METADATA
-    ) {
-      String floatDir = fileTypeDetails.getFloatId();
-      boolean profile = ArgoFileType.isProfile(fileTypeDetails.getType());
-      NcSubmissionMessage ncSubmissionMessage = NcSubmissionMessage.builder()
-          .withOperation(Operation.ADD)
-          .withFileName(fileName)
-          .withFileType(fileTypeDetails.getType())
-          .withFloatId(floatDir)
-          .withDac(submittedFile.getDac())
-          .withTimestamp(submittedFile.getTimestamp())
-          .withTraceId(submittedFile.getTraceId())
-          .build();
-      String processingDacDir = processingFileStore.appendToPath(processingFileStore.getRoot(), "dac", submittedFile.getDac(),
-          submittedFile.getTimestamp().toString(), floatDir);
-      if (profile) {
-        processingDacDir = processingFileStore.appendToPath(processingDacDir, "profiles");
-      }
-      String ncFile = processingFileStore.appendToPath(processingDacDir, fileName);
-      LOGGER.info("Adding to processing directory {}", ncFile);
-      try {
-        processingFileStore.uploadLocalFile(file, ncFile);
-      } catch (IOException e) {
-        throw new RuntimeException("Unable to upload file: " + file + " to " + ncFile, e);
-      }
-      return Optional.of(ncSubmissionMessage);
+        fileTypeDetails.getType() == ArgoFileType.METADATA;
+  }
+
+  private static boolean isRemovalFile(String fileName) {
+    ArgoFileTypeDetails fileTypeDetails = ArgoFileType.getFileNameDetails(fileName);
+    return fileTypeDetails.getType() == ArgoFileType.REMOVAL_TXT;
+  }
+
+  private static NcSubmissionMessage createDataSubmissionMessage(DacSubmittedFileMessage submittedFile, String fileName) {
+    ArgoFileTypeDetails fileTypeDetails = ArgoFileType.getFileNameDetails(fileName);
+    String floatDir = fileTypeDetails.getFloatId();
+    return NcSubmissionMessage.builder()
+        .withOperation(Operation.ADD)
+        .withFileName(fileName)
+        .withFileType(fileTypeDetails.getType())
+        .withFloatId(floatDir)
+        .withDac(submittedFile.getDac())
+        .withTimestamp(submittedFile.getTimestamp())
+        .withTraceId(submittedFile.getTraceId())
+        .build();
+  }
+
+  private static NcSubmissionMessage createRemovalMessage(DacSubmittedFileMessage submittedFile, String fileName) {
+    return NcSubmissionMessage.builder()
+        .withOperation(Operation.REMOVE)
+        .withFileName(fileName)
+        .withFileType(ArgoFileType.REMOVAL_TXT)
+        .withDac(submittedFile.getDac())
+        .withTimestamp(submittedFile.getTimestamp())
+        .withTraceId(submittedFile.getTraceId())
+        .build();
+  }
+
+  private static String resolveDataFileName(NcSubmissionMessage message, FileStore processingFileStore) {
+    String processingDacDir = processingFileStore.appendToPath(processingFileStore.getRoot(), "dac", message.getDac(),
+        message.getTimestamp().toString(), message.getFloatId());
+    if (ArgoFileType.isProfile(message.getFileType())) {
+      processingDacDir = processingFileStore.appendToPath(processingDacDir, "profiles");
+    }
+    return processingFileStore.appendToPath(processingDacDir, message.getFileName());
+  }
+
+  private static String resolveRemovalFileName(NcSubmissionMessage message, FileStore processingFileStore) {
+    return processingFileStore.appendToPath(processingFileStore.getRoot(), "dac", message.getDac(),
+        message.getTimestamp().toString(), message.getFileName());
+  }
+
+  private static void uploadProcessingFile(Path localFile, String remotePath, FileStore processingFileStore) {
+    LOGGER.info("Adding to processing directory {}", remotePath);
+    try {
+      processingFileStore.uploadLocalFile(localFile, remotePath);
+    } catch (IOException e) {
+      throw new RuntimeException("Unable to upload file: " + localFile + " to " + remotePath, e);
+    }
+  }
+
+  static Optional<NcSubmissionMessage> moveSingleFile(DacSubmittedFileMessage submittedFile, Path file, String fileName, FileStore processingFileStore) {
+    if (isSubmittableDataFile(fileName)) {
+      NcSubmissionMessage message = createDataSubmissionMessage(submittedFile, fileName);
+      uploadProcessingFile(file, resolveDataFileName(message, processingFileStore), processingFileStore);
+      return Optional.of(message);
+    } else if (isRemovalFile(fileName)) {
+      NcSubmissionMessage message = createRemovalMessage(submittedFile, fileName);
+      uploadProcessingFile(file, resolveRemovalFileName(message, processingFileStore), processingFileStore);
+      return Optional.of(message);
     }
     return Optional.empty();
   }
@@ -78,6 +116,7 @@ public class DefaultSubmissionProcessor implements SubmissionProcessor {
 
     Path tempWorkDir;
     try {
+      Files.createDirectories(localTempDir);
       tempWorkDir = Files.createTempDirectory(localTempDir, "processing");
     } catch (IOException e) {
       throw new RuntimeException("An error occurred while creating local work directory", e);
