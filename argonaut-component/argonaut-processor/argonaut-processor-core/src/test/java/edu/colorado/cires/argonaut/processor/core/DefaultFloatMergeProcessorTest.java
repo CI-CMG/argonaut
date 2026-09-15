@@ -13,10 +13,10 @@ import edu.colorado.cires.argonaut.core.merge.multiprof.MultiProfileMerger;
 import edu.colorado.cires.argonaut.file.core.FileStore;
 import edu.colorado.cires.argonaut.messaging.core.databind.MetadataRecord;
 import edu.colorado.cires.argonaut.messaging.core.databind.MetadataRecord.Action;
+import edu.colorado.cires.argonaut.messaging.core.databind.MetadataRecord.FileStatus;
 import edu.colorado.cires.argonaut.messaging.core.databind.ProfileOperation;
 import edu.colorado.cires.argonaut.messaging.core.queue.MessageSender;
 import edu.colorado.cires.argonaut.messaging.core.util.ArgonautJsonMapperFactory;
-import edu.colorado.cires.argonaut.metadata.core.MetadataStore;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -60,6 +60,7 @@ public class DefaultFloatMergeProcessorTest {
     when(outputFileStore.appendToPath(eq("/foo/bar"), eq("dac"), eq("aoml/123/profiles/R123_002.nc"))).thenReturn("/foo/bar/dac/aoml/123/profiles/R123_002.nc");
     when(outputFileStore.appendToPath(eq("aoml"), eq("123"), eq("123_prof.nc"))).thenReturn("aoml/123/123_prof.nc");
     when(outputFileStore.appendToPath(eq("/foo/bar"), eq("dac"), eq("aoml/123/123_prof.nc"))).thenReturn("/foo/bar/dac/aoml/123/123_prof.nc");
+    when(outputFileStore.appendToPath(eq("/foo/bar"), eq("dac"), eq("aoml"), eq("123"), eq("123_prof.nc"))).thenReturn("/foo/bar/dac/aoml/123/123_prof.nc");
 
 
 
@@ -76,9 +77,9 @@ public class DefaultFloatMergeProcessorTest {
         .withDac("aoml")
         .withFloatId("123")
         .withFiles(Arrays.asList(
-            "aoml/123/profiles/R123_001.nc",
-            "aoml/123/profiles/R123_001D.nc",
-            "aoml/123/profiles/R123_002.nc"
+            MetadataRecord.builder().withFile("aoml/123/profiles/R123_001.nc").withFileName("R123_001.nc").withFileStatus(FileStatus.ACTIVE).build(),
+            MetadataRecord.builder().withFile("aoml/123/profiles/R123_001D.nc").withFileName("R123_001D.nc").withFileStatus(FileStatus.ACTIVE).build(),
+            MetadataRecord.builder().withFile("aoml/123/profiles/R123_002.nc").withFileName("R123_002.nc").withFileStatus(FileStatus.ACTIVE).build()
             ))
         .build();
 

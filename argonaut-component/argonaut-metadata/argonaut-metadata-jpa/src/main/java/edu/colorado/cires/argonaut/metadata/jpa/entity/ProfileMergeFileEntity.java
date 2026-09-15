@@ -56,6 +56,8 @@ public class ProfileMergeFileEntity {
   private String parameterDataMode;
   @Column(name = "last_updated_time", nullable = false)
   private ZonedDateTime lastUpdatedTime;
+  @Column(name = "file_name", nullable = false, length = 20)
+  private String fileName;
 
 
   public String getFile() {
@@ -196,5 +198,13 @@ public class ProfileMergeFileEntity {
 
   public void setLastUpdatedTime(ZonedDateTime lastUpdatedTime) {
     this.lastUpdatedTime = lastUpdatedTime;
+  }
+
+  public String getFileName() {
+    return fileName;
+  }
+
+  public void setFileName(String fileName) {
+    this.fileName = fileName;
   }
 }

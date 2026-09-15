@@ -15,6 +15,7 @@ import edu.colorado.cires.argonaut.messaging.core.databind.MetadataRecord.Action
 import edu.colorado.cires.argonaut.processor.core.GeoFilter;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.time.Instant;
 
 public final class NetCdfMetadataRecord {
 
@@ -60,6 +61,7 @@ public final class NetCdfMetadataRecord {
           .withCycleNumber(formatCycleNumber(profile.getCycleNumber()))
           .withDate(profile.getJulianDate())
           .withAction(Action.UPDATE)
+          .withActionTimestamp(Instant.now())
           .withLatitude(profile.getLatitude())
           .withLongitude(profile.getLongitude())
           .withOcean(geoFilter.determineArgoOcean(profile.getLongitude(), profile.getLatitude()))
@@ -71,7 +73,7 @@ public final class NetCdfMetadataRecord {
     }
   }
 
-  public static MetadataRecord fromV13SyntheticProfile(String file, String dac, Path ncFile, GeoFilter geoFilter) throws IOException {
+  public static MetadataRecord fromV13SyntheticProfile(String file, String fileName, String dac, Path ncFile, GeoFilter geoFilter) throws IOException {
     try (ArgoSyntheticProfileV13Reader reader = new ArgoSyntheticProfileV13Reader(ncFile)) {
       ArgoSyntheticMultiProfileV13 multiProfile = reader.getMultiProfile();
       ArgoSyntheticProfileV13 profile = null;
@@ -89,6 +91,7 @@ public final class NetCdfMetadataRecord {
 
       return MetadataRecord.builder()
           .withFile(file)
+          .withFileName(fileName)
           .withDac(dac)
           .withFloatId(profile.getPlatformNumber())
           .withParameterDataMode(parameter.getDataMode())
@@ -96,6 +99,7 @@ public final class NetCdfMetadataRecord {
           .withCycleNumber(formatCycleNumber(profile.getCycleNumber()))
           .withDate(profile.getJulianDate())
           .withAction(Action.UPDATE)
+          .withActionTimestamp(Instant.now())
           .withLatitude(profile.getLatitude())
           .withLongitude(profile.getLongitude())
           .withOcean(geoFilter.determineArgoOcean(profile.getLongitude(), profile.getLatitude()))
@@ -118,6 +122,7 @@ public final class NetCdfMetadataRecord {
           .withFloatId(metadata.getPlatformNumber())
           .withDate(metadata.getDateUpdate())
           .withAction(Action.UPDATE)
+          .withActionTimestamp(Instant.now())
           .withLatitude(metadata.getLaunchLatitude())
           .withLongitude(metadata.getLaunchLongitude())
           .withOcean(geoFilter.determineArgoOcean(metadata.getLaunchLongitude(), metadata.getLaunchLatitude()))

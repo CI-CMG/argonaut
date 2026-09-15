@@ -8,6 +8,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import edu.colorado.cires.argonaut.messaging.core.databind.MetadataRecord;
+import edu.colorado.cires.argonaut.messaging.core.databind.MetadataRecord.FileStatus;
 import edu.colorado.cires.argonaut.messaging.core.databind.ProfileOperation;
 import edu.colorado.cires.argonaut.messaging.core.queue.MessageSender;
 import edu.colorado.cires.argonaut.messaging.core.util.ArgonautJsonMapperFactory;
@@ -43,8 +45,14 @@ public class DefaultFloatMergeAggregatorTest {
     when(metadataStore.findUpdatedOrMissingMergeFilesPage(any())).thenAnswer((invocationOnMock) -> {
       IndexPageRequest pageRequest = invocationOnMock.getArgument(0, IndexPageRequest.class);
       List<ProfileOperation> page = Arrays.asList(
-          ProfileOperation.builder().withDac("aaaa").withFloatId("" + pageRequest.getPageNumber()).withFiles(Collections.singletonList("aaaa/profiles/" + pageRequest.getPageNumber() + ".nc")).build(),
-          ProfileOperation.builder().withDac("bbbb").withFloatId("" + pageRequest.getPageNumber() * 10).withFiles(Collections.singletonList("aaaa/profiles/" + pageRequest.getPageNumber() * 10 + ".nc")).build()
+          ProfileOperation.builder().withDac("aaaa").withFloatId("" + pageRequest.getPageNumber())
+              .withFiles(Collections.singletonList(
+                  MetadataRecord.builder().withFile("aaaa/profiles/" + pageRequest.getPageNumber() + ".nc").withFileName(pageRequest.getPageNumber() + ".nc").withFileStatus(FileStatus.ACTIVE).build()
+              )).build(),
+          ProfileOperation.builder().withDac("bbbb").withFloatId("" + pageRequest.getPageNumber() * 10)
+              .withFiles(Collections.singletonList(
+                  MetadataRecord.builder().withFile("aaaa/profiles/" + pageRequest.getPageNumber() * 10 + ".nc").withFileName(pageRequest.getPageNumber() * 10 + ".nc").withFileStatus(FileStatus.ACTIVE).build()
+              )).build()
       );
       return DefaultProfilePage.builder().withTotalRecords(4).withIndexPageRequest(DefaultIndexPageRequest.builder(pageRequest).build())
           .withPage(page).build();
@@ -58,10 +66,22 @@ public class DefaultFloatMergeAggregatorTest {
         eq(DefaultIndexPageRequest.builder().withPageNumber(2).withPageSize(2).build()));
 
     List<String> messages = Arrays.asList(
-        jsonMapper.writeValueAsString(ProfileOperation.builder().withDac("aaaa").withFloatId("1").withTraceId(traceId).withFileName("1_prof.nc").withFiles(Collections.singletonList("aaaa/profiles/1.nc")).build()),
-        jsonMapper.writeValueAsString(ProfileOperation.builder().withDac("bbbb").withFloatId("10").withTraceId(traceId).withFileName("10_prof.nc").withFiles(Collections.singletonList("aaaa/profiles/10.nc")).build()),
-        jsonMapper.writeValueAsString(ProfileOperation.builder().withDac("aaaa").withFloatId("2").withTraceId(traceId).withFileName("2_prof.nc").withFiles(Collections.singletonList("aaaa/profiles/2.nc")).build()),
-        jsonMapper.writeValueAsString(ProfileOperation.builder().withDac("bbbb").withFloatId("20").withTraceId(traceId).withFileName("20_prof.nc").withFiles(Collections.singletonList("aaaa/profiles/20.nc")).build())
+        jsonMapper.writeValueAsString(ProfileOperation.builder().withDac("aaaa").withFloatId("1").withTraceId(traceId).withFileName("1_prof.nc")
+            .withFiles(Collections.singletonList(
+                MetadataRecord.builder().withFile("aaaa/profiles/1.nc").withFileName("1.nc").withFileStatus(FileStatus.ACTIVE).build()
+            )).build()),
+        jsonMapper.writeValueAsString(ProfileOperation.builder().withDac("bbbb").withFloatId("10").withTraceId(traceId).withFileName("10_prof.nc")
+            .withFiles(Collections.singletonList(
+                MetadataRecord.builder().withFile("aaaa/profiles/10.nc").withFileName("10.nc").withFileStatus(FileStatus.ACTIVE).build()
+            )).build()),
+        jsonMapper.writeValueAsString(ProfileOperation.builder().withDac("aaaa").withFloatId("2").withTraceId(traceId).withFileName("2_prof.nc")
+            .withFiles(Collections.singletonList(
+                MetadataRecord.builder().withFile("aaaa/profiles/2.nc").withFileName("2.nc").withFileStatus(FileStatus.ACTIVE).build()
+            )).build()),
+        jsonMapper.writeValueAsString(ProfileOperation.builder().withDac("bbbb").withFloatId("20").withTraceId(traceId).withFileName("20_prof.nc")
+            .withFiles(Collections.singletonList(
+                MetadataRecord.builder().withFile("aaaa/profiles/20.nc").withFileName("20.nc").withFileStatus(FileStatus.ACTIVE).build()
+            )).build())
     );
     for (String message : messages) {
       verify(messageSender, times(1)).sendJson(eq(queue), eq(message));

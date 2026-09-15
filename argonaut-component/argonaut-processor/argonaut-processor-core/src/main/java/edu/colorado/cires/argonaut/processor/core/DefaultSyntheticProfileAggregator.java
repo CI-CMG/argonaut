@@ -1,6 +1,6 @@
 package edu.colorado.cires.argonaut.processor.core;
 
-import edu.colorado.cires.argonaut.file.core.FileStore;
+import edu.colorado.cires.argonaut.messaging.core.databind.MetadataRecord;
 import edu.colorado.cires.argonaut.messaging.core.databind.ProfileOperation;
 import edu.colorado.cires.argonaut.messaging.core.queue.MessageSender;
 import edu.colorado.cires.argonaut.metadata.core.DefaultIndexPageRequest;
@@ -21,14 +21,9 @@ public class DefaultSyntheticProfileAggregator implements SyntheticProfileAggreg
   private String syntheticProfileQueue;
   private int pageSize = 200;
   private boolean enabled = true;
-  private FileStore outputFileStore;
 
   public void setTraceIdGenerator(Supplier<UUID> traceIdGenerator) {
     this.traceIdGenerator = traceIdGenerator;
-  }
-
-  public void setOutputFileStore(FileStore outputFileStore) {
-    this.outputFileStore = outputFileStore;
   }
 
   public void setEnabled(boolean enabled) {
@@ -64,9 +59,9 @@ public class DefaultSyntheticProfileAggregator implements SyntheticProfileAggreg
     }
   }
 
-  private String getFileName(ProfileOperation profile) {
+  private static String getFileName(ProfileOperation profile) {
     return profile.getFiles().stream()
-        .map(outputFileStore::getFileName)
+        .map(MetadataRecord::getFileName)
         .filter(f -> f.startsWith("B"))
         .map(f -> f.replace("B", "S"))
         .findFirst()

@@ -20,6 +20,9 @@ import edu.colorado.cires.argonaut.metadata.jpa.entity.ProfileFileEntity;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 
@@ -51,6 +54,7 @@ class Finder {
             .withFileType(ArgoFileType.METADATA)
             .withDac(result.getFloatId().getDac().getDac())
             .withFile(result.getFile())
+            .withFileName(result.getFileName())
             .withFloatId(result.getFloatId().getFloatId())
             .withFileStatus(FileStatus.valueOf(result.getFileStatus()))
             .withDate(result.getDate() == null ? null : result.getDate().toInstant())
@@ -91,6 +95,7 @@ class Finder {
             .withFileType(ArgoFileType.valueOf(result.getFileType()))
             .withDac(result.getCycle().getFloatId().getDac().getDac())
             .withFile(result.getFile())
+            .withFileName(result.getFileName())
             .withFloatId(result.getCycle().getFloatId().getFloatId())
             .withFileStatus(FileStatus.valueOf(result.getFileStatus()))
             .withDate(result.getDate() == null ? null : result.getDate().toInstant())
@@ -114,7 +119,8 @@ class Finder {
   }
 
   private static List<DacFloatFilePath> getGeoPaths(EntityManager em, int year, int month, int day, String ocean) {
-    List<ProfileFileEntity> entities = em.createQuery("SELECT p FROM ProfileFileEntity p WHERE p.year = :year AND p.month = :month AND p.day = :day AND ocean = :ocean AND p.fileStatus = 'ACTIVE' AND p.fileType = 'PROFILE_CORE'")
+    List<ProfileFileEntity> entities = em.createQuery(
+            "SELECT p FROM ProfileFileEntity p WHERE p.year = :year AND p.month = :month AND p.day = :day AND ocean = :ocean AND p.fileStatus = 'ACTIVE' AND p.fileType = 'PROFILE_CORE'")
         .setParameter("year", year)
         .setParameter("month", month)
         .setParameter("day", day)
@@ -205,13 +211,26 @@ class Finder {
           .withPage(pageResults.stream().map(floatEntity -> ProfileOperation.builder()
               .withDac(floatEntity.getDac().getDac())
               .withFloatId(floatEntity.getFloatId())
-              .withFiles(floatEntity.getCycles().stream().flatMap(cycle -> cycle.getProfiles().stream())
-                  .filter(profile -> ArgoFileType.PROFILE_CORE.toString().equals(profile.getFileType()))
-                  .filter(profile -> FileStatus.ACTIVE.toString().equals(profile.getFileStatus()))
-                  .map(ProfileFileEntity::getFile).sorted().toList())
+              .withFiles(getMergeFileInfo(floatEntity))
               .build()
           ).toList()).build();
     }
+  }
+
+  private static List<MetadataRecord> getMergeFileInfo(FloatEntity floatEntity) {
+    List<MetadataRecord> result = new LinkedList<>();
+    for (CycleEntity cycle : floatEntity.getCycles()) {
+      for (ProfileFileEntity profile : cycle.getProfiles()) {
+        if (ArgoFileType.PROFILE_CORE.toString().equals(profile.getFileType())) {
+          result.add(MetadataRecord.builder()
+              .withFileName(profile.getFileName())
+              .withFile(profile.getFile())
+              .withFileStatus(FileStatus.valueOf(profile.getFileStatus()))
+              .build());
+        }
+      }
+    }
+    return result;
   }
 
   ProfilePage findUpdatedOrMissingSyntheticProfilesPage(IndexPageRequest pageRequest) {
@@ -253,17 +272,35 @@ class Finder {
       return DefaultProfilePage.builder()
           .withTotalRecords(count)
           .withIndexPageRequest(DefaultIndexPageRequest.builder(pageRequest).build())
-          .withPage(pageResults.stream().map(cycle -> {
-                List<String> files = new ArrayList<>(3);
-                files.add(cycle.getFloatId().getMetadata().getFile());
-                files.addAll(cycle.getProfiles().stream().map(ProfileFileEntity::getFile).sorted().toList());
-                return ProfileOperation.builder()
-                    .withDac(cycle.getFloatId().getDac().getDac())
-                    .withFloatId(cycle.getFloatId().getFloatId())
-                    .withFiles(files)
-                    .build();
-              }
+          .withPage(pageResults.stream().map(cycle -> ProfileOperation.builder()
+              .withDac(cycle.getFloatId().getDac().getDac())
+              .withFloatId(cycle.getFloatId().getFloatId())
+              .withFiles(getSyntheticMergeFiles(cycle))
+              .build()
           ).toList()).build();
     }
+  }
+
+  private static List<MetadataRecord> getSyntheticMergeFiles(CycleEntity cycle) {
+    List<MetadataRecord> result = new LinkedList<>();
+    MetadataFileEntity metadataFileEntity = cycle.getFloatId().getMetadata();
+    if (metadataFileEntity != null) {
+      result.add(MetadataRecord.builder()
+          .withFileName(metadataFileEntity.getFileName())
+          .withFile(metadataFileEntity.getFile())
+          .withFileStatus(FileStatus.valueOf(metadataFileEntity.getFileStatus()))
+          .build());
+    }
+    List<MetadataRecord> profileList = new LinkedList<>();
+    for (ProfileFileEntity profile : cycle.getProfiles()) {
+      profileList.add(MetadataRecord.builder()
+          .withFileName(profile.getFileName())
+          .withFile(profile.getFile())
+          .withFileStatus(FileStatus.valueOf(profile.getFileStatus()))
+          .build());
+    }
+    Collections.sort(profileList, Comparator.comparing(MetadataRecord::getFile));
+    result.addAll(profileList);
+    return result;
   }
 }

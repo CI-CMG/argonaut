@@ -10,6 +10,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import edu.colorado.cires.argonaut.file.core.FileStore;
+import edu.colorado.cires.argonaut.messaging.core.databind.MetadataRecord;
+import edu.colorado.cires.argonaut.messaging.core.databind.MetadataRecord.FileStatus;
 import edu.colorado.cires.argonaut.messaging.core.databind.ProfileOperation;
 import edu.colorado.cires.argonaut.messaging.core.queue.MessageSender;
 import edu.colorado.cires.argonaut.messaging.core.util.ArgonautJsonMapperFactory;
@@ -37,9 +39,6 @@ public class DefaultSyntheticProfileAggregatorTest {
     UUID traceId = UUID.randomUUID();
     MessageSender messageSender = mock(MessageSender.class);
     MetadataStore metadataStore = mock(MetadataStore.class);
-    FileStore fileStore = mock(FileStore.class);
-
-    when(fileStore.getFileName(any())).thenAnswer(i -> Paths.get(i.getArgument(0, String.class)).getFileName().toString());
 
     List<ProfileOperation> expected = new ArrayList<>(maxResults);
     when(metadataStore.findUpdatedOrMissingSyntheticProfilesPage(any())).thenAnswer(invocation -> {
@@ -54,9 +53,9 @@ public class DefaultSyntheticProfileAggregatorTest {
             .withTraceId(traceId)
             .withFileName("SR" + i + "_001.nc")
             .withFiles(Arrays.asList(
-                "aoml/" + i + "/profiles/R" + i + "_001.nc",
-                "aoml/" + i + "/profiles/BR" + i + "_001.nc",
-                "aoml/" + i + "/" + i + "_meta.nc"
+                MetadataRecord.builder().withFile("aoml/" + i + "/profiles/R" + i + "_001.nc").withFileName("R" + i + "_001.nc").withFileStatus(FileStatus.ACTIVE).build(),
+                MetadataRecord.builder().withFile("aoml/" + i + "/profiles/BR" + i + "_001.nc").withFileName("BR" + i + "_001.nc").withFileStatus(FileStatus.ACTIVE).build(),
+                MetadataRecord.builder().withFile("aoml/" + i + "/" + i + "_meta.nc").withFileName(i + "_meta.nc").withFileStatus(FileStatus.ACTIVE).build()
             ))
             .build();
         expected.add(profileOperation);
@@ -77,7 +76,6 @@ public class DefaultSyntheticProfileAggregatorTest {
     aggregator.setMessageSender(messageSender);
     aggregator.setMetadataStore(metadataStore);
     aggregator.setPageSize(5);
-    aggregator.setOutputFileStore(fileStore);
     aggregator.setTraceIdGenerator(() -> traceId);
 
     aggregator.trigger();

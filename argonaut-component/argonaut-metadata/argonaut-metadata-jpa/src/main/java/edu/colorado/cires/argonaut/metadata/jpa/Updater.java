@@ -175,6 +175,7 @@ class Updater {
             entity.setCycle(cycle);
           }
 
+          entity.setFileName(record.getFileName());
           entity.setFileType(record.getFileType().toString());
           entity.setFileStatus(ACTIVE.toString());
           if (record.getDate() == null) {
@@ -240,6 +241,7 @@ class Updater {
           entity.setFloatId(floatEntity);
         }
 
+        entity.setFileName(record.getFileName());
         entity.setFileStatus(ACTIVE.toString());
         entity.setDate(record.getDate() == null ? null : record.getDate().atOffset(ZoneOffset.UTC).toZonedDateTime());
         entity.setLatitude(record.getLatitude());
@@ -285,6 +287,7 @@ class Updater {
           entity.setFloatId(floatEntity);
         }
 
+        entity.setFileName(record.getFileName());
         entity.setFileStatus(ACTIVE.toString());
         entity.setDate(record.getDate() == null ? null : record.getDate().atOffset(ZoneOffset.UTC).toZonedDateTime());
         entity.setLatitude(record.getLatitude());

@@ -1,12 +1,12 @@
 package edu.colorado.cires.argonaut.processor.core;
 
-import edu.colorado.cires.argonaut.core.merge.multiprof.DefaultMultiProfileMerger;
 import edu.colorado.cires.argonaut.core.merge.multiprof.LocalPathSupplier;
 import edu.colorado.cires.argonaut.core.merge.multiprof.MultiProfileMerger;
 import edu.colorado.cires.argonaut.file.core.FileStore;
 import edu.colorado.cires.argonaut.messaging.core.databind.ArgoFileType;
 import edu.colorado.cires.argonaut.messaging.core.databind.MetadataRecord;
 import edu.colorado.cires.argonaut.messaging.core.databind.MetadataRecord.Action;
+import edu.colorado.cires.argonaut.messaging.core.databind.MetadataRecord.FileStatus;
 import edu.colorado.cires.argonaut.messaging.core.databind.ProfileOperation;
 import edu.colorado.cires.argonaut.messaging.core.queue.MessageSender;
 import java.io.IOException;
@@ -17,9 +17,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import org.apache.commons.io.FileUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import tools.jackson.databind.json.JsonMapper;
 
 public class DefaultFloatMergeProcessor implements FloatMergeProcessor {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(DefaultFloatMergeProcessor.class);
 
   private static final List<String> PARAMETERS = Arrays.asList("PRES", "TEMP", "PSAL");
 
@@ -62,7 +66,7 @@ public class DefaultFloatMergeProcessor implements FloatMergeProcessor {
 
   private List<LocalPathSupplier> getInputFileSuppliers(ProfileOperation message) {
     List<LocalPathSupplier> result = new ArrayList<>(message.getFiles().size());
-    for (String file : message.getFiles()) {
+    for (MetadataRecord metadataRecord : message.getFiles()) {
       result.add(new LocalPathSupplier() {
 
         private Path tempFile = null;
@@ -74,14 +78,14 @@ public class DefaultFloatMergeProcessor implements FloatMergeProcessor {
 
         @Override
         public String getFileName() {
-          return outputFileStore.getFileName(file);
+          return metadataRecord.getFileName();
         }
 
         @Override
         public void prepare() {
           try {
             tempFile = Files.createTempFile(localTempDir, "float-merge-download-", ".nc");
-            String path = outputFileStore.appendToPath(outputFileStore.getRoot(), "dac", file);
+            String path = outputFileStore.appendToPath(outputFileStore.getRoot(), "dac", metadataRecord.getFile());
             outputFileStore.downloadLocalFile(path, tempFile);
           } catch (IOException e) {
             throw new RuntimeException("Unable to create temporary download file: " + tempFile, e);
@@ -104,15 +108,27 @@ public class DefaultFloatMergeProcessor implements FloatMergeProcessor {
     return result;
   }
 
-  @Override
-  public void merge(ProfileOperation message) {
-    String dac = message.getDac();
+  private static boolean isRemoveMergeFile(ProfileOperation message) {
+    long activeFiles = message.getFiles().stream()
+        .filter(metadataRecord -> metadataRecord.getFileStatus() == FileStatus.ACTIVE)
+        .count();
+    return activeFiles == 0L;
+  }
+
+  private void removeMergeFile(ProfileOperation message) {
+    String outputFile = getOutputFile(message);
+    outputFileStore.delete(outputFile);
+    LOGGER.info("Removed multi-cycle merge file: {}", outputFile);
+  }
+
+  private String getOutputFile(ProfileOperation message) {
     String floatId = message.getFloatId();
-
     String fileName = floatId + "_prof.nc";
-    String outputFileForMetadata = outputFileStore.appendToPath(dac, floatId, fileName);
-    String outputFile = outputFileStore.appendToPath(outputFileStore.getRoot(), "dac", outputFileForMetadata);
+    return outputFileStore.appendToPath(outputFileStore.getRoot(), "dac", message.getDac(), floatId, fileName);
+  }
 
+  private void mergeProfiles(ProfileOperation message) {
+    String outputFile = getOutputFile(message);
     Path localOutputFile;
     try {
       localOutputFile = Files.createTempFile(localTempDir, "float-merge-", ".nc");
@@ -124,49 +140,67 @@ public class DefaultFloatMergeProcessor implements FloatMergeProcessor {
       try {
         merger.mergeProfiles(getInputFileSuppliers(message), PARAMETERS, localOutputFile);
       } catch (IOException e) {
-        throw new RuntimeException("Unable to merge float data " + fileName, e);
+        throw new RuntimeException("Unable to merge float data " + outputFile, e);
       }
       try {
         outputFileStore.uploadLocalFile(localOutputFile, outputFile);
       } catch (IOException e) {
-        throw new RuntimeException("Unable to upload merge file " + fileName, e);
+        throw new RuntimeException("Unable to upload merge file " + outputFile, e);
       }
 
-      Instant now = Instant.now();
-
-      for (String filePath : message.getFiles()) {
-        messageSender.sendJson(
-            updateIndexQueue,
-            jsonMapper.writeValueAsString(MetadataRecord.builder()
-                .withTraceId(message.getTraceId())
-                .withFileName(outputFileStore.getFileName(filePath))
-                .withFile(filePath)
-                .withDac(dac)
-                .withFloatId(floatId)
-                .withAction(Action.FLOAT_MERGE)
-                .withFileType(ArgoFileType.PROFILE_CORE)
-                .withActionTimestamp(now)
-                .build()));
-      }
-
-      messageSender.sendJson(
-          updateIndexQueue,
-          jsonMapper.writeValueAsString(MetadataRecord.builder()
-              .withTraceId(message.getTraceId())
-              .withActionTimestamp(now)
-              .withFileName(fileName)
-              .withFile(outputFileForMetadata)
-              .withDate(now)
-              .withDateUpdate(now)
-              .withAction(Action.UPDATE)
-              .withDac(dac)
-              .withFloatId(floatId)
-              .withFileType(ArgoFileType.PROFILE_MULTI_CYCLE)
-              .build()));
-
+      LOGGER.info("Updated multi-cycle merge file: {}", outputFile);
 
     } finally {
       FileUtils.deleteQuietly(localOutputFile.toFile());
     }
   }
+
+  private void notifyMergeCompleted(ProfileOperation message) {
+    Instant now = Instant.now();
+
+    for (MetadataRecord metadataRecord : message.getFiles()) {
+      messageSender.sendJson(
+          updateIndexQueue,
+          jsonMapper.writeValueAsString(MetadataRecord.builder()
+              .withTraceId(message.getTraceId())
+              .withFileName(metadataRecord.getFileName())
+              .withFile(metadataRecord.getFile())
+              .withDac(message.getDac())
+              .withFloatId(message.getFloatId())
+              .withAction(Action.FLOAT_MERGE)
+              .withFileType(ArgoFileType.PROFILE_CORE)
+              .withActionTimestamp(now)
+              .build()));
+    }
+
+    String fileName = message.getFloatId() + "_prof.nc";
+    String outputFileForMetadata = outputFileStore.appendToPath(message.getDac(), message.getFloatId(), fileName);
+
+    messageSender.sendJson(
+        updateIndexQueue,
+        jsonMapper.writeValueAsString(MetadataRecord.builder()
+            .withTraceId(message.getTraceId())
+            .withActionTimestamp(now)
+            .withFileName(fileName)
+            .withFile(outputFileForMetadata)
+            .withDate(now)
+            .withDateUpdate(now)
+            .withAction(Action.UPDATE)
+            .withDac(message.getDac())
+            .withFloatId(message.getFloatId())
+            .withFileType(ArgoFileType.PROFILE_MULTI_CYCLE)
+            .build()));
+  }
+
+  @Override
+  public void merge(ProfileOperation message) {
+    if (isRemoveMergeFile(message)) {
+      removeMergeFile(message);
+    } else {
+      mergeProfiles(message);
+    }
+    notifyMergeCompleted(message);
+  }
+
+
 }

@@ -11,6 +11,7 @@ import edu.colorado.cires.argonaut.processor.core.transform.NetCdfMetadataRecord
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.io.FileUtils;
@@ -73,15 +74,15 @@ public class DefaultSyntheticProfileProcessor implements SyntheticProfileProcess
     List<MetadataRecord> metadataRecordUpdates = new ArrayList<>(4);
     try {
       List<FileInfo> downloadedFiles = new ArrayList<>();
-      for (String file : message.getFiles()) {
+      for (MetadataRecord record : message.getFiles()) {
         try {
-          String fileName = outputFileStore.getFileName(file);
+          String fileName = record.getFileName();
           Path downloadedFile = tempDir.resolve(fileName);
-          String fullFilePath = outputFileStore.appendToPath(outputFileStore.getRoot(), "dac", file);
+          String fullFilePath = outputFileStore.appendToPath(outputFileStore.getRoot(), "dac", record.getFile());
           outputFileStore.downloadLocalFile(fullFilePath, downloadedFile);
-          downloadedFiles.add(new FileInfo(fileName, file, downloadedFile, ArgoFileType.forFileName(fileName)));
+          downloadedFiles.add(new FileInfo(fileName, record.getFile(), downloadedFile, ArgoFileType.forFileName(fileName)));
         } catch (IOException e) {
-          throw new RuntimeException("Unable to download " + file, e);
+          throw new RuntimeException("Unable to download " + record.getFile(), e);
         }
       }
 
@@ -105,7 +106,7 @@ public class DefaultSyntheticProfileProcessor implements SyntheticProfileProcess
       metadataRecordUpdates.add(createMetadataRecord(meta, message));
 
       try {
-        metadataRecordUpdates.add(NetCdfMetadataRecord.fromV13SyntheticProfile(sFile, message.getDac(), outputPath, geoFilter));
+        metadataRecordUpdates.add(NetCdfMetadataRecord.fromV13SyntheticProfile(sFile, sProfileFileName, message.getDac(), outputPath, geoFilter));
       } catch (IOException e) {
         throw new RuntimeException("Unable to parse synthetic profile", e);
       }
@@ -132,6 +133,7 @@ public class DefaultSyntheticProfileProcessor implements SyntheticProfileProcess
         .withFileName(fileInfo.getFileName())
         .withFile(fileInfo.getFile())
         .withAction(Action.SYNTHETIC_MERGE)
+        .withActionTimestamp(Instant.now())
         .withDac(message.getDac())
         .withFloatId(message.getFloatId())
         .withFileType(fileInfo.getFileType())

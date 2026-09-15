@@ -12,7 +12,7 @@ import java.util.UUID;
 import tools.jackson.databind.annotation.JsonDeserialize;
 
 @JsonDeserialize(builder = ProfileOperation.Builder.class)
-public class ProfileOperation implements TracedMessage{
+public class ProfileOperation implements TracedMessage {
 
   public static Builder builder() {
     return new Builder();
@@ -24,12 +24,12 @@ public class ProfileOperation implements TracedMessage{
 
   private final String dac;
   private final String floatId;
-  private final List<String> files;
+  private final List<MetadataRecord> files;
   private final UUID traceId;
   private final String fileName;
   private final Map<String, Object> otherFields;
 
-  private ProfileOperation(String dac, String floatId, List<String> files, UUID traceId, String fileName, Map<String, Object> otherFields) {
+  private ProfileOperation(String dac, String floatId, List<MetadataRecord> files, UUID traceId, String fileName, Map<String, Object> otherFields) {
     this.dac = dac;
     this.floatId = floatId;
     this.files = files;
@@ -56,7 +56,7 @@ public class ProfileOperation implements TracedMessage{
     return floatId;
   }
 
-  public List<String> getFiles() {
+  public List<MetadataRecord> getFiles() {
     return files;
   }
 
@@ -95,9 +95,10 @@ public class ProfileOperation implements TracedMessage{
   }
 
   public static final class Builder {
+
     private String dac;
     private String floatId;
-    private List<String> files = Collections.emptyList();
+    private List<MetadataRecord> files = Collections.emptyList();
     private UUID traceId;
     private String fileName;
     private Map<String, Object> otherFields = new HashMap<>();
@@ -125,7 +126,7 @@ public class ProfileOperation implements TracedMessage{
       return this;
     }
 
-    public Builder withFiles(List<String> fileNames) {
+    public Builder withFiles(List<MetadataRecord> fileNames) {
       if (fileNames == null) {
         this.files = Collections.emptyList();
       } else {

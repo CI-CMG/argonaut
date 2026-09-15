@@ -59,7 +59,7 @@ public class MetadataRecord implements TracedMessage {
     private FileStatus fileStatus;
     private String dac;
     private String floatId;
-    private Instant actionTimestamp = Instant.now();
+    private Instant actionTimestamp;
     private UUID traceId;
     private String fileName;
     private Map<String, Object> otherFields = new HashMap<>();

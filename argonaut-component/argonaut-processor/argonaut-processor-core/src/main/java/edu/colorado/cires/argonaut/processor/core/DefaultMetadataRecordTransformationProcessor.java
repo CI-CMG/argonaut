@@ -9,6 +9,7 @@ import edu.colorado.cires.argonaut.processor.core.transform.NetCdfMetadataRecord
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Instant;
 import java.util.UUID;
 import org.apache.commons.io.FileUtils;
 
@@ -35,11 +36,14 @@ public class DefaultMetadataRecordTransformationProcessor implements MetadataRec
             .withFileType(message.getFileType())
             .withFile(file)
             .withFileName(message.getFileName())
+            .withActionTimestamp(Instant.now())
             .withAction(Action.REMOVE)
             .build();
       default:
         return MetadataRecord.builder()
             .withFile(file)
+            .withFileName(message.getFileName())
+            .withActionTimestamp(Instant.now())
             .withAction(Action.NONE)
             .build();
     }

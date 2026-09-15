@@ -185,7 +185,6 @@
     <property name="enabled" value="${synthetic-profile.enabled}"/>
     <property name="pageSize" value="${synthetic-profile.page-size}"/>
     <property name="metadataStore" ref="metadataStore"/>
-    <property name="outputFileStore" ref="outputFileStore"/>
   </bean>
 
   <bean id="syntheticProfileMerger" class="edu.colorado.cires.argonaut.core.merge.synthetic.DefaultSyntheticProfileMerger"/>

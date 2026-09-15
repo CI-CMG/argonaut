@@ -18,6 +18,7 @@ import edu.colorado.cires.argonaut.messaging.core.databind.ArgoFileType;
 import edu.colorado.cires.argonaut.messaging.core.databind.ArgoOcean;
 import edu.colorado.cires.argonaut.messaging.core.databind.MetadataRecord;
 import edu.colorado.cires.argonaut.messaging.core.databind.MetadataRecord.Action;
+import edu.colorado.cires.argonaut.messaging.core.databind.MetadataRecord.FileStatus;
 import edu.colorado.cires.argonaut.messaging.core.databind.ProfileOperation;
 import edu.colorado.cires.argonaut.messaging.core.queue.MessageSender;
 import edu.colorado.cires.argonaut.messaging.core.util.ArgonautJsonMapperFactory;
@@ -60,9 +61,9 @@ public class DefaultSyntheticProfileProcessorTest {
         .withDac("meds")
         .withFloatId("4902691")
         .withFiles(Arrays.asList(
-            "meds/4902691/profiles/R4902691_034.nc",
-            "meds/4902691/profiles/BR4902691_034.nc",
-            "meds/4902691/4902691_meta.nc"
+            MetadataRecord.builder().withFile("meds/4902691/profiles/R4902691_034.nc").withFileName("R4902691_034.nc").withFileStatus(FileStatus.ACTIVE).build(),
+            MetadataRecord.builder().withFile("meds/4902691/profiles/BR4902691_034.nc").withFileName("BR4902691_034.nc").withFileStatus(FileStatus.ACTIVE).build(),
+            MetadataRecord.builder().withFile("meds/4902691/4902691_meta.nc").withFileName("4902691_meta.nc").withFileStatus(FileStatus.ACTIVE).build()
         ))
         .build();
 
@@ -167,6 +168,7 @@ public class DefaultSyntheticProfileProcessorTest {
     assertEquals(MetadataRecord.builder()
         .withActionTimestamp(now)
         .withFile("meds/4902691/profiles/SR4902691_034.nc")
+        .withFileName("SR4902691_034.nc")
         .withDate(Instant.parse("2026-04-15T11:33:59.999Z"))
         .withDateUpdate(now)
         .withAction(Action.UPDATE)

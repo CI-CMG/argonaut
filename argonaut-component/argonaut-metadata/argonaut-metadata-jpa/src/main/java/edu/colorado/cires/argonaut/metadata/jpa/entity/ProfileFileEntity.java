@@ -71,6 +71,8 @@ public class ProfileFileEntity {
   private ZonedDateTime geoMergeTime;
   @Column(name = "last_updated_time", nullable = false)
   private ZonedDateTime lastUpdatedTime;
+  @Column(name = "file_name", nullable = false, length = 20)
+  private String fileName;
 
 
   public String getFile() {
@@ -267,5 +269,13 @@ public class ProfileFileEntity {
 
   public void setDay(Integer day) {
     this.day = day;
+  }
+
+  public String getFileName() {
+    return fileName;
+  }
+
+  public void setFileName(String fileName) {
+    this.fileName = fileName;
   }
 }
