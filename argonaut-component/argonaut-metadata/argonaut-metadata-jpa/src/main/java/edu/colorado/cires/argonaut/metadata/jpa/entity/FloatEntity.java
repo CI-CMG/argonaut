@@ -10,6 +10,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.Version;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,6 +21,10 @@ public class FloatEntity {
   @Id
   @Column(name = "id", nullable = false, length = 20)
   private String id;
+
+  @Version
+  @Column(name = "version", nullable = false)
+  private int version;
 
   @Column(name = "float_id", nullable = false, length = 10)
   private String floatId;
@@ -39,6 +44,10 @@ public class FloatEntity {
 
   public String getId() {
     return id;
+  }
+
+  public int getVersion() {
+    return version;
   }
 
   public void setId(String id) {

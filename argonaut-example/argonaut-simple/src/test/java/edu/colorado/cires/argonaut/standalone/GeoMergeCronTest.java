@@ -66,9 +66,6 @@ public class GeoMergeCronTest {
   private static final Path processingDacDir = processingDir.resolve("dac");
   private static final Path submissionDacDir = submissionDir.resolve("dac");
 
-  private static final Instant timestamp = LocalDateTime.of(2026, 2, 20, 1, 2, 3).atZone(ZoneId.of("UTC")).toInstant();
-
-
   @BeforeEach
   public void setup() throws Exception {
 

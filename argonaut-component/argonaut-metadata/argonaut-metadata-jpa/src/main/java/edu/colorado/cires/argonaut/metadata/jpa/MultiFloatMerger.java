@@ -2,6 +2,7 @@ package edu.colorado.cires.argonaut.metadata.jpa;
 
 import edu.colorado.cires.argonaut.messaging.core.databind.ArgoFileType;
 import edu.colorado.cires.argonaut.messaging.core.databind.MetadataRecord;
+import edu.colorado.cires.argonaut.messaging.core.databind.MetadataRecord.FileStatus;
 import edu.colorado.cires.argonaut.metadata.jpa.entity.ProfileFileEntity;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
@@ -32,7 +33,13 @@ class MultiFloatMerger {
             ProfileFileEntity entity = em.find(ProfileFileEntity.class, record.getFile(), LockModeType.OPTIMISTIC);
             if (entity != null) {
               LOGGER.info("Updating multi-float merge for " + record.getFile());
-              entity.setMultiFloatMergeTime(record.getActionTimestamp().atZone(ZoneId.of("UTC")));
+              if(entity.getFileStatus().equals(FileStatus.REMOVED.name())){
+                entity.setMultiFloatMergeTime(null);
+              } else if (entity.getFileStatus().equals(FileStatus.ACTIVE.name())){
+                entity.setMultiFloatMergeTime(record.getActionTimestamp().atZone(ZoneId.of("UTC")));
+              } else {
+                throw new UnsupportedOperationException("Invalid file status " + entity.getFileStatus());
+              }
             }
             tx.commit();
             break;
@@ -57,7 +64,13 @@ class MultiFloatMerger {
             ProfileFileEntity entity = em.find(ProfileFileEntity.class, record.getFile(), LockModeType.OPTIMISTIC);
             if (entity != null) {
               LOGGER.info("Updating geo merge for " + record.getFile());
-              entity.setGeoMergeTime(record.getActionTimestamp().atZone(ZoneId.of("UTC")));
+              if(entity.getFileStatus().equals(FileStatus.REMOVED.name())){
+                entity.setGeoMergeTime(null);
+              } else if (entity.getFileStatus().equals(FileStatus.ACTIVE.name())){
+                entity.setGeoMergeTime(record.getActionTimestamp().atZone(ZoneId.of("UTC")));
+              } else {
+                throw new UnsupportedOperationException("Invalid file status " + entity.getFileStatus());
+              }
             }
             tx.commit();
             break;

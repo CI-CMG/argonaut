@@ -751,6 +751,90 @@ public class JpaMetadataStoreTest {
         .withFileType(ArgoFileType.SYNTHETIC_PROFILE_SINGLE_CYCLE)
         .build());
 
+
+
+    datastore.updateIndex(MetadataRecord.builder()
+        .withFile("aoml/13855/13855_meta.nc")
+        .withDac("aoml")
+        .withFloatId("13855")
+        .withActionTimestamp(date)
+        .withDate(date)
+        .withLatitude(0.267)
+        .withLongitude(-16.032)
+        .withOcean(ArgoOcean.ATLANTIC_OCEAN)
+        .withProfilerType("845")
+        .withInstitution("A0")
+        .withDateUpdate(date)
+        .withAction(Action.UPDATE)
+        .withFileType(ArgoFileType.METADATA)
+        .build());
+
+    datastore.updateIndex(MetadataRecord.builder()
+        .withFile("aoml/13855/profiles/D13855_001.nc")
+        .withDac("aoml")
+        .withFloatId("13855")
+        .withCycleNumber("001")
+        .withDirection("A")
+        .withParameterDataMode("D")
+        .withActionTimestamp(date)
+        .withDate(date)
+        .withLatitude(0.267)
+        .withLatitudeMin(0.1)
+        .withLatitudeMax(0.4)
+        .withLongitude(-16.032)
+        .withLongitudeMin(-17.0)
+        .withLongitudeMax(-14.0)
+        .withOcean(ArgoOcean.ATLANTIC_OCEAN)
+        .withProfilerType("845")
+        .withInstitution("A0")
+        .withDateUpdate(date)
+        .withParameters("params")
+        .withAction(Action.UPDATE)
+        .withFileType(ArgoFileType.PROFILE_CORE)
+        .build());
+
+    datastore.updateIndex(MetadataRecord.builder()
+        .withFile("aoml/13855/profiles/BD13855_001.nc")
+        .withDac("aoml")
+        .withFloatId("13855")
+        .withCycleNumber("001")
+        .withDirection("A")
+        .withParameterDataMode("D")
+        .withActionTimestamp(date)
+        .withDate(date)
+        .withLatitude(0.267)
+        .withLatitudeMin(0.1)
+        .withLatitudeMax(0.4)
+        .withLongitude(-16.032)
+        .withLongitudeMin(-17.0)
+        .withLongitudeMax(-14.0)
+        .withOcean(ArgoOcean.ATLANTIC_OCEAN)
+        .withProfilerType("845")
+        .withInstitution("A0")
+        .withDateUpdate(date)
+        .withParameters("params")
+        .withAction(Action.UPDATE)
+        .withFileType(ArgoFileType.PROFILE_BIOCHEMICAL)
+        .build());
+
+    datastore.updateIndex(MetadataRecord.builder()
+        .withFile("aoml/13855/profiles/D13855_001.nc")
+        .withActionTimestamp(date)
+        .withAction(Action.SYNTHETIC_MERGE)
+        .withFileType(ArgoFileType.PROFILE_CORE)
+        .withDac("aoml")
+        .withFloatId("13855")
+        .build());
+
+    datastore.updateIndex(MetadataRecord.builder()
+        .withFile("aoml/13855/profiles/BD13855_001.nc")
+        .withActionTimestamp(date)
+        .withAction(Action.SYNTHETIC_MERGE)
+        .withFileType(ArgoFileType.PROFILE_BIOCHEMICAL)
+        .withDac("aoml")
+        .withFloatId("13855")
+        .build());
+
     ProfilePage page = datastore.findUpdatedOrMissingSyntheticProfilesPage(DefaultIndexPageRequest.builder().withPageSize(100).build());
     assertEquals(Arrays.asList(ProfileOperation.builder()
             .withDac("aoml")
@@ -809,6 +893,17 @@ public class JpaMetadataStoreTest {
                     "aoml/123/123_meta.nc",
                     "aoml/123/profiles/BD123_001.nc",
                     "aoml/123/profiles/D123_001.nc"
+                ))
+                .build(),
+            // TODO what should this file list look like for metadata removal?
+            ProfileOperation.builder()
+                .withDac("aoml")
+                .withFloatId("13857")
+                .withFiles(Arrays.asList(
+                    "aoml/13857/13857_meta.nc",
+                    "aoml/13857/profiles/BD13857_002.nc",
+                    "aoml/13857/profiles/D13857_002.nc",
+                    "aoml/13857/profiles/SD13857_002.nc"
                 ))
                 .build()
         ),
@@ -1004,6 +1099,174 @@ public class JpaMetadataStoreTest {
 
   }
 
+
+  @Test
+  public void testFindRemovedMergeFilesPage() throws Exception {
+
+    Instant date = Instant.now();
+
+    // saved file, not merged - should be in results
+    datastore.updateIndex(MetadataRecord.builder()
+        .withFile("aoml/13857/profiles/D13857_001.nc")
+        .withDac("aoml")
+        .withFloatId("13857")
+        .withCycleNumber("001")
+        .withDirection("A")
+        .withParameterDataMode("D")
+        .withActionTimestamp(date)
+        .withDate(date)
+        .withLatitude(0.267)
+        .withLatitudeMin(0.1)
+        .withLatitudeMax(0.4)
+        .withLongitude(-16.032)
+        .withLongitudeMin(-17.0)
+        .withLongitudeMax(-14.0)
+        .withOcean(ArgoOcean.ATLANTIC_OCEAN)
+        .withProfilerType("845")
+        .withInstitution("A0")
+        .withDateUpdate(date)
+        .withParameters("params")
+        .withAction(Action.UPDATE)
+        .withFileType(ArgoFileType.PROFILE_CORE)
+        .build());
+
+
+    // saved file, merged - should not be in results
+    datastore.updateIndex(MetadataRecord.builder()
+        .withFile("aoml/123/profiles/D123_001.nc")
+        .withDac("aoml")
+        .withFloatId("123")
+        .withCycleNumber("001")
+        .withDirection("A")
+        .withParameterDataMode("D")
+        .withActionTimestamp(date)
+        .withDate(date)
+        .withLatitude(0.267)
+        .withLatitudeMin(0.1)
+        .withLatitudeMax(0.4)
+        .withLongitude(-16.032)
+        .withLongitudeMin(-17.0)
+        .withLongitudeMax(-14.0)
+        .withOcean(ArgoOcean.ATLANTIC_OCEAN)
+        .withProfilerType("845")
+        .withInstitution("A0")
+        .withDateUpdate(date)
+        .withParameters("params")
+        .withAction(Action.UPDATE)
+        .withFileType(ArgoFileType.PROFILE_CORE)
+        .build());
+
+
+    datastore.updateIndex(MetadataRecord.builder()
+        .withFile("aoml/123/profiles/D123_001.nc")
+        .withActionTimestamp(date)
+        .withDac("aoml")
+        .withFloatId("123")
+        .withAction(Action.FLOAT_MERGE)
+        .withFileType(ArgoFileType.PROFILE_CORE)
+        .build());
+
+
+
+    // removed file, merged - should be in results
+    datastore.updateIndex(MetadataRecord.builder()
+        .withFile("aoml/1111/profiles/D1111_001.nc")
+        .withDac("aoml")
+        .withFloatId("1111")
+        .withCycleNumber("001")
+        .withDirection("A")
+        .withParameterDataMode("D")
+        .withActionTimestamp(date)
+        .withDate(date)
+        .withLatitude(0.267)
+        .withLatitudeMin(0.1)
+        .withLatitudeMax(0.4)
+        .withLongitude(-16.032)
+        .withLongitudeMin(-17.0)
+        .withLongitudeMax(-14.0)
+        .withOcean(ArgoOcean.ATLANTIC_OCEAN)
+        .withProfilerType("845")
+        .withInstitution("A0")
+        .withDateUpdate(date)
+        .withParameters("params")
+        .withAction(Action.UPDATE)
+        .withFileType(ArgoFileType.PROFILE_CORE)
+        .build());
+
+
+    datastore.updateIndex(MetadataRecord.builder()
+        .withFile("aoml/1111/profiles/D1111_001.nc")
+        .withActionTimestamp(date)
+        .withDac("aoml")
+        .withFloatId("1111")
+        .withAction(Action.FLOAT_MERGE)
+        .withFileType(ArgoFileType.PROFILE_CORE)
+        .build());
+
+    datastore.updateIndex(MetadataRecord.builder()
+        .withFile("aoml/1111/profiles/D1111_001.nc")
+        .withActionTimestamp(date)
+        .withDac("aoml")
+        .withFloatId("1111")
+        .withAction(Action.REMOVE)
+        .withFileType(ArgoFileType.PROFILE_CORE)
+        .build());
+
+
+    // removed file, not merged - should not be in results
+
+    datastore.updateIndex(MetadataRecord.builder()
+        .withFile("aoml/2222/profiles/D2222_001.nc")
+        .withDac("aoml")
+        .withFloatId("2222")
+        .withCycleNumber("001")
+        .withDirection("A")
+        .withParameterDataMode("D")
+        .withActionTimestamp(date)
+        .withDate(date)
+        .withLatitude(0.267)
+        .withLatitudeMin(0.1)
+        .withLatitudeMax(0.4)
+        .withLongitude(-16.032)
+        .withLongitudeMin(-17.0)
+        .withLongitudeMax(-14.0)
+        .withOcean(ArgoOcean.ATLANTIC_OCEAN)
+        .withProfilerType("845")
+        .withInstitution("A0")
+        .withDateUpdate(date)
+        .withParameters("params")
+        .withAction(Action.UPDATE)
+        .withFileType(ArgoFileType.PROFILE_CORE)
+        .build());
+
+    datastore.updateIndex(MetadataRecord.builder()
+        .withFile("aoml/2222/profiles/D2222_001.nc")
+        .withActionTimestamp(date)
+        .withDac("aoml")
+        .withFloatId("2222")
+        .withAction(Action.REMOVE)
+        .withFileType(ArgoFileType.PROFILE_CORE)
+        .build());
+
+
+    ProfilePage page1 = datastore.findUpdatedOrMissingMergeFilesPage(DefaultIndexPageRequest.builder().withPageSize(100).build());
+    assertEquals(
+        Arrays.asList(
+            ProfileOperation.builder().withDac("aoml")
+                .withFloatId("1111")
+                .build(),
+          ProfileOperation.builder()
+            .withDac("aoml")
+            .withFloatId("13857")
+            .withFiles(Arrays.asList(
+                "aoml/13857/profiles/D13857_001.nc"
+            ))
+            .build()
+        ),
+        page1.getPage());
+
+  }
+
   @Test
   public void testFindUpdatedOrMissingGeoMergeFilesPage() throws Exception {
 
@@ -1193,6 +1456,176 @@ public class JpaMetadataStoreTest {
                     .build()
             ))
             .build()),
+        page1.getPage());
+
+  }
+
+  @Test
+  public void testFindRemovedGeoMergeFilesPage() throws Exception {
+
+
+    // saved file, not merged - should be in results
+    datastore.updateIndex(MetadataRecord.builder()
+        .withFile("aoml/13857/profiles/D13857_001.nc")
+        .withDac("aoml")
+        .withFloatId("13857")
+        .withCycleNumber("001")
+        .withDirection("A")
+        .withParameterDataMode("D")
+        .withActionTimestamp(Instant.now())
+        .withDate(Instant.parse("2026-05-01T00:00:00Z"))
+        .withLatitude(0.267)
+        .withLatitudeMin(0.1)
+        .withLatitudeMax(0.4)
+        .withLongitude(-16.032)
+        .withLongitudeMin(-17.0)
+        .withLongitudeMax(-14.0)
+        .withOcean(ArgoOcean.ATLANTIC_OCEAN)
+        .withProfilerType("845")
+        .withInstitution("A0")
+        .withDateUpdate(Instant.now())
+        .withParameters("params")
+        .withAction(Action.UPDATE)
+        .withFileType(ArgoFileType.PROFILE_CORE)
+        .build());
+
+
+    // saved file, merged - should not be in results
+    datastore.updateIndex(MetadataRecord.builder()
+        .withFile("aoml/123/profiles/D123_001.nc")
+        .withDac("aoml")
+        .withFloatId("123")
+        .withCycleNumber("001")
+        .withDirection("A")
+        .withParameterDataMode("D")
+        .withActionTimestamp(Instant.now())
+        .withDate(Instant.parse("2026-05-02T00:00:00Z"))
+        .withLatitude(0.267)
+        .withLatitudeMin(0.1)
+        .withLatitudeMax(0.4)
+        .withLongitude(-16.032)
+        .withLongitudeMin(-17.0)
+        .withLongitudeMax(-14.0)
+        .withOcean(ArgoOcean.ATLANTIC_OCEAN)
+        .withProfilerType("845")
+        .withInstitution("A0")
+        .withDateUpdate(Instant.now())
+        .withParameters("params")
+        .withAction(Action.UPDATE)
+        .withFileType(ArgoFileType.PROFILE_CORE)
+        .build());
+
+
+    datastore.updateIndex(MetadataRecord.builder()
+        .withFile("aoml/123/profiles/D123_001.nc")
+        .withActionTimestamp(Instant.now())
+        .withDac("aoml")
+        .withFloatId("123")
+        .withAction(Action.GEO_MERGE)
+        .withFileType(ArgoFileType.PROFILE_CORE)
+        .build());
+
+
+
+    // removed file, merged - should be in results
+    datastore.updateIndex(MetadataRecord.builder()
+        .withFile("aoml/1111/profiles/D1111_001.nc")
+        .withDac("aoml")
+        .withFloatId("1111")
+        .withCycleNumber("001")
+        .withDirection("A")
+        .withParameterDataMode("D")
+        .withActionTimestamp(Instant.now())
+        .withDate(Instant.parse("2026-05-03T00:00:00Z"))
+        .withLatitude(0.267)
+        .withLatitudeMin(0.1)
+        .withLatitudeMax(0.4)
+        .withLongitude(-16.032)
+        .withLongitudeMin(-17.0)
+        .withLongitudeMax(-14.0)
+        .withOcean(ArgoOcean.INDIAN_OCEAN)
+        .withProfilerType("845")
+        .withInstitution("A0")
+        .withDateUpdate(Instant.now())
+        .withParameters("params")
+        .withAction(Action.UPDATE)
+        .withFileType(ArgoFileType.PROFILE_CORE)
+        .build());
+
+
+    datastore.updateIndex(MetadataRecord.builder()
+        .withFile("aoml/1111/profiles/D1111_001.nc")
+        .withActionTimestamp(Instant.now())
+        .withDac("aoml")
+        .withFloatId("1111")
+        .withAction(Action.GEO_MERGE)
+        .withFileType(ArgoFileType.PROFILE_CORE)
+        .build());
+
+    datastore.updateIndex(MetadataRecord.builder()
+        .withFile("aoml/1111/profiles/D1111_001.nc")
+        .withActionTimestamp(Instant.now())
+        .withDac("aoml")
+        .withFloatId("1111")
+        .withAction(Action.REMOVE)
+        .withFileType(ArgoFileType.PROFILE_CORE)
+        .build());
+
+
+    // removed file, not merged - should not be in results
+
+    datastore.updateIndex(MetadataRecord.builder()
+        .withFile("aoml/2222/profiles/D2222_001.nc")
+        .withDac("aoml")
+        .withFloatId("2222")
+        .withCycleNumber("001")
+        .withDirection("A")
+        .withParameterDataMode("D")
+        .withActionTimestamp(Instant.now())
+        .withDate(Instant.parse("2026-05-04T00:00:00Z"))
+        .withLatitude(0.267)
+        .withLatitudeMin(0.1)
+        .withLatitudeMax(0.4)
+        .withLongitude(-16.032)
+        .withLongitudeMin(-17.0)
+        .withLongitudeMax(-14.0)
+        .withOcean(ArgoOcean.ATLANTIC_OCEAN)
+        .withProfilerType("845")
+        .withInstitution("A0")
+        .withDateUpdate(Instant.now())
+        .withParameters("params")
+        .withAction(Action.UPDATE)
+        .withFileType(ArgoFileType.PROFILE_CORE)
+        .build());
+
+    datastore.updateIndex(MetadataRecord.builder()
+        .withFile("aoml/2222/profiles/D2222_001.nc")
+        .withActionTimestamp(Instant.now())
+        .withDac("aoml")
+        .withFloatId("2222")
+        .withAction(Action.REMOVE)
+        .withFileType(ArgoFileType.PROFILE_CORE)
+        .build());
+
+    GeoMergePage page1 = datastore.findUpdatedOrMissingGeoMergeFilesPage(DefaultIndexPageRequest.builder().withPageSize(100).build());
+    assertEquals(
+        Arrays.asList(
+            GeoMergeInfo.builder()
+                .withYear(2026)
+                .withMonth(5)
+                .withDay(1)
+                .withOcean(ArgoOcean.ATLANTIC_OCEAN)
+                .withFiles(Arrays.asList(
+                    DacFloatFilePath.builder().withDac("aoml").withFloatId("13857").withFile("aoml/13857/profiles/D13857_001.nc").build()
+                ))
+                .build(),
+            GeoMergeInfo.builder()
+                .withYear(2026)
+                .withMonth(5)
+                .withDay(3)
+                .withOcean(ArgoOcean.INDIAN_OCEAN)
+                .build()
+        ),
         page1.getPage());
 
   }

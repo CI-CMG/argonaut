@@ -30,7 +30,11 @@ public class DefaultMetadataRecordTransformationProcessor implements MetadataRec
         return createUpdateMessage(message.getFileType(), file, message.getDac(), message.getFileName(), message.getTraceId());
       case REMOVE:
         return MetadataRecord.builder()
+            .withDac(message.getDac())
+            .withTraceId(message.getTraceId())
+            .withFileType(message.getFileType())
             .withFile(file)
+            .withFileName(message.getFileName())
             .withAction(Action.REMOVE)
             .build();
       default:

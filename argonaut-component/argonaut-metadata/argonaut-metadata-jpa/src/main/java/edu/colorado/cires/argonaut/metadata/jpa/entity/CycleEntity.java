@@ -9,6 +9,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import jakarta.persistence.Version;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,6 +20,10 @@ public class CycleEntity {
   @Id
   @Column(name = "id", nullable = false, length = 26)
   private String id;
+
+  @Version
+  @Column(name = "version", nullable = false)
+  private int version;
 
   @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.DETACH, CascadeType.REFRESH})
   @JoinColumn(name = "float_id", nullable = false)
@@ -38,6 +43,10 @@ public class CycleEntity {
 
   public String getId() {
     return id;
+  }
+
+  public int getVersion() {
+    return version;
   }
 
   public void setId(String id) {

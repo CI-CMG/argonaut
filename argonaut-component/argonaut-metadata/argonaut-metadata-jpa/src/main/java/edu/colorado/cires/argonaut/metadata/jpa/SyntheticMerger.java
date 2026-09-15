@@ -2,6 +2,7 @@ package edu.colorado.cires.argonaut.metadata.jpa;
 
 import edu.colorado.cires.argonaut.messaging.core.databind.ArgoFileType;
 import edu.colorado.cires.argonaut.messaging.core.databind.MetadataRecord;
+import edu.colorado.cires.argonaut.messaging.core.databind.MetadataRecord.FileStatus;
 import edu.colorado.cires.argonaut.metadata.jpa.entity.ProfileFileEntity;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
@@ -9,8 +10,12 @@ import jakarta.persistence.EntityTransaction;
 import jakarta.persistence.LockModeType;
 import jakarta.persistence.OptimisticLockException;
 import java.time.ZoneId;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 class SyntheticMerger {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(SyntheticMerger.class);
 
   private final EntityManagerFactory entityManagerFactory;
 
@@ -27,7 +32,14 @@ class SyntheticMerger {
           try {
             ProfileFileEntity entity = em.find(ProfileFileEntity.class, record.getFile(), LockModeType.OPTIMISTIC);
             if (entity != null) {
-              entity.setSyntheticMergeTime(record.getActionTimestamp().atZone(ZoneId.of("UTC")));
+              LOGGER.info("Updating synth merge for " + record.getFile());
+              if(entity.getFileStatus().equals(FileStatus.REMOVED.name())){
+                entity.setSyntheticMergeTime(null);
+              } else if (entity.getFileStatus().equals(FileStatus.ACTIVE.name())){
+                entity.setSyntheticMergeTime(record.getActionTimestamp().atZone(ZoneId.of("UTC")));
+              } else {
+                throw new UnsupportedOperationException("Invalid file status " + entity.getFileStatus());
+              }
             }
             tx.commit();
             break;

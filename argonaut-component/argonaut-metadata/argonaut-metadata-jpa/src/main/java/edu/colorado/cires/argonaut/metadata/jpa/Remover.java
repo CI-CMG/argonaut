@@ -8,6 +8,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.EntityTransaction;
 import jakarta.persistence.LockModeType;
+import jakarta.persistence.OptimisticLockException;
 
 class Remover {
 
@@ -18,14 +19,14 @@ class Remover {
   }
 
   private static void removeProfile(EntityManager em, MetadataRecord record) {
-    ProfileFileEntity existing = em.find(ProfileFileEntity.class, record.getFile());
+    ProfileFileEntity existing = em.find(ProfileFileEntity.class, record.getFile(), LockModeType.OPTIMISTIC);
     if (existing != null) {
       existing.setFileStatus(FileStatus.REMOVED.name());
     }
   }
 
   private static void removeMetadata(EntityManager em, MetadataRecord record) {
-    MetadataFileEntity existing = em.find(MetadataFileEntity.class, record.getFile());
+    MetadataFileEntity existing = em.find(MetadataFileEntity.class, record.getFile(), LockModeType.OPTIMISTIC);
     if (existing != null) {
       existing.setFileStatus(FileStatus.REMOVED.name());
       em.createQuery("""
@@ -51,15 +52,20 @@ class Remover {
   }
 
   void remove(MetadataRecord record) {
-    try (EntityManager em = entityManagerFactory.createEntityManager()) {
-      EntityTransaction tx = em.getTransaction();
-      tx.begin();
-      try {
-        remove(em, record);
-        tx.commit();
-      } catch (Exception e) {
-        tx.rollback();
-        throw e;
+    while (true) {
+      try (EntityManager em = entityManagerFactory.createEntityManager()) {
+        EntityTransaction tx = em.getTransaction();
+        tx.begin();
+        try {
+          remove(em, record);
+          tx.commit();
+          break;
+        } catch (OptimisticLockException e) {
+          tx.rollback();
+        } catch (Exception e) {
+          tx.rollback();
+          throw e;
+        }
       }
     }
   }

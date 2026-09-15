@@ -127,22 +127,23 @@ class Finder {
         .build()).toList();
   }
 
-  // TODO update to support deleted files
   GeoMergePage findUpdatedOrMissingGeoMergeFilesPage(IndexPageRequest pageRequest) {
     try (EntityManager em = entityManagerFactory.createEntityManager()) {
       long count = em.createQuery(
           """
                  SELECT COUNT(DISTINCT CONCAT(profile.year, '_', profile.month, '_', profile.day, '_', profile.ocean)) FROM ProfileFileEntity profile
-                 WHERE profile.fileStatus = 'ACTIVE' AND
-                       profile.fileType = 'PROFILE_CORE' AND
-                       profile.geoMergeTime IS NULL
+                 WHERE profile.fileType = 'PROFILE_CORE' AND 
+                       (( profile.fileStatus = 'ACTIVE' AND profile.geoMergeTime IS NULL ) 
+                       OR  
+                       ( profile.fileStatus = 'REMOVED' AND profile.geoMergeTime IS NOT NULL ))
               """, Long.class).getSingleResult();
       List<String> geoMergeIds = em.createQuery(
               """
                      SELECT DISTINCT CONCAT(profile.year, '_', profile.month, '_', profile.day, '_', profile.ocean) id FROM ProfileFileEntity profile
-                         WHERE profile.fileStatus = 'ACTIVE' AND 
-                             profile.fileType = 'PROFILE_CORE' AND
-                             profile.geoMergeTime IS NULL
+                       WHERE profile.fileType = 'PROFILE_CORE' AND 
+                       (( profile.fileStatus = 'ACTIVE' AND profile.geoMergeTime IS NULL ) 
+                       OR  
+                       ( profile.fileStatus = 'REMOVED' AND profile.geoMergeTime IS NOT NULL ))
                      order by id
                   """, String.class)
           .setMaxResults(pageRequest.getPageSize())
@@ -170,22 +171,23 @@ class Finder {
     }
   }
 
-  // TODO update to support deleted files
   ProfilePage findUpdatedOrMissingMergeFilesPage(IndexPageRequest pageRequest) {
     try (EntityManager em = entityManagerFactory.createEntityManager()) {
       long count = em.createQuery(
           """
                  SELECT COUNT(DISTINCT profile.cycle.floatId.id) FROM ProfileFileEntity profile
-                 WHERE profile.fileStatus = 'ACTIVE' AND
-                       profile.fileType = 'PROFILE_CORE' AND
-                       profile.multiFloatMergeTime IS NULL
+                 WHERE profile.fileType = 'PROFILE_CORE' AND 
+                       (( profile.fileStatus = 'ACTIVE' AND profile.multiFloatMergeTime IS NULL ) 
+                       OR  
+                       ( profile.fileStatus = 'REMOVED' AND profile.multiFloatMergeTime IS NOT NULL ))
               """, Long.class).getSingleResult();
       List<String> floatIds = em.createQuery(
               """
                      SELECT DISTINCT profile.cycle.floatId.id fid FROM ProfileFileEntity profile
-                         WHERE profile.fileStatus = 'ACTIVE' AND 
-                             profile.fileType = 'PROFILE_CORE' AND
-                             profile.multiFloatMergeTime IS NULL
+                         WHERE profile.fileType = 'PROFILE_CORE' AND 
+                         (( profile.fileStatus = 'ACTIVE' AND profile.multiFloatMergeTime IS NULL ) 
+                         OR  
+                         ( profile.fileStatus = 'REMOVED' AND profile.multiFloatMergeTime IS NOT NULL ))
                      order by fid
                   """, String.class)
           .setMaxResults(pageRequest.getPageSize())
@@ -212,25 +214,31 @@ class Finder {
     }
   }
 
-  // TODO update to support deleted files
-  // TODO 'REMOVED' files are included in the list.  Test if this is used properly in the merge processor.
   ProfilePage findUpdatedOrMissingSyntheticProfilesPage(IndexPageRequest pageRequest) {
     try (EntityManager em = entityManagerFactory.createEntityManager()) {
       long count = em.createQuery(
           """
                  SELECT COUNT(DISTINCT profile.cycle.id) FROM ProfileFileEntity profile
-                 WHERE profile.cycle.floatId.metadata.fileStatus = 'ACTIVE' AND
-                       profile.fileStatus = 'ACTIVE' AND
-                       (profile.fileType = 'PROFILE_CORE' OR profile.fileType = 'PROFILE_BIOCHEMICAL') AND
-                       profile.syntheticMergeTime IS NULL
+                 WHERE (profile.fileType = 'PROFILE_CORE' OR profile.fileType = 'PROFILE_BIOCHEMICAL') AND 
+                       (
+                         profile.cycle.floatId.metadata.fileStatus = 'ACTIVE' AND 
+                         ( profile.fileStatus = 'ACTIVE' AND profile.syntheticMergeTime IS NULL ) OR ( profile.fileStatus = 'REMOVED' AND profile.syntheticMergeTime IS NOT NULL )
+                       ) OR 
+                       (
+                         profile.cycle.floatId.metadata.fileStatus = 'REMOVED' AND profile.syntheticMergeTime IS NOT NULL
+                       ) 
               """, Long.class).getSingleResult();
       List<String> cycleIds = em.createQuery(
               """
                      SELECT DISTINCT profile.cycle.id cid FROM ProfileFileEntity profile
-                         WHERE profile.cycle.floatId.metadata.fileStatus = 'ACTIVE' AND 
-                             profile.fileStatus = 'ACTIVE' AND 
-                             (profile.fileType = 'PROFILE_CORE' OR profile.fileType = 'PROFILE_BIOCHEMICAL') AND
-                             profile.syntheticMergeTime IS NULL
+                         WHERE (profile.fileType = 'PROFILE_CORE' OR profile.fileType = 'PROFILE_BIOCHEMICAL') AND 
+                         (
+                           profile.cycle.floatId.metadata.fileStatus = 'ACTIVE' AND 
+                           ( profile.fileStatus = 'ACTIVE' AND profile.syntheticMergeTime IS NULL ) OR ( profile.fileStatus = 'REMOVED' AND profile.syntheticMergeTime IS NOT NULL )
+                         ) OR 
+                         (
+                           profile.cycle.floatId.metadata.fileStatus = 'REMOVED' AND profile.syntheticMergeTime IS NOT NULL
+                         ) 
                      order by cid
                   """, String.class)
           .setMaxResults(pageRequest.getPageSize())

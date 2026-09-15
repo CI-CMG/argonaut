@@ -35,6 +35,33 @@
       <bean ref="validationResultRouter" method="route"/>
     </route>
 
+    <route id="validate-removal">
+      <errorHandler>
+        <deadLetterChannel deadLetterUri="seda:audit" onPrepareFailureRef="prepareErrorAuditProcessor"/>
+      </errorHandler>
+      <from uri="seda:validate-removal"/>
+      <setHeader name="AuditEventProcessor">
+        <constant>VALIDATION</constant>
+      </setHeader>
+      <bean ref="deserializationProcessor" method="deserialize(${body}, edu.colorado.cires.argonaut.messaging.core.databind.NcSubmissionMessage)"/>
+      <bean ref="auditSender" method="validationStarted"/>
+      <bean ref="removalFileValidationProcessor" method="validate"/>
+      <bean ref="removalFileValidationResultRouter" method="route"/>
+    </route>
+
+    <route id="removal-validation-success">
+      <errorHandler>
+        <deadLetterChannel deadLetterUri="seda:audit" onPrepareFailureRef="prepareErrorAuditProcessor"/>
+      </errorHandler>
+      <from uri="seda:removal-validation-success"/>
+      <setHeader name="AuditEventProcessor">
+        <constant>VALIDATION</constant>
+      </setHeader>
+      <bean ref="deserializationProcessor" method="deserialize(${body}, edu.colorado.cires.argonaut.messaging.core.databind.NcSubmissionMessage)"/>
+      <bean ref="auditSender" method="validationSuccess"/>
+      <bean ref="removalFileSplitter" method="splitRemovalFileMessages"/>
+    </route>
+
     <route id="validation-success">
       <errorHandler>
         <deadLetterChannel deadLetterUri="seda:audit" onPrepareFailureRef="prepareErrorAuditProcessor"/>

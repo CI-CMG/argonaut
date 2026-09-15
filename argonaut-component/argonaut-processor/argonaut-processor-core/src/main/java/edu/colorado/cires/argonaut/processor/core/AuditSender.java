@@ -101,13 +101,24 @@ public class AuditSender {
   }
 
   public void fileMovedToOutput(MetadataRecord message) {
+    String auditMessage;
+    switch (message.getAction()) {
+      case UPDATE:
+        auditMessage = "file added to access location: " + message.getFile();
+        break;
+      case REMOVE:
+        auditMessage = "file moved to removal location: " + message.getFile();
+        break;
+      default:
+        auditMessage = "file moved: " + message.getAction();
+    }
     messageSender.sendJson(
         auditQueue,
         jsonMapper.writeValueAsString(AuditMessage.builder()
             .withDac(message.getDac())
             .withEventType(EventType.INFO)
             .withFileName(message.getFileName())
-            .withMessage("file added to access location: " + message.getFile())
+            .withMessage(auditMessage)
             .withProcessor(AuditEventProcessor.FILE_STORE)
             .withTimestamp(Instant.now())
             .withTraceId(message.getTraceId())

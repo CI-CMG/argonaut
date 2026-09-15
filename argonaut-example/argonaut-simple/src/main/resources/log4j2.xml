@@ -24,6 +24,9 @@
       <AppenderRef ref="Console"/>
     </Logger>
 
+    <Logger name="ArgoFileSpecification" level="error" additivity="false">
+      <AppenderRef ref="Console"/>
+    </Logger>
 
     <Root level="info">
       <AppenderRef ref="Console"/>

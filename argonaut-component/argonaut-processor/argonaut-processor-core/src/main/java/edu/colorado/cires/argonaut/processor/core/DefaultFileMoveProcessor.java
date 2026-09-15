@@ -58,10 +58,32 @@ public class DefaultFileMoveProcessor implements FileMoveProcessor {
   }
 
   private void handleRemove(NcSubmissionMessage ncSubmissionMessage) {
-    String source = resolveOutputFile(ncSubmissionMessage);
-    String destination = resolveRemovedFile(ncSubmissionMessage);
-    outputFileStore.move(source, destination);
-    LOGGER.info("Moved removed file from {} to {}", source, destination);
+    if (ncSubmissionMessage.getFileType() == ArgoFileType.REMOVAL_TXT) {
+      String processingFile = processingFileStore.appendToPath(processingFileStore.getRoot(), "dac", ncSubmissionMessage.getDac(),
+          ncSubmissionMessage.getTimestamp().toString(), ncSubmissionMessage.getFileName());
+      if (!ncSubmissionMessage.getValidationErrors().isEmpty()) {
+        String destinationFile = submissionFileStore.appendToPath(submissionFileStore.getRoot(), "dac", ncSubmissionMessage.getDac(), "processed",
+            ncSubmissionMessage.getTimestamp().toString(), "reject", ncSubmissionMessage.getFileName());
+        try (InputStream inputStream = processingFileStore.getInputStream(processingFile);
+            OutputStream outputStream = submissionFileStore.getOutputStream(destinationFile)
+        ) {
+          IOUtils.copy(inputStream, outputStream);
+        } catch (IOException e) {
+          throw new RuntimeException("Unable to copy " + processingFile + " to " + destinationFile, e);
+        }
+        processingFileStore.delete(processingFile);
+        String processedFile = submissionFileStore.appendToPath(submissionFileStore.getRoot(), "dac", ncSubmissionMessage.getDac(), "processed", ncSubmissionMessage.getTimestamp().toString(), ncSubmissionMessage.getFileName());
+        if (submissionFileStore.fileExists(processedFile)) {
+          submissionFileStore.delete(processedFile);
+        }
+      }
+      // TODO copy timestamped copy of removal file to output?
+    } else {
+      String source = resolveOutputFile(ncSubmissionMessage);
+      String destination = resolveRemovedFile(ncSubmissionMessage);
+      outputFileStore.move(source, destination);
+      LOGGER.info("Moved removed file from {} to {}", source, destination);
+    }
   }
 
   private void handleAdd(NcSubmissionMessage ncSubmissionMessage) {

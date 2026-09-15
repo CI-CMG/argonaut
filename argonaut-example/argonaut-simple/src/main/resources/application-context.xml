@@ -51,8 +51,6 @@
     <property name="rootPath" value="${dac.output.directory}"/>
   </bean>
 
-  <bean id="removalFileValidationProcessor" class="edu.colorado.cires.argonaut.processor.core.DefaultRemovalFileValidationProcessor"/>
-
   <bean id="tarballSubmissionProcessor" class="edu.colorado.cires.argonaut.processor.core.DefaultTarballSubmissionProcessor">
     <property name="localTempDir" value="${work-directory}"/>
     <property name="submissionFileStore" ref="submissionFileStore"/>
@@ -69,7 +67,7 @@
     <property name="jsonMapper" ref="jsonMapper"/>
     <property name="messageSender" ref="messageSender"/>
     <property name="submitDataQueue" value="seda:validation"/>
-    <property name="submitRemovalQueue" value="seda:submit-removal"/>
+    <property name="submitRemovalQueue" value="seda:validate-removal"/>
     <property name="tarballSubmissionProcessor" ref="tarballSubmissionProcessor"/>
     <property name="submissionProcessor" ref="submissionProcessor"/>
   </bean>
@@ -90,6 +88,20 @@
     <property name="messageSender" ref="messageSender"/>
     <property name="successQueue" value="seda:validation-success"/>
     <property name="failureQueue" value="seda:validation-failure"/>
+  </bean>
+
+  <bean id="removalFileValidationResultRouter" class="edu.colorado.cires.argonaut.processor.core.DefaultValidationRouter">
+    <property name="jsonMapper" ref="jsonMapper"/>
+    <property name="messageSender" ref="messageSender"/>
+    <property name="successQueue" value="seda:removal-validation-success"/>
+    <property name="failureQueue" value="seda:validation-failure"/>
+  </bean>
+
+  <bean id="removalFileSplitter" class="edu.colorado.cires.argonaut.processor.core.DefaultRemovalFileMessageSplitter">
+    <property name="jsonMapper" ref="jsonMapper"/>
+    <property name="messageSender" ref="messageSender"/>
+    <property name="fileMoveQueue" value="seda:file-output"/>
+    <property name="processingFileStore" ref="processingFileStore"/>
   </bean>
 
   <bean id="fileMoveProcessor" class="edu.colorado.cires.argonaut.processor.core.DefaultFileMoveProcessor">
@@ -228,6 +240,10 @@
 
   <bean id="auditProcessor" class="edu.colorado.cires.argonaut.audit.jpa.JpaAuditStorageProcessor">
     <property name="entityManagerFactory" ref="auditEntityManagerFactory"/>
+  </bean>
+
+  <bean id="removalFileValidationProcessor" class="edu.colorado.cires.argonaut.processor.core.DefaultRemovalFileValidationProcessor">
+    <property name="processingFileStore" ref="processingFileStore"/>
   </bean>
 
   <camelContext id="argonaut-camel" xmlns="http://camel.apache.org/schema/spring">

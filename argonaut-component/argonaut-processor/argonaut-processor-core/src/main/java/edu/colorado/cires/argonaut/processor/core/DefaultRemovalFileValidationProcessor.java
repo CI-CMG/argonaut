@@ -73,13 +73,4 @@ public class DefaultRemovalFileValidationProcessor implements RemovalFileValidat
         ncSubmissionMessage.getFileName());
   }
 
-  private void download(String remotePath, Path localPath) {
-    try {
-      processingFileStore.downloadLocalFile(remotePath, localPath);
-    } catch (IOException e) {
-      throw new RuntimeException("Unable to download " + remotePath, e);
-    }
-  }
-
-
 }
