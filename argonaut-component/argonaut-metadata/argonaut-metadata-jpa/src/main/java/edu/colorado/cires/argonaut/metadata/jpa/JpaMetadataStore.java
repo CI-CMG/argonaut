@@ -37,7 +37,10 @@ public class JpaMetadataStore implements MetadataStore {
         syntheticMerger.updateSynthMerge(record);
         break;
       case FLOAT_MERGE:
-        multiFloatMerger.updateMultiFloatMerge(record);
+        multiFloatMerger.updateMultiFloatMerge(record, false);
+        break;
+      case FLOAT_MERGE_REMOVE:
+        multiFloatMerger.updateMultiFloatMerge(record, true);
         break;
       case GEO_MERGE:
         multiFloatMerger.updateGeoFloatMerge(record);

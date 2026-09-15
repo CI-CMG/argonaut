@@ -3,6 +3,7 @@ package edu.colorado.cires.argonaut.metadata.jpa;
 import static edu.colorado.cires.argonaut.messaging.core.databind.MetadataRecord.FileStatus.ACTIVE;
 
 import edu.colorado.cires.argonaut.messaging.core.databind.MetadataRecord;
+import edu.colorado.cires.argonaut.messaging.core.databind.MetadataRecord.FileStatus;
 import edu.colorado.cires.argonaut.metadata.jpa.entity.CycleEntity;
 import edu.colorado.cires.argonaut.metadata.jpa.entity.DacEntity;
 import edu.colorado.cires.argonaut.metadata.jpa.entity.FloatEntity;
@@ -224,43 +225,49 @@ class Updater {
 
   }
 
-  private void createOrUpdateProfileMergeFile(MetadataRecord record) {
+  static void createOrUpdateProfileMergeFile(MetadataRecord record, EntityManager em, FileStatus fileStatus) {
     String floatId = getFloatId(record);
     String file = Objects.requireNonNull(record.getFile());
+
+    FloatEntity floatEntity = em.find(FloatEntity.class, floatId);
+    ProfileMergeFileEntity entity = em.find(ProfileMergeFileEntity.class, file);
+    boolean add = (entity == null);
+
+    if (add) {
+      entity = new ProfileMergeFileEntity();
+      entity.setFile(file);
+      entity.setFloatId(floatEntity);
+    }
+
+    entity.setFileName(record.getFileName());
+    entity.setFileStatus(fileStatus.toString());
+    entity.setDate(record.getDate() == null ? null : record.getDate().atOffset(ZoneOffset.UTC).toZonedDateTime());
+    entity.setLatitude(record.getLatitude());
+    entity.setLatitudeMin(record.getLatitudeMin());
+    entity.setLatitudeMax(record.getLatitudeMax());
+    entity.setLongitude(record.getLongitude());
+    entity.setLongitudeMin(record.getLongitudeMin());
+    entity.setLongitudeMax(record.getLongitudeMax());
+    entity.setOcean(record.getOcean() == null ? null : record.getOcean().getCode());
+    entity.setProfilerType(record.getProfilerType());
+    entity.setInstitution(record.getInstitution());
+    entity.setDateUpdate(record.getDateUpdate() == null ? null : record.getDateUpdate().atOffset(ZoneOffset.UTC).toZonedDateTime());
+    entity.setParameters(record.getParameters());
+    entity.setParameterDataMode(record.getParameterDataMode());
+    entity.setLastUpdatedTime(record.getActionTimestamp().atOffset(ZoneOffset.UTC).toZonedDateTime());
+
+    if (add) {
+      em.persist(entity);
+    }
+
+  }
+
+  private void createOrUpdateProfileMergeFile(MetadataRecord record) {
     try (EntityManager em = entityManagerFactory.createEntityManager()) {
       EntityTransaction tx = em.getTransaction();
       tx.begin();
       try {
-        FloatEntity floatEntity = em.find(FloatEntity.class, floatId);
-        ProfileMergeFileEntity entity = em.find(ProfileMergeFileEntity.class, file);
-        boolean add = (entity == null);
-
-        if (add) {
-          entity = new ProfileMergeFileEntity();
-          entity.setFile(file);
-          entity.setFloatId(floatEntity);
-        }
-
-        entity.setFileName(record.getFileName());
-        entity.setFileStatus(ACTIVE.toString());
-        entity.setDate(record.getDate() == null ? null : record.getDate().atOffset(ZoneOffset.UTC).toZonedDateTime());
-        entity.setLatitude(record.getLatitude());
-        entity.setLatitudeMin(record.getLatitudeMin());
-        entity.setLatitudeMax(record.getLatitudeMax());
-        entity.setLongitude(record.getLongitude());
-        entity.setLongitudeMin(record.getLongitudeMin());
-        entity.setLongitudeMax(record.getLongitudeMax());
-        entity.setOcean(record.getOcean() == null ? null : record.getOcean().getCode());
-        entity.setProfilerType(record.getProfilerType());
-        entity.setInstitution(record.getInstitution());
-        entity.setDateUpdate(record.getDateUpdate() == null ? null : record.getDateUpdate().atOffset(ZoneOffset.UTC).toZonedDateTime());
-        entity.setParameters(record.getParameters());
-        entity.setParameterDataMode(record.getParameterDataMode());
-        entity.setLastUpdatedTime(record.getActionTimestamp().atOffset(ZoneOffset.UTC).toZonedDateTime());
-
-        if (add) {
-          em.persist(entity);
-        }
+        createOrUpdateProfileMergeFile(record, em, FileStatus.ACTIVE);
         tx.commit();
       } catch (Exception e) {
         tx.rollback();

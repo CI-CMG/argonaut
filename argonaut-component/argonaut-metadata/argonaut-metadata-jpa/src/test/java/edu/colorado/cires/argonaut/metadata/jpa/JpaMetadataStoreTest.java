@@ -2,6 +2,8 @@ package edu.colorado.cires.argonaut.metadata.jpa;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import edu.colorado.cires.argonaut.messaging.core.databind.ArgoFileType;
 import edu.colorado.cires.argonaut.messaging.core.databind.ArgoOcean;
@@ -14,6 +16,8 @@ import edu.colorado.cires.argonaut.messaging.core.databind.ProfileOperation;
 import edu.colorado.cires.argonaut.metadata.core.DefaultIndexPageRequest;
 import edu.colorado.cires.argonaut.metadata.core.GeoMergePage;
 import edu.colorado.cires.argonaut.metadata.core.ProfilePage;
+import edu.colorado.cires.argonaut.metadata.jpa.entity.ProfileFileEntity;
+import edu.colorado.cires.argonaut.metadata.jpa.entity.ProfileMergeFileEntity;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.EntityTransaction;
@@ -23,6 +27,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -48,6 +53,7 @@ public class JpaMetadataStoreTest {
       EntityTransaction tx = em.getTransaction();
       tx.begin();
       try {
+        em.createQuery("delete from ProfileMergeFileEntity").executeUpdate();
         em.createQuery("delete from ProfileFileEntity").executeUpdate();
         em.createQuery("delete from MetadataFileEntity").executeUpdate();
         em.createQuery("delete from CycleEntity").executeUpdate();
@@ -233,7 +239,6 @@ public class JpaMetadataStoreTest {
         .build();
     datastore.updateIndex(record12);
 
-
     Instant now = Instant.now();
 
     assertEquals(
@@ -250,7 +255,6 @@ public class JpaMetadataStoreTest {
     );
     assertFalse(datastore.findByFile("aoml/13857/profiles/D13857_004.nc").isPresent());
   }
-
 
 
   @Test
@@ -396,7 +400,6 @@ public class JpaMetadataStoreTest {
         .withFileType(ArgoFileType.PROFILE_BIOCHEMICAL)
         .build());
 
-
     // synth
 
     datastore.updateIndex(MetadataRecord.builder()
@@ -449,8 +452,6 @@ public class JpaMetadataStoreTest {
         .withFileType(ArgoFileType.PROFILE_BIOCHEMICAL)
         .build());
 
-
-
     datastore.updateIndex(MetadataRecord.builder()
         .withFile("aoml/13857/13857_meta.nc")
         .withFileName("13857_meta.nc")
@@ -460,7 +461,6 @@ public class JpaMetadataStoreTest {
         .withAction(Action.SYNTHETIC_MERGE)
         .withFileType(ArgoFileType.METADATA)
         .build());
-
 
     datastore.updateIndex(MetadataRecord.builder()
         .withFile("aoml/13857/profiles/D13857_002.nc")
@@ -482,7 +482,6 @@ public class JpaMetadataStoreTest {
         .withFloatId("13857")
         .build());
 
-
     datastore.updateIndex(MetadataRecord.builder()
         .withFile("aoml/13857/profiles/SD13857_002.nc")
         .withFileName("SD13857_002.nc")
@@ -503,8 +502,6 @@ public class JpaMetadataStoreTest {
         .withFileType(ArgoFileType.SYNTHETIC_PROFILE_SINGLE_CYCLE)
         .build());
 
-
-
     ProfilePage page1 = datastore.findUpdatedOrMissingSyntheticProfilesPage(DefaultIndexPageRequest.builder().withPageSize(1).build());
     assertEquals(2, page1.getTotalRecords());
     assertEquals(2, page1.getTotalPages());
@@ -515,10 +512,11 @@ public class JpaMetadataStoreTest {
             .withFloatId("123")
             .withFiles(Arrays.asList(
                 MetadataRecord.builder().withFile("aoml/123/123_meta.nc").withFileName("123_meta.nc").withFileStatus(FileStatus.ACTIVE).build(),
-                MetadataRecord.builder().withFile("aoml/123/profiles/BD123_001.nc").withFileName("BD123_001.nc").withFileStatus(FileStatus.ACTIVE).build(),
+                MetadataRecord.builder().withFile("aoml/123/profiles/BD123_001.nc").withFileName("BD123_001.nc").withFileStatus(FileStatus.ACTIVE)
+                    .build(),
                 MetadataRecord.builder().withFile("aoml/123/profiles/D123_001.nc").withFileName("D123_001.nc").withFileStatus(FileStatus.ACTIVE).build()
             ))
-        .build()),
+            .build()),
         page1.getPage());
 
     ProfilePage page2 = datastore.findUpdatedOrMissingSyntheticProfilesPage(page1.getNextPage().get());
@@ -531,8 +529,10 @@ public class JpaMetadataStoreTest {
             .withFloatId("13857")
             .withFiles(Arrays.asList(
                 MetadataRecord.builder().withFile("aoml/13857/13857_meta.nc").withFileName("13857_meta.nc").withFileStatus(FileStatus.ACTIVE).build(),
-                MetadataRecord.builder().withFile("aoml/13857/profiles/BD13857_001.nc").withFileName("BD13857_001.nc").withFileStatus(FileStatus.ACTIVE).build(),
-                MetadataRecord.builder().withFile("aoml/13857/profiles/D13857_001.nc").withFileName("D13857_001.nc").withFileStatus(FileStatus.ACTIVE).build()
+                MetadataRecord.builder().withFile("aoml/13857/profiles/BD13857_001.nc").withFileName("BD13857_001.nc").withFileStatus(FileStatus.ACTIVE)
+                    .build(),
+                MetadataRecord.builder().withFile("aoml/13857/profiles/D13857_001.nc").withFileName("D13857_001.nc").withFileStatus(FileStatus.ACTIVE)
+                    .build()
             ))
             .build()),
         page2.getPage());
@@ -682,7 +682,6 @@ public class JpaMetadataStoreTest {
         .withFileType(ArgoFileType.PROFILE_BIOCHEMICAL)
         .build());
 
-
     // synth
 
     datastore.updateIndex(MetadataRecord.builder()
@@ -735,8 +734,6 @@ public class JpaMetadataStoreTest {
         .withFileType(ArgoFileType.PROFILE_BIOCHEMICAL)
         .build());
 
-
-
     datastore.updateIndex(MetadataRecord.builder()
         .withFile("aoml/13857/13857_meta.nc")
         .withFileName("13857_meta.nc")
@@ -746,7 +743,6 @@ public class JpaMetadataStoreTest {
         .withAction(Action.SYNTHETIC_MERGE)
         .withFileType(ArgoFileType.METADATA)
         .build());
-
 
     datastore.updateIndex(MetadataRecord.builder()
         .withFile("aoml/13857/profiles/D13857_002.nc")
@@ -768,7 +764,6 @@ public class JpaMetadataStoreTest {
         .withFloatId("13857")
         .build());
 
-
     datastore.updateIndex(MetadataRecord.builder()
         .withFile("aoml/13857/profiles/SD13857_002.nc")
         .withFileName("SD13857_002.nc")
@@ -788,8 +783,6 @@ public class JpaMetadataStoreTest {
         .withAction(Action.UPDATE)
         .withFileType(ArgoFileType.SYNTHETIC_PROFILE_SINGLE_CYCLE)
         .build());
-
-
 
     datastore.updateIndex(MetadataRecord.builder()
         .withFile("aoml/13855/13855_meta.nc")
@@ -880,26 +873,28 @@ public class JpaMetadataStoreTest {
 
     ProfilePage page = datastore.findUpdatedOrMissingSyntheticProfilesPage(DefaultIndexPageRequest.builder().withPageSize(100).build());
     assertEquals(Arrays.asList(ProfileOperation.builder()
-            .withDac("aoml")
-            .withFloatId("123")
-            .withFiles(Arrays.asList(
-                MetadataRecord.builder().withFile("aoml/123/123_meta.nc").withFileName("123_meta.nc").withFileStatus(FileStatus.ACTIVE).build(),
-                MetadataRecord.builder().withFile("aoml/123/profiles/BD123_001.nc").withFileName("BD123_001.nc").withFileStatus(FileStatus.ACTIVE).build(),
-                MetadataRecord.builder().withFile("aoml/123/profiles/D123_001.nc").withFileName("D123_001.nc").withFileStatus(FileStatus.ACTIVE).build()
-            ))
-            .build(),
+                .withDac("aoml")
+                .withFloatId("123")
+                .withFiles(Arrays.asList(
+                    MetadataRecord.builder().withFile("aoml/123/123_meta.nc").withFileName("123_meta.nc").withFileStatus(FileStatus.ACTIVE).build(),
+                    MetadataRecord.builder().withFile("aoml/123/profiles/BD123_001.nc").withFileName("BD123_001.nc").withFileStatus(FileStatus.ACTIVE)
+                        .build(),
+                    MetadataRecord.builder().withFile("aoml/123/profiles/D123_001.nc").withFileName("D123_001.nc").withFileStatus(FileStatus.ACTIVE).build()
+                ))
+                .build(),
             ProfileOperation.builder()
                 .withDac("aoml")
                 .withFloatId("13857")
                 .withFiles(Arrays.asList(
                     MetadataRecord.builder().withFile("aoml/13857/13857_meta.nc").withFileName("13857_meta.nc").withFileStatus(FileStatus.ACTIVE).build(),
-                    MetadataRecord.builder().withFile("aoml/13857/profiles/BD13857_001.nc").withFileName("BD13857_001.nc").withFileStatus(FileStatus.ACTIVE).build(),
-                    MetadataRecord.builder().withFile("aoml/13857/profiles/D13857_001.nc").withFileName("D13857_001.nc").withFileStatus(FileStatus.ACTIVE).build()
+                    MetadataRecord.builder().withFile("aoml/13857/profiles/BD13857_001.nc").withFileName("BD13857_001.nc")
+                        .withFileStatus(FileStatus.ACTIVE).build(),
+                    MetadataRecord.builder().withFile("aoml/13857/profiles/D13857_001.nc").withFileName("D13857_001.nc").withFileStatus(FileStatus.ACTIVE)
+                        .build()
                 ))
                 .build()
-            ),
+        ),
         page.getPage());
-
 
     //MetadataRecord{file='aoml/13857/13857_meta.nc', date=2026-05-14T13:48:57.457848Z, latitude=0.267, latitudeMin=null, latitudeMax=null, longitude=-16.032, longitudeMin=null, longitudeMax=null, ocean=ATLANTIC_OCEAN, profilerType='845', institution='A0', dateUpdate=2026-05-14T13:48:57.457848Z, parameters='null', parameterDataMode='null', direction='null', cycleNumber='null', action=null, fileType=METADATA, fileStatus=ACTIVE, dac='aoml', floatId='13857', actionTimestamp=2026-05-14T13:48:57.723361Z, otherFields={}}
 
@@ -936,7 +931,8 @@ public class JpaMetadataStoreTest {
                 .withFloatId("123")
                 .withFiles(Arrays.asList(
                     MetadataRecord.builder().withFile("aoml/123/123_meta.nc").withFileName("123_meta.nc").withFileStatus(FileStatus.ACTIVE).build(),
-                    MetadataRecord.builder().withFile("aoml/123/profiles/BD123_001.nc").withFileName("BD123_001.nc").withFileStatus(FileStatus.ACTIVE).build(),
+                    MetadataRecord.builder().withFile("aoml/123/profiles/BD123_001.nc").withFileName("BD123_001.nc").withFileStatus(FileStatus.ACTIVE)
+                        .build(),
                     MetadataRecord.builder().withFile("aoml/123/profiles/D123_001.nc").withFileName("D123_001.nc").withFileStatus(FileStatus.ACTIVE).build()
                 ))
                 .build(),
@@ -944,15 +940,18 @@ public class JpaMetadataStoreTest {
                 .withDac("aoml")
                 .withFloatId("13857")
                 .withFiles(Arrays.asList(
-                    MetadataRecord.builder().withFile("aoml/13857/13857_meta.nc").withFileName("13857_meta.nc").withFileStatus(FileStatus.REMOVED).build(),
-                    MetadataRecord.builder().withFile("aoml/13857/profiles/BD13857_002.nc").withFileName("BD13857_002.nc").withFileStatus(FileStatus.ACTIVE).build(),
-                    MetadataRecord.builder().withFile("aoml/13857/profiles/D13857_002.nc").withFileName("D13857_002.nc").withFileStatus(FileStatus.ACTIVE).build(),
-                    MetadataRecord.builder().withFile("aoml/13857/profiles/SD13857_002.nc").withFileName("SD13857_002.nc").withFileStatus(FileStatus.ACTIVE).build()
+                    MetadataRecord.builder().withFile("aoml/13857/13857_meta.nc").withFileName("13857_meta.nc").withFileStatus(FileStatus.REMOVED)
+                        .build(),
+                    MetadataRecord.builder().withFile("aoml/13857/profiles/BD13857_002.nc").withFileName("BD13857_002.nc")
+                        .withFileStatus(FileStatus.ACTIVE).build(),
+                    MetadataRecord.builder().withFile("aoml/13857/profiles/D13857_002.nc").withFileName("D13857_002.nc").withFileStatus(FileStatus.ACTIVE)
+                        .build(),
+                    MetadataRecord.builder().withFile("aoml/13857/profiles/SD13857_002.nc").withFileName("SD13857_002.nc")
+                        .withFileStatus(FileStatus.ACTIVE).build()
                 ))
                 .build()
         ),
         page.getPage());
-
 
     assertEquals(MetadataRecord.builder()
         .withFile("aoml/13857/13857_meta.nc")
@@ -978,7 +977,6 @@ public class JpaMetadataStoreTest {
   public void testFindUpdatedOrMissingMergeFilesPage() throws Exception {
 
     Instant date = Instant.now();
-
 
     datastore.updateIndex(MetadataRecord.builder()
         .withFile("aoml/13857/profiles/D13857_001.nc")
@@ -1030,7 +1028,6 @@ public class JpaMetadataStoreTest {
         .withFileType(ArgoFileType.PROFILE_CORE)
         .build());
 
-
     datastore.updateIndex(MetadataRecord.builder()
         .withFile("aoml/123/profiles/D123_001.nc")
         .withFileName("D123_001.nc")
@@ -1081,7 +1078,6 @@ public class JpaMetadataStoreTest {
         .withFileType(ArgoFileType.PROFILE_BIOCHEMICAL)
         .build());
 
-
     ProfilePage page1 = datastore.findUpdatedOrMissingMergeFilesPage(DefaultIndexPageRequest.builder().withPageSize(1).build());
     assertEquals(2, page1.getTotalRecords());
     assertEquals(2, page1.getTotalPages());
@@ -1105,12 +1101,13 @@ public class JpaMetadataStoreTest {
             .withDac("aoml")
             .withFloatId("13857")
             .withFiles(Arrays.asList(
-                MetadataRecord.builder().withFile("aoml/13857/profiles/D13857_001.nc").withFileName("D13857_001.nc").withFileStatus(FileStatus.ACTIVE).build(),
-                MetadataRecord.builder().withFile("aoml/13857/profiles/D13857_002.nc").withFileName("D13857_002.nc").withFileStatus(FileStatus.ACTIVE).build()
+                MetadataRecord.builder().withFile("aoml/13857/profiles/D13857_001.nc").withFileName("D13857_001.nc").withFileStatus(FileStatus.ACTIVE)
+                    .build(),
+                MetadataRecord.builder().withFile("aoml/13857/profiles/D13857_002.nc").withFileName("D13857_002.nc").withFileStatus(FileStatus.ACTIVE)
+                    .build()
             ))
             .build()),
         page2.getPage());
-
 
     datastore.updateIndex(MetadataRecord.builder()
         .withFile("aoml/13857/profiles/D13857_001.nc")
@@ -1131,8 +1128,6 @@ public class JpaMetadataStoreTest {
         .withAction(Action.FLOAT_MERGE)
         .withFileType(ArgoFileType.METADATA)
         .build());
-
-
 
     page1 = datastore.findUpdatedOrMissingMergeFilesPage(DefaultIndexPageRequest.builder().withPageSize(1).build());
     assertEquals(2, page1.getTotalRecords());
@@ -1182,7 +1177,6 @@ public class JpaMetadataStoreTest {
         .withFileType(ArgoFileType.PROFILE_CORE)
         .build());
 
-
     // saved file, merged - should not be in results
     datastore.updateIndex(MetadataRecord.builder()
         .withFile("aoml/123/profiles/D123_001.nc")
@@ -1209,7 +1203,6 @@ public class JpaMetadataStoreTest {
         .withFileType(ArgoFileType.PROFILE_CORE)
         .build());
 
-
     datastore.updateIndex(MetadataRecord.builder()
         .withFile("aoml/123/profiles/D123_001.nc")
         .withFileName("D123_001.nc")
@@ -1219,8 +1212,6 @@ public class JpaMetadataStoreTest {
         .withAction(Action.FLOAT_MERGE)
         .withFileType(ArgoFileType.PROFILE_CORE)
         .build());
-
-
 
     // removed file, merged - should be in results
     datastore.updateIndex(MetadataRecord.builder()
@@ -1248,7 +1239,6 @@ public class JpaMetadataStoreTest {
         .withFileType(ArgoFileType.PROFILE_CORE)
         .build());
 
-
     datastore.updateIndex(MetadataRecord.builder()
         .withFile("aoml/1111/profiles/D1111_001.nc")
         .withFileName("D1111_001.nc")
@@ -1268,7 +1258,6 @@ public class JpaMetadataStoreTest {
         .withAction(Action.REMOVE)
         .withFileType(ArgoFileType.PROFILE_CORE)
         .build());
-
 
     // removed file, not merged - should not be in results
 
@@ -1307,25 +1296,104 @@ public class JpaMetadataStoreTest {
         .withFileType(ArgoFileType.PROFILE_CORE)
         .build());
 
-
     ProfilePage page1 = datastore.findUpdatedOrMissingMergeFilesPage(DefaultIndexPageRequest.builder().withPageSize(100).build());
     assertEquals(
         Arrays.asList(
             ProfileOperation.builder().withDac("aoml")
                 .withFloatId("1111")
                 .withFiles(Arrays.asList(
-                    MetadataRecord.builder().withFile("aoml/1111/profiles/D1111_001.nc").withFileName("D1111_001.nc").withFileStatus(FileStatus.REMOVED).build()
+                    MetadataRecord.builder().withFile("aoml/1111/profiles/D1111_001.nc").withFileName("D1111_001.nc")
+                        .withFileStatus(FileStatus.REMOVED).build()
                 ))
                 .build(),
-          ProfileOperation.builder()
-            .withDac("aoml")
-            .withFloatId("13857")
-            .withFiles(Arrays.asList(
-                MetadataRecord.builder().withFile("aoml/13857/profiles/D13857_001.nc").withFileName("D13857_001.nc").withFileStatus(FileStatus.ACTIVE).build()
-            ))
-            .build()
+            ProfileOperation.builder()
+                .withDac("aoml")
+                .withFloatId("13857")
+                .withFiles(Arrays.asList(
+                    MetadataRecord.builder().withFile("aoml/13857/profiles/D13857_001.nc").withFileName("D13857_001.nc")
+                        .withFileStatus(FileStatus.ACTIVE).build()
+                ))
+                .build()
         ),
         page1.getPage());
+
+    // simulate callback from merge processor
+
+    UUID traceId = UUID.randomUUID();
+
+    datastore.updateIndex(MetadataRecord.builder()
+        .withTraceId(traceId)
+        .withFileName("D13857_001.nc")
+        .withFile("aoml/13857/profiles/D13857_001.nc")
+        .withDac("aoml")
+        .withFloatId("13857")
+        .withAction(Action.FLOAT_MERGE)
+        .withFileType(ArgoFileType.PROFILE_CORE)
+        .withActionTimestamp(Instant.now())
+        .build());
+
+    datastore.updateIndex(MetadataRecord.builder()
+        .withTraceId(traceId)
+        .withFileName("D1111_001.nc")
+        .withFile("aoml/1111/profiles/D1111_001.nc")
+        .withDac("aoml")
+        .withFloatId("1111")
+        .withAction(Action.FLOAT_MERGE_REMOVE)
+        .withFileType(ArgoFileType.PROFILE_CORE)
+        .withActionTimestamp(Instant.now())
+        .build());
+
+    datastore.updateIndex(MetadataRecord.builder()
+        .withTraceId(traceId)
+        .withActionTimestamp(Instant.now())
+        .withFileName("13857_prof.nc")
+        .withFile("aoml/13857/13857_prof.nc")
+        .withDate(Instant.now())
+        .withDateUpdate(Instant.now())
+        .withAction(Action.UPDATE)
+        .withDac("aoml")
+        .withFloatId("13857")
+        .withFileType(ArgoFileType.PROFILE_MULTI_CYCLE)
+        .build());
+
+    datastore.updateIndex(MetadataRecord.builder()
+        .withTraceId(traceId)
+        .withActionTimestamp(Instant.now())
+        .withFileName("1111_prof.nc")
+        .withFile("aoml/1111/1111_prof.nc")
+        .withDate(Instant.now())
+        .withDateUpdate(Instant.now())
+        .withAction(Action.REMOVE)
+        .withDac("aoml")
+        .withFloatId("1111")
+        .withFileType(ArgoFileType.PROFILE_MULTI_CYCLE)
+        .build());
+
+    page1 = datastore.findUpdatedOrMissingMergeFilesPage(DefaultIndexPageRequest.builder().withPageSize(100).build());
+    assertEquals(0, page1.getTotalRecords());
+
+    try (EntityManager em = emf.createEntityManager()) {
+      EntityTransaction tx = em.getTransaction();
+      tx.begin();
+      try {
+        assertEquals(FileStatus.REMOVED.toString(), em.find(ProfileMergeFileEntity.class, "aoml/1111/1111_prof.nc").getFileStatus());
+        assertEquals(FileStatus.ACTIVE.toString(), em.find(ProfileMergeFileEntity.class, "aoml/13857/13857_prof.nc").getFileStatus());
+
+        ProfileFileEntity d13857 = em.find(ProfileFileEntity.class, "aoml/13857/profiles/D13857_001.nc");
+        assertEquals(FileStatus.ACTIVE.toString(), d13857.getFileStatus());
+        assertNotNull(d13857.getMultiFloatMergeTime());
+
+        ProfileFileEntity d1111 = em.find(ProfileFileEntity.class, "aoml/1111/profiles/D1111_001.nc");
+        assertEquals(FileStatus.REMOVED.toString(), d1111.getFileStatus());
+        assertNull(d1111.getMultiFloatMergeTime());
+
+        tx.commit();
+      } catch (Exception e) {
+        tx.rollback();
+        throw e;
+      }
+    }
+
 
   }
 
@@ -1334,7 +1402,6 @@ public class JpaMetadataStoreTest {
 
     Instant date = Instant.parse("2020-01-02T00:00:00.00Z");
     Instant now = Instant.now();
-
 
     datastore.updateIndex(MetadataRecord.builder()
         .withFile("aoml/13857/profiles/D13857_001.nc")
@@ -1386,7 +1453,6 @@ public class JpaMetadataStoreTest {
         .withFileType(ArgoFileType.PROFILE_CORE)
         .build());
 
-
     datastore.updateIndex(MetadataRecord.builder()
         .withFile("aoml/123/profiles/D123_001.nc")
         .withFileName("D123_001.nc")
@@ -1437,7 +1503,6 @@ public class JpaMetadataStoreTest {
         .withFileType(ArgoFileType.PROFILE_BIOCHEMICAL)
         .build());
 
-
     GeoMergePage page1 = datastore.findUpdatedOrMissingGeoMergeFilesPage(DefaultIndexPageRequest.builder().withPageSize(1).build());
     assertEquals(2, page1.getTotalRecords());
     assertEquals(2, page1.getTotalPages());
@@ -1483,7 +1548,6 @@ public class JpaMetadataStoreTest {
             .build()),
         page2.getPage());
 
-
     datastore.updateIndex(MetadataRecord.builder()
         .withFile("aoml/13857/profiles/D13857_001.nc")
         .withFileName("D13857_001.nc")
@@ -1503,8 +1567,6 @@ public class JpaMetadataStoreTest {
         .withAction(Action.GEO_MERGE)
         .withFileType(ArgoFileType.METADATA)
         .build());
-
-
 
     page1 = datastore.findUpdatedOrMissingGeoMergeFilesPage(DefaultIndexPageRequest.builder().withPageSize(1).build());
     assertEquals(2, page1.getTotalRecords());
@@ -1530,7 +1592,6 @@ public class JpaMetadataStoreTest {
 
   @Test
   public void testFindRemovedGeoMergeFilesPage() throws Exception {
-
 
     // saved file, not merged - should be in results
     datastore.updateIndex(MetadataRecord.builder()
@@ -1558,7 +1619,6 @@ public class JpaMetadataStoreTest {
         .withFileType(ArgoFileType.PROFILE_CORE)
         .build());
 
-
     // saved file, merged - should not be in results
     datastore.updateIndex(MetadataRecord.builder()
         .withFile("aoml/123/profiles/D123_001.nc")
@@ -1585,7 +1645,6 @@ public class JpaMetadataStoreTest {
         .withFileType(ArgoFileType.PROFILE_CORE)
         .build());
 
-
     datastore.updateIndex(MetadataRecord.builder()
         .withFile("aoml/123/profiles/D123_001.nc")
         .withFileName("D123_001.nc")
@@ -1595,8 +1654,6 @@ public class JpaMetadataStoreTest {
         .withAction(Action.GEO_MERGE)
         .withFileType(ArgoFileType.PROFILE_CORE)
         .build());
-
-
 
     // removed file, merged - should be in results
     datastore.updateIndex(MetadataRecord.builder()
@@ -1624,7 +1681,6 @@ public class JpaMetadataStoreTest {
         .withFileType(ArgoFileType.PROFILE_CORE)
         .build());
 
-
     datastore.updateIndex(MetadataRecord.builder()
         .withFile("aoml/1111/profiles/D1111_001.nc")
         .withFileName("D1111_001.nc")
@@ -1644,7 +1700,6 @@ public class JpaMetadataStoreTest {
         .withAction(Action.REMOVE)
         .withFileType(ArgoFileType.PROFILE_CORE)
         .build());
-
 
     // removed file, not merged - should not be in results
 

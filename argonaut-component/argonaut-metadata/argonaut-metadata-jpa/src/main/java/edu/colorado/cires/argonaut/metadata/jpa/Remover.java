@@ -4,6 +4,7 @@ import edu.colorado.cires.argonaut.messaging.core.databind.MetadataRecord;
 import edu.colorado.cires.argonaut.messaging.core.databind.MetadataRecord.FileStatus;
 import edu.colorado.cires.argonaut.metadata.jpa.entity.MetadataFileEntity;
 import edu.colorado.cires.argonaut.metadata.jpa.entity.ProfileFileEntity;
+import edu.colorado.cires.argonaut.metadata.jpa.entity.ProfileMergeFileEntity;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.EntityTransaction;
@@ -36,6 +37,15 @@ class Remover {
     }
   }
 
+  private static void removeMultiProfileMerge(EntityManager em, MetadataRecord record) {
+    ProfileMergeFileEntity existing = em.find(ProfileMergeFileEntity.class, record.getFile(), LockModeType.OPTIMISTIC);
+    if (existing != null) {
+      existing.setFileStatus(FileStatus.REMOVED.name());
+    } else {
+      Updater.createOrUpdateProfileMergeFile(record, em, FileStatus.REMOVED);
+    }
+  }
+
   private static void remove(EntityManager em, MetadataRecord record) {
     switch (record.getFileType()) {
       case PROFILE_CORE:
@@ -45,6 +55,9 @@ class Remover {
         break;
       case METADATA:
         removeMetadata(em, record);
+        break;
+      case PROFILE_MULTI_CYCLE:
+        removeMultiProfileMerge(em, record);
         break;
       default:
         throw new UnsupportedOperationException("Unsupported file type: " + record.getFileType());

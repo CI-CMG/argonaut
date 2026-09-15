@@ -155,7 +155,7 @@ public class DefaultFloatMergeProcessor implements FloatMergeProcessor {
     }
   }
 
-  private void notifyMergeCompleted(ProfileOperation message) {
+  private void notifyMergeCompleted(ProfileOperation message, boolean remove) {
     Instant now = Instant.now();
 
     for (MetadataRecord metadataRecord : message.getFiles()) {
@@ -167,7 +167,7 @@ public class DefaultFloatMergeProcessor implements FloatMergeProcessor {
               .withFile(metadataRecord.getFile())
               .withDac(message.getDac())
               .withFloatId(message.getFloatId())
-              .withAction(Action.FLOAT_MERGE)
+              .withAction(metadataRecord.getFileStatus() == FileStatus.REMOVED ? Action.FLOAT_MERGE_REMOVE : Action.FLOAT_MERGE)
               .withFileType(ArgoFileType.PROFILE_CORE)
               .withActionTimestamp(now)
               .build()));
@@ -185,7 +185,7 @@ public class DefaultFloatMergeProcessor implements FloatMergeProcessor {
             .withFile(outputFileForMetadata)
             .withDate(now)
             .withDateUpdate(now)
-            .withAction(Action.UPDATE)
+            .withAction(remove ? Action.REMOVE : Action.UPDATE)
             .withDac(message.getDac())
             .withFloatId(message.getFloatId())
             .withFileType(ArgoFileType.PROFILE_MULTI_CYCLE)
@@ -194,12 +194,13 @@ public class DefaultFloatMergeProcessor implements FloatMergeProcessor {
 
   @Override
   public void merge(ProfileOperation message) {
-    if (isRemoveMergeFile(message)) {
+    boolean remove = isRemoveMergeFile(message);
+    if (remove) {
       removeMergeFile(message);
     } else {
       mergeProfiles(message);
     }
-    notifyMergeCompleted(message);
+    notifyMergeCompleted(message, remove);
   }
 
 

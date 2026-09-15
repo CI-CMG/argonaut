@@ -23,7 +23,7 @@ class MultiFloatMerger {
     this.entityManagerFactory = entityManagerFactory;
   }
 
-  void updateMultiFloatMerge(MetadataRecord record) {
+  void updateMultiFloatMerge(MetadataRecord record, boolean remove) {
     if (record.getFileType() == ArgoFileType.PROFILE_CORE) {
       while (true) {
         try (EntityManager em = entityManagerFactory.createEntityManager()) {
@@ -33,13 +33,7 @@ class MultiFloatMerger {
             ProfileFileEntity entity = em.find(ProfileFileEntity.class, record.getFile(), LockModeType.OPTIMISTIC);
             if (entity != null) {
               LOGGER.info("Updating multi-float merge for " + record.getFile());
-              if(entity.getFileStatus().equals(FileStatus.REMOVED.name())){
-                entity.setMultiFloatMergeTime(null);
-              } else if (entity.getFileStatus().equals(FileStatus.ACTIVE.name())){
-                entity.setMultiFloatMergeTime(record.getActionTimestamp().atZone(ZoneId.of("UTC")));
-              } else {
-                throw new UnsupportedOperationException("Invalid file status " + entity.getFileStatus());
-              }
+              entity.setMultiFloatMergeTime(remove ? null : record.getActionTimestamp().atZone(ZoneId.of("UTC")));
             }
             tx.commit();
             break;
