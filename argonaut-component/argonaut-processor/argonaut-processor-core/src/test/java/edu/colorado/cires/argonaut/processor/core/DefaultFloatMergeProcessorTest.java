@@ -2,6 +2,7 @@ package edu.colorado.cires.argonaut.processor.core;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -318,10 +319,9 @@ public class DefaultFloatMergeProcessorTest {
     verify(merger).mergeProfiles(localPathSupplierCaptor.capture(), eq(Arrays.asList("PRES", "TEMP", "PSAL")), outputPathCaptor.capture());
 
     List<LocalPathSupplier> localPathSuppliers = localPathSupplierCaptor.getValue();
-    assertEquals(3, localPathSuppliers.size());
+    assertEquals(2, localPathSuppliers.size());
     LocalPathSupplier localPathSupplier1 = localPathSuppliers.get(0);
     LocalPathSupplier localPathSupplier2 = localPathSuppliers.get(1);
-    LocalPathSupplier localPathSupplier3 = localPathSuppliers.get(2);
 
     localPathSupplier1.prepare();
     assertEquals("R123_001.nc", localPathSupplier1.getFileName());
@@ -333,14 +333,9 @@ public class DefaultFloatMergeProcessorTest {
     assertNotNull(localPathSupplier2.getLocalPath());
     localPathSupplier2.cleanUp();
 
-    localPathSupplier3.prepare();
-    assertEquals("R123_002.nc", localPathSupplier3.getFileName());
-    assertNotNull(localPathSupplier3.getLocalPath());
-    localPathSupplier3.cleanUp();
-
     verify(outputFileStore).downloadLocalFile(eq("/foo/bar/dac/aoml/123/profiles/R123_001.nc"), eq(localPathSupplier1.getLocalPath()));
     verify(outputFileStore).downloadLocalFile(eq("/foo/bar/dac/aoml/123/profiles/R123_001D.nc"), eq(localPathSupplier2.getLocalPath()));
-    verify(outputFileStore).downloadLocalFile(eq("/foo/bar/dac/aoml/123/profiles/R123_002.nc"), eq(localPathSupplier3.getLocalPath()));
+    verify(outputFileStore, times(0)).downloadLocalFile(eq("/foo/bar/dac/aoml/123/profiles/R123_002.nc"), any());
 
 
     ArgumentCaptor<String> jsonCaptor = ArgumentCaptor.forClass(String.class);

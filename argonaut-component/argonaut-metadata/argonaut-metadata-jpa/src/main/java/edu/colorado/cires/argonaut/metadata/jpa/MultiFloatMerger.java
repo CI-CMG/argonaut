@@ -48,7 +48,7 @@ class MultiFloatMerger {
     }
   }
 
-  void updateGeoFloatMerge(MetadataRecord record) {
+  void updateGeoFloatMerge(MetadataRecord record, boolean remove) {
     if (record.getFileType() == ArgoFileType.PROFILE_CORE) {
       while (true) {
         try (EntityManager em = entityManagerFactory.createEntityManager()) {
@@ -58,13 +58,7 @@ class MultiFloatMerger {
             ProfileFileEntity entity = em.find(ProfileFileEntity.class, record.getFile(), LockModeType.OPTIMISTIC);
             if (entity != null) {
               LOGGER.info("Updating geo merge for " + record.getFile());
-              if(entity.getFileStatus().equals(FileStatus.REMOVED.name())){
-                entity.setGeoMergeTime(null);
-              } else if (entity.getFileStatus().equals(FileStatus.ACTIVE.name())){
-                entity.setGeoMergeTime(record.getActionTimestamp().atZone(ZoneId.of("UTC")));
-              } else {
-                throw new UnsupportedOperationException("Invalid file status " + entity.getFileStatus());
-              }
+              entity.setGeoMergeTime(remove ? null : record.getActionTimestamp().atZone(ZoneId.of("UTC")));
             }
             tx.commit();
             break;

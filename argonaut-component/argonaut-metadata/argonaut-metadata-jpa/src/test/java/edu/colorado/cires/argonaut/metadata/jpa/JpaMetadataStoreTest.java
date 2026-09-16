@@ -7,7 +7,6 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 
 import edu.colorado.cires.argonaut.messaging.core.databind.ArgoFileType;
 import edu.colorado.cires.argonaut.messaging.core.databind.ArgoOcean;
-import edu.colorado.cires.argonaut.messaging.core.databind.DacFloatFilePath;
 import edu.colorado.cires.argonaut.messaging.core.databind.GeoMergeInfo;
 import edu.colorado.cires.argonaut.messaging.core.databind.MetadataRecord;
 import edu.colorado.cires.argonaut.messaging.core.databind.MetadataRecord.Action;
@@ -1177,6 +1176,42 @@ public class JpaMetadataStoreTest {
         .withFileType(ArgoFileType.PROFILE_CORE)
         .build());
 
+    // removed without merge timestamp should not be in results
+    datastore.updateIndex(MetadataRecord.builder()
+        .withFile("aoml/13857/profiles/D13857_002.nc")
+        .withFileName("D13857_002.nc")
+        .withDac("aoml")
+        .withFloatId("13857")
+        .withCycleNumber("002")
+        .withDirection("A")
+        .withParameterDataMode("D")
+        .withActionTimestamp(date)
+        .withDate(date)
+        .withLatitude(0.267)
+        .withLatitudeMin(0.1)
+        .withLatitudeMax(0.4)
+        .withLongitude(-16.032)
+        .withLongitudeMin(-17.0)
+        .withLongitudeMax(-14.0)
+        .withOcean(ArgoOcean.ATLANTIC_OCEAN)
+        .withProfilerType("845")
+        .withInstitution("A0")
+        .withDateUpdate(date)
+        .withParameters("params")
+        .withAction(Action.UPDATE)
+        .withFileType(ArgoFileType.PROFILE_CORE)
+        .build());
+    datastore.updateIndex(MetadataRecord.builder()
+        .withFile("aoml/13857/profiles/D13857_002.nc")
+        .withFileName("D13857_002.nc")
+        .withActionTimestamp(date)
+        .withDac("aoml")
+        .withFloatId("13857")
+        .withAction(Action.REMOVE)
+        .withFileType(ArgoFileType.PROFILE_CORE)
+        .build());
+
+
     // saved file, merged - should not be in results
     datastore.updateIndex(MetadataRecord.builder()
         .withFile("aoml/123/profiles/D123_001.nc")
@@ -1453,6 +1488,41 @@ public class JpaMetadataStoreTest {
         .withFileType(ArgoFileType.PROFILE_CORE)
         .build());
 
+    // removed without geo merge timestamp should not be in results
+    datastore.updateIndex(MetadataRecord.builder()
+        .withFile("aoml/13857/profiles/D13857_003.nc")
+        .withFileName("D13857_003.nc")
+        .withDac("aoml")
+        .withFloatId("13857")
+        .withCycleNumber("003")
+        .withDirection("A")
+        .withParameterDataMode("D")
+        .withActionTimestamp(now)
+        .withDate(date)
+        .withLatitude(0.267)
+        .withLatitudeMin(0.1)
+        .withLatitudeMax(0.4)
+        .withLongitude(-16.032)
+        .withLongitudeMin(-17.0)
+        .withLongitudeMax(-14.0)
+        .withOcean(ArgoOcean.INDIAN_OCEAN)
+        .withProfilerType("845")
+        .withInstitution("A0")
+        .withDateUpdate(now)
+        .withParameters("params")
+        .withAction(Action.UPDATE)
+        .withFileType(ArgoFileType.PROFILE_CORE)
+        .build());
+    datastore.updateIndex(MetadataRecord.builder()
+        .withFile("aoml/13857/profiles/D13857_003.nc")
+        .withFileName("D13857_003.nc")
+        .withActionTimestamp(date)
+        .withDac("aoml")
+        .withFloatId("13857")
+        .withAction(Action.REMOVE)
+        .withFileType(ArgoFileType.PROFILE_CORE)
+        .build());
+
     datastore.updateIndex(MetadataRecord.builder()
         .withFile("aoml/123/profiles/D123_001.nc")
         .withFileName("D123_001.nc")
@@ -1514,7 +1584,9 @@ public class JpaMetadataStoreTest {
             .withDay(2)
             .withOcean(ArgoOcean.ATLANTIC_OCEAN)
             .withFiles(Arrays.asList(
-                DacFloatFilePath.builder()
+                MetadataRecord.builder()
+                    .withFileName("D123_001.nc")
+                    .withFileStatus(FileStatus.ACTIVE)
                     .withFile("aoml/123/profiles/D123_001.nc")
                     .withDac("aoml")
                     .withFloatId("123")
@@ -1534,12 +1606,16 @@ public class JpaMetadataStoreTest {
             .withDay(2)
             .withOcean(ArgoOcean.INDIAN_OCEAN)
             .withFiles(Arrays.asList(
-                DacFloatFilePath.builder()
+                MetadataRecord.builder()
+                    .withFileName("D13857_001.nc")
+                    .withFileStatus(FileStatus.ACTIVE)
                     .withFile("aoml/13857/profiles/D13857_001.nc")
                     .withDac("aoml")
                     .withFloatId("13857")
                     .build(),
-                DacFloatFilePath.builder()
+                MetadataRecord.builder()
+                    .withFileName("D13857_002.nc")
+                    .withFileStatus(FileStatus.ACTIVE)
                     .withFile("aoml/13857/profiles/D13857_002.nc")
                     .withDac("aoml")
                     .withFloatId("13857")
@@ -1579,7 +1655,9 @@ public class JpaMetadataStoreTest {
             .withDay(2)
             .withOcean(ArgoOcean.ATLANTIC_OCEAN)
             .withFiles(Arrays.asList(
-                DacFloatFilePath.builder()
+                MetadataRecord.builder()
+                    .withFileName("D123_001.nc")
+                    .withFileStatus(FileStatus.ACTIVE)
                     .withFile("aoml/123/profiles/D123_001.nc")
                     .withDac("aoml")
                     .withFloatId("123")
@@ -1747,7 +1825,13 @@ public class JpaMetadataStoreTest {
                 .withDay(1)
                 .withOcean(ArgoOcean.ATLANTIC_OCEAN)
                 .withFiles(Arrays.asList(
-                    DacFloatFilePath.builder().withDac("aoml").withFloatId("13857").withFile("aoml/13857/profiles/D13857_001.nc").build()
+                    MetadataRecord.builder()
+                        .withFileName("D13857_001.nc")
+                        .withFileStatus(FileStatus.ACTIVE)
+                        .withDac("aoml")
+                        .withFloatId("13857")
+                        .withFile("aoml/13857/profiles/D13857_001.nc")
+                        .build()
                 ))
                 .build(),
             GeoMergeInfo.builder()
@@ -1755,9 +1839,70 @@ public class JpaMetadataStoreTest {
                 .withMonth(5)
                 .withDay(3)
                 .withOcean(ArgoOcean.INDIAN_OCEAN)
+                .withFiles(Arrays.asList(
+                    MetadataRecord.builder()
+                        .withFileName("D1111_001.nc")
+                        .withFileStatus(FileStatus.REMOVED)
+                        .withDac("aoml")
+                        .withFloatId("1111")
+                        .withFile("aoml/1111/profiles/D1111_001.nc")
+                        .build()
+                ))
                 .build()
         ),
         page1.getPage());
+
+    // simulate callback from merge processor
+
+    UUID traceId = UUID.randomUUID();
+
+    datastore.updateIndex(MetadataRecord.builder()
+        .withTraceId(traceId)
+        .withFileName("D13857_001.nc")
+        .withFile("aoml/13857/profiles/D13857_001.nc")
+        .withDac("aoml")
+        .withFloatId("13857")
+        .withAction(Action.GEO_MERGE)
+        .withFileType(ArgoFileType.PROFILE_CORE)
+        .withActionTimestamp(Instant.now())
+        .build());
+
+    datastore.updateIndex(MetadataRecord.builder()
+        .withTraceId(traceId)
+        .withFileName("D1111_001.nc")
+        .withFile("aoml/1111/profiles/D1111_001.nc")
+        .withDac("aoml")
+        .withFloatId("1111")
+        .withAction(Action.GEO_MERGE_REMOVE)
+        .withFileType(ArgoFileType.PROFILE_CORE)
+        .withActionTimestamp(Instant.now())
+        .build());
+
+
+
+    page1 = datastore.findUpdatedOrMissingGeoMergeFilesPage(DefaultIndexPageRequest.builder().withPageSize(100).build());
+    assertEquals(0, page1.getTotalRecords());
+
+    try (EntityManager em = emf.createEntityManager()) {
+      EntityTransaction tx = em.getTransaction();
+      tx.begin();
+      try {
+
+        ProfileFileEntity d13857 = em.find(ProfileFileEntity.class, "aoml/13857/profiles/D13857_001.nc");
+        assertEquals(FileStatus.ACTIVE.toString(), d13857.getFileStatus());
+        assertNotNull(d13857.getGeoMergeTime());
+
+        ProfileFileEntity d1111 = em.find(ProfileFileEntity.class, "aoml/1111/profiles/D1111_001.nc");
+        assertEquals(FileStatus.REMOVED.toString(), d1111.getFileStatus());
+        assertNull(d1111.getGeoMergeTime());
+
+        tx.commit();
+      } catch (Exception e) {
+        tx.rollback();
+        throw e;
+      }
+    }
+
 
   }
 

@@ -67,43 +67,45 @@ public class DefaultFloatMergeProcessor implements FloatMergeProcessor {
   private List<LocalPathSupplier> getInputFileSuppliers(ProfileOperation message) {
     List<LocalPathSupplier> result = new ArrayList<>(message.getFiles().size());
     for (MetadataRecord metadataRecord : message.getFiles()) {
-      result.add(new LocalPathSupplier() {
+      if (metadataRecord.getFileStatus() == FileStatus.ACTIVE) {
+        result.add(new LocalPathSupplier() {
 
-        private Path tempFile = null;
+          private Path tempFile = null;
 
-        @Override
-        public String getDac() {
-          return message.getDac();
-        }
-
-        @Override
-        public String getFileName() {
-          return metadataRecord.getFileName();
-        }
-
-        @Override
-        public void prepare() {
-          try {
-            tempFile = Files.createTempFile(localTempDir, "float-merge-download-", ".nc");
-            String path = outputFileStore.appendToPath(outputFileStore.getRoot(), "dac", metadataRecord.getFile());
-            outputFileStore.downloadLocalFile(path, tempFile);
-          } catch (IOException e) {
-            throw new RuntimeException("Unable to create temporary download file: " + tempFile, e);
+          @Override
+          public String getDac() {
+            return message.getDac();
           }
-        }
 
-        @Override
-        public Path getLocalPath() {
-          return tempFile;
-        }
-
-        @Override
-        public void cleanUp() {
-          if (tempFile != null) {
-            FileUtils.deleteQuietly(tempFile.toFile());
+          @Override
+          public String getFileName() {
+            return metadataRecord.getFileName();
           }
-        }
-      });
+
+          @Override
+          public void prepare() {
+            try {
+              tempFile = Files.createTempFile(localTempDir, "float-merge-download-", ".nc");
+              String path = outputFileStore.appendToPath(outputFileStore.getRoot(), "dac", metadataRecord.getFile());
+              outputFileStore.downloadLocalFile(path, tempFile);
+            } catch (IOException e) {
+              throw new RuntimeException("Unable to create temporary download file: " + tempFile, e);
+            }
+          }
+
+          @Override
+          public Path getLocalPath() {
+            return tempFile;
+          }
+
+          @Override
+          public void cleanUp() {
+            if (tempFile != null) {
+              FileUtils.deleteQuietly(tempFile.toFile());
+            }
+          }
+        });
+      }
     }
     return result;
   }

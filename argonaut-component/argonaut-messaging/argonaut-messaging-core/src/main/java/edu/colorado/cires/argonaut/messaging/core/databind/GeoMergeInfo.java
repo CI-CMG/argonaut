@@ -2,7 +2,6 @@ package edu.colorado.cires.argonaut.messaging.core.databind;
 
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
-import edu.colorado.cires.argonaut.messaging.core.databind.ProfileOperation.Builder;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -28,11 +27,11 @@ public class GeoMergeInfo {
   private final Integer month;
   private final Integer day;
   private final ArgoOcean ocean;
-  private final List<DacFloatFilePath> files;
+  private final List<MetadataRecord> files;
   private final Map<String, Object> otherFields;
 
   private GeoMergeInfo(UUID traceId, Integer year, Integer month, Integer day,
-      ArgoOcean ocean, List<DacFloatFilePath> files, Map<String, Object> otherFields) {
+      ArgoOcean ocean, List<MetadataRecord> files, Map<String, Object> otherFields) {
     this.traceId = traceId;
     this.year = year;
     this.month = month;
@@ -62,7 +61,7 @@ public class GeoMergeInfo {
     return ocean;
   }
 
-  public List<DacFloatFilePath> getFiles() {
+  public List<MetadataRecord> getFiles() {
     return files;
   }
 
@@ -108,7 +107,7 @@ public class GeoMergeInfo {
     private Integer month;
     private Integer day;
     private ArgoOcean ocean;
-    private List<DacFloatFilePath> files = Collections.emptyList();
+    private List<MetadataRecord> files = Collections.emptyList();
     private Map<String, Object> otherFields = new HashMap<>();
 
     private Builder() {
@@ -151,7 +150,7 @@ public class GeoMergeInfo {
       return this;
     }
 
-    public Builder withFiles(List<DacFloatFilePath> fileNames) {
+    public Builder withFiles(List<MetadataRecord> fileNames) {
       if (fileNames == null) {
         this.files = Collections.emptyList();
       } else {

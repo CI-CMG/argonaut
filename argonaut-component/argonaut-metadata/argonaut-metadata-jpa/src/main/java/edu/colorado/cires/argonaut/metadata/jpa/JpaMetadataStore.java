@@ -43,7 +43,10 @@ public class JpaMetadataStore implements MetadataStore {
         multiFloatMerger.updateMultiFloatMerge(record, true);
         break;
       case GEO_MERGE:
-        multiFloatMerger.updateGeoFloatMerge(record);
+        multiFloatMerger.updateGeoFloatMerge(record, false);
+        break;
+      case GEO_MERGE_REMOVE:
+        multiFloatMerger.updateGeoFloatMerge(record, true);
         break;
       case NONE:
       default:

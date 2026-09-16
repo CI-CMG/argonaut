@@ -4,10 +4,10 @@ import edu.colorado.cires.argonaut.core.merge.multiprof.LocalPathSupplier;
 import edu.colorado.cires.argonaut.core.merge.multiprof.MultiProfileMerger;
 import edu.colorado.cires.argonaut.file.core.FileStore;
 import edu.colorado.cires.argonaut.messaging.core.databind.ArgoFileType;
-import edu.colorado.cires.argonaut.messaging.core.databind.DacFloatFilePath;
 import edu.colorado.cires.argonaut.messaging.core.databind.GeoMergeInfo;
 import edu.colorado.cires.argonaut.messaging.core.databind.MetadataRecord;
 import edu.colorado.cires.argonaut.messaging.core.databind.MetadataRecord.Action;
+import edu.colorado.cires.argonaut.messaging.core.databind.MetadataRecord.FileStatus;
 import edu.colorado.cires.argonaut.messaging.core.queue.MessageSender;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -66,107 +66,140 @@ public class DefaultGeoMergeProcessor implements GeoMergeProcessor {
 
   private List<LocalPathSupplier> getInputFileSuppliers(GeoMergeInfo message) {
     List<LocalPathSupplier> result = new ArrayList<>(message.getFiles().size());
-    for (DacFloatFilePath dacPath : message.getFiles()) {
-      result.add(new LocalPathSupplier() {
+    for (MetadataRecord dacPath : message.getFiles()) {
+      if(dacPath.getFileStatus() == FileStatus.ACTIVE) {
+        result.add(new LocalPathSupplier() {
 
-        private Path tempFile = null;
+          private Path tempFile = null;
 
-        @Override
-        public String getDac() {
-          return dacPath.getDac();
-        }
-
-        @Override
-        public String getFileName() {
-          return outputFileStore.getFileName(dacPath.getFile());
-        }
-
-        @Override
-        public void prepare() {
-          try {
-            tempFile = Files.createTempFile(localTempDir, "geo-merge-download-", ".nc");
-            String path = outputFileStore.appendToPath(outputFileStore.getRoot(), "dac", dacPath.getFile());
-            outputFileStore.downloadLocalFile(path, tempFile);
-          } catch (IOException e) {
-            throw new RuntimeException("Unable to create temporary download file: " + tempFile, e);
+          @Override
+          public String getDac() {
+            return dacPath.getDac();
           }
-        }
 
-        @Override
-        public Path getLocalPath() {
-          return tempFile;
-        }
-
-        @Override
-        public void cleanUp() {
-          if (tempFile != null) {
-            FileUtils.deleteQuietly(tempFile.toFile());
+          @Override
+          public String getFileName() {
+            return dacPath.getFileName();
           }
-        }
-      });
+
+          @Override
+          public void prepare() {
+            try {
+              tempFile = Files.createTempFile(localTempDir, "geo-merge-download-", ".nc");
+              String path = outputFileStore.appendToPath(outputFileStore.getRoot(), "dac", dacPath.getFile());
+              outputFileStore.downloadLocalFile(path, tempFile);
+            } catch (IOException e) {
+              throw new RuntimeException("Unable to create temporary download file: " + tempFile, e);
+            }
+          }
+
+          @Override
+          public Path getLocalPath() {
+            return tempFile;
+          }
+
+          @Override
+          public void cleanUp() {
+            if (tempFile != null) {
+              FileUtils.deleteQuietly(tempFile.toFile());
+            }
+          }
+        });
+      }
+
     }
     return result;
   }
 
+  private static boolean isRemoveMergeFile(GeoMergeInfo message) {
+    long activeFiles = message.getFiles().stream()
+        .filter(metadataRecord -> metadataRecord.getFileStatus() == FileStatus.ACTIVE)
+        .count();
+    return activeFiles == 0L;
+  }
+
+  private void mergeProfiles(GeoMergeInfo message) {
+    LOGGER.info("Geo merge executing: {} {}/{}/{}", message.getOcean(), message.getYear(), message.getMonth(), message.getDay());
+    if (LOGGER.isDebugEnabled()) {
+      LOGGER.debug("Geo merge executing: {}", message);
+    }
+
+    String outputFile = getOutputFile(message);
+
+    Path localOutputFile;
+    try {
+      localOutputFile = Files.createTempFile(localTempDir, "geo-merge-", ".nc");
+    } catch (IOException e) {
+      throw new RuntimeException("Unable to create temporary output file", e);
+    }
+
+    try {
+      try {
+        merger.mergeProfiles(getInputFileSuppliers(message), PARAMETERS, localOutputFile);
+      } catch (IOException e) {
+        throw new RuntimeException("Unable to merge geo data " + outputFile, e);
+      }
+      try {
+        outputFileStore.uploadLocalFile(localOutputFile, outputFile);
+      } catch (IOException e) {
+        throw new RuntimeException("Unable to upload merge file " + outputFile, e);
+      }
+
+    } finally {
+      FileUtils.deleteQuietly(localOutputFile.toFile());
+    }
+  }
+
+  private void removeMergeFile(GeoMergeInfo message) {
+    String outputFile = getOutputFile(message);
+    outputFileStore.delete(outputFile);
+    LOGGER.info("Removed geo-merge file: {}", outputFile);
+  }
+
+  private String getOutputFile(GeoMergeInfo message) {
+    String fileName = String.format("%04d%02d%02d_prof.nc", message.getYear(), message.getMonth(), message.getDay());
+    return outputFileStore.appendToPath(
+        outputFileStore.getRoot(),
+        "geo",
+        message.getOcean().getDirectory(),
+        String.format("%04d", message.getYear()),
+        String.format("%02d", message.getMonth()),
+        fileName
+    );
+  }
+
+  private void notifyMergeCompleted(GeoMergeInfo message, boolean remove) {
+
+    Instant now = Instant.now();
+
+    for (MetadataRecord filePath : message.getFiles()) {
+      messageSender.sendJson(
+          updateIndexQueue,
+          jsonMapper.writeValueAsString(MetadataRecord.builder()
+              .withTraceId(message.getTraceId())
+              .withFileName(outputFileStore.getFileName(filePath.getFile()))
+              .withFile(filePath.getFile())
+              .withDac(filePath.getDac())
+              .withFloatId(filePath.getFloatId())
+              .withAction(filePath.getFileStatus() == FileStatus.REMOVED ? Action.GEO_MERGE_REMOVE : Action.GEO_MERGE)
+              .withFileType(ArgoFileType.PROFILE_CORE)
+              .withActionTimestamp(now)
+              .build()));
+    }
+
+  }
+
+
   @Override
   public void merge(GeoMergeInfo message) {
     if (message.getOcean().getDirectory() != null) {
-
-      LOGGER.info("Geo merge executing: {} {}/{}/{}", message.getOcean(), message.getYear(), message.getMonth(), message.getDay());
-      if (LOGGER.isDebugEnabled()) {
-        LOGGER.debug("Geo merge executing: {}", message);
+      boolean remove = isRemoveMergeFile(message);
+      if (remove) {
+        removeMergeFile(message);
+      } else {
+        mergeProfiles(message);
       }
-
-
-      String fileName = String.format("%04d%02d%02d_prof.nc", message.getYear(), message.getMonth(), message.getDay());
-      String outputFile = outputFileStore.appendToPath(
-          outputFileStore.getRoot(),
-          "geo",
-          message.getOcean().getDirectory(),
-          String.format("%04d", message.getYear()),
-          String.format("%02d", message.getMonth()),
-          fileName
-      );
-
-      Path localOutputFile;
-      try {
-        localOutputFile = Files.createTempFile(localTempDir, "geo-merge-", ".nc");
-      } catch (IOException e) {
-        throw new RuntimeException("Unable to create temporary output file", e);
-      }
-
-      try {
-        try {
-          merger.mergeProfiles(getInputFileSuppliers(message), PARAMETERS, localOutputFile);
-        } catch (IOException e) {
-          throw new RuntimeException("Unable to merge geo data " + fileName, e);
-        }
-        try {
-          outputFileStore.uploadLocalFile(localOutputFile, outputFile);
-        } catch (IOException e) {
-          throw new RuntimeException("Unable to upload merge file " + fileName, e);
-        }
-
-        Instant now = Instant.now();
-
-        for (DacFloatFilePath filePath : message.getFiles()) {
-          messageSender.sendJson(
-              updateIndexQueue,
-              jsonMapper.writeValueAsString(MetadataRecord.builder()
-                  .withTraceId(message.getTraceId())
-                  .withFileName(outputFileStore.getFileName(filePath.getFile()))
-                  .withFile(filePath.getFile())
-                  .withDac(filePath.getDac())
-                  .withFloatId(filePath.getFloatId())
-                  .withAction(Action.GEO_MERGE)
-                  .withFileType(ArgoFileType.PROFILE_CORE)
-                  .withActionTimestamp(now)
-                  .build()));
-        }
-
-      } finally {
-        FileUtils.deleteQuietly(localOutputFile.toFile());
-      }
+      notifyMergeCompleted(message, remove);
     }
   }
 }

@@ -8,8 +8,9 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import edu.colorado.cires.argonaut.messaging.core.databind.ArgoOcean;
-import edu.colorado.cires.argonaut.messaging.core.databind.DacFloatFilePath;
 import edu.colorado.cires.argonaut.messaging.core.databind.GeoMergeInfo;
+import edu.colorado.cires.argonaut.messaging.core.databind.MetadataRecord;
+import edu.colorado.cires.argonaut.messaging.core.databind.MetadataRecord.FileStatus;
 import edu.colorado.cires.argonaut.messaging.core.queue.MessageSender;
 import edu.colorado.cires.argonaut.messaging.core.util.ArgonautJsonMapperFactory;
 import edu.colorado.cires.argonaut.metadata.core.DefaultGeoMergePage;
@@ -49,7 +50,9 @@ public class DefaultGeoMergeAggregatorTest {
               .withDay(1 + pageRequest.getPageNumber())
               .withOcean(ArgoOcean.PACIFIC_OCEAN)
               .withTraceId(traceId)
-              .withFiles(Collections.singletonList(DacFloatFilePath.builder()
+              .withFiles(Collections.singletonList(MetadataRecord.builder()
+                      .withFileName("bbbb.nc")
+                      .withFileStatus(FileStatus.ACTIVE)
                       .withFile("aaa/bbbb.nc")
                       .withFloatId("bbbb")
                       .withDac("aaa")
@@ -61,7 +64,9 @@ public class DefaultGeoMergeAggregatorTest {
               .withDay(2 + pageRequest.getPageNumber())
               .withOcean(ArgoOcean.ATLANTIC_OCEAN)
               .withTraceId(traceId)
-              .withFiles(Collections.singletonList(DacFloatFilePath.builder()
+              .withFiles(Collections.singletonList(MetadataRecord.builder()
+                  .withFileName("dddd.nc")
+                  .withFileStatus(FileStatus.ACTIVE)
                   .withFile("ccc/dddd.nc")
                   .withFloatId("dddd")
                   .withDac("ccc")
@@ -87,7 +92,9 @@ public class DefaultGeoMergeAggregatorTest {
             .withOcean(ArgoOcean.PACIFIC_OCEAN)
             .withTraceId(traceId)
             .withFiles(Collections.singletonList(
-                DacFloatFilePath.builder()
+                MetadataRecord.builder()
+                    .withFileName("bbbb.nc")
+                    .withFileStatus(FileStatus.ACTIVE)
                     .withFile("aaa/bbbb.nc")
                     .withFloatId("bbbb")
                     .withDac("aaa")
@@ -101,7 +108,9 @@ public class DefaultGeoMergeAggregatorTest {
             .withOcean(ArgoOcean.ATLANTIC_OCEAN)
             .withTraceId(traceId)
             .withFiles(Collections.singletonList(
-                DacFloatFilePath.builder()
+                MetadataRecord.builder()
+                    .withFileName("dddd.nc")
+                    .withFileStatus(FileStatus.ACTIVE)
                     .withFile("ccc/dddd.nc")
                     .withFloatId("dddd")
                     .withDac("ccc")
@@ -115,7 +124,9 @@ public class DefaultGeoMergeAggregatorTest {
             .withOcean(ArgoOcean.PACIFIC_OCEAN)
             .withTraceId(traceId)
             .withFiles(Collections.singletonList(
-                DacFloatFilePath.builder()
+                MetadataRecord.builder()
+                    .withFileName("bbbb.nc")
+                    .withFileStatus(FileStatus.ACTIVE)
                     .withFile("aaa/bbbb.nc")
                     .withFloatId("bbbb")
                     .withDac("aaa")
@@ -129,7 +140,9 @@ public class DefaultGeoMergeAggregatorTest {
             .withOcean(ArgoOcean.ATLANTIC_OCEAN)
             .withTraceId(traceId)
             .withFiles(Collections.singletonList(
-                DacFloatFilePath.builder()
+                MetadataRecord.builder()
+                    .withFileName("dddd.nc")
+                    .withFileStatus(FileStatus.ACTIVE)
                     .withFile("ccc/dddd.nc")
                     .withFloatId("dddd")
                     .withDac("ccc")

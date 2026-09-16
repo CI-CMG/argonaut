@@ -2,7 +2,6 @@ package edu.colorado.cires.argonaut.metadata.jpa;
 
 import edu.colorado.cires.argonaut.messaging.core.databind.ArgoFileType;
 import edu.colorado.cires.argonaut.messaging.core.databind.ArgoOcean;
-import edu.colorado.cires.argonaut.messaging.core.databind.DacFloatFilePath;
 import edu.colorado.cires.argonaut.messaging.core.databind.GeoMergeInfo;
 import edu.colorado.cires.argonaut.messaging.core.databind.MetadataRecord;
 import edu.colorado.cires.argonaut.messaging.core.databind.MetadataRecord.FileStatus;
@@ -118,19 +117,31 @@ class Finder {
     return Optional.empty();
   }
 
-  private static List<DacFloatFilePath> getGeoPaths(EntityManager em, int year, int month, int day, String ocean) {
+  private static List<MetadataRecord> getGeoPaths(EntityManager em, int year, int month, int day, String ocean) {
     List<ProfileFileEntity> entities = em.createQuery(
-            "SELECT p FROM ProfileFileEntity p WHERE p.year = :year AND p.month = :month AND p.day = :day AND ocean = :ocean AND p.fileStatus = 'ACTIVE' AND p.fileType = 'PROFILE_CORE'")
+            """
+                SELECT p FROM ProfileFileEntity p
+                  WHERE p.year = :year
+                    AND p.month = :month
+                    AND p.day = :day
+                    AND ocean = :ocean
+                    AND p.fileType = 'PROFILE_CORE'
+                    AND (p.fileStatus = 'ACTIVE' OR p.geoMergeTime IS NOT NULL)
+            """)
         .setParameter("year", year)
         .setParameter("month", month)
         .setParameter("day", day)
         .setParameter("ocean", ocean)
         .getResultList();
-    return entities.stream().map(entity -> DacFloatFilePath.builder()
+
+    return entities.stream().map(entity -> MetadataRecord.builder()
+        .withFileName(entity.getFileName())
         .withDac(entity.getCycle().getFloatId().getDac().getDac())
-        .withFloatId(entity.getCycle().getFloatId().getFloatId())
         .withFile(entity.getFile())
+        .withFloatId(entity.getCycle().getFloatId().getFloatId())
+        .withFileStatus(FileStatus.valueOf(entity.getFileStatus()))
         .build()).toList();
+
   }
 
   GeoMergePage findUpdatedOrMissingGeoMergeFilesPage(IndexPageRequest pageRequest) {
@@ -222,11 +233,13 @@ class Finder {
     for (CycleEntity cycle : floatEntity.getCycles()) {
       for (ProfileFileEntity profile : cycle.getProfiles()) {
         if (ArgoFileType.PROFILE_CORE.toString().equals(profile.getFileType())) {
-          result.add(MetadataRecord.builder()
-              .withFileName(profile.getFileName())
-              .withFile(profile.getFile())
-              .withFileStatus(FileStatus.valueOf(profile.getFileStatus()))
-              .build());
+          if (FileStatus.ACTIVE.toString().equals(profile.getFileStatus()) || profile.getMultiFloatMergeTime() != null) {
+            result.add(MetadataRecord.builder()
+                .withFileName(profile.getFileName())
+                .withFile(profile.getFile())
+                .withFileStatus(FileStatus.valueOf(profile.getFileStatus()))
+                .build());
+          }
         }
       }
     }
