@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import edu.colorado.cires.argonaut.messaging.core.databind.ArgoFileType;
 import edu.colorado.cires.argonaut.messaging.core.databind.ArgoOcean;
@@ -52,6 +53,7 @@ public class JpaMetadataStoreTest {
       EntityTransaction tx = em.getTransaction();
       tx.begin();
       try {
+        em.createQuery("delete from MetadataSyntheticMergeEntity").executeUpdate();
         em.createQuery("delete from ProfileMergeFileEntity").executeUpdate();
         em.createQuery("delete from ProfileFileEntity").executeUpdate();
         em.createQuery("delete from MetadataFileEntity").executeUpdate();
@@ -459,26 +461,10 @@ public class JpaMetadataStoreTest {
         .withFloatId("13857")
         .withAction(Action.SYNTHETIC_MERGE)
         .withFileType(ArgoFileType.METADATA)
-        .build());
-
-    datastore.updateIndex(MetadataRecord.builder()
-        .withFile("aoml/13857/profiles/D13857_002.nc")
-        .withFileName("D13857_002.nc")
-        .withActionTimestamp(date)
-        .withAction(Action.SYNTHETIC_MERGE)
-        .withFileType(ArgoFileType.PROFILE_CORE)
-        .withDac("aoml")
-        .withFloatId("13857")
-        .build());
-
-    datastore.updateIndex(MetadataRecord.builder()
-        .withFile("aoml/13857/profiles/BD13857_002.nc")
-        .withFileName("BD13857_002.nc")
-        .withActionTimestamp(date)
-        .withAction(Action.SYNTHETIC_MERGE)
-        .withFileType(ArgoFileType.PROFILE_BIOCHEMICAL)
-        .withDac("aoml")
-        .withFloatId("13857")
+        .withRelatedFiles(Arrays.asList(
+            "aoml/13857/profiles/D13857_002.nc",
+            "aoml/13857/profiles/BD13857_002.nc"
+        ))
         .build());
 
     datastore.updateIndex(MetadataRecord.builder()
@@ -510,10 +496,10 @@ public class JpaMetadataStoreTest {
             .withDac("aoml")
             .withFloatId("123")
             .withFiles(Arrays.asList(
-                MetadataRecord.builder().withFile("aoml/123/123_meta.nc").withFileName("123_meta.nc").withFileStatus(FileStatus.ACTIVE).build(),
-                MetadataRecord.builder().withFile("aoml/123/profiles/BD123_001.nc").withFileName("BD123_001.nc").withFileStatus(FileStatus.ACTIVE)
+                MetadataRecord.builder().withFileType(ArgoFileType.METADATA).withFile("aoml/123/123_meta.nc").withFileName("123_meta.nc").withFileStatus(FileStatus.ACTIVE).build(),
+                MetadataRecord.builder().withFileType(ArgoFileType.PROFILE_BIOCHEMICAL).withFile("aoml/123/profiles/BD123_001.nc").withFileName("BD123_001.nc").withFileStatus(FileStatus.ACTIVE)
                     .build(),
-                MetadataRecord.builder().withFile("aoml/123/profiles/D123_001.nc").withFileName("D123_001.nc").withFileStatus(FileStatus.ACTIVE).build()
+                MetadataRecord.builder().withFileType(ArgoFileType.PROFILE_CORE).withFile("aoml/123/profiles/D123_001.nc").withFileName("D123_001.nc").withFileStatus(FileStatus.ACTIVE).build()
             ))
             .build()),
         page1.getPage());
@@ -527,16 +513,810 @@ public class JpaMetadataStoreTest {
             .withDac("aoml")
             .withFloatId("13857")
             .withFiles(Arrays.asList(
-                MetadataRecord.builder().withFile("aoml/13857/13857_meta.nc").withFileName("13857_meta.nc").withFileStatus(FileStatus.ACTIVE).build(),
-                MetadataRecord.builder().withFile("aoml/13857/profiles/BD13857_001.nc").withFileName("BD13857_001.nc").withFileStatus(FileStatus.ACTIVE)
+                MetadataRecord.builder().withFileType(ArgoFileType.METADATA).withFile("aoml/13857/13857_meta.nc").withFileName("13857_meta.nc").withFileStatus(FileStatus.ACTIVE).build(),
+                MetadataRecord.builder().withFileType(ArgoFileType.PROFILE_BIOCHEMICAL).withFile("aoml/13857/profiles/BD13857_001.nc").withFileName("BD13857_001.nc").withFileStatus(FileStatus.ACTIVE)
                     .build(),
-                MetadataRecord.builder().withFile("aoml/13857/profiles/D13857_001.nc").withFileName("D13857_001.nc").withFileStatus(FileStatus.ACTIVE)
+                MetadataRecord.builder().withFileType(ArgoFileType.PROFILE_CORE).withFile("aoml/13857/profiles/D13857_001.nc").withFileName("D13857_001.nc").withFileStatus(FileStatus.ACTIVE)
                     .build()
             ))
             .build()),
         page2.getPage());
   }
 
+  @Test
+  public void testFindRemovedMissingSyntheticProfilesPage() throws Exception {
+
+    Instant date = Instant.now();
+
+    datastore.updateIndex(MetadataRecord.builder()
+        .withFile("aoml/123/123_meta.nc")
+        .withFileName("123_meta.nc")
+        .withDac("aoml")
+        .withFloatId("123")
+        .withActionTimestamp(date)
+        .withDate(date)
+        .withLatitude(0.267)
+        .withLongitude(-16.032)
+        .withOcean(ArgoOcean.ATLANTIC_OCEAN)
+        .withProfilerType("845")
+        .withInstitution("A0")
+        .withDateUpdate(date)
+        .withAction(Action.UPDATE)
+        .withFileType(ArgoFileType.METADATA)
+        .build());
+
+    datastore.updateIndex(MetadataRecord.builder()
+        .withFile("aoml/123/profiles/D123_001.nc")
+        .withFileName("D123_001.nc")
+        .withDac("aoml")
+        .withFloatId("123")
+        .withCycleNumber("001")
+        .withDirection("A")
+        .withParameterDataMode("D")
+        .withActionTimestamp(date)
+        .withDate(date)
+        .withLatitude(0.267)
+        .withLatitudeMin(0.1)
+        .withLatitudeMax(0.4)
+        .withLongitude(-16.032)
+        .withLongitudeMin(-17.0)
+        .withLongitudeMax(-14.0)
+        .withOcean(ArgoOcean.ATLANTIC_OCEAN)
+        .withProfilerType("845")
+        .withInstitution("A0")
+        .withDateUpdate(date)
+        .withParameters("params")
+        .withAction(Action.UPDATE)
+        .withFileType(ArgoFileType.PROFILE_CORE)
+        .build());
+
+    datastore.updateIndex(MetadataRecord.builder()
+        .withFile("aoml/123/profiles/BD123_001.nc")
+        .withFileName("BD123_001.nc")
+        .withDac("aoml")
+        .withFloatId("123")
+        .withCycleNumber("001")
+        .withDirection("A")
+        .withParameterDataMode("D")
+        .withActionTimestamp(date)
+        .withDate(date)
+        .withLatitude(0.267)
+        .withLatitudeMin(0.1)
+        .withLatitudeMax(0.4)
+        .withLongitude(-16.032)
+        .withLongitudeMin(-17.0)
+        .withLongitudeMax(-14.0)
+        .withOcean(ArgoOcean.ATLANTIC_OCEAN)
+        .withProfilerType("845")
+        .withInstitution("A0")
+        .withDateUpdate(date)
+        .withParameters("params")
+        .withAction(Action.UPDATE)
+        .withFileType(ArgoFileType.PROFILE_BIOCHEMICAL)
+        .build());
+
+    datastore.updateIndex(MetadataRecord.builder()
+        .withFile("aoml/999/999_meta.nc")
+        .withFileName("999_meta.nc")
+        .withDac("aoml")
+        .withFloatId("999")
+        .withActionTimestamp(date)
+        .withDate(date)
+        .withLatitude(0.267)
+        .withLongitude(-16.032)
+        .withOcean(ArgoOcean.ATLANTIC_OCEAN)
+        .withProfilerType("845")
+        .withInstitution("A0")
+        .withDateUpdate(date)
+        .withAction(Action.UPDATE)
+        .withFileType(ArgoFileType.METADATA)
+        .build());
+
+    datastore.updateIndex(MetadataRecord.builder()
+        .withFile("aoml/999/profiles/D999_001.nc")
+        .withFileName("D999_001.nc")
+        .withDac("aoml")
+        .withFloatId("999")
+        .withCycleNumber("001")
+        .withDirection("A")
+        .withParameterDataMode("D")
+        .withActionTimestamp(date)
+        .withDate(date)
+        .withLatitude(0.267)
+        .withLatitudeMin(0.1)
+        .withLatitudeMax(0.4)
+        .withLongitude(-16.032)
+        .withLongitudeMin(-17.0)
+        .withLongitudeMax(-14.0)
+        .withOcean(ArgoOcean.ATLANTIC_OCEAN)
+        .withProfilerType("845")
+        .withInstitution("A0")
+        .withDateUpdate(date)
+        .withParameters("params")
+        .withAction(Action.UPDATE)
+        .withFileType(ArgoFileType.PROFILE_CORE)
+        .build());
+
+    datastore.updateIndex(MetadataRecord.builder()
+        .withFile("aoml/999/profiles/BD999_001.nc")
+        .withFileName("BD999_001.nc")
+        .withDac("aoml")
+        .withFloatId("999")
+        .withCycleNumber("001")
+        .withDirection("A")
+        .withParameterDataMode("D")
+        .withActionTimestamp(date)
+        .withDate(date)
+        .withLatitude(0.267)
+        .withLatitudeMin(0.1)
+        .withLatitudeMax(0.4)
+        .withLongitude(-16.032)
+        .withLongitudeMin(-17.0)
+        .withLongitudeMax(-14.0)
+        .withOcean(ArgoOcean.ATLANTIC_OCEAN)
+        .withProfilerType("845")
+        .withInstitution("A0")
+        .withDateUpdate(date)
+        .withParameters("params")
+        .withAction(Action.UPDATE)
+        .withFileType(ArgoFileType.PROFILE_BIOCHEMICAL)
+        .build());
+
+    datastore.updateIndex(MetadataRecord.builder()
+        .withFile("aoml/13857/13857_meta.nc")
+        .withFileName("13857_meta.nc")
+        .withDac("aoml")
+        .withFloatId("13857")
+        .withActionTimestamp(date)
+        .withDate(date)
+        .withLatitude(0.267)
+        .withLongitude(-16.032)
+        .withOcean(ArgoOcean.ATLANTIC_OCEAN)
+        .withProfilerType("845")
+        .withInstitution("A0")
+        .withDateUpdate(date)
+        .withAction(Action.UPDATE)
+        .withFileType(ArgoFileType.METADATA)
+        .build());
+
+    datastore.updateIndex(MetadataRecord.builder()
+        .withFile("aoml/13857/profiles/D13857_001.nc")
+        .withFileName("D13857_001.nc")
+        .withDac("aoml")
+        .withFloatId("13857")
+        .withCycleNumber("001")
+        .withDirection("A")
+        .withParameterDataMode("D")
+        .withActionTimestamp(date)
+        .withDate(date)
+        .withLatitude(0.267)
+        .withLatitudeMin(0.1)
+        .withLatitudeMax(0.4)
+        .withLongitude(-16.032)
+        .withLongitudeMin(-17.0)
+        .withLongitudeMax(-14.0)
+        .withOcean(ArgoOcean.ATLANTIC_OCEAN)
+        .withProfilerType("845")
+        .withInstitution("A0")
+        .withDateUpdate(date)
+        .withParameters("params")
+        .withAction(Action.UPDATE)
+        .withFileType(ArgoFileType.PROFILE_CORE)
+        .build());
+
+    datastore.updateIndex(MetadataRecord.builder()
+        .withFile("aoml/13857/profiles/BD13857_001.nc")
+        .withFileName("BD13857_001.nc")
+        .withDac("aoml")
+        .withFloatId("13857")
+        .withCycleNumber("001")
+        .withDirection("A")
+        .withParameterDataMode("D")
+        .withActionTimestamp(date)
+        .withDate(date)
+        .withLatitude(0.267)
+        .withLatitudeMin(0.1)
+        .withLatitudeMax(0.4)
+        .withLongitude(-16.032)
+        .withLongitudeMin(-17.0)
+        .withLongitudeMax(-14.0)
+        .withOcean(ArgoOcean.ATLANTIC_OCEAN)
+        .withProfilerType("845")
+        .withInstitution("A0")
+        .withDateUpdate(date)
+        .withParameters("params")
+        .withAction(Action.UPDATE)
+        .withFileType(ArgoFileType.PROFILE_BIOCHEMICAL)
+        .build());
+
+    datastore.updateIndex(MetadataRecord.builder()
+        .withFile("aoml/13857/profiles/D13857_002.nc")
+        .withFileName("D13857_002.nc")
+        .withDac("aoml")
+        .withFloatId("13857")
+        .withCycleNumber("002")
+        .withDirection("A")
+        .withParameterDataMode("D")
+        .withActionTimestamp(date)
+        .withDate(date)
+        .withLatitude(0.267)
+        .withLatitudeMin(0.1)
+        .withLatitudeMax(0.4)
+        .withLongitude(-16.032)
+        .withLongitudeMin(-17.0)
+        .withLongitudeMax(-14.0)
+        .withOcean(ArgoOcean.ATLANTIC_OCEAN)
+        .withProfilerType("845")
+        .withInstitution("A0")
+        .withDateUpdate(date)
+        .withParameters("params")
+        .withAction(Action.UPDATE)
+        .withFileType(ArgoFileType.PROFILE_CORE)
+        .build());
+
+    datastore.updateIndex(MetadataRecord.builder()
+        .withFile("aoml/13857/profiles/BD13857_002.nc")
+        .withFileName("BD13857_002.nc")
+        .withDac("aoml")
+        .withFloatId("13857")
+        .withCycleNumber("002")
+        .withDirection("A")
+        .withParameterDataMode("D")
+        .withActionTimestamp(date)
+        .withDate(date)
+        .withLatitude(0.267)
+        .withLatitudeMin(0.1)
+        .withLatitudeMax(0.4)
+        .withLongitude(-16.032)
+        .withLongitudeMin(-17.0)
+        .withLongitudeMax(-14.0)
+        .withOcean(ArgoOcean.ATLANTIC_OCEAN)
+        .withProfilerType("845")
+        .withInstitution("A0")
+        .withDateUpdate(date)
+        .withParameters("params")
+        .withAction(Action.UPDATE)
+        .withFileType(ArgoFileType.PROFILE_BIOCHEMICAL)
+        .build());
+
+    datastore.updateIndex(MetadataRecord.builder()
+        .withFile("aoml/13857/profiles/D13857_003.nc")
+        .withFileName("D13857_003.nc")
+        .withDac("aoml")
+        .withFloatId("13857")
+        .withCycleNumber("003")
+        .withDirection("A")
+        .withParameterDataMode("D")
+        .withActionTimestamp(date)
+        .withDate(date)
+        .withLatitude(0.267)
+        .withLatitudeMin(0.1)
+        .withLatitudeMax(0.4)
+        .withLongitude(-16.032)
+        .withLongitudeMin(-17.0)
+        .withLongitudeMax(-14.0)
+        .withOcean(ArgoOcean.ATLANTIC_OCEAN)
+        .withProfilerType("845")
+        .withInstitution("A0")
+        .withDateUpdate(date)
+        .withParameters("params")
+        .withAction(Action.UPDATE)
+        .withFileType(ArgoFileType.PROFILE_CORE)
+        .build());
+
+    datastore.updateIndex(MetadataRecord.builder()
+        .withFile("aoml/13857/profiles/BD13857_003.nc")
+        .withFileName("BD13857_003.nc")
+        .withDac("aoml")
+        .withFloatId("13857")
+        .withCycleNumber("003")
+        .withDirection("A")
+        .withParameterDataMode("D")
+        .withActionTimestamp(date)
+        .withDate(date)
+        .withLatitude(0.267)
+        .withLatitudeMin(0.1)
+        .withLatitudeMax(0.4)
+        .withLongitude(-16.032)
+        .withLongitudeMin(-17.0)
+        .withLongitudeMax(-14.0)
+        .withOcean(ArgoOcean.ATLANTIC_OCEAN)
+        .withProfilerType("845")
+        .withInstitution("A0")
+        .withDateUpdate(date)
+        .withParameters("params")
+        .withAction(Action.UPDATE)
+        .withFileType(ArgoFileType.PROFILE_BIOCHEMICAL)
+        .build());
+
+    ProfilePage page = datastore.findUpdatedOrMissingSyntheticProfilesPage(DefaultIndexPageRequest.builder().withPageSize(10).build());
+    assertEquals(Arrays.asList(
+            ProfileOperation.builder()
+                .withDac("aoml")
+                .withFloatId("123")
+                .withFiles(Arrays.asList(
+                    MetadataRecord.builder().withFileType(ArgoFileType.METADATA).withFile("aoml/123/123_meta.nc").withFileName("123_meta.nc").withFileStatus(FileStatus.ACTIVE).build(),
+                    MetadataRecord.builder().withFileType(ArgoFileType.PROFILE_BIOCHEMICAL).withFile("aoml/123/profiles/BD123_001.nc").withFileName("BD123_001.nc")
+                        .withFileStatus(FileStatus.ACTIVE).build(),
+                    MetadataRecord.builder().withFileType(ArgoFileType.PROFILE_CORE).withFile("aoml/123/profiles/D123_001.nc").withFileName("D123_001.nc").withFileStatus(FileStatus.ACTIVE)
+                        .build()
+                ))
+                .build(),
+            ProfileOperation.builder()
+                .withDac("aoml")
+                .withFloatId("13857")
+                .withFiles(Arrays.asList(
+                    MetadataRecord.builder().withFileType(ArgoFileType.METADATA).withFile("aoml/13857/13857_meta.nc").withFileName("13857_meta.nc").withFileStatus(FileStatus.ACTIVE).build(),
+                    MetadataRecord.builder().withFileType(ArgoFileType.PROFILE_BIOCHEMICAL).withFile("aoml/13857/profiles/BD13857_001.nc").withFileName("BD13857_001.nc")
+                        .withFileStatus(FileStatus.ACTIVE).build(),
+                    MetadataRecord.builder().withFileType(ArgoFileType.PROFILE_CORE).withFile("aoml/13857/profiles/D13857_001.nc").withFileName("D13857_001.nc").withFileStatus(FileStatus.ACTIVE)
+                        .build()
+                ))
+                .build(),
+            ProfileOperation.builder()
+                .withDac("aoml")
+                .withFloatId("13857")
+                .withFiles(Arrays.asList(
+                    MetadataRecord.builder().withFileType(ArgoFileType.METADATA).withFile("aoml/13857/13857_meta.nc").withFileName("13857_meta.nc").withFileStatus(FileStatus.ACTIVE).build(),
+                    MetadataRecord.builder().withFileType(ArgoFileType.PROFILE_BIOCHEMICAL).withFile("aoml/13857/profiles/BD13857_002.nc").withFileName("BD13857_002.nc")
+                        .withFileStatus(FileStatus.ACTIVE).build(),
+                    MetadataRecord.builder().withFileType(ArgoFileType.PROFILE_CORE).withFile("aoml/13857/profiles/D13857_002.nc").withFileName("D13857_002.nc").withFileStatus(FileStatus.ACTIVE)
+                        .build()
+                ))
+                .build(),
+            ProfileOperation.builder()
+                .withDac("aoml")
+                .withFloatId("13857")
+                .withFiles(Arrays.asList(
+                    MetadataRecord.builder().withFileType(ArgoFileType.METADATA).withFile("aoml/13857/13857_meta.nc").withFileName("13857_meta.nc").withFileStatus(FileStatus.ACTIVE).build(),
+                    MetadataRecord.builder().withFileType(ArgoFileType.PROFILE_BIOCHEMICAL).withFile("aoml/13857/profiles/BD13857_003.nc").withFileName("BD13857_003.nc")
+                        .withFileStatus(FileStatus.ACTIVE).build(),
+                    MetadataRecord.builder().withFileType(ArgoFileType.PROFILE_CORE).withFile("aoml/13857/profiles/D13857_003.nc").withFileName("D13857_003.nc").withFileStatus(FileStatus.ACTIVE)
+                        .build()
+                ))
+                .build(),
+            ProfileOperation.builder()
+                .withDac("aoml")
+                .withFloatId("999")
+                .withFiles(Arrays.asList(
+                    MetadataRecord.builder().withFileType(ArgoFileType.METADATA).withFile("aoml/999/999_meta.nc").withFileName("999_meta.nc").withFileStatus(FileStatus.ACTIVE).build(),
+                    MetadataRecord.builder().withFileType(ArgoFileType.PROFILE_BIOCHEMICAL).withFile("aoml/999/profiles/BD999_001.nc").withFileName("BD999_001.nc")
+                        .withFileStatus(FileStatus.ACTIVE).build(),
+                    MetadataRecord.builder().withFileType(ArgoFileType.PROFILE_CORE).withFile("aoml/999/profiles/D999_001.nc").withFileName("D999_001.nc").withFileStatus(FileStatus.ACTIVE)
+                        .build()
+                ))
+                .build()
+        ),
+        page.getPage());
+
+    datastore.updateIndex(MetadataRecord.builder()
+        .withFile("aoml/123/123_meta.nc")
+        .withFileName("123_meta.nc")
+        .withActionTimestamp(date)
+        .withDac("aoml")
+        .withFloatId("123")
+        .withAction(Action.SYNTHETIC_MERGE)
+        .withFileType(ArgoFileType.METADATA)
+        .withRelatedFiles(Arrays.asList(
+            "aoml/123/profiles/BD123_001.nc",
+            "aoml/123/profiles/D123_001.nc"
+        ))
+        .build());
+
+    datastore.updateIndex(MetadataRecord.builder()
+        .withFile("aoml/123/profiles/SD123_001.nc")
+        .withFileName("SD123_001.nc")
+        .withDac("aoml")
+        .withFloatId("123")
+        .withCycleNumber("001")
+        .withDirection("A")
+        .withParameterDataMode("D")
+        .withActionTimestamp(date)
+        .withDate(date)
+        .withLatitude(0.267)
+        .withLongitude(-16.032)
+        .withOcean(ArgoOcean.ATLANTIC_OCEAN)
+        .withProfilerType("845")
+        .withInstitution("A0")
+        .withDateUpdate(date)
+        .withAction(Action.UPDATE)
+        .withFileType(ArgoFileType.SYNTHETIC_PROFILE_SINGLE_CYCLE)
+        .build());
+
+
+    page = datastore.findUpdatedOrMissingSyntheticProfilesPage(DefaultIndexPageRequest.builder().withPageSize(10).build());
+    assertEquals(Arrays.asList(
+            ProfileOperation.builder()
+                .withDac("aoml")
+                .withFloatId("13857")
+                .withFiles(Arrays.asList(
+                    MetadataRecord.builder().withFileType(ArgoFileType.METADATA).withFile("aoml/13857/13857_meta.nc").withFileName("13857_meta.nc").withFileStatus(FileStatus.ACTIVE).build(),
+                    MetadataRecord.builder().withFileType(ArgoFileType.PROFILE_BIOCHEMICAL).withFile("aoml/13857/profiles/BD13857_001.nc").withFileName("BD13857_001.nc")
+                        .withFileStatus(FileStatus.ACTIVE).build(),
+                    MetadataRecord.builder().withFileType(ArgoFileType.PROFILE_CORE).withFile("aoml/13857/profiles/D13857_001.nc").withFileName("D13857_001.nc").withFileStatus(FileStatus.ACTIVE)
+                        .build()
+                ))
+                .build(),
+            ProfileOperation.builder()
+                .withDac("aoml")
+                .withFloatId("13857")
+                .withFiles(Arrays.asList(
+                    MetadataRecord.builder().withFileType(ArgoFileType.METADATA).withFile("aoml/13857/13857_meta.nc").withFileName("13857_meta.nc").withFileStatus(FileStatus.ACTIVE).build(),
+                    MetadataRecord.builder().withFileType(ArgoFileType.PROFILE_BIOCHEMICAL).withFile("aoml/13857/profiles/BD13857_002.nc").withFileName("BD13857_002.nc")
+                        .withFileStatus(FileStatus.ACTIVE).build(),
+                    MetadataRecord.builder().withFileType(ArgoFileType.PROFILE_CORE).withFile("aoml/13857/profiles/D13857_002.nc").withFileName("D13857_002.nc").withFileStatus(FileStatus.ACTIVE)
+                        .build()
+                ))
+                .build(),
+            ProfileOperation.builder()
+                .withDac("aoml")
+                .withFloatId("13857")
+                .withFiles(Arrays.asList(
+                    MetadataRecord.builder().withFileType(ArgoFileType.METADATA).withFile("aoml/13857/13857_meta.nc").withFileName("13857_meta.nc").withFileStatus(FileStatus.ACTIVE).build(),
+                    MetadataRecord.builder().withFileType(ArgoFileType.PROFILE_BIOCHEMICAL).withFile("aoml/13857/profiles/BD13857_003.nc").withFileName("BD13857_003.nc")
+                        .withFileStatus(FileStatus.ACTIVE).build(),
+                    MetadataRecord.builder().withFileType(ArgoFileType.PROFILE_CORE).withFile("aoml/13857/profiles/D13857_003.nc").withFileName("D13857_003.nc").withFileStatus(FileStatus.ACTIVE)
+                        .build()
+                ))
+                .build(),
+            ProfileOperation.builder()
+                .withDac("aoml")
+                .withFloatId("999")
+                .withFiles(Arrays.asList(
+                    MetadataRecord.builder().withFileType(ArgoFileType.METADATA).withFile("aoml/999/999_meta.nc").withFileName("999_meta.nc").withFileStatus(FileStatus.ACTIVE).build(),
+                    MetadataRecord.builder().withFileType(ArgoFileType.PROFILE_BIOCHEMICAL).withFile("aoml/999/profiles/BD999_001.nc").withFileName("BD999_001.nc")
+                        .withFileStatus(FileStatus.ACTIVE).build(),
+                    MetadataRecord.builder().withFileType(ArgoFileType.PROFILE_CORE).withFile("aoml/999/profiles/D999_001.nc").withFileName("D999_001.nc").withFileStatus(FileStatus.ACTIVE)
+                        .build()
+                ))
+                .build()
+        ),
+        page.getPage());
+
+    datastore.updateIndex(MetadataRecord.builder()
+        .withFile("aoml/13857/13857_meta.nc")
+        .withFileName("13857_meta.nc")
+        .withActionTimestamp(date)
+        .withDac("aoml")
+        .withFloatId("13857")
+        .withAction(Action.SYNTHETIC_MERGE)
+        .withFileType(ArgoFileType.METADATA)
+        .withRelatedFiles(Arrays.asList(
+            "aoml/13857/profiles/BD13857_003.nc",
+            "aoml/13857/profiles/D13857_003.nc"
+        ))
+        .build());
+
+    datastore.updateIndex(MetadataRecord.builder()
+        .withFile("aoml/13857/profiles/SD13857_003.nc")
+        .withFileName("SD13857_003.nc")
+        .withDac("aoml")
+        .withFloatId("13857")
+        .withCycleNumber("003")
+        .withDirection("A")
+        .withParameterDataMode("D")
+        .withActionTimestamp(date)
+        .withDate(date)
+        .withLatitude(0.267)
+        .withLongitude(-16.032)
+        .withOcean(ArgoOcean.ATLANTIC_OCEAN)
+        .withProfilerType("845")
+        .withInstitution("A0")
+        .withDateUpdate(date)
+        .withAction(Action.UPDATE)
+        .withFileType(ArgoFileType.SYNTHETIC_PROFILE_SINGLE_CYCLE)
+        .build());
+
+    page = datastore.findUpdatedOrMissingSyntheticProfilesPage(DefaultIndexPageRequest.builder().withPageSize(10).build());
+    assertEquals(Arrays.asList(
+            ProfileOperation.builder()
+                .withDac("aoml")
+                .withFloatId("13857")
+                .withFiles(Arrays.asList(
+                    MetadataRecord.builder().withFileType(ArgoFileType.METADATA).withFile("aoml/13857/13857_meta.nc").withFileName("13857_meta.nc").withFileStatus(FileStatus.ACTIVE).build(),
+                    MetadataRecord.builder().withFileType(ArgoFileType.PROFILE_BIOCHEMICAL).withFile("aoml/13857/profiles/BD13857_001.nc").withFileName("BD13857_001.nc")
+                        .withFileStatus(FileStatus.ACTIVE).build(),
+                    MetadataRecord.builder().withFileType(ArgoFileType.PROFILE_CORE).withFile("aoml/13857/profiles/D13857_001.nc").withFileName("D13857_001.nc").withFileStatus(FileStatus.ACTIVE)
+                        .build()
+                ))
+                .build(),
+            ProfileOperation.builder()
+                .withDac("aoml")
+                .withFloatId("13857")
+                .withFiles(Arrays.asList(
+                    MetadataRecord.builder().withFileType(ArgoFileType.METADATA).withFile("aoml/13857/13857_meta.nc").withFileName("13857_meta.nc").withFileStatus(FileStatus.ACTIVE).build(),
+                    MetadataRecord.builder().withFileType(ArgoFileType.PROFILE_BIOCHEMICAL).withFile("aoml/13857/profiles/BD13857_002.nc").withFileName("BD13857_002.nc")
+                        .withFileStatus(FileStatus.ACTIVE).build(),
+                    MetadataRecord.builder().withFileType(ArgoFileType.PROFILE_CORE).withFile("aoml/13857/profiles/D13857_002.nc").withFileName("D13857_002.nc").withFileStatus(FileStatus.ACTIVE)
+                        .build()
+                ))
+                .build(),
+            ProfileOperation.builder()
+                .withDac("aoml")
+                .withFloatId("999")
+                .withFiles(Arrays.asList(
+                    MetadataRecord.builder().withFileType(ArgoFileType.METADATA).withFile("aoml/999/999_meta.nc").withFileName("999_meta.nc").withFileStatus(FileStatus.ACTIVE).build(),
+                    MetadataRecord.builder().withFileType(ArgoFileType.PROFILE_BIOCHEMICAL).withFile("aoml/999/profiles/BD999_001.nc").withFileName("BD999_001.nc")
+                        .withFileStatus(FileStatus.ACTIVE).build(),
+                    MetadataRecord.builder().withFileType(ArgoFileType.PROFILE_CORE).withFile("aoml/999/profiles/D999_001.nc").withFileName("D999_001.nc").withFileStatus(FileStatus.ACTIVE)
+                        .build()
+                ))
+                .build()
+        ),
+        page.getPage());
+
+
+
+    datastore.updateIndex(MetadataRecord.builder()
+        .withFile("aoml/13857/13857_meta.nc")
+        .withFileName("13857_meta.nc")
+        .withActionTimestamp(date)
+        .withDac("aoml")
+        .withFloatId("13857")
+        .withAction(Action.REMOVE)
+        .withFileType(ArgoFileType.METADATA)
+        .build());
+
+    page = datastore.findUpdatedOrMissingSyntheticProfilesPage(DefaultIndexPageRequest.builder().withPageSize(10).build());
+    assertEquals(Arrays.asList(
+            ProfileOperation.builder()
+                .withDac("aoml")
+                .withFloatId("13857")
+                .withFiles(Arrays.asList(
+                    MetadataRecord.builder().withFileType(ArgoFileType.METADATA).withFile("aoml/13857/13857_meta.nc").withFileName("13857_meta.nc").withFileStatus(FileStatus.REMOVED).build(),
+                    MetadataRecord.builder().withFileType(ArgoFileType.PROFILE_BIOCHEMICAL).withFile("aoml/13857/profiles/BD13857_003.nc").withFileName("BD13857_003.nc")
+                        .withFileStatus(FileStatus.ACTIVE).build(),
+                    MetadataRecord.builder().withFileType(ArgoFileType.PROFILE_CORE).withFile("aoml/13857/profiles/D13857_003.nc").withFileName("D13857_003.nc").withFileStatus(FileStatus.ACTIVE)
+                        .build()
+                ))
+                .build(),
+            ProfileOperation.builder()
+                .withDac("aoml")
+                .withFloatId("999")
+                .withFiles(Arrays.asList(
+                    MetadataRecord.builder().withFileType(ArgoFileType.METADATA).withFile("aoml/999/999_meta.nc").withFileName("999_meta.nc").withFileStatus(FileStatus.ACTIVE).build(),
+                    MetadataRecord.builder().withFileType(ArgoFileType.PROFILE_BIOCHEMICAL).withFile("aoml/999/profiles/BD999_001.nc").withFileName("BD999_001.nc")
+                        .withFileStatus(FileStatus.ACTIVE).build(),
+                    MetadataRecord.builder().withFileType(ArgoFileType.PROFILE_CORE).withFile("aoml/999/profiles/D999_001.nc").withFileName("D999_001.nc").withFileStatus(FileStatus.ACTIVE)
+                        .build()
+                ))
+                .build()
+        ),
+        page.getPage());
+
+
+    datastore.updateIndex(MetadataRecord.builder()
+        .withFile("aoml/123/profiles/BD123_001.nc")
+        .withFileName("13857_meta.nc")
+        .withActionTimestamp(date)
+        .withDac("aoml")
+        .withFloatId("123")
+        .withAction(Action.REMOVE)
+        .withFileType(ArgoFileType.PROFILE_BIOCHEMICAL)
+        .build());
+
+
+    page = datastore.findUpdatedOrMissingSyntheticProfilesPage(DefaultIndexPageRequest.builder().withPageSize(10).build());
+    assertEquals(Arrays.asList(
+            ProfileOperation.builder()
+                .withDac("aoml")
+                .withFloatId("123")
+                .withFiles(Arrays.asList(
+                    MetadataRecord.builder().withFileType(ArgoFileType.METADATA).withFile("aoml/123/123_meta.nc").withFileName("123_meta.nc").withFileStatus(FileStatus.ACTIVE).build(),
+                    MetadataRecord.builder().withFileType(ArgoFileType.PROFILE_BIOCHEMICAL).withFile("aoml/123/profiles/BD123_001.nc").withFileName("BD123_001.nc")
+                        .withFileStatus(FileStatus.REMOVED).build(),
+                    MetadataRecord.builder().withFileType(ArgoFileType.PROFILE_CORE).withFile("aoml/123/profiles/D123_001.nc").withFileName("D123_001.nc").withFileStatus(FileStatus.ACTIVE)
+                        .build()
+                ))
+                .build(),
+            ProfileOperation.builder()
+                .withDac("aoml")
+                .withFloatId("13857")
+                .withFiles(Arrays.asList(
+                    MetadataRecord.builder().withFileType(ArgoFileType.METADATA).withFile("aoml/13857/13857_meta.nc").withFileName("13857_meta.nc").withFileStatus(FileStatus.REMOVED).build(),
+                    MetadataRecord.builder().withFileType(ArgoFileType.PROFILE_BIOCHEMICAL).withFile("aoml/13857/profiles/BD13857_003.nc").withFileName("BD13857_003.nc")
+                        .withFileStatus(FileStatus.ACTIVE).build(),
+                    MetadataRecord.builder().withFileType(ArgoFileType.PROFILE_CORE).withFile("aoml/13857/profiles/D13857_003.nc").withFileName("D13857_003.nc").withFileStatus(FileStatus.ACTIVE)
+                        .build()
+                ))
+                .build(),
+            ProfileOperation.builder()
+                .withDac("aoml")
+                .withFloatId("999")
+                .withFiles(Arrays.asList(
+                    MetadataRecord.builder().withFileType(ArgoFileType.METADATA).withFile("aoml/999/999_meta.nc").withFileName("999_meta.nc").withFileStatus(FileStatus.ACTIVE).build(),
+                    MetadataRecord.builder().withFileType(ArgoFileType.PROFILE_BIOCHEMICAL).withFile("aoml/999/profiles/BD999_001.nc").withFileName("BD999_001.nc")
+                        .withFileStatus(FileStatus.ACTIVE).build(),
+                    MetadataRecord.builder().withFileType(ArgoFileType.PROFILE_CORE).withFile("aoml/999/profiles/D999_001.nc").withFileName("D999_001.nc").withFileStatus(FileStatus.ACTIVE)
+                        .build()
+                ))
+                .build()
+        ),
+        page.getPage());
+
+    datastore.updateIndex(MetadataRecord.builder()
+        .withFile("aoml/999/999_meta.nc")
+        .withFileName("999_meta.nc")
+        .withActionTimestamp(date)
+        .withDac("aoml")
+        .withFloatId("999")
+        .withAction(Action.SYNTHETIC_MERGE)
+        .withFileType(ArgoFileType.METADATA)
+        .withRelatedFiles(Arrays.asList(
+            "aoml/999/profiles/BD999_001.nc",
+            "aoml/999/profiles/D999_001.nc"
+        ))
+        .build());
+
+    datastore.updateIndex(MetadataRecord.builder()
+        .withFile("aoml/999/profiles/SD999_001.nc")
+        .withFileName("SD999_001.nc")
+        .withDac("aoml")
+        .withFloatId("999")
+        .withCycleNumber("001")
+        .withDirection("A")
+        .withParameterDataMode("D")
+        .withActionTimestamp(date)
+        .withDate(date)
+        .withLatitude(0.267)
+        .withLongitude(-16.032)
+        .withOcean(ArgoOcean.ATLANTIC_OCEAN)
+        .withProfilerType("845")
+        .withInstitution("A0")
+        .withDateUpdate(date)
+        .withAction(Action.UPDATE)
+        .withFileType(ArgoFileType.SYNTHETIC_PROFILE_SINGLE_CYCLE)
+        .build());
+
+    page = datastore.findUpdatedOrMissingSyntheticProfilesPage(DefaultIndexPageRequest.builder().withPageSize(10).build());
+    assertEquals(Arrays.asList(
+            ProfileOperation.builder()
+                .withDac("aoml")
+                .withFloatId("123")
+                .withFiles(Arrays.asList(
+                    MetadataRecord.builder().withFileType(ArgoFileType.METADATA).withFile("aoml/123/123_meta.nc").withFileName("123_meta.nc").withFileStatus(FileStatus.ACTIVE).build(),
+                    MetadataRecord.builder().withFileType(ArgoFileType.PROFILE_BIOCHEMICAL).withFile("aoml/123/profiles/BD123_001.nc").withFileName("BD123_001.nc")
+                        .withFileStatus(FileStatus.REMOVED).build(),
+                    MetadataRecord.builder().withFileType(ArgoFileType.PROFILE_CORE).withFile("aoml/123/profiles/D123_001.nc").withFileName("D123_001.nc").withFileStatus(FileStatus.ACTIVE)
+                        .build()
+                ))
+                .build(),
+            ProfileOperation.builder()
+                .withDac("aoml")
+                .withFloatId("13857")
+                .withFiles(Arrays.asList(
+                    MetadataRecord.builder().withFileType(ArgoFileType.METADATA).withFile("aoml/13857/13857_meta.nc").withFileName("13857_meta.nc").withFileStatus(FileStatus.REMOVED).build(),
+                    MetadataRecord.builder().withFileType(ArgoFileType.PROFILE_BIOCHEMICAL).withFile("aoml/13857/profiles/BD13857_003.nc").withFileName("BD13857_003.nc")
+                        .withFileStatus(FileStatus.ACTIVE).build(),
+                    MetadataRecord.builder().withFileType(ArgoFileType.PROFILE_CORE).withFile("aoml/13857/profiles/D13857_003.nc").withFileName("D13857_003.nc").withFileStatus(FileStatus.ACTIVE)
+                        .build()
+                ))
+                .build()
+        ),
+        page.getPage());
+
+
+    datastore.updateIndex(MetadataRecord.builder()
+        .withFile("aoml/999/999_meta.nc")
+        .withFileName("999_meta.nc")
+        .withDac("aoml")
+        .withFloatId("999")
+        .withActionTimestamp(date)
+        .withDate(date)
+        .withLatitude(0.267)
+        .withLongitude(-16.032)
+        .withOcean(ArgoOcean.ATLANTIC_OCEAN)
+        .withProfilerType("845")
+        .withInstitution("A0")
+        .withDateUpdate(date)
+        .withAction(Action.UPDATE)
+        .withFileType(ArgoFileType.METADATA)
+        .build());
+
+    page = datastore.findUpdatedOrMissingSyntheticProfilesPage(DefaultIndexPageRequest.builder().withPageSize(10).build());
+    assertEquals(Arrays.asList(
+            ProfileOperation.builder()
+                .withDac("aoml")
+                .withFloatId("123")
+                .withFiles(Arrays.asList(
+                    MetadataRecord.builder().withFileType(ArgoFileType.METADATA).withFile("aoml/123/123_meta.nc").withFileName("123_meta.nc").withFileStatus(FileStatus.ACTIVE).build(),
+                    MetadataRecord.builder().withFileType(ArgoFileType.PROFILE_BIOCHEMICAL).withFile("aoml/123/profiles/BD123_001.nc").withFileName("BD123_001.nc")
+                        .withFileStatus(FileStatus.REMOVED).build(),
+                    MetadataRecord.builder().withFileType(ArgoFileType.PROFILE_CORE).withFile("aoml/123/profiles/D123_001.nc").withFileName("D123_001.nc").withFileStatus(FileStatus.ACTIVE)
+                        .build()
+                ))
+                .build(),
+            ProfileOperation.builder()
+                .withDac("aoml")
+                .withFloatId("13857")
+                .withFiles(Arrays.asList(
+                    MetadataRecord.builder().withFileType(ArgoFileType.METADATA).withFile("aoml/13857/13857_meta.nc").withFileName("13857_meta.nc").withFileStatus(FileStatus.REMOVED).build(),
+                    MetadataRecord.builder().withFileType(ArgoFileType.PROFILE_BIOCHEMICAL).withFile("aoml/13857/profiles/BD13857_003.nc").withFileName("BD13857_003.nc")
+                        .withFileStatus(FileStatus.ACTIVE).build(),
+                    MetadataRecord.builder().withFileType(ArgoFileType.PROFILE_CORE).withFile("aoml/13857/profiles/D13857_003.nc").withFileName("D13857_003.nc").withFileStatus(FileStatus.ACTIVE)
+                        .build()
+                ))
+                .build(),
+            ProfileOperation.builder()
+                .withDac("aoml")
+                .withFloatId("999")
+                .withFiles(Arrays.asList(
+                    MetadataRecord.builder().withFileType(ArgoFileType.METADATA).withFile("aoml/999/999_meta.nc").withFileName("999_meta.nc").withFileStatus(FileStatus.ACTIVE).build(),
+                    MetadataRecord.builder().withFileType(ArgoFileType.PROFILE_BIOCHEMICAL).withFile("aoml/999/profiles/BD999_001.nc").withFileName("BD999_001.nc")
+                        .withFileStatus(FileStatus.ACTIVE).build(),
+                    MetadataRecord.builder().withFileType(ArgoFileType.PROFILE_CORE).withFile("aoml/999/profiles/D999_001.nc").withFileName("D999_001.nc").withFileStatus(FileStatus.ACTIVE)
+                        .build()
+                ))
+                .build()
+        ),
+        page.getPage());
+
+
+    datastore.updateIndex(MetadataRecord.builder()
+        .withFile("aoml/123/123_meta.nc")
+        .withFileName("123_meta.nc")
+        .withActionTimestamp(date)
+        .withDac("aoml")
+        .withFloatId("123")
+        .withAction(Action.SYNTHETIC_MERGE_REMOVE)
+        .withFileType(ArgoFileType.METADATA)
+        .withRelatedFiles(Arrays.asList(
+            "aoml/123/profiles/BD123_001.nc",
+            "aoml/123/profiles/D123_001.nc"
+        ))
+        .build());
+
+    datastore.updateIndex(MetadataRecord.builder()
+        .withFile("aoml/123/profiles/SD123_001.nc")
+        .withFileName("SD123_001.nc")
+        .withDac("aoml")
+        .withFloatId("123")
+        .withCycleNumber("001")
+        .withDirection("A")
+        .withParameterDataMode("D")
+        .withActionTimestamp(date)
+        .withDate(date)
+        .withLatitude(0.267)
+        .withLongitude(-16.032)
+        .withOcean(ArgoOcean.ATLANTIC_OCEAN)
+        .withProfilerType("845")
+        .withInstitution("A0")
+        .withDateUpdate(date)
+        .withAction(Action.REMOVE)
+        .withFileType(ArgoFileType.SYNTHETIC_PROFILE_SINGLE_CYCLE)
+        .build());
+
+    assertFalse(datastore.findByFile("aoml/123/profiles/SD123_001.nc").isPresent());
+    assertTrue(datastore.findByFile("aoml/123/profiles/SD123_001.nc", true).isPresent());
+
+
+    page = datastore.findUpdatedOrMissingSyntheticProfilesPage(DefaultIndexPageRequest.builder().withPageSize(10).build());
+    assertEquals(Arrays.asList(
+            ProfileOperation.builder()
+                .withDac("aoml")
+                .withFloatId("13857")
+                .withFiles(Arrays.asList(
+                    MetadataRecord.builder().withFileType(ArgoFileType.METADATA).withFile("aoml/13857/13857_meta.nc").withFileName("13857_meta.nc").withFileStatus(FileStatus.REMOVED).build(),
+                    MetadataRecord.builder().withFileType(ArgoFileType.PROFILE_BIOCHEMICAL).withFile("aoml/13857/profiles/BD13857_003.nc").withFileName("BD13857_003.nc")
+                        .withFileStatus(FileStatus.ACTIVE).build(),
+                    MetadataRecord.builder().withFileType(ArgoFileType.PROFILE_CORE).withFile("aoml/13857/profiles/D13857_003.nc").withFileName("D13857_003.nc").withFileStatus(FileStatus.ACTIVE)
+                        .build()
+                ))
+                .build(),
+            ProfileOperation.builder()
+                .withDac("aoml")
+                .withFloatId("999")
+                .withFiles(Arrays.asList(
+                    MetadataRecord.builder().withFileType(ArgoFileType.METADATA).withFile("aoml/999/999_meta.nc").withFileName("999_meta.nc").withFileStatus(FileStatus.ACTIVE).build(),
+                    MetadataRecord.builder().withFileType(ArgoFileType.PROFILE_BIOCHEMICAL).withFile("aoml/999/profiles/BD999_001.nc").withFileName("BD999_001.nc")
+                        .withFileStatus(FileStatus.ACTIVE).build(),
+                    MetadataRecord.builder().withFileType(ArgoFileType.PROFILE_CORE).withFile("aoml/999/profiles/D999_001.nc").withFileName("D999_001.nc").withFileStatus(FileStatus.ACTIVE)
+                        .build()
+                ))
+                .build()
+        ),
+        page.getPage());
+  }
 
   @Test
   public void testRemoveMetadata() throws Exception {
@@ -741,27 +1521,12 @@ public class JpaMetadataStoreTest {
         .withFloatId("13857")
         .withAction(Action.SYNTHETIC_MERGE)
         .withFileType(ArgoFileType.METADATA)
+        .withRelatedFiles(Arrays.asList(
+            "aoml/13857/profiles/D13857_002.nc",
+            "aoml/13857/profiles/BD13857_002.nc"
+        ))
         .build());
 
-    datastore.updateIndex(MetadataRecord.builder()
-        .withFile("aoml/13857/profiles/D13857_002.nc")
-        .withFileName("D13857_002.nc")
-        .withActionTimestamp(date)
-        .withAction(Action.SYNTHETIC_MERGE)
-        .withFileType(ArgoFileType.PROFILE_CORE)
-        .withDac("aoml")
-        .withFloatId("13857")
-        .build());
-
-    datastore.updateIndex(MetadataRecord.builder()
-        .withFile("aoml/13857/profiles/BD13857_002.nc")
-        .withFileName("BD13857_002.nc")
-        .withActionTimestamp(date)
-        .withAction(Action.SYNTHETIC_MERGE)
-        .withFileType(ArgoFileType.PROFILE_BIOCHEMICAL)
-        .withDac("aoml")
-        .withFloatId("13857")
-        .build());
 
     datastore.updateIndex(MetadataRecord.builder()
         .withFile("aoml/13857/profiles/SD13857_002.nc")
@@ -851,44 +1616,39 @@ public class JpaMetadataStoreTest {
         .build());
 
     datastore.updateIndex(MetadataRecord.builder()
-        .withFile("aoml/13855/profiles/D13855_001.nc")
+        .withFile("aoml/13855/13855_meta.nc")
         .withFileName("D13855_001.nc")
         .withActionTimestamp(date)
         .withAction(Action.SYNTHETIC_MERGE)
-        .withFileType(ArgoFileType.PROFILE_CORE)
+        .withFileType(ArgoFileType.METADATA)
         .withDac("aoml")
         .withFloatId("13855")
+        .withRelatedFiles(Arrays.asList(
+            "aoml/13855/profiles/BD13855_001.nc",
+            "aoml/13855/profiles/D13855_001.nc"
+        ))
         .build());
 
-    datastore.updateIndex(MetadataRecord.builder()
-        .withFile("aoml/13855/profiles/BD13855_001.nc")
-        .withFileName("BD13855_001.nc")
-        .withActionTimestamp(date)
-        .withAction(Action.SYNTHETIC_MERGE)
-        .withFileType(ArgoFileType.PROFILE_BIOCHEMICAL)
-        .withDac("aoml")
-        .withFloatId("13855")
-        .build());
 
     ProfilePage page = datastore.findUpdatedOrMissingSyntheticProfilesPage(DefaultIndexPageRequest.builder().withPageSize(100).build());
     assertEquals(Arrays.asList(ProfileOperation.builder()
                 .withDac("aoml")
                 .withFloatId("123")
                 .withFiles(Arrays.asList(
-                    MetadataRecord.builder().withFile("aoml/123/123_meta.nc").withFileName("123_meta.nc").withFileStatus(FileStatus.ACTIVE).build(),
-                    MetadataRecord.builder().withFile("aoml/123/profiles/BD123_001.nc").withFileName("BD123_001.nc").withFileStatus(FileStatus.ACTIVE)
+                    MetadataRecord.builder().withFileType(ArgoFileType.METADATA).withFile("aoml/123/123_meta.nc").withFileName("123_meta.nc").withFileStatus(FileStatus.ACTIVE).build(),
+                    MetadataRecord.builder().withFileType(ArgoFileType.PROFILE_BIOCHEMICAL).withFile("aoml/123/profiles/BD123_001.nc").withFileName("BD123_001.nc").withFileStatus(FileStatus.ACTIVE)
                         .build(),
-                    MetadataRecord.builder().withFile("aoml/123/profiles/D123_001.nc").withFileName("D123_001.nc").withFileStatus(FileStatus.ACTIVE).build()
+                    MetadataRecord.builder().withFileType(ArgoFileType.PROFILE_CORE).withFile("aoml/123/profiles/D123_001.nc").withFileName("D123_001.nc").withFileStatus(FileStatus.ACTIVE).build()
                 ))
                 .build(),
             ProfileOperation.builder()
                 .withDac("aoml")
                 .withFloatId("13857")
                 .withFiles(Arrays.asList(
-                    MetadataRecord.builder().withFile("aoml/13857/13857_meta.nc").withFileName("13857_meta.nc").withFileStatus(FileStatus.ACTIVE).build(),
-                    MetadataRecord.builder().withFile("aoml/13857/profiles/BD13857_001.nc").withFileName("BD13857_001.nc")
+                    MetadataRecord.builder().withFileType(ArgoFileType.METADATA).withFile("aoml/13857/13857_meta.nc").withFileName("13857_meta.nc").withFileStatus(FileStatus.ACTIVE).build(),
+                    MetadataRecord.builder().withFileType(ArgoFileType.PROFILE_BIOCHEMICAL).withFile("aoml/13857/profiles/BD13857_001.nc").withFileName("BD13857_001.nc")
                         .withFileStatus(FileStatus.ACTIVE).build(),
-                    MetadataRecord.builder().withFile("aoml/13857/profiles/D13857_001.nc").withFileName("D13857_001.nc").withFileStatus(FileStatus.ACTIVE)
+                    MetadataRecord.builder().withFileType(ArgoFileType.PROFILE_CORE).withFile("aoml/13857/profiles/D13857_001.nc").withFileName("D13857_001.nc").withFileStatus(FileStatus.ACTIVE)
                         .build()
                 ))
                 .build()
@@ -929,24 +1689,22 @@ public class JpaMetadataStoreTest {
                 .withDac("aoml")
                 .withFloatId("123")
                 .withFiles(Arrays.asList(
-                    MetadataRecord.builder().withFile("aoml/123/123_meta.nc").withFileName("123_meta.nc").withFileStatus(FileStatus.ACTIVE).build(),
-                    MetadataRecord.builder().withFile("aoml/123/profiles/BD123_001.nc").withFileName("BD123_001.nc").withFileStatus(FileStatus.ACTIVE)
+                    MetadataRecord.builder().withFileType(ArgoFileType.METADATA).withFile("aoml/123/123_meta.nc").withFileName("123_meta.nc").withFileStatus(FileStatus.ACTIVE).build(),
+                    MetadataRecord.builder().withFileType(ArgoFileType.PROFILE_BIOCHEMICAL).withFile("aoml/123/profiles/BD123_001.nc").withFileName("BD123_001.nc").withFileStatus(FileStatus.ACTIVE)
                         .build(),
-                    MetadataRecord.builder().withFile("aoml/123/profiles/D123_001.nc").withFileName("D123_001.nc").withFileStatus(FileStatus.ACTIVE).build()
+                    MetadataRecord.builder().withFileType(ArgoFileType.PROFILE_CORE).withFile("aoml/123/profiles/D123_001.nc").withFileName("D123_001.nc").withFileStatus(FileStatus.ACTIVE).build()
                 ))
                 .build(),
             ProfileOperation.builder()
                 .withDac("aoml")
                 .withFloatId("13857")
                 .withFiles(Arrays.asList(
-                    MetadataRecord.builder().withFile("aoml/13857/13857_meta.nc").withFileName("13857_meta.nc").withFileStatus(FileStatus.REMOVED)
+                    MetadataRecord.builder().withFileType(ArgoFileType.METADATA).withFile("aoml/13857/13857_meta.nc").withFileName("13857_meta.nc").withFileStatus(FileStatus.REMOVED)
                         .build(),
-                    MetadataRecord.builder().withFile("aoml/13857/profiles/BD13857_002.nc").withFileName("BD13857_002.nc")
+                    MetadataRecord.builder().withFileType(ArgoFileType.PROFILE_BIOCHEMICAL).withFile("aoml/13857/profiles/BD13857_002.nc").withFileName("BD13857_002.nc")
                         .withFileStatus(FileStatus.ACTIVE).build(),
-                    MetadataRecord.builder().withFile("aoml/13857/profiles/D13857_002.nc").withFileName("D13857_002.nc").withFileStatus(FileStatus.ACTIVE)
-                        .build(),
-                    MetadataRecord.builder().withFile("aoml/13857/profiles/SD13857_002.nc").withFileName("SD13857_002.nc")
-                        .withFileStatus(FileStatus.ACTIVE).build()
+                    MetadataRecord.builder().withFileType(ArgoFileType.PROFILE_CORE).withFile("aoml/13857/profiles/D13857_002.nc").withFileName("D13857_002.nc").withFileStatus(FileStatus.ACTIVE)
+                        .build()
                 ))
                 .build()
         ),
@@ -1210,7 +1968,6 @@ public class JpaMetadataStoreTest {
         .withAction(Action.REMOVE)
         .withFileType(ArgoFileType.PROFILE_CORE)
         .build());
-
 
     // saved file, merged - should not be in results
     datastore.updateIndex(MetadataRecord.builder()
@@ -1877,8 +2634,6 @@ public class JpaMetadataStoreTest {
         .withFileType(ArgoFileType.PROFILE_CORE)
         .withActionTimestamp(Instant.now())
         .build());
-
-
 
     page1 = datastore.findUpdatedOrMissingGeoMergeFilesPage(DefaultIndexPageRequest.builder().withPageSize(100).build());
     assertEquals(0, page1.getTotalRecords());

@@ -310,6 +310,7 @@ class Updater {
         entity.setParameters(record.getParameters());
         entity.setParameterDataMode(record.getParameterDataMode());
         entity.setLastUpdatedTime(record.getActionTimestamp().atOffset(ZoneOffset.UTC).toZonedDateTime());
+        entity.getSyntheticMerges().clear();
 
         if (add) {
           em.persist(entity);

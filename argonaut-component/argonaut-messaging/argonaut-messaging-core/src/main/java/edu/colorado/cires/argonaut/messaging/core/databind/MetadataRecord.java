@@ -2,9 +2,12 @@ package edu.colorado.cires.argonaut.messaging.core.databind;
 
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
+import edu.colorado.cires.argonaut.messaging.core.databind.NcSubmissionMessage.Builder;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
@@ -33,6 +36,7 @@ public class MetadataRecord implements TracedMessage {
     FLOAT_MERGE,
     FLOAT_MERGE_REMOVE,
     SYNTHETIC_MERGE,
+    SYNTHETIC_MERGE_REMOVE,
     GEO_MERGE,
     GEO_MERGE_REMOVE,
     NONE
@@ -64,6 +68,7 @@ public class MetadataRecord implements TracedMessage {
     private Instant actionTimestamp;
     private UUID traceId;
     private String fileName;
+    private List<String> relatedFiles = new ArrayList<>();
     private Map<String, Object> otherFields = new HashMap<>();
 
     private Builder() {
@@ -95,6 +100,7 @@ public class MetadataRecord implements TracedMessage {
       actionTimestamp = source.actionTimestamp;
       traceId = source.traceId;
       fileName = source.fileName;
+      relatedFiles = new ArrayList<>(source.relatedFiles);
       otherFields.putAll(source.otherFields);
     }
 
@@ -222,6 +228,11 @@ public class MetadataRecord implements TracedMessage {
       return this;
     }
 
+    public Builder withRelatedFiles(List<String> relatedFiles) {
+      this.relatedFiles = MessageUtils.emptyOrCopy(relatedFiles);
+      return this;
+    }
+
     @Deprecated
     @JsonAnySetter
     private Builder withOtherField(String name, Object value) {
@@ -255,6 +266,7 @@ public class MetadataRecord implements TracedMessage {
           actionTimestamp,
           traceId,
           fileName,
+          Collections.unmodifiableList(relatedFiles),
           otherFields
       );
     }
@@ -285,12 +297,13 @@ public class MetadataRecord implements TracedMessage {
   private final Instant actionTimestamp;
   private final UUID traceId;
   private final String fileName;
+  private final List<String> relatedFiles;
   private final Map<String, Object> otherFields;
 
   private MetadataRecord(String file, Instant date, Double latitude, Double latitudeMin, Double latitudeMax, Double longitude, Double longitudeMin,
       Double longitudeMax, ArgoOcean ocean, String profilerType, String institution, Instant dateUpdate, String parameters, String parameterDataMode,
       String direction, String cycleNumber, Action action, ArgoFileType fileType, FileStatus fileStatus, String dac, String floatId, Instant actionTimestamp,
-      UUID traceId, String fileName,
+      UUID traceId, String fileName, List<String> relatedFiles,
       Map<String, Object> otherFields) {
     this.file = file;
     this.date = date;
@@ -316,6 +329,7 @@ public class MetadataRecord implements TracedMessage {
     this.actionTimestamp = actionTimestamp;
     this.traceId = traceId;
     this.fileName = fileName;
+    this.relatedFiles = relatedFiles;
     this.otherFields = Collections.unmodifiableMap(new HashMap<>(otherFields));
   }
 
@@ -417,6 +431,10 @@ public class MetadataRecord implements TracedMessage {
     return actionTimestamp;
   }
 
+  public List<String> getRelatedFiles() {
+    return relatedFiles;
+  }
+
   @Deprecated
   @JsonAnyGetter
   public Map<String, Object> getOtherFields() {
@@ -438,14 +456,14 @@ public class MetadataRecord implements TracedMessage {
         that.direction) && Objects.equals(cycleNumber, that.cycleNumber) && action == that.action && fileType == that.fileType
         && fileStatus == that.fileStatus && Objects.equals(dac, that.dac) && Objects.equals(floatId, that.floatId)
         && instantsEquals(actionTimestamp, that.actionTimestamp) && Objects.equals(traceId, that.traceId)
-        && Objects.equals(fileName, that.fileName) && Objects.equals(otherFields, that.otherFields);
+        && Objects.equals(fileName, that.fileName) && Objects.equals(otherFields, that.otherFields) && Objects.equals(relatedFiles, that.relatedFiles);
   }
 
   @Override
   public int hashCode() {
     return Objects.hash(file, date, latitude, latitudeMin, latitudeMax, longitude, longitudeMin, longitudeMax, ocean, profilerType, institution,
         dateUpdate, parameters, parameterDataMode, direction, cycleNumber, action, fileType, fileStatus, dac, floatId, actionTimestamp, traceId,
-        fileName, otherFields);
+        fileName, otherFields, relatedFiles);
   }
 
   private static boolean instantsEquals(Instant instant1, Instant instant2) {
@@ -485,6 +503,7 @@ public class MetadataRecord implements TracedMessage {
         ", actionTimestamp=" + actionTimestamp +
         ", traceId=" + traceId +
         ", fileName='" + fileName + '\'' +
+        ", relatedFiles=" + relatedFiles +
         ", otherFields=" + otherFields +
         '}';
   }

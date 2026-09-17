@@ -5,10 +5,13 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.Version;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "metadata")
@@ -25,6 +28,9 @@ public class MetadataFileEntity {
   @OneToOne(cascade = {CascadeType.DETACH, CascadeType.REFRESH})
   @JoinColumn(name = "float", nullable = false)
   private FloatEntity floatId;
+
+  @OneToMany(mappedBy = "metadata", cascade = CascadeType.ALL, orphanRemoval = true)
+  private List<MetadataSyntheticMergeEntity> syntheticMerges = new ArrayList<>();
 
   @Column(name = "file_status", length = 50, nullable = false)
   private String fileStatus;
@@ -206,5 +212,13 @@ public class MetadataFileEntity {
 
   public void setFileName(String fileName) {
     this.fileName = fileName;
+  }
+
+  public List<MetadataSyntheticMergeEntity> getSyntheticMerges() {
+    return syntheticMerges;
+  }
+
+  public void setSyntheticMerges(List<MetadataSyntheticMergeEntity> syntheticMerges) {
+    this.syntheticMerges = syntheticMerges;
   }
 }

@@ -88,4 +88,5 @@ public class CycleEntity {
   public List<ProfileFileEntity> getProfiles() {
     return profiles;
   }
+
 }

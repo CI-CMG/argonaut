@@ -3,6 +3,8 @@ package edu.colorado.cires.argonaut.metadata.jpa;
 import edu.colorado.cires.argonaut.messaging.core.databind.ArgoFileType;
 import edu.colorado.cires.argonaut.messaging.core.databind.MetadataRecord;
 import edu.colorado.cires.argonaut.messaging.core.databind.MetadataRecord.FileStatus;
+import edu.colorado.cires.argonaut.metadata.jpa.entity.MetadataFileEntity;
+import edu.colorado.cires.argonaut.metadata.jpa.entity.MetadataSyntheticMergeEntity;
 import edu.colorado.cires.argonaut.metadata.jpa.entity.ProfileFileEntity;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
@@ -10,6 +12,8 @@ import jakarta.persistence.EntityTransaction;
 import jakarta.persistence.LockModeType;
 import jakarta.persistence.OptimisticLockException;
 import java.time.ZoneId;
+import java.util.List;
+import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,23 +27,43 @@ class SyntheticMerger {
     this.entityManagerFactory = entityManagerFactory;
   }
 
-  void updateSynthMerge(MetadataRecord record) {
-    if (record.getFileType() == ArgoFileType.PROFILE_CORE || record.getFileType() == ArgoFileType.PROFILE_BIOCHEMICAL) {
+  void updateSynthMerge(MetadataRecord record, boolean remove) {
+    if (record.getFileType() == ArgoFileType.METADATA) {
       while (true) {
         try (EntityManager em = entityManagerFactory.createEntityManager()) {
           EntityTransaction tx = em.getTransaction();
           tx.begin();
           try {
-            ProfileFileEntity entity = em.find(ProfileFileEntity.class, record.getFile(), LockModeType.OPTIMISTIC);
-            if (entity != null) {
-              LOGGER.info("Updating synth merge for " + record.getFile());
-              if(entity.getFileStatus().equals(FileStatus.REMOVED.name())){
-                entity.setSyntheticMergeTime(null);
-              } else if (entity.getFileStatus().equals(FileStatus.ACTIVE.name())){
-                entity.setSyntheticMergeTime(record.getActionTimestamp().atZone(ZoneId.of("UTC")));
-              } else {
-                throw new UnsupportedOperationException("Invalid file status " + entity.getFileStatus());
+            MetadataFileEntity metadata = em.find(MetadataFileEntity.class, record.getFile(), LockModeType.OPTIMISTIC);
+            List<ProfileFileEntity> profiles = record.getRelatedFiles().stream()
+                .map(file -> em.find(ProfileFileEntity.class, file, LockModeType.OPTIMISTIC)).toList();
+            if (metadata != null) {
+              for (ProfileFileEntity profile : profiles) {
+                if (profile != null) {
+                  LOGGER.info("Updating synth merge for " + profile.getFile());
+                  profile.setSyntheticMergeTime(remove ? null : record.getActionTimestamp().atZone(ZoneId.of("UTC")));
+                }
+                List<MetadataSyntheticMergeEntity> mds = em.createQuery(
+                        "SELECT m FROM MetadataSyntheticMergeEntity m WHERE m.profile = :profile AND m.metadata = :metadata")
+                    .setParameter("profile", profile)
+                    .setParameter("metadata", metadata)
+                    .getResultList();
+
+                if (remove) {
+                  for (MetadataSyntheticMergeEntity md : mds) {
+                    em.remove(md);
+                  }
+                } else if (mds.isEmpty()) {
+                  MetadataSyntheticMergeEntity md = new MetadataSyntheticMergeEntity();
+                  md.setMetadata(metadata);
+                  md.setProfile(profile);
+                  md.setSyntheticMergeTime(record.getActionTimestamp().atZone(ZoneId.of("UTC")));
+                  md.setId(UUID.randomUUID());
+                  em.persist(md);
+                }
+
               }
+
             }
             tx.commit();
             break;

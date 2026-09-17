@@ -251,26 +251,70 @@ class Finder {
       long count = em.createQuery(
           """
                  SELECT COUNT(DISTINCT profile.cycle.id) FROM ProfileFileEntity profile
-                 WHERE (profile.fileType = 'PROFILE_CORE' OR profile.fileType = 'PROFILE_BIOCHEMICAL') AND 
-                       (
-                         profile.cycle.floatId.metadata.fileStatus = 'ACTIVE' AND 
-                         ( profile.fileStatus = 'ACTIVE' AND profile.syntheticMergeTime IS NULL ) OR ( profile.fileStatus = 'REMOVED' AND profile.syntheticMergeTime IS NOT NULL )
-                       ) OR 
-                       (
-                         profile.cycle.floatId.metadata.fileStatus = 'REMOVED' AND profile.syntheticMergeTime IS NOT NULL
-                       ) 
+                           WHERE
+                           (
+                             profile.fileStatus = 'ACTIVE'
+                             AND profile.cycle.floatId.metadata.fileStatus = 'ACTIVE'
+                             AND (
+                                    (
+                                      profile.fileType = 'PROFILE_BIOCHEMICAL' 
+                                      AND EXISTS (SELECT core.file FROM ProfileFileEntity core WHERE core.fileType = 'PROFILE_CORE' AND core.fileStatus = 'ACTIVE' AND core.cycle = profile.cycle)
+                                    ) OR (
+                                      profile.fileType = 'PROFILE_CORE'
+                                      AND EXISTS (SELECT bio.file FROM ProfileFileEntity bio WHERE bio.fileType = 'PROFILE_BIOCHEMICAL' AND bio.fileStatus = 'ACTIVE' AND bio.cycle = profile.cycle) 
+                                    )
+                                )
+                             AND (
+                               profile.syntheticMergeTime IS NULL 
+                               OR NOT EXISTS (SELECT mds.syntheticMergeTime FROM MetadataSyntheticMergeEntity mds WHERE mds.profile = profile)
+                             )
+                           ) OR (
+                             (profile.fileType = 'PROFILE_BIOCHEMICAL' OR profile.fileType = 'PROFILE_CORE' )
+                             AND profile.fileStatus = 'REMOVED'
+                             AND profile.syntheticMergeTime IS NOT NULL
+                           ) OR (
+                             (profile.fileType = 'PROFILE_BIOCHEMICAL' OR profile.fileType = 'PROFILE_CORE' )
+                             AND profile.fileStatus = 'ACTIVE'
+                             AND profile.syntheticMergeTime IS NOT NULL
+                             AND NOT profile.cycle.floatId.metadata.fileStatus = 'ACTIVE'
+                           )
               """, Long.class).getSingleResult();
+
+
+      // case 1: bio, core, and md are active, but missing one or more merge times -> trigger merge
+      // case 2: bio or core have been removed, but have merge times -> trigger merge removal
+      // case 3: bio or core are active and have merge time, but md is missing or removed -> trigger merge removal
+
       List<String> cycleIds = em.createQuery(
               """
                      SELECT DISTINCT profile.cycle.id cid FROM ProfileFileEntity profile
-                         WHERE (profile.fileType = 'PROFILE_CORE' OR profile.fileType = 'PROFILE_BIOCHEMICAL') AND 
-                         (
-                           profile.cycle.floatId.metadata.fileStatus = 'ACTIVE' AND 
-                           ( profile.fileStatus = 'ACTIVE' AND profile.syntheticMergeTime IS NULL ) OR ( profile.fileStatus = 'REMOVED' AND profile.syntheticMergeTime IS NOT NULL )
-                         ) OR 
-                         (
-                           profile.cycle.floatId.metadata.fileStatus = 'REMOVED' AND profile.syntheticMergeTime IS NOT NULL
-                         ) 
+                         WHERE
+                           (
+                             profile.fileStatus = 'ACTIVE'
+                             AND profile.cycle.floatId.metadata.fileStatus = 'ACTIVE'
+                             AND (
+                                    (
+                                      profile.fileType = 'PROFILE_BIOCHEMICAL' 
+                                      AND EXISTS (SELECT core.file FROM ProfileFileEntity core WHERE core.fileType = 'PROFILE_CORE' AND core.fileStatus = 'ACTIVE' AND core.cycle = profile.cycle)
+                                    ) OR (
+                                      profile.fileType = 'PROFILE_CORE'
+                                      AND EXISTS (SELECT bio.file FROM ProfileFileEntity bio WHERE bio.fileType = 'PROFILE_BIOCHEMICAL' AND bio.fileStatus = 'ACTIVE' AND bio.cycle = profile.cycle) 
+                                    )
+                                )
+                             AND (
+                               profile.syntheticMergeTime IS NULL 
+                               OR NOT EXISTS (SELECT mds.syntheticMergeTime FROM MetadataSyntheticMergeEntity mds WHERE mds.profile = profile)
+                             )
+                           ) OR (
+                             (profile.fileType = 'PROFILE_BIOCHEMICAL' OR profile.fileType = 'PROFILE_CORE' )
+                             AND profile.fileStatus = 'REMOVED'
+                             AND profile.syntheticMergeTime IS NOT NULL
+                           ) OR (
+                             (profile.fileType = 'PROFILE_BIOCHEMICAL' OR profile.fileType = 'PROFILE_CORE' )
+                             AND profile.fileStatus = 'ACTIVE'
+                             AND profile.syntheticMergeTime IS NOT NULL
+                             AND NOT profile.cycle.floatId.metadata.fileStatus = 'ACTIVE'
+                           )
                      order by cid
                   """, String.class)
           .setMaxResults(pageRequest.getPageSize())
@@ -299,6 +343,7 @@ class Finder {
     MetadataFileEntity metadataFileEntity = cycle.getFloatId().getMetadata();
     if (metadataFileEntity != null) {
       result.add(MetadataRecord.builder()
+          .withFileType(ArgoFileType.METADATA)
           .withFileName(metadataFileEntity.getFileName())
           .withFile(metadataFileEntity.getFile())
           .withFileStatus(FileStatus.valueOf(metadataFileEntity.getFileStatus()))
@@ -306,11 +351,14 @@ class Finder {
     }
     List<MetadataRecord> profileList = new LinkedList<>();
     for (ProfileFileEntity profile : cycle.getProfiles()) {
-      profileList.add(MetadataRecord.builder()
-          .withFileName(profile.getFileName())
-          .withFile(profile.getFile())
-          .withFileStatus(FileStatus.valueOf(profile.getFileStatus()))
-          .build());
+      if (ArgoFileType.PROFILE_CORE.toString().equals(profile.getFileType()) || ArgoFileType.PROFILE_BIOCHEMICAL.toString().equals(profile.getFileType())) {
+        profileList.add(MetadataRecord.builder()
+            .withFileType(ArgoFileType.valueOf(profile.getFileType()))
+            .withFileName(profile.getFileName())
+            .withFile(profile.getFile())
+            .withFileStatus(FileStatus.valueOf(profile.getFileStatus()))
+            .build());
+      }
     }
     Collections.sort(profileList, Comparator.comparing(MetadataRecord::getFile));
     result.addAll(profileList);

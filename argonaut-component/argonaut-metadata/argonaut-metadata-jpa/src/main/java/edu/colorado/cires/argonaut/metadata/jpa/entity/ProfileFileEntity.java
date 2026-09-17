@@ -7,9 +7,12 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.Version;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "profile")
@@ -73,6 +76,9 @@ public class ProfileFileEntity {
   private ZonedDateTime lastUpdatedTime;
   @Column(name = "file_name", nullable = false, length = 20)
   private String fileName;
+
+  @OneToMany(mappedBy = "profile", cascade = CascadeType.ALL, orphanRemoval = true)
+  private List<MetadataSyntheticMergeEntity> syntheticMerges = new ArrayList<>();
 
 
   public String getFile() {

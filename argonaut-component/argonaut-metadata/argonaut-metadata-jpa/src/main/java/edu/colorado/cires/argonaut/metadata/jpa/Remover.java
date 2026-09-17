@@ -30,10 +30,6 @@ class Remover {
     MetadataFileEntity existing = em.find(MetadataFileEntity.class, record.getFile(), LockModeType.OPTIMISTIC);
     if (existing != null) {
       existing.setFileStatus(FileStatus.REMOVED.name());
-      em.createQuery("""
-              UPDATE ProfileFileEntity profile SET profile.syntheticMergeTime = null
-              WHERE profile.cycle.floatId.id = :fid
-          """).setParameter("fid", existing.getFloatId().getFloatId()).executeUpdate();
     }
   }
 

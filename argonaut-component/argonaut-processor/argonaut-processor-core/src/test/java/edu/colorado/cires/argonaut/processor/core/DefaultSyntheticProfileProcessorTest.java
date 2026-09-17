@@ -9,6 +9,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import edu.colorado.cires.argonaut.core.merge.synthetic.DefaultSyntheticProfileMerger;
@@ -31,6 +32,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -55,15 +57,15 @@ public class DefaultSyntheticProfileProcessorTest {
   }
 
   @Test
-  public void test() throws Exception {
+  public void testMerge() throws Exception {
 
     ProfileOperation profileOperation = ProfileOperation.builder()
         .withDac("meds")
         .withFloatId("4902691")
         .withFiles(Arrays.asList(
-            MetadataRecord.builder().withFile("meds/4902691/profiles/R4902691_034.nc").withFileName("R4902691_034.nc").withFileStatus(FileStatus.ACTIVE).build(),
-            MetadataRecord.builder().withFile("meds/4902691/profiles/BR4902691_034.nc").withFileName("BR4902691_034.nc").withFileStatus(FileStatus.ACTIVE).build(),
-            MetadataRecord.builder().withFile("meds/4902691/4902691_meta.nc").withFileName("4902691_meta.nc").withFileStatus(FileStatus.ACTIVE).build()
+            MetadataRecord.builder().withFileType(ArgoFileType.PROFILE_CORE).withFile("meds/4902691/profiles/R4902691_034.nc").withFileName("R4902691_034.nc").withFileStatus(FileStatus.ACTIVE).build(),
+            MetadataRecord.builder().withFileType(ArgoFileType.PROFILE_BIOCHEMICAL).withFile("meds/4902691/profiles/BR4902691_034.nc").withFileName("BR4902691_034.nc").withFileStatus(FileStatus.ACTIVE).build(),
+            MetadataRecord.builder().withFileType(ArgoFileType.METADATA).withFile("meds/4902691/4902691_meta.nc").withFileName("4902691_meta.nc").withFileStatus(FileStatus.ACTIVE).build()
         ))
         .build();
 
@@ -119,7 +121,7 @@ public class DefaultSyntheticProfileProcessorTest {
         eq(tempDir.resolve("4902691_meta.nc")), eq(tempDir.resolve("SR4902691_034.nc")));
 
     ArgumentCaptor<String> jsonCaptor = ArgumentCaptor.forClass(String.class);
-    verify(messageSender, times(4)).sendJson(eq(updateIndexQueue), jsonCaptor.capture());
+    verify(messageSender, times(2)).sendJson(eq(updateIndexQueue), jsonCaptor.capture());
 
     Instant now = Instant.now();
     Map<String, MetadataRecord> jsonMap = new HashMap<>();
@@ -133,28 +135,6 @@ public class DefaultSyntheticProfileProcessorTest {
 
     assertEquals(MetadataRecord.builder()
         .withActionTimestamp(now)
-        .withFile("meds/4902691/profiles/R4902691_034.nc")
-        .withFileName("R4902691_034.nc")
-        .withAction(Action.SYNTHETIC_MERGE)
-        .withDac("meds")
-        .withFloatId("4902691")
-        .withFileType(ArgoFileType.PROFILE_CORE)
-        .withDateUpdate(now)
-        .build(), jsonMap.get("meds/4902691/profiles/R4902691_034.nc"));
-
-    assertEquals(MetadataRecord.builder()
-        .withActionTimestamp(now)
-        .withFile("meds/4902691/profiles/BR4902691_034.nc")
-        .withFileName("BR4902691_034.nc")
-        .withAction(Action.SYNTHETIC_MERGE)
-        .withDac("meds")
-        .withFloatId("4902691")
-        .withFileType(ArgoFileType.PROFILE_BIOCHEMICAL)
-        .withDateUpdate(now)
-        .build(), jsonMap.get("meds/4902691/profiles/BR4902691_034.nc"));
-
-    assertEquals(MetadataRecord.builder()
-        .withActionTimestamp(now)
         .withFile("meds/4902691/4902691_meta.nc")
         .withFileName("4902691_meta.nc")
         .withAction(Action.SYNTHETIC_MERGE)
@@ -162,6 +142,10 @@ public class DefaultSyntheticProfileProcessorTest {
         .withFloatId("4902691")
         .withFileType(ArgoFileType.METADATA)
         .withDateUpdate(now)
+        .withRelatedFiles(Arrays.asList(
+            "meds/4902691/profiles/R4902691_034.nc",
+            "meds/4902691/profiles/BR4902691_034.nc"
+        ))
         .build(), jsonMap.get("meds/4902691/4902691_meta.nc"));
 
 
@@ -183,6 +167,112 @@ public class DefaultSyntheticProfileProcessorTest {
         .withProfilerType("834")
         .withFileType(ArgoFileType.SYNTHETIC_PROFILE_SINGLE_CYCLE)
         .withInstitution("ME")
+        .build(), jsonMap.get("meds/4902691/profiles/SR4902691_034.nc"));
+
+  }
+
+  @Test
+  public void testRemoval() throws Exception {
+
+    UUID traceId = UUID.randomUUID();
+
+    ProfileOperation profileOperation = ProfileOperation.builder()
+        .withTraceId(traceId)
+        .withDac("meds")
+        .withFloatId("4902691")
+        .withFiles(Arrays.asList(
+            MetadataRecord.builder().withFileType(ArgoFileType.PROFILE_CORE).withFile("meds/4902691/profiles/R4902691_034.nc").withFileName("R4902691_034.nc").withFileStatus(FileStatus.REMOVED).build(),
+            MetadataRecord.builder().withFileType(ArgoFileType.PROFILE_BIOCHEMICAL).withFile("meds/4902691/profiles/BR4902691_034.nc").withFileName("BR4902691_034.nc").withFileStatus(FileStatus.ACTIVE).build(),
+            MetadataRecord.builder().withFileType(ArgoFileType.METADATA).withFile("meds/4902691/4902691_meta.nc").withFileName("4902691_meta.nc").withFileStatus(FileStatus.ACTIVE).build()
+        ))
+        .build();
+
+    SyntheticProfileMerger syntheticProfileMerger = mock(SyntheticProfileMerger.class);
+    MessageSender messageSender = mock(MessageSender.class);
+    FileStore fileStore = mock(FileStore.class);
+    GeoFilter geoFilter = mock(GeoFilter.class);
+
+    when(fileStore.appendToPath(any(String.class), any(String[].class))).thenAnswer(invocation -> {
+      List<String> varArgs = new ArrayList<>(invocation.getArguments().length - 1);
+      for (int i = 1; i < invocation.getArguments().length; i++) {
+        varArgs.add(invocation.getArgument(i, String.class));
+      }
+      String joined = String.join("/", varArgs);
+      return invocation.getArgument(0, String.class) + "/" + joined;
+    });
+    when(fileStore.getRoot()).thenReturn("/foo/bar");
+    when(fileStore.getFileName(any())).thenAnswer(invocation -> {
+      String[] parts = invocation.getArgument(0, String.class).split("/");
+      return parts[parts.length - 1];
+    });
+
+    ArgumentCaptor<Path> pathCaptor = ArgumentCaptor.forClass(Path.class);
+    doAnswer(invocationOnMock -> {
+      String path = invocationOnMock.getArgument(0, String.class);
+      Path localPath = invocationOnMock.getArgument(1, Path.class);
+      String[] parts = path.split("/");
+      Files.copy(Paths.get("src/test/resources/synth_proc").resolve(parts[parts.length - 1]), localPath);
+      return null;
+    }).when(fileStore).downloadLocalFile(any(), pathCaptor.capture());
+
+    when(geoFilter.determineArgoOcean(anyDouble(), anyDouble())).thenReturn(ArgoOcean.INDIAN_OCEAN);
+
+
+    DefaultSyntheticProfileProcessor processor = new DefaultSyntheticProfileProcessor();
+    processor.setLocalTempDir(workingDir);
+    processor.setJsonMapper(jsonMapper);
+    processor.setSyntheticProfileMerger(syntheticProfileMerger);
+    processor.setMessageSender(messageSender);
+    processor.setOutputFileStore(fileStore);
+    processor.setUpdateIndexQueue(updateIndexQueue);
+    processor.setGeoFilter(geoFilter);
+
+    processor.generateSyntheticProfile(profileOperation);
+
+    verify(fileStore, times(0)).downloadLocalFile(any(), any());
+    verify(fileStore, times(1)).delete(eq("/foo/bar/dac/meds/4902691/profiles/SR4902691_034.nc"));
+
+    verifyNoInteractions(syntheticProfileMerger);
+
+    ArgumentCaptor<String> jsonCaptor = ArgumentCaptor.forClass(String.class);
+    verify(messageSender, times(2)).sendJson(eq(updateIndexQueue), jsonCaptor.capture());
+
+    Instant now = Instant.now();
+    Map<String, MetadataRecord> jsonMap = new HashMap<>();
+    for (String json : jsonCaptor.getAllValues()) {
+      MetadataRecord metadataRecord = MetadataRecord.builder(jsonMapper.readValue(json, MetadataRecord.class))
+          .withActionTimestamp(now) //override dynamic timestamp to allow for equality assertions
+          .withDateUpdate(now)
+          .build();
+      jsonMap.put(metadataRecord.getFile(), metadataRecord);
+    }
+
+    assertEquals(MetadataRecord.builder()
+        .withTraceId(traceId)
+        .withActionTimestamp(now)
+        .withFile("meds/4902691/4902691_meta.nc")
+        .withFileName("4902691_meta.nc")
+        .withAction(Action.SYNTHETIC_MERGE_REMOVE)
+        .withDac("meds")
+        .withFloatId("4902691")
+        .withFileType(ArgoFileType.METADATA)
+        .withDateUpdate(now)
+        .withRelatedFiles(Arrays.asList(
+            "meds/4902691/profiles/R4902691_034.nc",
+            "meds/4902691/profiles/BR4902691_034.nc"
+        ))
+        .build(), jsonMap.get("meds/4902691/4902691_meta.nc"));
+
+    assertEquals(MetadataRecord.builder()
+        .withTraceId(traceId)
+        .withActionTimestamp(jsonMap.get("meds/4902691/profiles/SR4902691_034.nc").getActionTimestamp())
+        .withFileName("SR4902691_034.nc")
+        .withFile("meds/4902691/profiles/SR4902691_034.nc")
+        .withDateUpdate(jsonMap.get("meds/4902691/profiles/SR4902691_034.nc").getDateUpdate())
+        .withAction(Action.REMOVE)
+        .withDac("meds")
+        .withFloatId("4902691")
+        .withFileType(ArgoFileType.SYNTHETIC_PROFILE_SINGLE_CYCLE)
         .build(), jsonMap.get("meds/4902691/profiles/SR4902691_034.nc"));
 
   }
