@@ -245,6 +245,20 @@
     <property name="processingFileStore" ref="processingFileStore"/>
   </bean>
 
+  <bean id="removedFileDeleteTrigger" class="edu.colorado.cires.argonaut.processor.core.DefaultRemovedFileDeleteTrigger">
+    <property name="metadataStore" ref="metadataStore"/>
+    <property name="messageSender" ref="messageSender"/>
+    <property name="jsonMapper" ref="jsonMapper"/>
+    <property name="removedFileDeleteQueue" value="seda:removed-file-delete"/>
+    <property name="pageSize" value="${removed-file-delete.page-size}"/>
+    <property name="enabled" value="${removed-file-delete.enabled}"/>
+    <property name="removedFileRetentionDays" value="${removed-file-delete.retention-days}"/>
+  </bean>
+
+  <bean id="removedFileDeleteProcessor" class="edu.colorado.cires.argonaut.processor.core.DefaultRemovedFileDeleteProcessor">
+    <property name="outputFileStore" ref="outputFileStore"/>
+  </bean>
+
   <camelContext id="argonaut-camel" xmlns="http://camel.apache.org/schema/spring">
     <template id="producerTemplate"/>
     <routeContextRef ref="dac-submission-routes"/>

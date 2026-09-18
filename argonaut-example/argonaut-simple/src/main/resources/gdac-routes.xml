@@ -199,6 +199,20 @@
       <bean ref="auditProcessor" method="recordEvent"/>
     </route>
 
+    <route id="removed-file-delete-cron">
+      <from uri="cron:removed-file-delete?schedule={{removed-file-delete.cron}}"/>
+      <bean ref="removedFileDeleteTrigger" method="trigger"/>
+    </route>
+
+    <route id="removed-file-delete">
+      <from uri="seda:removed-file-delete"/>
+<!--      TODO audit-->
+      <bean ref="deserializationProcessor" method="deserialize(${body}, edu.colorado.cires.argonaut.messaging.core.databind.ProfileOperation)"/>
+      <bean ref="removedFileDeleteProcessor" method="delete"/>
+      <bean ref="serializationProcessor" method="serialize"/>
+      <to uri="seda:update-index"/>
+    </route>
+
   </routeContext>
 
 </beans>

@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import edu.colorado.cires.argonaut.audit.jpa.entity.AuditEntity;
+import edu.colorado.cires.argonaut.metadata.jpa.entity.FileRemovedTimeEntity;
 import edu.colorado.cires.argonaut.metadata.jpa.entity.ProfileFileEntity;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
@@ -15,6 +16,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Duration;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -220,6 +224,33 @@ public class RemovalTest {
 
     assertFalse(Files.exists(submissionDir.resolve("dac/aoml/processed/2026-02-20T01:02:03Z/reject/aoml_removal.txt")));
     assertTrue(Files.exists(submissionDir.resolve("dac/aoml/processed/2026-02-20T01:02:03Z/aoml_removal.txt")));
+
+    // artificially set delete time further in the past to trigger removal
+    try (EntityManager em = entityManagerFactory.createEntityManager()) {
+      EntityTransaction tx = em.getTransaction();
+      tx.begin();
+      try {
+        List<FileRemovedTimeEntity> entities = em.createQuery("select f from FileRemovedTimeEntity f", FileRemovedTimeEntity.class).getResultList();
+        for (FileRemovedTimeEntity fileRemovedTimeEntity : entities) {
+          fileRemovedTimeEntity.setRemovedTime(Instant.now().minus(100, ChronoUnit.DAYS).atZone(ZoneId.of("UTC")));
+        }
+        tx.commit();
+      } catch (Exception e) {
+        tx.rollback();
+        throw e;
+      }
+    }
+
+
+    await().pollInterval(Duration.ofSeconds(10)).atMost(Duration.ofMinutes(1)).untilAsserted(() -> {
+      submissions
+          .forEach(path -> {
+            boolean removed = toBeRemoved.contains(path);
+            String dac = path.getName(4).toString();
+            assertEquals(!removed, Files.exists(outputDir.resolve("dac").resolve(path.subpath(4, 8))));
+            assertFalse(Files.exists(outputDir.resolve("etc").resolve("removed").resolve(dac).resolve(path.getFileName())));
+          });
+    });
 
   }
 

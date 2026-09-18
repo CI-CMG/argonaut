@@ -16,6 +16,7 @@
       <list>
         <value>classpath:argonaut-default.properties</value>
         <value>classpath:/edu/colorado/cires/argonaut/standalone/argonaut-test.properties</value>
+        <value>classpath:/edu/colorado/cires/argonaut/standalone/RemovalTest.properties</value>
       </list>
     </property>
     <property name="ignoreResourceNotFound" value="true"/>
