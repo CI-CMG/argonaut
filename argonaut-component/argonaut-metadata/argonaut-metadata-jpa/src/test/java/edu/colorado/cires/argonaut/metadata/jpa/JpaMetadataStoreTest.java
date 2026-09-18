@@ -17,6 +17,7 @@ import edu.colorado.cires.argonaut.metadata.core.DefaultIndexPageRequest;
 import edu.colorado.cires.argonaut.metadata.core.DefaultRemovedFileSearch;
 import edu.colorado.cires.argonaut.metadata.core.GeoMergePage;
 import edu.colorado.cires.argonaut.metadata.core.ProfilePage;
+import edu.colorado.cires.argonaut.metadata.core.RemovedFilePage;
 import edu.colorado.cires.argonaut.metadata.jpa.entity.ProfileFileEntity;
 import edu.colorado.cires.argonaut.metadata.jpa.entity.ProfileMergeFileEntity;
 import jakarta.persistence.EntityManager;
@@ -2801,7 +2802,7 @@ public class JpaMetadataStoreTest {
         .build());
 
 
-    ProfilePage page = datastore.findRemovedFilesPage(DefaultRemovedFileSearch.builder().withPageSize(100).build());
+    RemovedFilePage page = datastore.findRemovedFilesPage(DefaultRemovedFileSearch.builder().withPageSize(100).build());
     assertEquals(1, page.getPageNumber());
     assertEquals(0, page.getTotalRecords());
     assertEquals(0, page.getPage().size());
@@ -2841,7 +2842,11 @@ public class JpaMetadataStoreTest {
         .build());
 
 
-    page = datastore.findRemovedFilesPage(DefaultRemovedFileSearch.builder().withPageSize(100).build());
+    page = datastore.findRemovedFilesPage(DefaultRemovedFileSearch.builder().withPageSize(1).withPageNumber(1).build());
+    assertEquals(3, page.getTotalRecords());
+    assertEquals(1, page.getPageNumber());
+    assertEquals(1, page.getPageSize());
+
 
     assertEquals(Arrays.asList(ProfileOperation.builder()
                 .withDac("aoml")
@@ -2855,7 +2860,18 @@ public class JpaMetadataStoreTest {
                         .withActionTimestamp(Instant.parse("2025-10-10T14:00:00Z"))
                         .build()
                 ))
-                .build(),
+                .build()
+        ),
+        page.getPage());
+
+
+    page = datastore.findRemovedFilesPage(DefaultRemovedFileSearch.builder().withPageSize(1).withPageNumber(2).build());
+    assertEquals(3, page.getTotalRecords());
+    assertEquals(2, page.getPageNumber());
+    assertEquals(1, page.getPageSize());
+
+
+    assertEquals(Arrays.asList(
             ProfileOperation.builder()
                 .withDac("aoml")
                 .withFloatId("13857")
@@ -2868,7 +2884,16 @@ public class JpaMetadataStoreTest {
                         .withActionTimestamp(Instant.parse("2025-10-10T12:00:00Z"))
                         .build()
                 ))
-                .build(),
+                .build()
+        ),
+        page.getPage());
+
+    page = datastore.findRemovedFilesPage(DefaultRemovedFileSearch.builder().withPageSize(1).withPageNumber(3).build());
+    assertEquals(3, page.getTotalRecords());
+    assertEquals(3, page.getPageNumber());
+    assertEquals(1, page.getPageSize());
+
+    assertEquals(Arrays.asList(
             ProfileOperation.builder()
                 .withDac("aoml")
                 .withFloatId("13857")

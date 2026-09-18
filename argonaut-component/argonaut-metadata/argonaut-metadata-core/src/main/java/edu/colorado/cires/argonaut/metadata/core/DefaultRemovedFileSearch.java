@@ -31,6 +31,8 @@ public class DefaultRemovedFileSearch implements RemovedFileSearch {
     private Builder(RemovedFileSearch src) {
       withPageNumber(src.getPageNumber());
       withPageSize(src.getPageSize());
+      withOlderThan(src.getOlderThan());
+      withForFileTypes(src.getFileTypes());
     }
 
     public Builder withPageNumber(int pageNumber) {
@@ -75,6 +77,15 @@ public class DefaultRemovedFileSearch implements RemovedFileSearch {
     this.forFileTypes = forFileTypes;
   }
 
+  @Override
+  public Instant getOlderThan() {
+    return olderThan;
+  }
+
+  @Override
+  public List<ArgoFileType> getFileTypes() {
+    return forFileTypes;
+  }
 
   @Override
   public int getPageNumber() {
@@ -84,16 +95,6 @@ public class DefaultRemovedFileSearch implements RemovedFileSearch {
   @Override
   public int getPageSize() {
     return pageSize;
-  }
-
-  @Override
-  public Instant olderThan() {
-    return olderThan;
-  }
-
-  @Override
-  public List<ArgoFileType> forFileTypes() {
-    return forFileTypes;
   }
 
   @Override

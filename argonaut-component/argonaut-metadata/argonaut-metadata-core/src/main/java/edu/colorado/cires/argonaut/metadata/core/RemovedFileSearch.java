@@ -4,9 +4,11 @@ import edu.colorado.cires.argonaut.messaging.core.databind.ArgoFileType;
 import java.time.Instant;
 import java.util.List;
 
-public interface RemovedFileSearch extends IndexPageRequest {
+public interface RemovedFileSearch {
 
-  Instant olderThan();
-  List<ArgoFileType> forFileTypes();
+  Instant getOlderThan();
+  List<ArgoFileType> getFileTypes();
+  int getPageNumber();
+  int getPageSize();
 
 }

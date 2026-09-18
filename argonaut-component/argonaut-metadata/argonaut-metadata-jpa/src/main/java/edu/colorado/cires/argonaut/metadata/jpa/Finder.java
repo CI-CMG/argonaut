@@ -9,9 +9,12 @@ import edu.colorado.cires.argonaut.messaging.core.databind.ProfileOperation;
 import edu.colorado.cires.argonaut.metadata.core.DefaultGeoMergePage;
 import edu.colorado.cires.argonaut.metadata.core.DefaultIndexPageRequest;
 import edu.colorado.cires.argonaut.metadata.core.DefaultProfilePage;
+import edu.colorado.cires.argonaut.metadata.core.DefaultRemovedFilePage;
+import edu.colorado.cires.argonaut.metadata.core.DefaultRemovedFileSearch;
 import edu.colorado.cires.argonaut.metadata.core.GeoMergePage;
 import edu.colorado.cires.argonaut.metadata.core.IndexPageRequest;
 import edu.colorado.cires.argonaut.metadata.core.ProfilePage;
+import edu.colorado.cires.argonaut.metadata.core.RemovedFilePage;
 import edu.colorado.cires.argonaut.metadata.core.RemovedFileSearch;
 import edu.colorado.cires.argonaut.metadata.jpa.entity.CycleEntity;
 import edu.colorado.cires.argonaut.metadata.jpa.entity.FileRemovedTimeEntity;
@@ -379,13 +382,13 @@ class Finder {
     return result;
   }
 
-  ProfilePage findRemovedFilesPage(RemovedFileSearch pageRequest) {
-    Instant olderThan = pageRequest.olderThan() == null ? Instant.now() : pageRequest.olderThan();
+  RemovedFilePage findRemovedFilesPage(RemovedFileSearch pageRequest) {
+    Instant olderThan = pageRequest.getOlderThan() == null ? Instant.now() : pageRequest.getOlderThan();
     ZonedDateTime queryOlderThan = olderThan.atOffset(ZoneOffset.UTC).toZonedDateTime();
     List<String> fileTypes = (
-        pageRequest.forFileTypes() == null || pageRequest.forFileTypes().isEmpty()
+        pageRequest.getFileTypes() == null || pageRequest.getFileTypes().isEmpty()
         ? DEFAULT_REMOVABLE_PROFILE_TYPES
-        : pageRequest.forFileTypes().stream().filter(DEFAULT_REMOVABLE_PROFILE_TYPES::contains).toList()
+        : pageRequest.getFileTypes().stream().filter(DEFAULT_REMOVABLE_PROFILE_TYPES::contains).toList()
         ).stream().map(ArgoFileType::toString).toList();
 
     try (EntityManager em = entityManagerFactory.createEntityManager()) {
@@ -410,9 +413,9 @@ class Finder {
           .setFirstResult((pageRequest.getPageNumber() - 1) * pageRequest.getPageSize())
           .getResultList();
 
-      return DefaultProfilePage.builder()
+      return DefaultRemovedFilePage.builder()
           .withTotalRecords(count)
-          .withIndexPageRequest(DefaultIndexPageRequest.builder(pageRequest).build())
+          .withIndexPageRequest(DefaultRemovedFileSearch.builder(pageRequest).build())
           .withPage(pageResults.stream().map(frt -> {
             String dac = null;
             String floatId = null;
