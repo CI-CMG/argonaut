@@ -14,6 +14,7 @@ import edu.colorado.cires.argonaut.messaging.core.databind.MetadataRecord.Action
 import edu.colorado.cires.argonaut.messaging.core.databind.MetadataRecord.FileStatus;
 import edu.colorado.cires.argonaut.messaging.core.databind.ProfileOperation;
 import edu.colorado.cires.argonaut.metadata.core.DefaultIndexPageRequest;
+import edu.colorado.cires.argonaut.metadata.core.DefaultRemovedFileSearch;
 import edu.colorado.cires.argonaut.metadata.core.GeoMergePage;
 import edu.colorado.cires.argonaut.metadata.core.ProfilePage;
 import edu.colorado.cires.argonaut.metadata.jpa.entity.ProfileFileEntity;
@@ -53,6 +54,7 @@ public class JpaMetadataStoreTest {
       EntityTransaction tx = em.getTransaction();
       tx.begin();
       try {
+        em.createQuery("delete from FileRemovedTimeEntity").executeUpdate();
         em.createQuery("delete from MetadataSyntheticMergeEntity").executeUpdate();
         em.createQuery("delete from ProfileMergeFileEntity").executeUpdate();
         em.createQuery("delete from ProfileFileEntity").executeUpdate();
@@ -2659,6 +2661,267 @@ public class JpaMetadataStoreTest {
     }
 
 
+  }
+
+
+  @Test
+  public void testFindRemovedFilesPage() throws Exception {
+    datastore.updateIndex(MetadataRecord.builder()
+        .withFile("aoml/13857/profiles/D13857_001.nc")
+        .withFileName("D13857_001.nc")
+        .withDac("aoml")
+        .withFloatId("13857")
+        .withCycleNumber("001")
+        .withDirection("A")
+        .withParameterDataMode("D")
+        .withActionTimestamp(Instant.now())
+        .withDate(Instant.parse("2026-05-01T00:00:00Z"))
+        .withLatitude(0.267)
+        .withLatitudeMin(0.1)
+        .withLatitudeMax(0.4)
+        .withLongitude(-16.032)
+        .withLongitudeMin(-17.0)
+        .withLongitudeMax(-14.0)
+        .withOcean(ArgoOcean.ATLANTIC_OCEAN)
+        .withProfilerType("845")
+        .withInstitution("A0")
+        .withDateUpdate(Instant.now())
+        .withParameters("params")
+        .withAction(Action.UPDATE)
+        .withFileType(ArgoFileType.PROFILE_CORE)
+        .build());
+
+    datastore.updateIndex(MetadataRecord.builder()
+        .withFile("aoml/13857/profiles/D13857_002.nc")
+        .withFileName("D13857_002.nc")
+        .withDac("aoml")
+        .withFloatId("13857")
+        .withCycleNumber("002")
+        .withDirection("A")
+        .withParameterDataMode("D")
+        .withActionTimestamp(Instant.now())
+        .withDate(Instant.parse("2026-05-01T00:00:00Z"))
+        .withLatitude(0.267)
+        .withLatitudeMin(0.1)
+        .withLatitudeMax(0.4)
+        .withLongitude(-16.032)
+        .withLongitudeMin(-17.0)
+        .withLongitudeMax(-14.0)
+        .withOcean(ArgoOcean.ATLANTIC_OCEAN)
+        .withProfilerType("845")
+        .withInstitution("A0")
+        .withDateUpdate(Instant.now())
+        .withParameters("params")
+        .withAction(Action.UPDATE)
+        .withFileType(ArgoFileType.PROFILE_CORE)
+        .build());
+
+    datastore.updateIndex(MetadataRecord.builder()
+        .withFile("aoml/13857/13857_meta.nc")
+        .withFileName("13857_meta.nc")
+        .withDac("aoml")
+        .withFloatId("13857")
+        .withActionTimestamp(Instant.now())
+        .withDate(Instant.now())
+        .withLatitude(0.267)
+        .withLongitude(-16.032)
+        .withOcean(ArgoOcean.ATLANTIC_OCEAN)
+        .withProfilerType("845")
+        .withInstitution("A0")
+        .withDateUpdate(Instant.now())
+        .withAction(Action.UPDATE)
+        .withFileType(ArgoFileType.METADATA)
+        .build());
+
+    datastore.updateIndex(MetadataRecord.builder()
+        .withFile("aoml/13855/13855_meta.nc")
+        .withFileName("13855_meta.nc")
+        .withDac("aoml")
+        .withFloatId("13855")
+        .withActionTimestamp(Instant.now())
+        .withDate(Instant.now())
+        .withLatitude(0.267)
+        .withLongitude(-16.032)
+        .withOcean(ArgoOcean.ATLANTIC_OCEAN)
+        .withProfilerType("845")
+        .withInstitution("A0")
+        .withDateUpdate(Instant.now())
+        .withAction(Action.UPDATE)
+        .withFileType(ArgoFileType.METADATA)
+        .build());
+
+    datastore.updateIndex(MetadataRecord.builder()
+        .withFile("aoml/13855/profiles/BD13855_001.nc")
+        .withFileName("BD13855_001.nc")
+        .withDac("aoml")
+        .withFloatId("13855")
+        .withCycleNumber("001")
+        .withDirection("A")
+        .withParameterDataMode("D")
+        .withActionTimestamp(Instant.now())
+        .withDate(Instant.now())
+        .withLatitude(0.267)
+        .withLatitudeMin(0.1)
+        .withLatitudeMax(0.4)
+        .withLongitude(-16.032)
+        .withLongitudeMin(-17.0)
+        .withLongitudeMax(-14.0)
+        .withOcean(ArgoOcean.ATLANTIC_OCEAN)
+        .withProfilerType("845")
+        .withInstitution("A0")
+        .withDateUpdate(Instant.now())
+        .withParameters("params")
+        .withAction(Action.UPDATE)
+        .withFileType(ArgoFileType.PROFILE_BIOCHEMICAL)
+        .build());
+
+    datastore.updateIndex(MetadataRecord.builder()
+        .withFile("aoml/13855/profiles/BD13855_002.nc")
+        .withFileName("BD13855_002.nc")
+        .withDac("aoml")
+        .withFloatId("13855")
+        .withCycleNumber("002")
+        .withDirection("A")
+        .withParameterDataMode("D")
+        .withActionTimestamp(Instant.now())
+        .withDate(Instant.now())
+        .withLatitude(0.267)
+        .withLatitudeMin(0.1)
+        .withLatitudeMax(0.4)
+        .withLongitude(-16.032)
+        .withLongitudeMin(-17.0)
+        .withLongitudeMax(-14.0)
+        .withOcean(ArgoOcean.ATLANTIC_OCEAN)
+        .withProfilerType("845")
+        .withInstitution("A0")
+        .withDateUpdate(Instant.now())
+        .withParameters("params")
+        .withAction(Action.UPDATE)
+        .withFileType(ArgoFileType.PROFILE_BIOCHEMICAL)
+        .build());
+
+
+    ProfilePage page = datastore.findRemovedFilesPage(DefaultRemovedFileSearch.builder().withPageSize(100).build());
+    assertEquals(1, page.getPageNumber());
+    assertEquals(0, page.getTotalRecords());
+    assertEquals(0, page.getPage().size());
+
+
+
+    datastore.updateIndex(MetadataRecord.builder()
+        .withFile("aoml/13857/profiles/D13857_001.nc")
+        .withFileName("D13857_001.nc")
+        .withDac("aoml")
+        .withFloatId("13857")
+        .withCycleNumber("001")
+        .withActionTimestamp(Instant.parse("2025-10-10T12:00:00Z"))
+        .withAction(Action.REMOVE)
+        .withFileType(ArgoFileType.PROFILE_CORE)
+        .build());
+
+    datastore.updateIndex(MetadataRecord.builder()
+        .withFile("aoml/13857/13857_meta.nc")
+        .withFileName("13857_meta.nc")
+        .withDac("aoml")
+        .withFloatId("13857")
+        .withActionTimestamp(Instant.parse("2025-10-10T13:00:00Z"))
+        .withAction(Action.REMOVE)
+        .withFileType(ArgoFileType.METADATA)
+        .build());
+
+    datastore.updateIndex(MetadataRecord.builder()
+        .withFile("aoml/13855/profiles/BD13855_001.nc")
+        .withFileName("BD13855_001.nc")
+        .withDac("aoml")
+        .withFloatId("13855")
+        .withCycleNumber("001")
+        .withActionTimestamp(Instant.parse("2025-10-10T14:00:00Z"))
+        .withAction(Action.REMOVE)
+        .withFileType(ArgoFileType.PROFILE_BIOCHEMICAL)
+        .build());
+
+
+    page = datastore.findRemovedFilesPage(DefaultRemovedFileSearch.builder().withPageSize(100).build());
+
+    assertEquals(Arrays.asList(ProfileOperation.builder()
+                .withDac("aoml")
+                .withFloatId("13855")
+                .withFiles(Collections.singletonList(
+                    MetadataRecord.builder()
+                        .withFileType(ArgoFileType.PROFILE_BIOCHEMICAL)
+                        .withFile("aoml/13855/profiles/BD13855_001.nc")
+                        .withFileName("BD13855_001.nc")
+                        .withFileStatus(FileStatus.REMOVED)
+                        .withActionTimestamp(Instant.parse("2025-10-10T14:00:00Z"))
+                        .build()
+                ))
+                .build(),
+            ProfileOperation.builder()
+                .withDac("aoml")
+                .withFloatId("13857")
+                .withFiles(Collections.singletonList(
+                    MetadataRecord.builder()
+                        .withFileType(ArgoFileType.PROFILE_CORE)
+                        .withFile("aoml/13857/profiles/D13857_001.nc")
+                        .withFileName("D13857_001.nc")
+                        .withFileStatus(FileStatus.REMOVED)
+                        .withActionTimestamp(Instant.parse("2025-10-10T12:00:00Z"))
+                        .build()
+                ))
+                .build(),
+            ProfileOperation.builder()
+                .withDac("aoml")
+                .withFloatId("13857")
+                .withFiles(Collections.singletonList(
+                    MetadataRecord.builder()
+                        .withFileType(ArgoFileType.METADATA)
+                        .withFile("aoml/13857/13857_meta.nc")
+                        .withFileName("13857_meta.nc")
+                        .withFileStatus(FileStatus.REMOVED)
+                        .withActionTimestamp(Instant.parse("2025-10-10T13:00:00Z"))
+                        .build()
+                ))
+                .build()
+        ),
+        page.getPage());
+
+    page = datastore.findRemovedFilesPage(DefaultRemovedFileSearch.builder().withForFileTypes(Collections.singletonList(ArgoFileType.METADATA)).withPageSize(100).build());
+
+    assertEquals(Arrays.asList(
+            ProfileOperation.builder()
+                .withDac("aoml")
+                .withFloatId("13857")
+                .withFiles(Collections.singletonList(
+                    MetadataRecord.builder()
+                        .withFileType(ArgoFileType.METADATA)
+                        .withFile("aoml/13857/13857_meta.nc")
+                        .withFileName("13857_meta.nc")
+                        .withFileStatus(FileStatus.REMOVED)
+                        .withActionTimestamp(Instant.parse("2025-10-10T13:00:00Z"))
+                        .build()
+                ))
+                .build()
+        ),
+        page.getPage());
+
+    page = datastore.findRemovedFilesPage(DefaultRemovedFileSearch.builder().withOlderThan(Instant.parse("2025-10-10T13:00:00Z")).withPageSize(100).build());
+
+    assertEquals(Arrays.asList(
+            ProfileOperation.builder()
+                .withDac("aoml")
+                .withFloatId("13857")
+                .withFiles(Collections.singletonList(
+                    MetadataRecord.builder()
+                        .withFileType(ArgoFileType.PROFILE_CORE)
+                        .withFile("aoml/13857/profiles/D13857_001.nc")
+                        .withFileName("D13857_001.nc")
+                        .withFileStatus(FileStatus.REMOVED)
+                        .withActionTimestamp(Instant.parse("2025-10-10T12:00:00Z"))
+                        .build()
+                ))
+                .build()
+        ),
+        page.getPage());
   }
 
 }

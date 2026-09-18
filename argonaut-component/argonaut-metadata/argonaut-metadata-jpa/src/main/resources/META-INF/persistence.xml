@@ -13,6 +13,7 @@
     <class>edu.colorado.cires.argonaut.metadata.jpa.entity.MetadataFileEntity</class>
     <class>edu.colorado.cires.argonaut.metadata.jpa.entity.ProfileFileEntity</class>
     <class>edu.colorado.cires.argonaut.metadata.jpa.entity.MetadataSyntheticMergeEntity</class>
+    <class>edu.colorado.cires.argonaut.metadata.jpa.entity.FileRemovedTimeEntity</class>
     <exclude-unlisted-classes>true</exclude-unlisted-classes>
     <properties>
       <property name="jakarta.persistence.jdbc.url" value=""/>

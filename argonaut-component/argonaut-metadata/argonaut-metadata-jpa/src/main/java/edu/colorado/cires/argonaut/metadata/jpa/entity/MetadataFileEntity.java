@@ -65,6 +65,9 @@ public class MetadataFileEntity {
   @Column(name = "file_name", nullable = false, length = 20)
   private String fileName;
 
+  @OneToMany(mappedBy = "metadata", cascade = CascadeType.ALL, orphanRemoval = true)
+  private List<FileRemovedTimeEntity> removedTimes = new ArrayList<>();
+
 
   public String getFile() {
     return file;
@@ -220,5 +223,13 @@ public class MetadataFileEntity {
 
   public void setSyntheticMerges(List<MetadataSyntheticMergeEntity> syntheticMerges) {
     this.syntheticMerges = syntheticMerges;
+  }
+
+  public List<FileRemovedTimeEntity> getRemovedTimes() {
+    return removedTimes;
+  }
+
+  public void setRemovedTimes(List<FileRemovedTimeEntity> removedTimes) {
+    this.removedTimes = removedTimes;
   }
 }

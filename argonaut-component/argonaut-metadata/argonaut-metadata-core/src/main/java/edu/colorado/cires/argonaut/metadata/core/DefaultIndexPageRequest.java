@@ -1,7 +1,6 @@
 package edu.colorado.cires.argonaut.metadata.core;
 
 import java.util.Objects;
-import java.util.Optional;
 
 public class DefaultIndexPageRequest implements IndexPageRequest {
 

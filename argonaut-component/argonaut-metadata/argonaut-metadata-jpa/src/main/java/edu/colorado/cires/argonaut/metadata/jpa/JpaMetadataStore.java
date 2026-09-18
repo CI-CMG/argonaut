@@ -5,6 +5,7 @@ import edu.colorado.cires.argonaut.metadata.core.GeoMergePage;
 import edu.colorado.cires.argonaut.metadata.core.IndexPageRequest;
 import edu.colorado.cires.argonaut.metadata.core.MetadataStore;
 import edu.colorado.cires.argonaut.metadata.core.ProfilePage;
+import edu.colorado.cires.argonaut.metadata.core.RemovedFileSearch;
 import jakarta.persistence.EntityManagerFactory;
 import java.util.Optional;
 
@@ -81,6 +82,11 @@ public class JpaMetadataStore implements MetadataStore {
   @Override
   public ProfilePage findUpdatedOrMissingSyntheticProfilesPage(IndexPageRequest pageRequest) {
     return finder.findUpdatedOrMissingSyntheticProfilesPage(pageRequest);
+  }
+
+  @Override
+  public ProfilePage findRemovedFilesPage(RemovedFileSearch pageRequest) {
+    return finder.findRemovedFilesPage(pageRequest);
   }
 
 }

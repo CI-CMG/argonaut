@@ -78,7 +78,7 @@ public class ProfileFileEntity {
   private String fileName;
 
   @OneToMany(mappedBy = "profile", cascade = CascadeType.ALL, orphanRemoval = true)
-  private List<MetadataSyntheticMergeEntity> syntheticMerges = new ArrayList<>();
+  private List<FileRemovedTimeEntity> removedTimes = new ArrayList<>();
 
 
   public String getFile() {
@@ -283,5 +283,13 @@ public class ProfileFileEntity {
 
   public void setFileName(String fileName) {
     this.fileName = fileName;
+  }
+
+  public List<FileRemovedTimeEntity> getRemovedTimes() {
+    return removedTimes;
+  }
+
+  public void setRemovedTimes(List<FileRemovedTimeEntity> removedTimes) {
+    this.removedTimes = removedTimes;
   }
 }

@@ -12,13 +12,19 @@ import edu.colorado.cires.argonaut.metadata.core.DefaultProfilePage;
 import edu.colorado.cires.argonaut.metadata.core.GeoMergePage;
 import edu.colorado.cires.argonaut.metadata.core.IndexPageRequest;
 import edu.colorado.cires.argonaut.metadata.core.ProfilePage;
+import edu.colorado.cires.argonaut.metadata.core.RemovedFileSearch;
 import edu.colorado.cires.argonaut.metadata.jpa.entity.CycleEntity;
+import edu.colorado.cires.argonaut.metadata.jpa.entity.FileRemovedTimeEntity;
 import edu.colorado.cires.argonaut.metadata.jpa.entity.FloatEntity;
 import edu.colorado.cires.argonaut.metadata.jpa.entity.MetadataFileEntity;
 import edu.colorado.cires.argonaut.metadata.jpa.entity.ProfileFileEntity;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
+import java.time.Instant;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedList;
@@ -26,6 +32,14 @@ import java.util.List;
 import java.util.Optional;
 
 class Finder {
+
+  private static final List<ArgoFileType> DEFAULT_REMOVABLE_PROFILE_TYPES = Arrays.asList(
+      ArgoFileType.METADATA,
+      ArgoFileType.PROFILE_CORE,
+      ArgoFileType.PROFILE_BIOCHEMICAL,
+      ArgoFileType.TRAJECTORY,
+      ArgoFileType.TECHNICAL_DATA
+  );
 
   private final EntityManagerFactory entityManagerFactory;
 
@@ -363,5 +377,73 @@ class Finder {
     Collections.sort(profileList, Comparator.comparing(MetadataRecord::getFile));
     result.addAll(profileList);
     return result;
+  }
+
+  ProfilePage findRemovedFilesPage(RemovedFileSearch pageRequest) {
+    Instant olderThan = pageRequest.olderThan() == null ? Instant.now() : pageRequest.olderThan();
+    ZonedDateTime queryOlderThan = olderThan.atOffset(ZoneOffset.UTC).toZonedDateTime();
+    List<String> fileTypes = (
+        pageRequest.forFileTypes() == null || pageRequest.forFileTypes().isEmpty()
+        ? DEFAULT_REMOVABLE_PROFILE_TYPES
+        : pageRequest.forFileTypes().stream().filter(DEFAULT_REMOVABLE_PROFILE_TYPES::contains).toList()
+        ).stream().map(ArgoFileType::toString).toList();
+
+    try (EntityManager em = entityManagerFactory.createEntityManager()) {
+      long count = em.createQuery(
+          """
+              SELECT COUNT(frt.id) FROM FileRemovedTimeEntity frt 
+              WHERE frt.removedTime < :olderThan AND frt.fileType IN (:forFileTypes)
+              """, Long.class)
+          .setParameter("olderThan", queryOlderThan)
+          .setParameter("forFileTypes", fileTypes)
+          .getSingleResult();
+
+      List<FileRemovedTimeEntity> pageResults = em.createQuery(
+              """
+                     SELECT frt FROM FileRemovedTimeEntity frt 
+                     WHERE frt.removedTime < :olderThan AND frt.fileType IN (:forFileTypes)
+                     ORDER BY frt.metadata.file, frt.profile.file
+                  """, FileRemovedTimeEntity.class)
+          .setParameter("olderThan", queryOlderThan)
+          .setParameter("forFileTypes", fileTypes)
+          .setMaxResults(pageRequest.getPageSize())
+          .setFirstResult((pageRequest.getPageNumber() - 1) * pageRequest.getPageSize())
+          .getResultList();
+
+      return DefaultProfilePage.builder()
+          .withTotalRecords(count)
+          .withIndexPageRequest(DefaultIndexPageRequest.builder(pageRequest).build())
+          .withPage(pageResults.stream().map(frt -> {
+            String dac = null;
+            String floatId = null;
+            MetadataRecord fileInfo = null;
+            if (frt.getMetadata() != null) {
+              dac = frt.getMetadata().getFloatId().getDac().getDac();
+              floatId = frt.getMetadata().getFloatId().getFloatId();
+              fileInfo = MetadataRecord.builder()
+                  .withFileName(frt.getMetadata().getFileName())
+                  .withFile(frt.getMetadata().getFile())
+                  .withFileStatus(FileStatus.valueOf(frt.getMetadata().getFileStatus()))
+                  .withFileType(ArgoFileType.METADATA)
+                  .withActionTimestamp(frt.getRemovedTime().toInstant())
+                  .build();
+            } else if(frt.getProfile() != null) {
+              dac = frt.getProfile().getCycle().getFloatId().getDac().getDac();
+              floatId = frt.getProfile().getCycle().getFloatId().getFloatId();
+              fileInfo = MetadataRecord.builder()
+                  .withFileName(frt.getProfile().getFileName())
+                  .withFile(frt.getProfile().getFile())
+                  .withFileStatus(FileStatus.valueOf(frt.getProfile().getFileStatus()))
+                  .withFileType(ArgoFileType.valueOf(frt.getProfile().getFileType()))
+                  .withActionTimestamp(frt.getRemovedTime().toInstant())
+                  .build();
+            }
+            return ProfileOperation.builder()
+                .withDac(dac)
+                .withFloatId(floatId)
+                .withFiles(Collections.singletonList(fileInfo))
+                .build();
+          }).toList()).build();
+    }
   }
 }

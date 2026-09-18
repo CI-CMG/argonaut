@@ -1,7 +1,9 @@
 package edu.colorado.cires.argonaut.metadata.jpa;
 
+import edu.colorado.cires.argonaut.messaging.core.databind.ArgoFileType;
 import edu.colorado.cires.argonaut.messaging.core.databind.MetadataRecord;
 import edu.colorado.cires.argonaut.messaging.core.databind.MetadataRecord.FileStatus;
+import edu.colorado.cires.argonaut.metadata.jpa.entity.FileRemovedTimeEntity;
 import edu.colorado.cires.argonaut.metadata.jpa.entity.MetadataFileEntity;
 import edu.colorado.cires.argonaut.metadata.jpa.entity.ProfileFileEntity;
 import edu.colorado.cires.argonaut.metadata.jpa.entity.ProfileMergeFileEntity;
@@ -10,6 +12,9 @@ import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.EntityTransaction;
 import jakarta.persistence.LockModeType;
 import jakarta.persistence.OptimisticLockException;
+import java.time.ZoneOffset;
+import java.util.List;
+import java.util.UUID;
 
 class Remover {
 
@@ -22,14 +27,44 @@ class Remover {
   private static void removeProfile(EntityManager em, MetadataRecord record) {
     ProfileFileEntity existing = em.find(ProfileFileEntity.class, record.getFile(), LockModeType.OPTIMISTIC);
     if (existing != null) {
+      if (!FileStatus.REMOVED.name().equals(existing.getFileStatus())) {
+        List<FileRemovedTimeEntity> frts = em.createQuery("SELECT frt FROM FileRemovedTimeEntity frt WHERE frt.profile = :profile",
+                FileRemovedTimeEntity.class)
+            .setParameter("profile", existing)
+            .getResultList();
+        if (frts.isEmpty()) {
+          FileRemovedTimeEntity frt = new FileRemovedTimeEntity();
+          frt.setRemovedTime(record.getActionTimestamp().atOffset(ZoneOffset.UTC).toZonedDateTime());
+          frt.setProfile(existing);
+          frt.setFileType(existing.getFileType());
+          frt.setId(UUID.randomUUID());
+          em.persist(frt);
+        }
+      }
       existing.setFileStatus(FileStatus.REMOVED.name());
+      existing.setLastUpdatedTime(record.getActionTimestamp().atOffset(ZoneOffset.UTC).toZonedDateTime());
     }
   }
 
   private static void removeMetadata(EntityManager em, MetadataRecord record) {
     MetadataFileEntity existing = em.find(MetadataFileEntity.class, record.getFile(), LockModeType.OPTIMISTIC);
     if (existing != null) {
+      if (!FileStatus.REMOVED.name().equals(existing.getFileStatus())) {
+        List<FileRemovedTimeEntity> frts = em.createQuery("SELECT frt FROM FileRemovedTimeEntity frt WHERE frt.metadata = :metadata",
+                FileRemovedTimeEntity.class)
+            .setParameter("metadata", existing)
+            .getResultList();
+        if (frts.isEmpty()) {
+          FileRemovedTimeEntity frt = new FileRemovedTimeEntity();
+          frt.setRemovedTime(record.getActionTimestamp().atOffset(ZoneOffset.UTC).toZonedDateTime());
+          frt.setMetadata(existing);
+          frt.setFileType(ArgoFileType.METADATA.toString());
+          frt.setId(UUID.randomUUID());
+          em.persist(frt);
+        }
+      }
       existing.setFileStatus(FileStatus.REMOVED.name());
+      existing.setLastUpdatedTime(record.getActionTimestamp().atOffset(ZoneOffset.UTC).toZonedDateTime());
     }
   }
 

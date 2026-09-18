@@ -73,8 +73,10 @@ public class GeoMergeCronTest {
       EntityTransaction tx = em.getTransaction();
       tx.begin();
       try {
+        em.createQuery("delete from FileRemovedTimeEntity").executeUpdate();
+        em.createQuery("delete from MetadataSyntheticMergeEntity").executeUpdate();
+        em.createQuery("delete from ProfileMergeFileEntity").executeUpdate();
         em.createQuery("delete from ProfileFileEntity").executeUpdate();
-        em.createQuery("delete from ProfileMergeFileEntity ").executeUpdate();
         em.createQuery("delete from MetadataFileEntity").executeUpdate();
         em.createQuery("delete from CycleEntity").executeUpdate();
         em.createQuery("delete from FloatEntity").executeUpdate();

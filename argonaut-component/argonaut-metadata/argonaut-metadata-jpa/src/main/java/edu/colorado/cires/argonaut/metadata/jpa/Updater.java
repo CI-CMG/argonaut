@@ -207,6 +207,7 @@ class Updater {
           entity.setMultiFloatMergeTime(null);
           entity.setGeoMergeTime(null);
           entity.setLastUpdatedTime(record.getActionTimestamp().atOffset(ZoneOffset.UTC).toZonedDateTime());
+          entity.getRemovedTimes().clear();
 
           if (add) {
             em.persist(entity);
@@ -311,6 +312,7 @@ class Updater {
         entity.setParameterDataMode(record.getParameterDataMode());
         entity.setLastUpdatedTime(record.getActionTimestamp().atOffset(ZoneOffset.UTC).toZonedDateTime());
         entity.getSyntheticMerges().clear();
+        entity.getRemovedTimes().clear();
 
         if (add) {
           em.persist(entity);
