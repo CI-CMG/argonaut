@@ -2947,6 +2947,204 @@ public class JpaMetadataStoreTest {
                 .build()
         ),
         page.getPage());
+
+    datastore.updateIndex(MetadataRecord.builder()
+        .withFile("aoml/13855/13855_meta.nc")
+        .withFileName("13855_meta.nc")
+        .withDac("aoml")
+        .withFloatId("13855")
+        .withActionTimestamp(Instant.parse("2025-10-10T13:00:00Z"))
+        .withAction(Action.REMOVE)
+        .withFileType(ArgoFileType.METADATA)
+        .build());
+
+    datastore.updateIndex(MetadataRecord.builder()
+        .withFile("aoml/13855/profiles/BD13855_002.nc")
+        .withFileName("BD13855_002.nc")
+        .withDac("aoml")
+        .withFloatId("13855")
+        .withCycleNumber("002")
+        .withActionTimestamp(Instant.parse("2025-10-10T14:00:00Z"))
+        .withAction(Action.REMOVE)
+        .withFileType(ArgoFileType.PROFILE_BIOCHEMICAL)
+        .build());
+
+    datastore.updateIndex(MetadataRecord.builder()
+        .withFile("aoml/13857/profiles/D13857_002.nc")
+        .withFileName("D13857_002.nc")
+        .withDac("aoml")
+        .withFloatId("13857")
+        .withCycleNumber("002")
+        .withActionTimestamp(Instant.parse("2025-10-10T14:00:00Z"))
+        .withAction(Action.REMOVE)
+        .withFileType(ArgoFileType.PROFILE_CORE)
+        .build());
+
+
+    page = datastore.findRemovedFilesPage(DefaultRemovedFileSearch.builder().withPageSize(100).build());
+
+    assertEquals(Arrays.asList(
+            ProfileOperation.builder()
+                .withDac("aoml")
+                .withFloatId("13855")
+                .withFiles(Collections.singletonList(
+                    MetadataRecord.builder()
+                        .withFileType(ArgoFileType.PROFILE_BIOCHEMICAL)
+                        .withFile("aoml/13855/profiles/BD13855_001.nc")
+                        .withFileName("BD13855_001.nc")
+                        .withFileStatus(FileStatus.REMOVED)
+                        .withActionTimestamp(Instant.parse("2025-10-10T14:00:00Z"))
+                        .build()
+                ))
+                .build(),
+            ProfileOperation.builder()
+                .withDac("aoml")
+                .withFloatId("13855")
+                .withFiles(Collections.singletonList(
+                    MetadataRecord.builder()
+                        .withFileType(ArgoFileType.PROFILE_BIOCHEMICAL)
+                        .withFile("aoml/13855/profiles/BD13855_002.nc")
+                        .withFileName("BD13855_002.nc")
+                        .withFileStatus(FileStatus.REMOVED)
+                        .withActionTimestamp(Instant.parse("2025-10-10T14:00:00Z"))
+                        .build()
+                ))
+                .build(),
+            ProfileOperation.builder()
+                .withDac("aoml")
+                .withFloatId("13857")
+                .withFiles(Collections.singletonList(
+                    MetadataRecord.builder()
+                        .withFileType(ArgoFileType.PROFILE_CORE)
+                        .withFile("aoml/13857/profiles/D13857_001.nc")
+                        .withFileName("D13857_001.nc")
+                        .withFileStatus(FileStatus.REMOVED)
+                        .withActionTimestamp(Instant.parse("2025-10-10T12:00:00Z"))
+                        .build()
+                ))
+                .build(),
+            ProfileOperation.builder()
+                .withDac("aoml")
+                .withFloatId("13857")
+                .withFiles(Collections.singletonList(
+                    MetadataRecord.builder()
+                        .withFileType(ArgoFileType.PROFILE_CORE)
+                        .withFile("aoml/13857/profiles/D13857_002.nc")
+                        .withFileName("D13857_002.nc")
+                        .withFileStatus(FileStatus.REMOVED)
+                        .withActionTimestamp(Instant.parse("2025-10-10T14:00:00Z"))
+                        .build()
+                ))
+                .build(),
+            ProfileOperation.builder()
+                .withDac("aoml")
+                .withFloatId("13855")
+                .withFiles(Collections.singletonList(
+                    MetadataRecord.builder()
+                        .withFileType(ArgoFileType.METADATA)
+                        .withFile("aoml/13855/13855_meta.nc")
+                        .withFileName("13855_meta.nc")
+                        .withFileStatus(FileStatus.REMOVED)
+                        .withActionTimestamp(Instant.parse("2025-10-10T13:00:00Z"))
+                        .build()
+                ))
+                .build(),
+            ProfileOperation.builder()
+                .withDac("aoml")
+                .withFloatId("13857")
+                .withFiles(Collections.singletonList(
+                    MetadataRecord.builder()
+                        .withFileType(ArgoFileType.METADATA)
+                        .withFile("aoml/13857/13857_meta.nc")
+                        .withFileName("13857_meta.nc")
+                        .withFileStatus(FileStatus.REMOVED)
+                        .withActionTimestamp(Instant.parse("2025-10-10T13:00:00Z"))
+                        .build()
+                ))
+                .build()
+
+        ),
+        page.getPage());
+
+    datastore.updateIndex(MetadataRecord.builder()
+        .withFile("aoml/13855/13855_meta.nc")
+        .withFileName("13855_meta.nc")
+        .withDac("aoml")
+        .withFloatId("13855")
+        .withActionTimestamp(Instant.parse("2025-10-10T13:00:00Z"))
+        .withAction(Action.DELETE_REMOVED_FILE)
+        .withFileType(ArgoFileType.METADATA)
+        .build());
+
+    datastore.updateIndex(MetadataRecord.builder()
+        .withFile("aoml/13855/profiles/BD13855_002.nc")
+        .withFileName("BD13855_002.nc")
+        .withDac("aoml")
+        .withFloatId("13855")
+        .withCycleNumber("002")
+        .withActionTimestamp(Instant.parse("2025-10-10T14:00:00Z"))
+        .withAction(Action.DELETE_REMOVED_FILE)
+        .withFileType(ArgoFileType.PROFILE_BIOCHEMICAL)
+        .build());
+
+    datastore.updateIndex(MetadataRecord.builder()
+        .withFile("aoml/13857/profiles/D13857_002.nc")
+        .withFileName("D13857_002.nc")
+        .withDac("aoml")
+        .withFloatId("13857")
+        .withCycleNumber("002")
+        .withActionTimestamp(Instant.parse("2025-10-10T14:00:00Z"))
+        .withAction(Action.DELETE_REMOVED_FILE)
+        .withFileType(ArgoFileType.PROFILE_CORE)
+        .build());
+
+
+    page = datastore.findRemovedFilesPage(DefaultRemovedFileSearch.builder().withPageSize(100).build());
+
+    assertEquals(Arrays.asList(
+            ProfileOperation.builder()
+                .withDac("aoml")
+                .withFloatId("13855")
+                .withFiles(Collections.singletonList(
+                    MetadataRecord.builder()
+                        .withFileType(ArgoFileType.PROFILE_BIOCHEMICAL)
+                        .withFile("aoml/13855/profiles/BD13855_001.nc")
+                        .withFileName("BD13855_001.nc")
+                        .withFileStatus(FileStatus.REMOVED)
+                        .withActionTimestamp(Instant.parse("2025-10-10T14:00:00Z"))
+                        .build()
+                ))
+                .build(),
+            ProfileOperation.builder()
+                .withDac("aoml")
+                .withFloatId("13857")
+                .withFiles(Collections.singletonList(
+                    MetadataRecord.builder()
+                        .withFileType(ArgoFileType.PROFILE_CORE)
+                        .withFile("aoml/13857/profiles/D13857_001.nc")
+                        .withFileName("D13857_001.nc")
+                        .withFileStatus(FileStatus.REMOVED)
+                        .withActionTimestamp(Instant.parse("2025-10-10T12:00:00Z"))
+                        .build()
+                ))
+                .build(),
+            ProfileOperation.builder()
+                .withDac("aoml")
+                .withFloatId("13857")
+                .withFiles(Collections.singletonList(
+                    MetadataRecord.builder()
+                        .withFileType(ArgoFileType.METADATA)
+                        .withFile("aoml/13857/13857_meta.nc")
+                        .withFileName("13857_meta.nc")
+                        .withFileStatus(FileStatus.REMOVED)
+                        .withActionTimestamp(Instant.parse("2025-10-10T13:00:00Z"))
+                        .build()
+                ))
+                .build()
+
+        ),
+        page.getPage());
+
   }
 
 }

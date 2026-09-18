@@ -114,4 +114,69 @@ class Remover {
     }
   }
 
+  private static void deleteProfile(EntityManager em, MetadataRecord record) {
+    ProfileFileEntity existing = em.find(ProfileFileEntity.class, record.getFile(), LockModeType.OPTIMISTIC);
+    if (existing != null) {
+      if (FileStatus.REMOVED.name().equals(existing.getFileStatus())) {
+        List<FileRemovedTimeEntity> frts = em.createQuery("SELECT frt FROM FileRemovedTimeEntity frt WHERE frt.profile = :profile",
+                FileRemovedTimeEntity.class)
+            .setParameter("profile", existing)
+            .getResultList();
+        for (FileRemovedTimeEntity frt : frts) {
+          em.remove(frt);
+        }
+      }
+      existing.setLastUpdatedTime(record.getActionTimestamp().atOffset(ZoneOffset.UTC).toZonedDateTime());
+    }
+  }
+
+  private static void deleteMetadata(EntityManager em, MetadataRecord record) {
+    MetadataFileEntity existing = em.find(MetadataFileEntity.class, record.getFile(), LockModeType.OPTIMISTIC);
+    if (existing != null) {
+      if (FileStatus.REMOVED.name().equals(existing.getFileStatus())) {
+        List<FileRemovedTimeEntity> frts = em.createQuery("SELECT frt FROM FileRemovedTimeEntity frt WHERE frt.metadata = :metadata",
+                FileRemovedTimeEntity.class)
+            .setParameter("metadata", existing)
+            .getResultList();
+        for (FileRemovedTimeEntity frt : frts) {
+          em.remove(frt);
+        }
+      }
+      existing.setLastUpdatedTime(record.getActionTimestamp().atOffset(ZoneOffset.UTC).toZonedDateTime());
+    }
+  }
+
+  private static void delete(EntityManager em, MetadataRecord record) {
+    switch (record.getFileType()) {
+      case PROFILE_CORE:
+      case PROFILE_BIOCHEMICAL:
+        deleteProfile(em, record);
+        break;
+      case METADATA:
+        deleteMetadata(em, record);
+        break;
+      default:
+        throw new UnsupportedOperationException("Unsupported file type: " + record.getFileType());
+    }
+  }
+
+  void delete(MetadataRecord record) {
+    while (true) {
+      try (EntityManager em = entityManagerFactory.createEntityManager()) {
+        EntityTransaction tx = em.getTransaction();
+        tx.begin();
+        try {
+          delete(em, record);
+          tx.commit();
+          break;
+        } catch (OptimisticLockException e) {
+          tx.rollback();
+        } catch (Exception e) {
+          tx.rollback();
+          throw e;
+        }
+      }
+    }
+  }
+
 }

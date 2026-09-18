@@ -35,6 +35,9 @@ public class JpaMetadataStore implements MetadataStore {
       case REMOVE:
         remover.remove(record);
         break;
+      case DELETE_REMOVED_FILE:
+        remover.delete(record);
+        break;
       case SYNTHETIC_MERGE:
         syntheticMerger.updateSynthMerge(record, false);
         break;

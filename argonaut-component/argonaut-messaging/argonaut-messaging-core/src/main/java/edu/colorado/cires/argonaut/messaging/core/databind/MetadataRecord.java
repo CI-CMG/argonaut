@@ -33,6 +33,7 @@ public class MetadataRecord implements TracedMessage {
   public enum Action {
     UPDATE,
     REMOVE,
+    DELETE_REMOVED_FILE,
     FLOAT_MERGE,
     FLOAT_MERGE_REMOVE,
     SYNTHETIC_MERGE,
