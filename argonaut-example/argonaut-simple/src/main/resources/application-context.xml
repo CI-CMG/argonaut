@@ -27,11 +27,11 @@
 
   <bean id="jsonMapper" class="edu.colorado.cires.argonaut.messaging.core.util.ArgonautJsonMapperFactory" factory-method="getJsonMapper"/>
 
-  <bean id="serializationProcessor" class="edu.colorado.cires.argonaut.standalone.SerializationProcessor">
+  <bean id="serializationProcessor" class="edu.colorado.cires.argonaut.messaging.core.util.SerializationProcessor">
     <property name="jsonMapper" ref="jsonMapper"/>
   </bean>
 
-  <bean id="deserializationProcessor" class="edu.colorado.cires.argonaut.standalone.DeserializationProcessor">
+  <bean id="deserializationProcessor" class="edu.colorado.cires.argonaut.messaging.core.util.DeserializationProcessor">
     <property name="jsonMapper" ref="jsonMapper"/>
   </bean>
 

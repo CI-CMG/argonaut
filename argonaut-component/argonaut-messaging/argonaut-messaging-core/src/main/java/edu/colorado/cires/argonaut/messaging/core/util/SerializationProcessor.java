@@ -1,4 +1,4 @@
-package edu.colorado.cires.argonaut.standalone;
+package edu.colorado.cires.argonaut.messaging.core.util;
 
 import tools.jackson.databind.json.JsonMapper;
 

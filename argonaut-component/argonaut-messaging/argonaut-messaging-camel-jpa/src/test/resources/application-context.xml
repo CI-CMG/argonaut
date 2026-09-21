@@ -1,0 +1,56 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="
+       http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://camel.apache.org/schema/spring
+       http://camel.apache.org/schema/spring/camel-spring.xsd">
+
+
+  <!--  default SEDA queue properties-->
+  <bean id="seda" class="org.apache.camel.component.seda.SedaComponent" >
+    <property name="defaultBlockWhenFull" value="${camel.seda.block-when-full}"/>
+    <property name="queueSize" value="${camel.seda.queue-size}"/>
+  </bean>
+
+  <bean id="jsonMapper" class="edu.colorado.cires.argonaut.messaging.core.util.ArgonautJsonMapperFactory" factory-method="getJsonMapper"/>
+
+  <bean id="serializationProcessor" class="edu.colorado.cires.argonaut.messaging.core.util.SerializationProcessor">
+    <property name="jsonMapper" ref="jsonMapper"/>
+  </bean>
+
+  <bean id="deserializationProcessor" class="edu.colorado.cires.argonaut.messaging.core.util.DeserializationProcessor">
+    <property name="jsonMapper" ref="jsonMapper"/>
+  </bean>
+
+  <bean id="messageSender" class="edu.colorado.cires.argonaut.messaging.camel.ArgonautCamelMessageSender">
+    <property name="producerTemplateId" value="producerTemplate"/>
+  </bean>
+
+  <bean id="entityManagerFactory" class="jakarta.persistence.Persistence" factory-method="createEntityManagerFactory">
+    <constructor-arg value="argonaut-index"/>
+    <constructor-arg>
+      <map>
+        <entry key="jakarta.persistence.jdbc.driver" value="org.h2.Driver"/>
+        <entry key="jakarta.persistence.jdbc.url" value="jdbc:h2:./target/queue"/>
+        <entry key="jakarta.persistence.jdbc.user" value="sa"/>
+        <entry key="jakarta.persistence.jdbc.password" value=""/>
+        <entry key="hibernate.hbm2ddl.auto" value="update"/>
+      </map>
+    </constructor-arg>
+  </bean>
+
+
+  <camelContext id="argonaut-camel" xmlns="http://camel.apache.org/schema/spring">
+    <template id="producerTemplate"/>
+    <route id="test-route">
+      <from uri=""/>
+      <to uri=""/>
+    </route>
+    <route id="test-route">
+      <from uri=""/>
+      <to uri=""/>
+    </route>
+  </camelContext>
+
+</beans>

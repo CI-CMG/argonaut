@@ -19,6 +19,7 @@
   <modules>
     <module>argonaut-messaging-core</module>
     <module>argonaut-messaging-camel</module>
+    <module>argonaut-messaging-camel-jpa</module>
   </modules>
 
   <dependencies>
