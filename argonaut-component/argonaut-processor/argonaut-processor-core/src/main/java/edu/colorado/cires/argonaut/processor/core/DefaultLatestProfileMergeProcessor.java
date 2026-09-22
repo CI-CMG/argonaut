@@ -75,48 +75,48 @@ public class DefaultLatestProfileMergeProcessor implements LatestProfileMergePro
   private List<LocalPathSupplier> getInputFileSuppliers(List<MetadataRecord> group) {
     List<LocalPathSupplier> result = new ArrayList<>(group.size());
     for (MetadataRecord metadataRecord : group) {
-        result.add(new LocalPathSupplier() {
+      result.add(new LocalPathSupplier() {
 
-          private Path tempFile = null;
+        private Path tempFile = null;
 
-          @Override
-          public Instant getJulD() {
-            return metadataRecord.getDate();
+        @Override
+        public Instant getJulD() {
+          return metadataRecord.getDate();
+        }
+
+        @Override
+        public String getDac() {
+          return metadataRecord.getDac();
+        }
+
+        @Override
+        public String getFileName() {
+          return metadataRecord.getFileName();
+        }
+
+        @Override
+        public void prepare() {
+          try {
+            tempFile = Files.createTempFile(localTempDir, "latest-merge-download-", ".nc");
+            String path = outputFileStore.appendToPath(outputFileStore.getRoot(), "dac", metadataRecord.getFile());
+            outputFileStore.downloadLocalFile(path, tempFile);
+          } catch (IOException e) {
+            throw new RuntimeException("Unable to create temporary download file: " + tempFile, e);
           }
+        }
 
-          @Override
-          public String getDac() {
-            return metadataRecord.getDac();
-          }
+        @Override
+        public Path getLocalPath() {
+          return tempFile;
+        }
 
-          @Override
-          public String getFileName() {
-            return metadataRecord.getFileName();
+        @Override
+        public void cleanUp() {
+          if (tempFile != null) {
+            FileUtils.deleteQuietly(tempFile.toFile());
           }
-
-          @Override
-          public void prepare() {
-            try {
-              tempFile = Files.createTempFile(localTempDir, "latest-merge-download-", ".nc");
-              String path = outputFileStore.appendToPath(outputFileStore.getRoot(), "dac", metadataRecord.getFile());
-              outputFileStore.downloadLocalFile(path, tempFile);
-            } catch (IOException e) {
-              throw new RuntimeException("Unable to create temporary download file: " + tempFile, e);
-            }
-          }
-
-          @Override
-          public Path getLocalPath() {
-            return tempFile;
-          }
-
-          @Override
-          public void cleanUp() {
-            if (tempFile != null) {
-              FileUtils.deleteQuietly(tempFile.toFile());
-            }
-          }
-        });
+        }
+      });
     }
     return result;
   }
@@ -128,45 +128,36 @@ public class DefaultLatestProfileMergeProcessor implements LatestProfileMergePro
     return activeFiles == 0L;
   }
 
-  private void removeMergeFile(ProfileOperation message) {
-    throw new UnsupportedOperationException("Not implemented yet");
-//    String outputFile = getOutputFile(message);
-//    outputFileStore.delete(outputFile);
-//    LOGGER.info("Removed multi-cycle merge file: {}", outputFile);
-  }
-
   private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyyMMdd");
 
-  private String getOutputFile(String fileName) {
-    return outputFileStore.appendToPath(outputFileStore.getRoot(), "latest_data", fileName);
-  }
-
   private void mergeProfiles(ProfileOperation message) {
-    Instant dateUpdate = message.getFiles().get(0).getDateUpdate();
-    String modePrefix = message.getFiles().get(0).getProfileMode().getPrefix();
+    Instant dateUpdate = message.getFiles().getFirst().getDateUpdate();
+    String modePrefix = message.getFiles().getFirst().getProfileMode().getPrefix();
     String filePrefix = modePrefix + FORMATTER.format(dateUpdate) + "_prof_";
 
+    List<LocalPathSupplier> sorted = DefaultMultiProfileMerger.orderByCycleThenJulD(
+        getInputFileSuppliers(
+            message.getFiles().stream().filter(mr -> FileStatus.ACTIVE == mr.getFileStatus()).toList()
+        ));
 
-    LinkedList<List<MetadataRecord>> groups = new LinkedList<>();
+    LinkedList<List<LocalPathSupplier>> groups = new LinkedList<>();
     int count = 0;
-    for (MetadataRecord metadataRecord : message.getFiles()) {
-      if (FileStatus.ACTIVE == metadataRecord.getFileStatus()) {
-        if (count == 0) {
-          groups.add(new LinkedList<>());
-        }
-        groups.getLast().add(metadataRecord);
-        count++;
-        if (count == maxProfilesPerFile) {
-          count = 0;
-        }
+    for (LocalPathSupplier lps : sorted) {
+      if (count == 0) {
+        groups.add(new LinkedList<>());
+      }
+      groups.getLast().add(lps);
+      count++;
+      if (count == maxProfilesPerFile) {
+        count = 0;
       }
     }
 
-    for (int i =  0; i < groups.size(); i++) {
-      List<MetadataRecord> group = groups.get(i);
-      String fileName =  filePrefix + i + ".nc";
+    for (int i = 0; i < groups.size(); i++) {
+      List<LocalPathSupplier> group = groups.get(i);
+      String fileName = filePrefix + i + ".nc";
 
-      String outputFile = getOutputFile(fileName);
+      String outputFile = outputFileStore.appendToPath(outputFileStore.getRoot(), "latest_data", fileName);
       Path localOutputFile;
       try {
         localOutputFile = Files.createTempFile(localTempDir, "latest-merge-", ".nc");
@@ -176,7 +167,7 @@ public class DefaultLatestProfileMergeProcessor implements LatestProfileMergePro
 
       try {
         try {
-          merger.mergeProfiles(DefaultMultiProfileMerger.orderByCycleThenJulD(getInputFileSuppliers(group)), PARAMETERS, localOutputFile);
+          merger.mergeProfiles(group, PARAMETERS, localOutputFile);
         } catch (IOException e) {
           throw new RuntimeException("Unable to merge latest data " + outputFile, e);
         }
@@ -196,7 +187,7 @@ public class DefaultLatestProfileMergeProcessor implements LatestProfileMergePro
 
   }
 
-  private void notifyMergeCompleted(ProfileOperation message, boolean remove) {
+  private void notifyMergeCompleted(ProfileOperation message) {
     Instant now = Instant.now();
 
     for (MetadataRecord metadataRecord : message.getFiles()) {
@@ -208,38 +199,36 @@ public class DefaultLatestProfileMergeProcessor implements LatestProfileMergePro
               .withFile(metadataRecord.getFile())
               .withDac(message.getDac())
               .withFloatId(message.getFloatId())
-              .withAction(metadataRecord.getFileStatus() == FileStatus.REMOVED ? Action.FLOAT_MERGE_REMOVE : Action.FLOAT_MERGE)
+              .withAction(metadataRecord.getFileStatus() == FileStatus.REMOVED ? Action.LATEST_MERGE_REMOVE : Action.LATEST_MERGE)
               .withFileType(ArgoFileType.PROFILE_CORE)
               .withActionTimestamp(now)
               .build()));
     }
+  }
 
-    String fileName = message.getFloatId() + "_prof.nc";
-    String outputFileForMetadata = outputFileStore.appendToPath(message.getDac(), message.getFloatId(), fileName);
-
-    messageSender.sendJson(
-        updateIndexQueue,
-        jsonMapper.writeValueAsString(MetadataRecord.builder()
-            .withTraceId(message.getTraceId())
-            .withActionTimestamp(now)
-            .withFileName(fileName)
-            .withFile(outputFileForMetadata)
-            .withAction(remove ? Action.REMOVE : Action.UPDATE)
-            .withDac(message.getDac())
-            .withFloatId(message.getFloatId())
-            .withFileType(ArgoFileType.PROFILE_MULTI_CYCLE)
-            .build()));
+  private void removeOldFiles(ProfileOperation message) {
+    if (!message.getFiles().isEmpty()) {
+      Instant dateUpdate = message.getFiles().getFirst().getDateUpdate();
+      String modePrefix = message.getFiles().getFirst().getProfileMode().getPrefix();
+      String filePrefix = modePrefix + FORMATTER.format(dateUpdate) + "_prof_";
+      // Assuming at most 10 files.  This approach might not be optimal, but does not require updates to FileStore interface and MetadataStore
+      for(int i = 0; i < 10; i++){
+        String file = outputFileStore.appendToPath(outputFileStore.getRoot(), "latest_data", filePrefix + i + ".nc");
+        if (outputFileStore.fileExists(file)) {
+          outputFileStore.delete(file);
+          LOGGER.info("Deleted latest merge file: {}", file);
+        }
+      }
+    }
   }
 
   @Override
   public void merge(ProfileOperation message) {
-    boolean remove = isRemoveMergeFile(message);
-    if (remove) {
-      removeMergeFile(message);
-    } else {
+    removeOldFiles(message);
+    if (!isRemoveMergeFile(message)) {
       mergeProfiles(message);
     }
-    notifyMergeCompleted(message, remove);
+    notifyMergeCompleted(message);
   }
 
 

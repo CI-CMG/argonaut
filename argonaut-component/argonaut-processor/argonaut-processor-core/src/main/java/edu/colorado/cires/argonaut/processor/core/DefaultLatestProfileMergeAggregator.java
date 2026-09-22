@@ -71,11 +71,7 @@ public class DefaultLatestProfileMergeAggregator implements LatestProfileMergeAg
 
   private void sendMessages(RecentProfilePage page) {
     for (ProfileOperation fmg : page.getPage()) {
-      messageSender.sendJson(mergeQueue, jsonMapper.writeValueAsString(
-          ProfileOperation.builder(fmg)
-              .withFileName(fmg.getFloatId() + "_prof.nc")
-              .withTraceId(traceIdGenerator.get())
-              .build()));
+      messageSender.sendJson(mergeQueue, jsonMapper.writeValueAsString(fmg));
     }
   }
 
@@ -87,7 +83,7 @@ public class DefaultLatestProfileMergeAggregator implements LatestProfileMergeAg
   }
 
   private Instant getDaysBack() {
-    return LocalDate.ofInstant(Instant.now(), ZoneId.of("UTC")).atStartOfDay().minusDays(daysBack).toInstant(ZoneOffset.UTC);
+    return LocalDate.ofInstant(nowGenerator.get(), ZoneId.of("UTC")).atStartOfDay().minusDays(daysBack).toInstant(ZoneOffset.UTC);
   }
 
   public void execute() {
