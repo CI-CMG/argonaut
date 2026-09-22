@@ -20,10 +20,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Duration;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -274,41 +270,6 @@ public class GeoMergeCronTest {
 
   }
 
-
-  private static class ProfileSorter implements Comparable<ProfileSorter> {
-
-    private final ArgoProfileV31 profile;
-    private final String dac;
-    private final int cycle;
-    private final String floatId;
-    private final String direction;
-
-    private ProfileSorter(ArgoProfileV31 profile) {
-      this.profile = profile;
-      dac = DAC_MAP.get(profile.getDataCenter());
-      cycle = profile.getCycleNumber();
-      floatId = profile.getPlatformNumber();
-      direction = profile.getDirection();
-    }
-
-    @Override
-    public int compareTo(ProfileSorter o2) {
-      if (dac.equals(o2.dac) ) {
-        if (floatId.equals(o2.floatId) ) {
-          if (cycle == o2.cycle) {
-            return o2.direction.compareTo(direction);
-          } else {
-            return Integer.compare(cycle, o2.cycle);
-          }
-        } else {
-          return Long.compare(Long.parseLong(floatId), Long.parseLong(o2.floatId));
-        }
-      } else {
-        return dac.compareTo(o2.dac);
-      }
-    }
-  }
-
   private void assertFilesEqual(Path expectedFile, Path mergedFile) throws IOException {
 
     try (
@@ -318,15 +279,9 @@ public class GeoMergeCronTest {
       List<ArgoProfileV31> profiles = reader.getMultiProfile().getProfiles();
       List<ArgoProfileV31> expectedProfiles = expectedReader.getMultiProfile().getProfiles();
       assertEquals(expectedProfiles.size(), profiles.size());
-      List<ProfileSorter> expectedSorters = new ArrayList<>();
-      for (int q = 0; q < expectedProfiles.size(); q++) {
-        ArgoProfileV31 expectedProfile = expectedProfiles.get(q);
-        expectedSorters.add(new ProfileSorter(expectedProfile));
-      }
-      Collections.sort(expectedSorters);
       for (int q = 0; q < expectedProfiles.size(); q++) {
         ArgoProfileV31 profile = profiles.get(q);
-        ArgoProfileV31 expectedProfile = expectedSorters.get(q).profile;
+        ArgoProfileV31 expectedProfile = expectedProfiles.get(q);
 
         assertEquals(profile.getProfileIndex(), profile.getProfileIndex());
         assertEquals(REFERENCE_DATE, profile.getReferenceDateTime());

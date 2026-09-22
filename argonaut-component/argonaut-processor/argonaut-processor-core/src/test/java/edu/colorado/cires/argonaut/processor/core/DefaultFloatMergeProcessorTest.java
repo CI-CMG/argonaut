@@ -22,6 +22,7 @@ import edu.colorado.cires.argonaut.messaging.core.util.ArgonautJsonMapperFactory
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
 import org.apache.commons.io.FileUtils;
@@ -79,9 +80,9 @@ public class DefaultFloatMergeProcessorTest {
         .withDac("aoml")
         .withFloatId("123")
         .withFiles(Arrays.asList(
-            MetadataRecord.builder().withFile("aoml/123/profiles/R123_001.nc").withFileName("R123_001.nc").withFileStatus(FileStatus.ACTIVE).build(),
-            MetadataRecord.builder().withFile("aoml/123/profiles/R123_001D.nc").withFileName("R123_001D.nc").withFileStatus(FileStatus.ACTIVE).build(),
-            MetadataRecord.builder().withFile("aoml/123/profiles/R123_002.nc").withFileName("R123_002.nc").withFileStatus(FileStatus.ACTIVE).build()
+            MetadataRecord.builder().withFile("aoml/123/profiles/R123_001.nc").withDate(Instant.parse("2025-01-02T12:00:00Z")).withFileName("R123_001.nc").withFileStatus(FileStatus.ACTIVE).build(),
+            MetadataRecord.builder().withFile("aoml/123/profiles/R123_001D.nc").withDate(Instant.parse("2025-01-02T12:01:00Z")).withFileName("R123_001D.nc").withFileStatus(FileStatus.ACTIVE).build(),
+            MetadataRecord.builder().withFile("aoml/123/profiles/R123_002.nc").withDate(Instant.parse("2025-01-02T12:00:00Z")).withFileName("R123_002.nc").withFileStatus(FileStatus.ACTIVE).build()
             ))
         .build();
 
@@ -220,7 +221,6 @@ public class DefaultFloatMergeProcessorTest {
     assertEquals("123", metadataRecords.get(3).getFloatId());
     assertNotNull(metadataRecords.get(3).getActionTimestamp());
     assertNotNull(metadataRecords.get(3).getDateUpdate());
-    assertNotNull(metadataRecords.get(3).getDate());
 
   }
 
@@ -270,7 +270,6 @@ public class DefaultFloatMergeProcessorTest {
     assertEquals("123", metadataRecords.get(0).getFloatId());
     assertNotNull(metadataRecords.get(0).getActionTimestamp());
     assertNotNull(metadataRecords.get(0).getDateUpdate());
-    assertNotNull(metadataRecords.get(0).getDate());
 
   }
 
@@ -306,9 +305,9 @@ public class DefaultFloatMergeProcessorTest {
         .withDac("aoml")
         .withFloatId("123")
         .withFiles(Arrays.asList(
-            MetadataRecord.builder().withFile("aoml/123/profiles/R123_001.nc").withFileName("R123_001.nc").withFileStatus(FileStatus.ACTIVE).build(),
-            MetadataRecord.builder().withFile("aoml/123/profiles/R123_001D.nc").withFileName("R123_001D.nc").withFileStatus(FileStatus.ACTIVE).build(),
-            MetadataRecord.builder().withFile("aoml/123/profiles/R123_002.nc").withFileName("R123_002.nc").withFileStatus(FileStatus.REMOVED).build()
+            MetadataRecord.builder().withDate(Instant.parse("2025-01-02T12:00:00Z")).withFile("aoml/123/profiles/R123_001.nc").withFileName("R123_001.nc").withFileStatus(FileStatus.ACTIVE).build(),
+            MetadataRecord.builder().withDate(Instant.parse("2025-01-02T12:01:00Z")).withFile("aoml/123/profiles/R123_001D.nc").withFileName("R123_001D.nc").withFileStatus(FileStatus.ACTIVE).build(),
+            MetadataRecord.builder().withDate(Instant.parse("2025-01-02T12:00:00Z")).withFile("aoml/123/profiles/R123_002.nc").withFileName("R123_002.nc").withFileStatus(FileStatus.REMOVED).build()
         ))
         .build();
 

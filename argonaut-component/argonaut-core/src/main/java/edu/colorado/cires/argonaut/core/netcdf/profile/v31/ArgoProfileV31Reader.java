@@ -20,10 +20,6 @@ public class ArgoProfileV31Reader implements Closeable {
 
   }
 
-  public ArgoProfileV31 getProfile() {
-    throw new UnsupportedOperationException("Not implemented yet");
-  }
-
   @Override
   public void close() throws IOException {
     netcdf.close();

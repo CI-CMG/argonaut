@@ -499,10 +499,10 @@ public class JpaMetadataStoreTest {
             .withDac("aoml")
             .withFloatId("123")
             .withFiles(Arrays.asList(
-                MetadataRecord.builder().withFileType(ArgoFileType.METADATA).withFile("aoml/123/123_meta.nc").withFileName("123_meta.nc").withFileStatus(FileStatus.ACTIVE).build(),
-                MetadataRecord.builder().withFileType(ArgoFileType.PROFILE_BIOCHEMICAL).withFile("aoml/123/profiles/BD123_001.nc").withFileName("BD123_001.nc").withFileStatus(FileStatus.ACTIVE)
+                MetadataRecord.builder().withDate(date).withFileType(ArgoFileType.METADATA).withFile("aoml/123/123_meta.nc").withFileName("123_meta.nc").withFileStatus(FileStatus.ACTIVE).build(),
+                MetadataRecord.builder().withDate(date).withFileType(ArgoFileType.PROFILE_BIOCHEMICAL).withFile("aoml/123/profiles/BD123_001.nc").withFileName("BD123_001.nc").withFileStatus(FileStatus.ACTIVE)
                     .build(),
-                MetadataRecord.builder().withFileType(ArgoFileType.PROFILE_CORE).withFile("aoml/123/profiles/D123_001.nc").withFileName("D123_001.nc").withFileStatus(FileStatus.ACTIVE).build()
+                MetadataRecord.builder().withDate(date).withFileType(ArgoFileType.PROFILE_CORE).withFile("aoml/123/profiles/D123_001.nc").withFileName("D123_001.nc").withFileStatus(FileStatus.ACTIVE).build()
             ))
             .build()),
         page1.getPage());
@@ -516,10 +516,10 @@ public class JpaMetadataStoreTest {
             .withDac("aoml")
             .withFloatId("13857")
             .withFiles(Arrays.asList(
-                MetadataRecord.builder().withFileType(ArgoFileType.METADATA).withFile("aoml/13857/13857_meta.nc").withFileName("13857_meta.nc").withFileStatus(FileStatus.ACTIVE).build(),
-                MetadataRecord.builder().withFileType(ArgoFileType.PROFILE_BIOCHEMICAL).withFile("aoml/13857/profiles/BD13857_001.nc").withFileName("BD13857_001.nc").withFileStatus(FileStatus.ACTIVE)
+                MetadataRecord.builder().withDate(date).withFileType(ArgoFileType.METADATA).withFile("aoml/13857/13857_meta.nc").withFileName("13857_meta.nc").withFileStatus(FileStatus.ACTIVE).build(),
+                MetadataRecord.builder().withDate(date).withFileType(ArgoFileType.PROFILE_BIOCHEMICAL).withFile("aoml/13857/profiles/BD13857_001.nc").withFileName("BD13857_001.nc").withFileStatus(FileStatus.ACTIVE)
                     .build(),
-                MetadataRecord.builder().withFileType(ArgoFileType.PROFILE_CORE).withFile("aoml/13857/profiles/D13857_001.nc").withFileName("D13857_001.nc").withFileStatus(FileStatus.ACTIVE)
+                MetadataRecord.builder().withDate(date).withFileType(ArgoFileType.PROFILE_CORE).withFile("aoml/13857/profiles/D13857_001.nc").withFileName("D13857_001.nc").withFileStatus(FileStatus.ACTIVE)
                     .build()
             ))
             .build()),
@@ -838,10 +838,10 @@ public class JpaMetadataStoreTest {
                 .withDac("aoml")
                 .withFloatId("123")
                 .withFiles(Arrays.asList(
-                    MetadataRecord.builder().withFileType(ArgoFileType.METADATA).withFile("aoml/123/123_meta.nc").withFileName("123_meta.nc").withFileStatus(FileStatus.ACTIVE).build(),
-                    MetadataRecord.builder().withFileType(ArgoFileType.PROFILE_BIOCHEMICAL).withFile("aoml/123/profiles/BD123_001.nc").withFileName("BD123_001.nc")
+                    MetadataRecord.builder().withDate(date).withFileType(ArgoFileType.METADATA).withFile("aoml/123/123_meta.nc").withFileName("123_meta.nc").withFileStatus(FileStatus.ACTIVE).build(),
+                    MetadataRecord.builder().withDate(date).withFileType(ArgoFileType.PROFILE_BIOCHEMICAL).withFile("aoml/123/profiles/BD123_001.nc").withFileName("BD123_001.nc")
                         .withFileStatus(FileStatus.ACTIVE).build(),
-                    MetadataRecord.builder().withFileType(ArgoFileType.PROFILE_CORE).withFile("aoml/123/profiles/D123_001.nc").withFileName("D123_001.nc").withFileStatus(FileStatus.ACTIVE)
+                    MetadataRecord.builder().withDate(date).withFileType(ArgoFileType.PROFILE_CORE).withFile("aoml/123/profiles/D123_001.nc").withFileName("D123_001.nc").withFileStatus(FileStatus.ACTIVE)
                         .build()
                 ))
                 .build(),
@@ -849,10 +849,10 @@ public class JpaMetadataStoreTest {
                 .withDac("aoml")
                 .withFloatId("13857")
                 .withFiles(Arrays.asList(
-                    MetadataRecord.builder().withFileType(ArgoFileType.METADATA).withFile("aoml/13857/13857_meta.nc").withFileName("13857_meta.nc").withFileStatus(FileStatus.ACTIVE).build(),
-                    MetadataRecord.builder().withFileType(ArgoFileType.PROFILE_BIOCHEMICAL).withFile("aoml/13857/profiles/BD13857_001.nc").withFileName("BD13857_001.nc")
+                    MetadataRecord.builder().withDate(date).withFileType(ArgoFileType.METADATA).withFile("aoml/13857/13857_meta.nc").withFileName("13857_meta.nc").withFileStatus(FileStatus.ACTIVE).build(),
+                    MetadataRecord.builder().withDate(date).withFileType(ArgoFileType.PROFILE_BIOCHEMICAL).withFile("aoml/13857/profiles/BD13857_001.nc").withFileName("BD13857_001.nc")
                         .withFileStatus(FileStatus.ACTIVE).build(),
-                    MetadataRecord.builder().withFileType(ArgoFileType.PROFILE_CORE).withFile("aoml/13857/profiles/D13857_001.nc").withFileName("D13857_001.nc").withFileStatus(FileStatus.ACTIVE)
+                    MetadataRecord.builder().withDate(date).withFileType(ArgoFileType.PROFILE_CORE).withFile("aoml/13857/profiles/D13857_001.nc").withFileName("D13857_001.nc").withFileStatus(FileStatus.ACTIVE)
                         .build()
                 ))
                 .build(),
@@ -860,10 +860,10 @@ public class JpaMetadataStoreTest {
                 .withDac("aoml")
                 .withFloatId("13857")
                 .withFiles(Arrays.asList(
-                    MetadataRecord.builder().withFileType(ArgoFileType.METADATA).withFile("aoml/13857/13857_meta.nc").withFileName("13857_meta.nc").withFileStatus(FileStatus.ACTIVE).build(),
-                    MetadataRecord.builder().withFileType(ArgoFileType.PROFILE_BIOCHEMICAL).withFile("aoml/13857/profiles/BD13857_002.nc").withFileName("BD13857_002.nc")
+                    MetadataRecord.builder().withDate(date).withFileType(ArgoFileType.METADATA).withFile("aoml/13857/13857_meta.nc").withFileName("13857_meta.nc").withFileStatus(FileStatus.ACTIVE).build(),
+                    MetadataRecord.builder().withDate(date).withFileType(ArgoFileType.PROFILE_BIOCHEMICAL).withFile("aoml/13857/profiles/BD13857_002.nc").withFileName("BD13857_002.nc")
                         .withFileStatus(FileStatus.ACTIVE).build(),
-                    MetadataRecord.builder().withFileType(ArgoFileType.PROFILE_CORE).withFile("aoml/13857/profiles/D13857_002.nc").withFileName("D13857_002.nc").withFileStatus(FileStatus.ACTIVE)
+                    MetadataRecord.builder().withDate(date).withFileType(ArgoFileType.PROFILE_CORE).withFile("aoml/13857/profiles/D13857_002.nc").withFileName("D13857_002.nc").withFileStatus(FileStatus.ACTIVE)
                         .build()
                 ))
                 .build(),
@@ -871,10 +871,10 @@ public class JpaMetadataStoreTest {
                 .withDac("aoml")
                 .withFloatId("13857")
                 .withFiles(Arrays.asList(
-                    MetadataRecord.builder().withFileType(ArgoFileType.METADATA).withFile("aoml/13857/13857_meta.nc").withFileName("13857_meta.nc").withFileStatus(FileStatus.ACTIVE).build(),
-                    MetadataRecord.builder().withFileType(ArgoFileType.PROFILE_BIOCHEMICAL).withFile("aoml/13857/profiles/BD13857_003.nc").withFileName("BD13857_003.nc")
+                    MetadataRecord.builder().withDate(date).withFileType(ArgoFileType.METADATA).withFile("aoml/13857/13857_meta.nc").withFileName("13857_meta.nc").withFileStatus(FileStatus.ACTIVE).build(),
+                    MetadataRecord.builder().withDate(date).withFileType(ArgoFileType.PROFILE_BIOCHEMICAL).withFile("aoml/13857/profiles/BD13857_003.nc").withFileName("BD13857_003.nc")
                         .withFileStatus(FileStatus.ACTIVE).build(),
-                    MetadataRecord.builder().withFileType(ArgoFileType.PROFILE_CORE).withFile("aoml/13857/profiles/D13857_003.nc").withFileName("D13857_003.nc").withFileStatus(FileStatus.ACTIVE)
+                    MetadataRecord.builder().withDate(date).withFileType(ArgoFileType.PROFILE_CORE).withFile("aoml/13857/profiles/D13857_003.nc").withFileName("D13857_003.nc").withFileStatus(FileStatus.ACTIVE)
                         .build()
                 ))
                 .build(),
@@ -882,10 +882,10 @@ public class JpaMetadataStoreTest {
                 .withDac("aoml")
                 .withFloatId("999")
                 .withFiles(Arrays.asList(
-                    MetadataRecord.builder().withFileType(ArgoFileType.METADATA).withFile("aoml/999/999_meta.nc").withFileName("999_meta.nc").withFileStatus(FileStatus.ACTIVE).build(),
-                    MetadataRecord.builder().withFileType(ArgoFileType.PROFILE_BIOCHEMICAL).withFile("aoml/999/profiles/BD999_001.nc").withFileName("BD999_001.nc")
+                    MetadataRecord.builder().withDate(date).withFileType(ArgoFileType.METADATA).withFile("aoml/999/999_meta.nc").withFileName("999_meta.nc").withFileStatus(FileStatus.ACTIVE).build(),
+                    MetadataRecord.builder().withDate(date).withFileType(ArgoFileType.PROFILE_BIOCHEMICAL).withFile("aoml/999/profiles/BD999_001.nc").withFileName("BD999_001.nc")
                         .withFileStatus(FileStatus.ACTIVE).build(),
-                    MetadataRecord.builder().withFileType(ArgoFileType.PROFILE_CORE).withFile("aoml/999/profiles/D999_001.nc").withFileName("D999_001.nc").withFileStatus(FileStatus.ACTIVE)
+                    MetadataRecord.builder().withDate(date).withFileType(ArgoFileType.PROFILE_CORE).withFile("aoml/999/profiles/D999_001.nc").withFileName("D999_001.nc").withFileStatus(FileStatus.ACTIVE)
                         .build()
                 ))
                 .build()
@@ -933,10 +933,10 @@ public class JpaMetadataStoreTest {
                 .withDac("aoml")
                 .withFloatId("13857")
                 .withFiles(Arrays.asList(
-                    MetadataRecord.builder().withFileType(ArgoFileType.METADATA).withFile("aoml/13857/13857_meta.nc").withFileName("13857_meta.nc").withFileStatus(FileStatus.ACTIVE).build(),
-                    MetadataRecord.builder().withFileType(ArgoFileType.PROFILE_BIOCHEMICAL).withFile("aoml/13857/profiles/BD13857_001.nc").withFileName("BD13857_001.nc")
+                    MetadataRecord.builder().withDate(date).withFileType(ArgoFileType.METADATA).withFile("aoml/13857/13857_meta.nc").withFileName("13857_meta.nc").withFileStatus(FileStatus.ACTIVE).build(),
+                    MetadataRecord.builder().withDate(date).withFileType(ArgoFileType.PROFILE_BIOCHEMICAL).withFile("aoml/13857/profiles/BD13857_001.nc").withFileName("BD13857_001.nc")
                         .withFileStatus(FileStatus.ACTIVE).build(),
-                    MetadataRecord.builder().withFileType(ArgoFileType.PROFILE_CORE).withFile("aoml/13857/profiles/D13857_001.nc").withFileName("D13857_001.nc").withFileStatus(FileStatus.ACTIVE)
+                    MetadataRecord.builder().withDate(date).withFileType(ArgoFileType.PROFILE_CORE).withFile("aoml/13857/profiles/D13857_001.nc").withFileName("D13857_001.nc").withFileStatus(FileStatus.ACTIVE)
                         .build()
                 ))
                 .build(),
@@ -944,10 +944,10 @@ public class JpaMetadataStoreTest {
                 .withDac("aoml")
                 .withFloatId("13857")
                 .withFiles(Arrays.asList(
-                    MetadataRecord.builder().withFileType(ArgoFileType.METADATA).withFile("aoml/13857/13857_meta.nc").withFileName("13857_meta.nc").withFileStatus(FileStatus.ACTIVE).build(),
-                    MetadataRecord.builder().withFileType(ArgoFileType.PROFILE_BIOCHEMICAL).withFile("aoml/13857/profiles/BD13857_002.nc").withFileName("BD13857_002.nc")
+                    MetadataRecord.builder().withDate(date).withFileType(ArgoFileType.METADATA).withFile("aoml/13857/13857_meta.nc").withFileName("13857_meta.nc").withFileStatus(FileStatus.ACTIVE).build(),
+                    MetadataRecord.builder().withDate(date).withFileType(ArgoFileType.PROFILE_BIOCHEMICAL).withFile("aoml/13857/profiles/BD13857_002.nc").withFileName("BD13857_002.nc")
                         .withFileStatus(FileStatus.ACTIVE).build(),
-                    MetadataRecord.builder().withFileType(ArgoFileType.PROFILE_CORE).withFile("aoml/13857/profiles/D13857_002.nc").withFileName("D13857_002.nc").withFileStatus(FileStatus.ACTIVE)
+                    MetadataRecord.builder().withDate(date).withFileType(ArgoFileType.PROFILE_CORE).withFile("aoml/13857/profiles/D13857_002.nc").withFileName("D13857_002.nc").withFileStatus(FileStatus.ACTIVE)
                         .build()
                 ))
                 .build(),
@@ -955,10 +955,10 @@ public class JpaMetadataStoreTest {
                 .withDac("aoml")
                 .withFloatId("13857")
                 .withFiles(Arrays.asList(
-                    MetadataRecord.builder().withFileType(ArgoFileType.METADATA).withFile("aoml/13857/13857_meta.nc").withFileName("13857_meta.nc").withFileStatus(FileStatus.ACTIVE).build(),
-                    MetadataRecord.builder().withFileType(ArgoFileType.PROFILE_BIOCHEMICAL).withFile("aoml/13857/profiles/BD13857_003.nc").withFileName("BD13857_003.nc")
+                    MetadataRecord.builder().withDate(date).withFileType(ArgoFileType.METADATA).withFile("aoml/13857/13857_meta.nc").withFileName("13857_meta.nc").withFileStatus(FileStatus.ACTIVE).build(),
+                    MetadataRecord.builder().withDate(date).withFileType(ArgoFileType.PROFILE_BIOCHEMICAL).withFile("aoml/13857/profiles/BD13857_003.nc").withFileName("BD13857_003.nc")
                         .withFileStatus(FileStatus.ACTIVE).build(),
-                    MetadataRecord.builder().withFileType(ArgoFileType.PROFILE_CORE).withFile("aoml/13857/profiles/D13857_003.nc").withFileName("D13857_003.nc").withFileStatus(FileStatus.ACTIVE)
+                    MetadataRecord.builder().withDate(date).withFileType(ArgoFileType.PROFILE_CORE).withFile("aoml/13857/profiles/D13857_003.nc").withFileName("D13857_003.nc").withFileStatus(FileStatus.ACTIVE)
                         .build()
                 ))
                 .build(),
@@ -966,10 +966,10 @@ public class JpaMetadataStoreTest {
                 .withDac("aoml")
                 .withFloatId("999")
                 .withFiles(Arrays.asList(
-                    MetadataRecord.builder().withFileType(ArgoFileType.METADATA).withFile("aoml/999/999_meta.nc").withFileName("999_meta.nc").withFileStatus(FileStatus.ACTIVE).build(),
-                    MetadataRecord.builder().withFileType(ArgoFileType.PROFILE_BIOCHEMICAL).withFile("aoml/999/profiles/BD999_001.nc").withFileName("BD999_001.nc")
+                    MetadataRecord.builder().withDate(date).withFileType(ArgoFileType.METADATA).withFile("aoml/999/999_meta.nc").withFileName("999_meta.nc").withFileStatus(FileStatus.ACTIVE).build(),
+                    MetadataRecord.builder().withDate(date).withFileType(ArgoFileType.PROFILE_BIOCHEMICAL).withFile("aoml/999/profiles/BD999_001.nc").withFileName("BD999_001.nc")
                         .withFileStatus(FileStatus.ACTIVE).build(),
-                    MetadataRecord.builder().withFileType(ArgoFileType.PROFILE_CORE).withFile("aoml/999/profiles/D999_001.nc").withFileName("D999_001.nc").withFileStatus(FileStatus.ACTIVE)
+                    MetadataRecord.builder().withDate(date).withFileType(ArgoFileType.PROFILE_CORE).withFile("aoml/999/profiles/D999_001.nc").withFileName("D999_001.nc").withFileStatus(FileStatus.ACTIVE)
                         .build()
                 ))
                 .build()
@@ -1016,10 +1016,10 @@ public class JpaMetadataStoreTest {
                 .withDac("aoml")
                 .withFloatId("13857")
                 .withFiles(Arrays.asList(
-                    MetadataRecord.builder().withFileType(ArgoFileType.METADATA).withFile("aoml/13857/13857_meta.nc").withFileName("13857_meta.nc").withFileStatus(FileStatus.ACTIVE).build(),
-                    MetadataRecord.builder().withFileType(ArgoFileType.PROFILE_BIOCHEMICAL).withFile("aoml/13857/profiles/BD13857_001.nc").withFileName("BD13857_001.nc")
+                    MetadataRecord.builder().withDate(date).withFileType(ArgoFileType.METADATA).withFile("aoml/13857/13857_meta.nc").withFileName("13857_meta.nc").withFileStatus(FileStatus.ACTIVE).build(),
+                    MetadataRecord.builder().withDate(date).withFileType(ArgoFileType.PROFILE_BIOCHEMICAL).withFile("aoml/13857/profiles/BD13857_001.nc").withFileName("BD13857_001.nc")
                         .withFileStatus(FileStatus.ACTIVE).build(),
-                    MetadataRecord.builder().withFileType(ArgoFileType.PROFILE_CORE).withFile("aoml/13857/profiles/D13857_001.nc").withFileName("D13857_001.nc").withFileStatus(FileStatus.ACTIVE)
+                    MetadataRecord.builder().withDate(date).withFileType(ArgoFileType.PROFILE_CORE).withFile("aoml/13857/profiles/D13857_001.nc").withFileName("D13857_001.nc").withFileStatus(FileStatus.ACTIVE)
                         .build()
                 ))
                 .build(),
@@ -1027,10 +1027,10 @@ public class JpaMetadataStoreTest {
                 .withDac("aoml")
                 .withFloatId("13857")
                 .withFiles(Arrays.asList(
-                    MetadataRecord.builder().withFileType(ArgoFileType.METADATA).withFile("aoml/13857/13857_meta.nc").withFileName("13857_meta.nc").withFileStatus(FileStatus.ACTIVE).build(),
-                    MetadataRecord.builder().withFileType(ArgoFileType.PROFILE_BIOCHEMICAL).withFile("aoml/13857/profiles/BD13857_002.nc").withFileName("BD13857_002.nc")
+                    MetadataRecord.builder().withDate(date).withFileType(ArgoFileType.METADATA).withFile("aoml/13857/13857_meta.nc").withFileName("13857_meta.nc").withFileStatus(FileStatus.ACTIVE).build(),
+                    MetadataRecord.builder().withDate(date).withFileType(ArgoFileType.PROFILE_BIOCHEMICAL).withFile("aoml/13857/profiles/BD13857_002.nc").withFileName("BD13857_002.nc")
                         .withFileStatus(FileStatus.ACTIVE).build(),
-                    MetadataRecord.builder().withFileType(ArgoFileType.PROFILE_CORE).withFile("aoml/13857/profiles/D13857_002.nc").withFileName("D13857_002.nc").withFileStatus(FileStatus.ACTIVE)
+                    MetadataRecord.builder().withDate(date).withFileType(ArgoFileType.PROFILE_CORE).withFile("aoml/13857/profiles/D13857_002.nc").withFileName("D13857_002.nc").withFileStatus(FileStatus.ACTIVE)
                         .build()
                 ))
                 .build(),
@@ -1038,10 +1038,10 @@ public class JpaMetadataStoreTest {
                 .withDac("aoml")
                 .withFloatId("999")
                 .withFiles(Arrays.asList(
-                    MetadataRecord.builder().withFileType(ArgoFileType.METADATA).withFile("aoml/999/999_meta.nc").withFileName("999_meta.nc").withFileStatus(FileStatus.ACTIVE).build(),
-                    MetadataRecord.builder().withFileType(ArgoFileType.PROFILE_BIOCHEMICAL).withFile("aoml/999/profiles/BD999_001.nc").withFileName("BD999_001.nc")
+                    MetadataRecord.builder().withDate(date).withFileType(ArgoFileType.METADATA).withFile("aoml/999/999_meta.nc").withFileName("999_meta.nc").withFileStatus(FileStatus.ACTIVE).build(),
+                    MetadataRecord.builder().withDate(date).withFileType(ArgoFileType.PROFILE_BIOCHEMICAL).withFile("aoml/999/profiles/BD999_001.nc").withFileName("BD999_001.nc")
                         .withFileStatus(FileStatus.ACTIVE).build(),
-                    MetadataRecord.builder().withFileType(ArgoFileType.PROFILE_CORE).withFile("aoml/999/profiles/D999_001.nc").withFileName("D999_001.nc").withFileStatus(FileStatus.ACTIVE)
+                    MetadataRecord.builder().withDate(date).withFileType(ArgoFileType.PROFILE_CORE).withFile("aoml/999/profiles/D999_001.nc").withFileName("D999_001.nc").withFileStatus(FileStatus.ACTIVE)
                         .build()
                 ))
                 .build()
@@ -1066,10 +1066,10 @@ public class JpaMetadataStoreTest {
                 .withDac("aoml")
                 .withFloatId("13857")
                 .withFiles(Arrays.asList(
-                    MetadataRecord.builder().withFileType(ArgoFileType.METADATA).withFile("aoml/13857/13857_meta.nc").withFileName("13857_meta.nc").withFileStatus(FileStatus.REMOVED).build(),
-                    MetadataRecord.builder().withFileType(ArgoFileType.PROFILE_BIOCHEMICAL).withFile("aoml/13857/profiles/BD13857_003.nc").withFileName("BD13857_003.nc")
+                    MetadataRecord.builder().withDate(date).withFileType(ArgoFileType.METADATA).withFile("aoml/13857/13857_meta.nc").withFileName("13857_meta.nc").withFileStatus(FileStatus.REMOVED).build(),
+                    MetadataRecord.builder().withDate(date).withFileType(ArgoFileType.PROFILE_BIOCHEMICAL).withFile("aoml/13857/profiles/BD13857_003.nc").withFileName("BD13857_003.nc")
                         .withFileStatus(FileStatus.ACTIVE).build(),
-                    MetadataRecord.builder().withFileType(ArgoFileType.PROFILE_CORE).withFile("aoml/13857/profiles/D13857_003.nc").withFileName("D13857_003.nc").withFileStatus(FileStatus.ACTIVE)
+                    MetadataRecord.builder().withDate(date).withFileType(ArgoFileType.PROFILE_CORE).withFile("aoml/13857/profiles/D13857_003.nc").withFileName("D13857_003.nc").withFileStatus(FileStatus.ACTIVE)
                         .build()
                 ))
                 .build(),
@@ -1077,10 +1077,10 @@ public class JpaMetadataStoreTest {
                 .withDac("aoml")
                 .withFloatId("999")
                 .withFiles(Arrays.asList(
-                    MetadataRecord.builder().withFileType(ArgoFileType.METADATA).withFile("aoml/999/999_meta.nc").withFileName("999_meta.nc").withFileStatus(FileStatus.ACTIVE).build(),
-                    MetadataRecord.builder().withFileType(ArgoFileType.PROFILE_BIOCHEMICAL).withFile("aoml/999/profiles/BD999_001.nc").withFileName("BD999_001.nc")
+                    MetadataRecord.builder().withDate(date).withFileType(ArgoFileType.METADATA).withFile("aoml/999/999_meta.nc").withFileName("999_meta.nc").withFileStatus(FileStatus.ACTIVE).build(),
+                    MetadataRecord.builder().withDate(date).withFileType(ArgoFileType.PROFILE_BIOCHEMICAL).withFile("aoml/999/profiles/BD999_001.nc").withFileName("BD999_001.nc")
                         .withFileStatus(FileStatus.ACTIVE).build(),
-                    MetadataRecord.builder().withFileType(ArgoFileType.PROFILE_CORE).withFile("aoml/999/profiles/D999_001.nc").withFileName("D999_001.nc").withFileStatus(FileStatus.ACTIVE)
+                    MetadataRecord.builder().withDate(date).withFileType(ArgoFileType.PROFILE_CORE).withFile("aoml/999/profiles/D999_001.nc").withFileName("D999_001.nc").withFileStatus(FileStatus.ACTIVE)
                         .build()
                 ))
                 .build()
@@ -1105,10 +1105,10 @@ public class JpaMetadataStoreTest {
                 .withDac("aoml")
                 .withFloatId("123")
                 .withFiles(Arrays.asList(
-                    MetadataRecord.builder().withFileType(ArgoFileType.METADATA).withFile("aoml/123/123_meta.nc").withFileName("123_meta.nc").withFileStatus(FileStatus.ACTIVE).build(),
-                    MetadataRecord.builder().withFileType(ArgoFileType.PROFILE_BIOCHEMICAL).withFile("aoml/123/profiles/BD123_001.nc").withFileName("BD123_001.nc")
+                    MetadataRecord.builder().withDate(date).withFileType(ArgoFileType.METADATA).withFile("aoml/123/123_meta.nc").withFileName("123_meta.nc").withFileStatus(FileStatus.ACTIVE).build(),
+                    MetadataRecord.builder().withDate(date).withFileType(ArgoFileType.PROFILE_BIOCHEMICAL).withFile("aoml/123/profiles/BD123_001.nc").withFileName("BD123_001.nc")
                         .withFileStatus(FileStatus.REMOVED).build(),
-                    MetadataRecord.builder().withFileType(ArgoFileType.PROFILE_CORE).withFile("aoml/123/profiles/D123_001.nc").withFileName("D123_001.nc").withFileStatus(FileStatus.ACTIVE)
+                    MetadataRecord.builder().withDate(date).withFileType(ArgoFileType.PROFILE_CORE).withFile("aoml/123/profiles/D123_001.nc").withFileName("D123_001.nc").withFileStatus(FileStatus.ACTIVE)
                         .build()
                 ))
                 .build(),
@@ -1116,10 +1116,10 @@ public class JpaMetadataStoreTest {
                 .withDac("aoml")
                 .withFloatId("13857")
                 .withFiles(Arrays.asList(
-                    MetadataRecord.builder().withFileType(ArgoFileType.METADATA).withFile("aoml/13857/13857_meta.nc").withFileName("13857_meta.nc").withFileStatus(FileStatus.REMOVED).build(),
-                    MetadataRecord.builder().withFileType(ArgoFileType.PROFILE_BIOCHEMICAL).withFile("aoml/13857/profiles/BD13857_003.nc").withFileName("BD13857_003.nc")
+                    MetadataRecord.builder().withDate(date).withFileType(ArgoFileType.METADATA).withFile("aoml/13857/13857_meta.nc").withFileName("13857_meta.nc").withFileStatus(FileStatus.REMOVED).build(),
+                    MetadataRecord.builder().withDate(date).withFileType(ArgoFileType.PROFILE_BIOCHEMICAL).withFile("aoml/13857/profiles/BD13857_003.nc").withFileName("BD13857_003.nc")
                         .withFileStatus(FileStatus.ACTIVE).build(),
-                    MetadataRecord.builder().withFileType(ArgoFileType.PROFILE_CORE).withFile("aoml/13857/profiles/D13857_003.nc").withFileName("D13857_003.nc").withFileStatus(FileStatus.ACTIVE)
+                    MetadataRecord.builder().withDate(date).withFileType(ArgoFileType.PROFILE_CORE).withFile("aoml/13857/profiles/D13857_003.nc").withFileName("D13857_003.nc").withFileStatus(FileStatus.ACTIVE)
                         .build()
                 ))
                 .build(),
@@ -1127,10 +1127,10 @@ public class JpaMetadataStoreTest {
                 .withDac("aoml")
                 .withFloatId("999")
                 .withFiles(Arrays.asList(
-                    MetadataRecord.builder().withFileType(ArgoFileType.METADATA).withFile("aoml/999/999_meta.nc").withFileName("999_meta.nc").withFileStatus(FileStatus.ACTIVE).build(),
-                    MetadataRecord.builder().withFileType(ArgoFileType.PROFILE_BIOCHEMICAL).withFile("aoml/999/profiles/BD999_001.nc").withFileName("BD999_001.nc")
+                    MetadataRecord.builder().withDate(date).withFileType(ArgoFileType.METADATA).withFile("aoml/999/999_meta.nc").withFileName("999_meta.nc").withFileStatus(FileStatus.ACTIVE).build(),
+                    MetadataRecord.builder().withDate(date).withFileType(ArgoFileType.PROFILE_BIOCHEMICAL).withFile("aoml/999/profiles/BD999_001.nc").withFileName("BD999_001.nc")
                         .withFileStatus(FileStatus.ACTIVE).build(),
-                    MetadataRecord.builder().withFileType(ArgoFileType.PROFILE_CORE).withFile("aoml/999/profiles/D999_001.nc").withFileName("D999_001.nc").withFileStatus(FileStatus.ACTIVE)
+                    MetadataRecord.builder().withDate(date).withFileType(ArgoFileType.PROFILE_CORE).withFile("aoml/999/profiles/D999_001.nc").withFileName("D999_001.nc").withFileStatus(FileStatus.ACTIVE)
                         .build()
                 ))
                 .build()
@@ -1177,10 +1177,10 @@ public class JpaMetadataStoreTest {
                 .withDac("aoml")
                 .withFloatId("123")
                 .withFiles(Arrays.asList(
-                    MetadataRecord.builder().withFileType(ArgoFileType.METADATA).withFile("aoml/123/123_meta.nc").withFileName("123_meta.nc").withFileStatus(FileStatus.ACTIVE).build(),
-                    MetadataRecord.builder().withFileType(ArgoFileType.PROFILE_BIOCHEMICAL).withFile("aoml/123/profiles/BD123_001.nc").withFileName("BD123_001.nc")
+                    MetadataRecord.builder().withDate(date).withFileType(ArgoFileType.METADATA).withFile("aoml/123/123_meta.nc").withFileName("123_meta.nc").withFileStatus(FileStatus.ACTIVE).build(),
+                    MetadataRecord.builder().withDate(date).withFileType(ArgoFileType.PROFILE_BIOCHEMICAL).withFile("aoml/123/profiles/BD123_001.nc").withFileName("BD123_001.nc")
                         .withFileStatus(FileStatus.REMOVED).build(),
-                    MetadataRecord.builder().withFileType(ArgoFileType.PROFILE_CORE).withFile("aoml/123/profiles/D123_001.nc").withFileName("D123_001.nc").withFileStatus(FileStatus.ACTIVE)
+                    MetadataRecord.builder().withDate(date).withFileType(ArgoFileType.PROFILE_CORE).withFile("aoml/123/profiles/D123_001.nc").withFileName("D123_001.nc").withFileStatus(FileStatus.ACTIVE)
                         .build()
                 ))
                 .build(),
@@ -1188,10 +1188,10 @@ public class JpaMetadataStoreTest {
                 .withDac("aoml")
                 .withFloatId("13857")
                 .withFiles(Arrays.asList(
-                    MetadataRecord.builder().withFileType(ArgoFileType.METADATA).withFile("aoml/13857/13857_meta.nc").withFileName("13857_meta.nc").withFileStatus(FileStatus.REMOVED).build(),
-                    MetadataRecord.builder().withFileType(ArgoFileType.PROFILE_BIOCHEMICAL).withFile("aoml/13857/profiles/BD13857_003.nc").withFileName("BD13857_003.nc")
+                    MetadataRecord.builder().withDate(date).withFileType(ArgoFileType.METADATA).withFile("aoml/13857/13857_meta.nc").withFileName("13857_meta.nc").withFileStatus(FileStatus.REMOVED).build(),
+                    MetadataRecord.builder().withDate(date).withFileType(ArgoFileType.PROFILE_BIOCHEMICAL).withFile("aoml/13857/profiles/BD13857_003.nc").withFileName("BD13857_003.nc")
                         .withFileStatus(FileStatus.ACTIVE).build(),
-                    MetadataRecord.builder().withFileType(ArgoFileType.PROFILE_CORE).withFile("aoml/13857/profiles/D13857_003.nc").withFileName("D13857_003.nc").withFileStatus(FileStatus.ACTIVE)
+                    MetadataRecord.builder().withDate(date).withFileType(ArgoFileType.PROFILE_CORE).withFile("aoml/13857/profiles/D13857_003.nc").withFileName("D13857_003.nc").withFileStatus(FileStatus.ACTIVE)
                         .build()
                 ))
                 .build()
@@ -1222,10 +1222,10 @@ public class JpaMetadataStoreTest {
                 .withDac("aoml")
                 .withFloatId("123")
                 .withFiles(Arrays.asList(
-                    MetadataRecord.builder().withFileType(ArgoFileType.METADATA).withFile("aoml/123/123_meta.nc").withFileName("123_meta.nc").withFileStatus(FileStatus.ACTIVE).build(),
-                    MetadataRecord.builder().withFileType(ArgoFileType.PROFILE_BIOCHEMICAL).withFile("aoml/123/profiles/BD123_001.nc").withFileName("BD123_001.nc")
+                    MetadataRecord.builder().withDate(date).withFileType(ArgoFileType.METADATA).withFile("aoml/123/123_meta.nc").withFileName("123_meta.nc").withFileStatus(FileStatus.ACTIVE).build(),
+                    MetadataRecord.builder().withDate(date).withFileType(ArgoFileType.PROFILE_BIOCHEMICAL).withFile("aoml/123/profiles/BD123_001.nc").withFileName("BD123_001.nc")
                         .withFileStatus(FileStatus.REMOVED).build(),
-                    MetadataRecord.builder().withFileType(ArgoFileType.PROFILE_CORE).withFile("aoml/123/profiles/D123_001.nc").withFileName("D123_001.nc").withFileStatus(FileStatus.ACTIVE)
+                    MetadataRecord.builder().withDate(date).withFileType(ArgoFileType.PROFILE_CORE).withFile("aoml/123/profiles/D123_001.nc").withFileName("D123_001.nc").withFileStatus(FileStatus.ACTIVE)
                         .build()
                 ))
                 .build(),
@@ -1233,10 +1233,10 @@ public class JpaMetadataStoreTest {
                 .withDac("aoml")
                 .withFloatId("13857")
                 .withFiles(Arrays.asList(
-                    MetadataRecord.builder().withFileType(ArgoFileType.METADATA).withFile("aoml/13857/13857_meta.nc").withFileName("13857_meta.nc").withFileStatus(FileStatus.REMOVED).build(),
-                    MetadataRecord.builder().withFileType(ArgoFileType.PROFILE_BIOCHEMICAL).withFile("aoml/13857/profiles/BD13857_003.nc").withFileName("BD13857_003.nc")
+                    MetadataRecord.builder().withDate(date).withFileType(ArgoFileType.METADATA).withFile("aoml/13857/13857_meta.nc").withFileName("13857_meta.nc").withFileStatus(FileStatus.REMOVED).build(),
+                    MetadataRecord.builder().withDate(date).withFileType(ArgoFileType.PROFILE_BIOCHEMICAL).withFile("aoml/13857/profiles/BD13857_003.nc").withFileName("BD13857_003.nc")
                         .withFileStatus(FileStatus.ACTIVE).build(),
-                    MetadataRecord.builder().withFileType(ArgoFileType.PROFILE_CORE).withFile("aoml/13857/profiles/D13857_003.nc").withFileName("D13857_003.nc").withFileStatus(FileStatus.ACTIVE)
+                    MetadataRecord.builder().withDate(date).withFileType(ArgoFileType.PROFILE_CORE).withFile("aoml/13857/profiles/D13857_003.nc").withFileName("D13857_003.nc").withFileStatus(FileStatus.ACTIVE)
                         .build()
                 ))
                 .build(),
@@ -1244,10 +1244,10 @@ public class JpaMetadataStoreTest {
                 .withDac("aoml")
                 .withFloatId("999")
                 .withFiles(Arrays.asList(
-                    MetadataRecord.builder().withFileType(ArgoFileType.METADATA).withFile("aoml/999/999_meta.nc").withFileName("999_meta.nc").withFileStatus(FileStatus.ACTIVE).build(),
-                    MetadataRecord.builder().withFileType(ArgoFileType.PROFILE_BIOCHEMICAL).withFile("aoml/999/profiles/BD999_001.nc").withFileName("BD999_001.nc")
+                    MetadataRecord.builder().withDate(date).withFileType(ArgoFileType.METADATA).withFile("aoml/999/999_meta.nc").withFileName("999_meta.nc").withFileStatus(FileStatus.ACTIVE).build(),
+                    MetadataRecord.builder().withDate(date).withFileType(ArgoFileType.PROFILE_BIOCHEMICAL).withFile("aoml/999/profiles/BD999_001.nc").withFileName("BD999_001.nc")
                         .withFileStatus(FileStatus.ACTIVE).build(),
-                    MetadataRecord.builder().withFileType(ArgoFileType.PROFILE_CORE).withFile("aoml/999/profiles/D999_001.nc").withFileName("D999_001.nc").withFileStatus(FileStatus.ACTIVE)
+                    MetadataRecord.builder().withDate(date).withFileType(ArgoFileType.PROFILE_CORE).withFile("aoml/999/profiles/D999_001.nc").withFileName("D999_001.nc").withFileStatus(FileStatus.ACTIVE)
                         .build()
                 ))
                 .build()
@@ -1299,10 +1299,10 @@ public class JpaMetadataStoreTest {
                 .withDac("aoml")
                 .withFloatId("13857")
                 .withFiles(Arrays.asList(
-                    MetadataRecord.builder().withFileType(ArgoFileType.METADATA).withFile("aoml/13857/13857_meta.nc").withFileName("13857_meta.nc").withFileStatus(FileStatus.REMOVED).build(),
-                    MetadataRecord.builder().withFileType(ArgoFileType.PROFILE_BIOCHEMICAL).withFile("aoml/13857/profiles/BD13857_003.nc").withFileName("BD13857_003.nc")
+                    MetadataRecord.builder().withDate(date).withFileType(ArgoFileType.METADATA).withFile("aoml/13857/13857_meta.nc").withFileName("13857_meta.nc").withFileStatus(FileStatus.REMOVED).build(),
+                    MetadataRecord.builder().withDate(date).withFileType(ArgoFileType.PROFILE_BIOCHEMICAL).withFile("aoml/13857/profiles/BD13857_003.nc").withFileName("BD13857_003.nc")
                         .withFileStatus(FileStatus.ACTIVE).build(),
-                    MetadataRecord.builder().withFileType(ArgoFileType.PROFILE_CORE).withFile("aoml/13857/profiles/D13857_003.nc").withFileName("D13857_003.nc").withFileStatus(FileStatus.ACTIVE)
+                    MetadataRecord.builder().withDate(date).withFileType(ArgoFileType.PROFILE_CORE).withFile("aoml/13857/profiles/D13857_003.nc").withFileName("D13857_003.nc").withFileStatus(FileStatus.ACTIVE)
                         .build()
                 ))
                 .build(),
@@ -1310,10 +1310,10 @@ public class JpaMetadataStoreTest {
                 .withDac("aoml")
                 .withFloatId("999")
                 .withFiles(Arrays.asList(
-                    MetadataRecord.builder().withFileType(ArgoFileType.METADATA).withFile("aoml/999/999_meta.nc").withFileName("999_meta.nc").withFileStatus(FileStatus.ACTIVE).build(),
-                    MetadataRecord.builder().withFileType(ArgoFileType.PROFILE_BIOCHEMICAL).withFile("aoml/999/profiles/BD999_001.nc").withFileName("BD999_001.nc")
+                    MetadataRecord.builder().withDate(date).withFileType(ArgoFileType.METADATA).withFile("aoml/999/999_meta.nc").withFileName("999_meta.nc").withFileStatus(FileStatus.ACTIVE).build(),
+                    MetadataRecord.builder().withDate(date).withFileType(ArgoFileType.PROFILE_BIOCHEMICAL).withFile("aoml/999/profiles/BD999_001.nc").withFileName("BD999_001.nc")
                         .withFileStatus(FileStatus.ACTIVE).build(),
-                    MetadataRecord.builder().withFileType(ArgoFileType.PROFILE_CORE).withFile("aoml/999/profiles/D999_001.nc").withFileName("D999_001.nc").withFileStatus(FileStatus.ACTIVE)
+                    MetadataRecord.builder().withDate(date).withFileType(ArgoFileType.PROFILE_CORE).withFile("aoml/999/profiles/D999_001.nc").withFileName("D999_001.nc").withFileStatus(FileStatus.ACTIVE)
                         .build()
                 ))
                 .build()
@@ -1638,20 +1638,20 @@ public class JpaMetadataStoreTest {
                 .withDac("aoml")
                 .withFloatId("123")
                 .withFiles(Arrays.asList(
-                    MetadataRecord.builder().withFileType(ArgoFileType.METADATA).withFile("aoml/123/123_meta.nc").withFileName("123_meta.nc").withFileStatus(FileStatus.ACTIVE).build(),
-                    MetadataRecord.builder().withFileType(ArgoFileType.PROFILE_BIOCHEMICAL).withFile("aoml/123/profiles/BD123_001.nc").withFileName("BD123_001.nc").withFileStatus(FileStatus.ACTIVE)
+                    MetadataRecord.builder().withDate(date).withFileType(ArgoFileType.METADATA).withFile("aoml/123/123_meta.nc").withFileName("123_meta.nc").withFileStatus(FileStatus.ACTIVE).build(),
+                    MetadataRecord.builder().withDate(date).withFileType(ArgoFileType.PROFILE_BIOCHEMICAL).withFile("aoml/123/profiles/BD123_001.nc").withFileName("BD123_001.nc").withFileStatus(FileStatus.ACTIVE)
                         .build(),
-                    MetadataRecord.builder().withFileType(ArgoFileType.PROFILE_CORE).withFile("aoml/123/profiles/D123_001.nc").withFileName("D123_001.nc").withFileStatus(FileStatus.ACTIVE).build()
+                    MetadataRecord.builder().withDate(date).withFileType(ArgoFileType.PROFILE_CORE).withFile("aoml/123/profiles/D123_001.nc").withFileName("D123_001.nc").withFileStatus(FileStatus.ACTIVE).build()
                 ))
                 .build(),
             ProfileOperation.builder()
                 .withDac("aoml")
                 .withFloatId("13857")
                 .withFiles(Arrays.asList(
-                    MetadataRecord.builder().withFileType(ArgoFileType.METADATA).withFile("aoml/13857/13857_meta.nc").withFileName("13857_meta.nc").withFileStatus(FileStatus.ACTIVE).build(),
-                    MetadataRecord.builder().withFileType(ArgoFileType.PROFILE_BIOCHEMICAL).withFile("aoml/13857/profiles/BD13857_001.nc").withFileName("BD13857_001.nc")
+                    MetadataRecord.builder().withDate(date).withFileType(ArgoFileType.METADATA).withFile("aoml/13857/13857_meta.nc").withFileName("13857_meta.nc").withFileStatus(FileStatus.ACTIVE).build(),
+                    MetadataRecord.builder().withDate(date).withFileType(ArgoFileType.PROFILE_BIOCHEMICAL).withFile("aoml/13857/profiles/BD13857_001.nc").withFileName("BD13857_001.nc")
                         .withFileStatus(FileStatus.ACTIVE).build(),
-                    MetadataRecord.builder().withFileType(ArgoFileType.PROFILE_CORE).withFile("aoml/13857/profiles/D13857_001.nc").withFileName("D13857_001.nc").withFileStatus(FileStatus.ACTIVE)
+                    MetadataRecord.builder().withDate(date).withFileType(ArgoFileType.PROFILE_CORE).withFile("aoml/13857/profiles/D13857_001.nc").withFileName("D13857_001.nc").withFileStatus(FileStatus.ACTIVE)
                         .build()
                 ))
                 .build()
@@ -1692,21 +1692,21 @@ public class JpaMetadataStoreTest {
                 .withDac("aoml")
                 .withFloatId("123")
                 .withFiles(Arrays.asList(
-                    MetadataRecord.builder().withFileType(ArgoFileType.METADATA).withFile("aoml/123/123_meta.nc").withFileName("123_meta.nc").withFileStatus(FileStatus.ACTIVE).build(),
-                    MetadataRecord.builder().withFileType(ArgoFileType.PROFILE_BIOCHEMICAL).withFile("aoml/123/profiles/BD123_001.nc").withFileName("BD123_001.nc").withFileStatus(FileStatus.ACTIVE)
+                    MetadataRecord.builder().withDate(date).withFileType(ArgoFileType.METADATA).withFile("aoml/123/123_meta.nc").withFileName("123_meta.nc").withFileStatus(FileStatus.ACTIVE).build(),
+                    MetadataRecord.builder().withDate(date).withFileType(ArgoFileType.PROFILE_BIOCHEMICAL).withFile("aoml/123/profiles/BD123_001.nc").withFileName("BD123_001.nc").withFileStatus(FileStatus.ACTIVE)
                         .build(),
-                    MetadataRecord.builder().withFileType(ArgoFileType.PROFILE_CORE).withFile("aoml/123/profiles/D123_001.nc").withFileName("D123_001.nc").withFileStatus(FileStatus.ACTIVE).build()
+                    MetadataRecord.builder().withDate(date).withFileType(ArgoFileType.PROFILE_CORE).withFile("aoml/123/profiles/D123_001.nc").withFileName("D123_001.nc").withFileStatus(FileStatus.ACTIVE).build()
                 ))
                 .build(),
             ProfileOperation.builder()
                 .withDac("aoml")
                 .withFloatId("13857")
                 .withFiles(Arrays.asList(
-                    MetadataRecord.builder().withFileType(ArgoFileType.METADATA).withFile("aoml/13857/13857_meta.nc").withFileName("13857_meta.nc").withFileStatus(FileStatus.REMOVED)
+                    MetadataRecord.builder().withDate(date).withFileType(ArgoFileType.METADATA).withFile("aoml/13857/13857_meta.nc").withFileName("13857_meta.nc").withFileStatus(FileStatus.REMOVED)
                         .build(),
-                    MetadataRecord.builder().withFileType(ArgoFileType.PROFILE_BIOCHEMICAL).withFile("aoml/13857/profiles/BD13857_002.nc").withFileName("BD13857_002.nc")
+                    MetadataRecord.builder().withDate(date).withFileType(ArgoFileType.PROFILE_BIOCHEMICAL).withFile("aoml/13857/profiles/BD13857_002.nc").withFileName("BD13857_002.nc")
                         .withFileStatus(FileStatus.ACTIVE).build(),
-                    MetadataRecord.builder().withFileType(ArgoFileType.PROFILE_CORE).withFile("aoml/13857/profiles/D13857_002.nc").withFileName("D13857_002.nc").withFileStatus(FileStatus.ACTIVE)
+                    MetadataRecord.builder().withDate(date).withFileType(ArgoFileType.PROFILE_CORE).withFile("aoml/13857/profiles/D13857_002.nc").withFileName("D13857_002.nc").withFileStatus(FileStatus.ACTIVE)
                         .build()
                 ))
                 .build()
@@ -1847,7 +1847,7 @@ public class JpaMetadataStoreTest {
             .withDac("aoml")
             .withFloatId("123")
             .withFiles(Arrays.asList(
-                MetadataRecord.builder().withFile("aoml/123/profiles/D123_001.nc").withFileName("D123_001.nc").withFileStatus(FileStatus.ACTIVE).build()
+                MetadataRecord.builder().withFile("aoml/123/profiles/D123_001.nc").withDate(date).withFileName("D123_001.nc").withFileStatus(FileStatus.ACTIVE).build()
             ))
             .build()),
         page1.getPage());
@@ -1861,9 +1861,9 @@ public class JpaMetadataStoreTest {
             .withDac("aoml")
             .withFloatId("13857")
             .withFiles(Arrays.asList(
-                MetadataRecord.builder().withFile("aoml/13857/profiles/D13857_001.nc").withFileName("D13857_001.nc").withFileStatus(FileStatus.ACTIVE)
+                MetadataRecord.builder().withFile("aoml/13857/profiles/D13857_001.nc").withDate(date).withFileName("D13857_001.nc").withFileStatus(FileStatus.ACTIVE)
                     .build(),
-                MetadataRecord.builder().withFile("aoml/13857/profiles/D13857_002.nc").withFileName("D13857_002.nc").withFileStatus(FileStatus.ACTIVE)
+                MetadataRecord.builder().withFile("aoml/13857/profiles/D13857_002.nc").withDate(date).withFileName("D13857_002.nc").withFileStatus(FileStatus.ACTIVE)
                     .build()
             ))
             .build()),
@@ -1898,7 +1898,7 @@ public class JpaMetadataStoreTest {
             .withDac("aoml")
             .withFloatId("123")
             .withFiles(Arrays.asList(
-                MetadataRecord.builder().withFile("aoml/123/profiles/D123_001.nc").withFileName("D123_001.nc").withFileStatus(FileStatus.ACTIVE).build()
+                MetadataRecord.builder().withFile("aoml/123/profiles/D123_001.nc").withDate(date).withFileName("D123_001.nc").withFileStatus(FileStatus.ACTIVE).build()
             ))
             .build()),
         page1.getPage());
@@ -2097,7 +2097,7 @@ public class JpaMetadataStoreTest {
             ProfileOperation.builder().withDac("aoml")
                 .withFloatId("1111")
                 .withFiles(Arrays.asList(
-                    MetadataRecord.builder().withFile("aoml/1111/profiles/D1111_001.nc").withFileName("D1111_001.nc")
+                    MetadataRecord.builder().withFile("aoml/1111/profiles/D1111_001.nc").withDate(date).withFileName("D1111_001.nc")
                         .withFileStatus(FileStatus.REMOVED).build()
                 ))
                 .build(),
@@ -2105,7 +2105,7 @@ public class JpaMetadataStoreTest {
                 .withDac("aoml")
                 .withFloatId("13857")
                 .withFiles(Arrays.asList(
-                    MetadataRecord.builder().withFile("aoml/13857/profiles/D13857_001.nc").withFileName("D13857_001.nc")
+                    MetadataRecord.builder().withFile("aoml/13857/profiles/D13857_001.nc").withDate(date).withFileName("D13857_001.nc")
                         .withFileStatus(FileStatus.ACTIVE).build()
                 ))
                 .build()
@@ -2350,6 +2350,7 @@ public class JpaMetadataStoreTest {
                     .withFile("aoml/123/profiles/D123_001.nc")
                     .withDac("aoml")
                     .withFloatId("123")
+                    .withDate(date)
                     .build()
             ))
             .build()),
@@ -2372,6 +2373,7 @@ public class JpaMetadataStoreTest {
                     .withFile("aoml/13857/profiles/D13857_001.nc")
                     .withDac("aoml")
                     .withFloatId("13857")
+                    .withDate(date)
                     .build(),
                 MetadataRecord.builder()
                     .withFileName("D13857_002.nc")
@@ -2379,6 +2381,7 @@ public class JpaMetadataStoreTest {
                     .withFile("aoml/13857/profiles/D13857_002.nc")
                     .withDac("aoml")
                     .withFloatId("13857")
+                    .withDate(date)
                     .build()
             ))
             .build()),
@@ -2421,6 +2424,7 @@ public class JpaMetadataStoreTest {
                     .withFile("aoml/123/profiles/D123_001.nc")
                     .withDac("aoml")
                     .withFloatId("123")
+                    .withDate(date)
                     .build()
             ))
             .build()),
@@ -2591,6 +2595,7 @@ public class JpaMetadataStoreTest {
                         .withDac("aoml")
                         .withFloatId("13857")
                         .withFile("aoml/13857/profiles/D13857_001.nc")
+                        .withDate(Instant.parse("2026-05-01T00:00:00Z"))
                         .build()
                 ))
                 .build(),
@@ -2606,6 +2611,7 @@ public class JpaMetadataStoreTest {
                         .withDac("aoml")
                         .withFloatId("1111")
                         .withFile("aoml/1111/profiles/D1111_001.nc")
+                        .withDate(Instant.parse("2026-05-03T00:00:00Z"))
                         .build()
                 ))
                 .build()
@@ -2667,6 +2673,8 @@ public class JpaMetadataStoreTest {
 
   @Test
   public void testFindRemovedFilesPage() throws Exception {
+    Instant date = Instant.now();
+
     datastore.updateIndex(MetadataRecord.builder()
         .withFile("aoml/13857/profiles/D13857_001.nc")
         .withFileName("D13857_001.nc")
@@ -2676,7 +2684,7 @@ public class JpaMetadataStoreTest {
         .withDirection("A")
         .withParameterDataMode("D")
         .withActionTimestamp(Instant.now())
-        .withDate(Instant.parse("2026-05-01T00:00:00Z"))
+        .withDate(date)
         .withLatitude(0.267)
         .withLatitudeMin(0.1)
         .withLatitudeMax(0.4)
@@ -2701,7 +2709,7 @@ public class JpaMetadataStoreTest {
         .withDirection("A")
         .withParameterDataMode("D")
         .withActionTimestamp(Instant.now())
-        .withDate(Instant.parse("2026-05-01T00:00:00Z"))
+        .withDate(date)
         .withLatitude(0.267)
         .withLatitudeMin(0.1)
         .withLatitudeMax(0.4)
@@ -2723,7 +2731,7 @@ public class JpaMetadataStoreTest {
         .withDac("aoml")
         .withFloatId("13857")
         .withActionTimestamp(Instant.now())
-        .withDate(Instant.now())
+        .withDate(date)
         .withLatitude(0.267)
         .withLongitude(-16.032)
         .withOcean(ArgoOcean.ATLANTIC_OCEAN)
@@ -2740,7 +2748,7 @@ public class JpaMetadataStoreTest {
         .withDac("aoml")
         .withFloatId("13855")
         .withActionTimestamp(Instant.now())
-        .withDate(Instant.now())
+        .withDate(date)
         .withLatitude(0.267)
         .withLongitude(-16.032)
         .withOcean(ArgoOcean.ATLANTIC_OCEAN)
@@ -2760,7 +2768,7 @@ public class JpaMetadataStoreTest {
         .withDirection("A")
         .withParameterDataMode("D")
         .withActionTimestamp(Instant.now())
-        .withDate(Instant.now())
+        .withDate(date)
         .withLatitude(0.267)
         .withLatitudeMin(0.1)
         .withLatitudeMax(0.4)
@@ -2785,7 +2793,7 @@ public class JpaMetadataStoreTest {
         .withDirection("A")
         .withParameterDataMode("D")
         .withActionTimestamp(Instant.now())
-        .withDate(Instant.now())
+        .withDate(date)
         .withLatitude(0.267)
         .withLatitudeMin(0.1)
         .withLatitudeMax(0.4)
@@ -2858,6 +2866,7 @@ public class JpaMetadataStoreTest {
                         .withFileName("BD13855_001.nc")
                         .withFileStatus(FileStatus.REMOVED)
                         .withActionTimestamp(Instant.parse("2025-10-10T14:00:00Z"))
+                        .withDate(date)
                         .build()
                 ))
                 .build()
@@ -2882,6 +2891,7 @@ public class JpaMetadataStoreTest {
                         .withFileName("D13857_001.nc")
                         .withFileStatus(FileStatus.REMOVED)
                         .withActionTimestamp(Instant.parse("2025-10-10T12:00:00Z"))
+                        .withDate(date)
                         .build()
                 ))
                 .build()
@@ -2904,6 +2914,7 @@ public class JpaMetadataStoreTest {
                         .withFileName("13857_meta.nc")
                         .withFileStatus(FileStatus.REMOVED)
                         .withActionTimestamp(Instant.parse("2025-10-10T13:00:00Z"))
+                        .withDate(date)
                         .build()
                 ))
                 .build()
@@ -2923,6 +2934,7 @@ public class JpaMetadataStoreTest {
                         .withFileName("13857_meta.nc")
                         .withFileStatus(FileStatus.REMOVED)
                         .withActionTimestamp(Instant.parse("2025-10-10T13:00:00Z"))
+                        .withDate(date)
                         .build()
                 ))
                 .build()
@@ -2942,6 +2954,7 @@ public class JpaMetadataStoreTest {
                         .withFileName("D13857_001.nc")
                         .withFileStatus(FileStatus.REMOVED)
                         .withActionTimestamp(Instant.parse("2025-10-10T12:00:00Z"))
+                        .withDate(date)
                         .build()
                 ))
                 .build()
@@ -2994,6 +3007,7 @@ public class JpaMetadataStoreTest {
                         .withFileName("BD13855_001.nc")
                         .withFileStatus(FileStatus.REMOVED)
                         .withActionTimestamp(Instant.parse("2025-10-10T14:00:00Z"))
+                        .withDate(date)
                         .build()
                 ))
                 .build(),
@@ -3007,6 +3021,7 @@ public class JpaMetadataStoreTest {
                         .withFileName("BD13855_002.nc")
                         .withFileStatus(FileStatus.REMOVED)
                         .withActionTimestamp(Instant.parse("2025-10-10T14:00:00Z"))
+                        .withDate(date)
                         .build()
                 ))
                 .build(),
@@ -3020,6 +3035,7 @@ public class JpaMetadataStoreTest {
                         .withFileName("D13857_001.nc")
                         .withFileStatus(FileStatus.REMOVED)
                         .withActionTimestamp(Instant.parse("2025-10-10T12:00:00Z"))
+                        .withDate(date)
                         .build()
                 ))
                 .build(),
@@ -3033,6 +3049,7 @@ public class JpaMetadataStoreTest {
                         .withFileName("D13857_002.nc")
                         .withFileStatus(FileStatus.REMOVED)
                         .withActionTimestamp(Instant.parse("2025-10-10T14:00:00Z"))
+                        .withDate(date)
                         .build()
                 ))
                 .build(),
@@ -3046,6 +3063,7 @@ public class JpaMetadataStoreTest {
                         .withFileName("13855_meta.nc")
                         .withFileStatus(FileStatus.REMOVED)
                         .withActionTimestamp(Instant.parse("2025-10-10T13:00:00Z"))
+                        .withDate(date)
                         .build()
                 ))
                 .build(),
@@ -3059,6 +3077,7 @@ public class JpaMetadataStoreTest {
                         .withFileName("13857_meta.nc")
                         .withFileStatus(FileStatus.REMOVED)
                         .withActionTimestamp(Instant.parse("2025-10-10T13:00:00Z"))
+                        .withDate(date)
                         .build()
                 ))
                 .build()
@@ -3112,6 +3131,7 @@ public class JpaMetadataStoreTest {
                         .withFileName("BD13855_001.nc")
                         .withFileStatus(FileStatus.REMOVED)
                         .withActionTimestamp(Instant.parse("2025-10-10T14:00:00Z"))
+                        .withDate(date)
                         .build()
                 ))
                 .build(),
@@ -3125,6 +3145,7 @@ public class JpaMetadataStoreTest {
                         .withFileName("D13857_001.nc")
                         .withFileStatus(FileStatus.REMOVED)
                         .withActionTimestamp(Instant.parse("2025-10-10T12:00:00Z"))
+                        .withDate(date)
                         .build()
                 ))
                 .build(),
@@ -3138,6 +3159,7 @@ public class JpaMetadataStoreTest {
                         .withFileName("13857_meta.nc")
                         .withFileStatus(FileStatus.REMOVED)
                         .withActionTimestamp(Instant.parse("2025-10-10T13:00:00Z"))
+                        .withDate(date)
                         .build()
                 ))
                 .build()

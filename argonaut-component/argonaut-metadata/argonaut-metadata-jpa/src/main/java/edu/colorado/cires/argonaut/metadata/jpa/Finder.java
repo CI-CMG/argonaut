@@ -157,6 +157,7 @@ class Finder {
         .withFile(entity.getFile())
         .withFloatId(entity.getCycle().getFloatId().getFloatId())
         .withFileStatus(FileStatus.valueOf(entity.getFileStatus()))
+        .withDate(entity.getDate() == null ? null : entity.getDate().toInstant())
         .build()).toList();
 
   }
@@ -255,6 +256,7 @@ class Finder {
                 .withFileName(profile.getFileName())
                 .withFile(profile.getFile())
                 .withFileStatus(FileStatus.valueOf(profile.getFileStatus()))
+                .withDate(profile.getDate() == null ? null : profile.getDate().toInstant())
                 .build());
           }
         }
@@ -364,6 +366,7 @@ class Finder {
           .withFileName(metadataFileEntity.getFileName())
           .withFile(metadataFileEntity.getFile())
           .withFileStatus(FileStatus.valueOf(metadataFileEntity.getFileStatus()))
+          .withDate(metadataFileEntity.getDate() == null ? null : metadataFileEntity.getDate().toInstant())
           .build());
     }
     List<MetadataRecord> profileList = new LinkedList<>();
@@ -374,6 +377,7 @@ class Finder {
             .withFileName(profile.getFileName())
             .withFile(profile.getFile())
             .withFileStatus(FileStatus.valueOf(profile.getFileStatus()))
+            .withDate(profile.getDate() == null ? null : profile.getDate().toInstant())
             .build());
       }
     }
@@ -427,6 +431,7 @@ class Finder {
                   .withFileName(frt.getMetadata().getFileName())
                   .withFile(frt.getMetadata().getFile())
                   .withFileStatus(FileStatus.valueOf(frt.getMetadata().getFileStatus()))
+                  .withDate(frt.getMetadata().getDate() == null ? null : frt.getMetadata().getDate().toInstant())
                   .withFileType(ArgoFileType.METADATA)
                   .withActionTimestamp(frt.getRemovedTime().toInstant())
                   .build();
@@ -437,6 +442,7 @@ class Finder {
                   .withFileName(frt.getProfile().getFileName())
                   .withFile(frt.getProfile().getFile())
                   .withFileStatus(FileStatus.valueOf(frt.getProfile().getFileStatus()))
+                  .withDate(frt.getProfile().getDate() == null ? null : frt.getProfile().getDate().toInstant())
                   .withFileType(ArgoFileType.valueOf(frt.getProfile().getFileType()))
                   .withActionTimestamp(frt.getRemovedTime().toInstant())
                   .build();

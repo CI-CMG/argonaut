@@ -5,6 +5,8 @@ import edu.colorado.cires.argonaut.metadata.core.GeoMergePage;
 import edu.colorado.cires.argonaut.metadata.core.IndexPageRequest;
 import edu.colorado.cires.argonaut.metadata.core.MetadataStore;
 import edu.colorado.cires.argonaut.metadata.core.ProfilePage;
+import edu.colorado.cires.argonaut.metadata.core.RecentProfilePage;
+import edu.colorado.cires.argonaut.metadata.core.RecentProfileSearch;
 import edu.colorado.cires.argonaut.metadata.core.RemovedFilePage;
 import edu.colorado.cires.argonaut.metadata.core.RemovedFileSearch;
 import jakarta.persistence.EntityManagerFactory;
@@ -91,6 +93,11 @@ public class JpaMetadataStore implements MetadataStore {
   @Override
   public RemovedFilePage findRemovedFilesPage(RemovedFileSearch pageRequest) {
     return finder.findRemovedFilesPage(pageRequest);
+  }
+
+  @Override
+  public RecentProfilePage findUpdatedOrMissingLatestMergeFilesPage(RecentProfileSearch pageRequest) {
+    throw  new UnsupportedOperationException("Not supported yet.");
   }
 
 }

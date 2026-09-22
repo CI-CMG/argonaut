@@ -1,16 +1,24 @@
 package edu.colorado.cires.argonaut.core.merge.multiprof;
 
 import java.nio.file.Path;
+import java.time.Instant;
 import java.util.Objects;
 
 public class SameFileSystemPathSupplier implements LocalPathSupplier {
 
   private final Path path;
   private final String dac;
+  private final Instant julD;
 
-  public SameFileSystemPathSupplier(Path path, String dac) {
+  public SameFileSystemPathSupplier(Path path, String dac, Instant julD) {
     this.path = path;
     this.dac = dac;
+    this.julD = julD;
+  }
+
+  @Override
+  public Instant getJulD() {
+    return julD;
   }
 
   @Override

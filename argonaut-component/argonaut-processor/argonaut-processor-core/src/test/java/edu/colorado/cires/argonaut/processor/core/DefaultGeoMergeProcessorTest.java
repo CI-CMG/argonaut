@@ -23,6 +23,7 @@ import edu.colorado.cires.argonaut.messaging.core.util.ArgonautJsonMapperFactory
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
@@ -92,6 +93,7 @@ public class DefaultGeoMergeProcessorTest {
                 .withDac("aoml")
                 .withFloatId("123")
                 .withFile("aoml/123/profiles/R123_001.nc")
+                .withDate(Instant.parse("2025-01-02T00:00:00Z"))
                 .build(),
             MetadataRecord.builder()
                 .withFileName("R123_001D.nc")
@@ -99,6 +101,7 @@ public class DefaultGeoMergeProcessorTest {
                 .withDac("aoml")
                 .withFloatId("123")
                 .withFile("aoml/123/profiles/R123_001D.nc")
+                .withDate(Instant.parse("2025-01-02T00:01:00Z"))
                 .build(),
             MetadataRecord.builder()
                 .withFileName("R123_002.nc")
@@ -106,6 +109,7 @@ public class DefaultGeoMergeProcessorTest {
                 .withDac("aoml")
                 .withFloatId("123")
                 .withFile("aoml/123/profiles/R123_002.nc")
+                .withDate(Instant.parse("2025-01-02T00:02:00Z"))
                 .build()
         )).build();
 
@@ -346,6 +350,7 @@ public class DefaultGeoMergeProcessorTest {
                 .withDac("aoml")
                 .withFloatId("123")
                 .withFile("aoml/123/profiles/R123_001.nc")
+                .withDate(Instant.parse("2025-01-02T00:00:00Z"))
                 .build(),
             MetadataRecord.builder()
                 .withFileName("R123_001D.nc")
@@ -353,6 +358,7 @@ public class DefaultGeoMergeProcessorTest {
                 .withDac("aoml")
                 .withFloatId("123")
                 .withFile("aoml/123/profiles/R123_001D.nc")
+                .withDate(Instant.parse("2025-01-02T00:01:00Z"))
                 .build(),
             MetadataRecord.builder()
                 .withFileName("R123_002.nc")
@@ -360,6 +366,7 @@ public class DefaultGeoMergeProcessorTest {
                 .withDac("aoml")
                 .withFloatId("123")
                 .withFile("aoml/123/profiles/R123_002.nc")
+                .withDate(Instant.parse("2025-01-02T00:00:00Z"))
                 .build()
         )).build();
 

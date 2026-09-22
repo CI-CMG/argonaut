@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import edu.colorado.cires.argonaut.core.netcdf.profile.v31.ArgoMultiProfileV31;
 import edu.colorado.cires.argonaut.core.netcdf.profile.v31.ArgoProfileV31;
 import edu.colorado.cires.argonaut.core.netcdf.profile.v31.ArgoProfileV31Calibration;
 import edu.colorado.cires.argonaut.core.netcdf.profile.v31.ArgoProfileV31Level;
@@ -16,6 +17,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
@@ -33,6 +35,17 @@ public class DefaultMultiProfileMergerTest {
     Files.createDirectories(outputDir);
   }
 
+  private static Instant readJulD(Path path) {
+    try (
+        ArgoProfileV31Reader reader = new ArgoProfileV31Reader(path);
+    ) {
+      ArgoMultiProfileV31 multiProfile = reader.getMultiProfile();
+      return multiProfile.getProfile(0).getJulianDate();
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
   @Test
   public void test() throws Exception {
     Path dacPath = Paths.get("src/test/resources/dac/meds/4902704");
@@ -42,13 +55,13 @@ public class DefaultMultiProfileMergerTest {
       pathSuppliers = stream
           .filter(Files::isRegularFile)
           .filter(f -> f.getFileName().toString().endsWith(".nc"))
-          .map(path -> new SameFileSystemPathSupplier(path, "meds"))
+          .map(path -> new SameFileSystemPathSupplier(path, "meds", readJulD(path)))
           .map(ps -> (LocalPathSupplier) ps)
           .toList();
     }
     Path output = outputDir.resolve("4902704_prof.nc");
     DefaultMultiProfileMerger merger = new DefaultMultiProfileMerger("My Institute", false);
-    merger.mergeProfiles(pathSuppliers, Arrays.asList("PRES", "TEMP", "PSAL"), output);
+    merger.mergeProfiles(DefaultMultiProfileMerger.orderByCycleThenJulD(pathSuppliers), Arrays.asList("PRES", "TEMP", "PSAL"), output);
 
     try (
         ArgoProfileV31Reader reader = new ArgoProfileV31Reader(output);

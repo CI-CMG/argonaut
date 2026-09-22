@@ -1,5 +1,6 @@
 package edu.colorado.cires.argonaut.processor.core;
 
+import edu.colorado.cires.argonaut.core.merge.multiprof.DefaultMultiProfileMerger;
 import edu.colorado.cires.argonaut.core.merge.multiprof.LocalPathSupplier;
 import edu.colorado.cires.argonaut.core.merge.multiprof.MultiProfileMerger;
 import edu.colorado.cires.argonaut.file.core.FileStore;
@@ -73,6 +74,11 @@ public class DefaultGeoMergeProcessor implements GeoMergeProcessor {
           private Path tempFile = null;
 
           @Override
+          public Instant getJulD() {
+            return dacPath.getDate();
+          }
+
+          @Override
           public String getDac() {
             return dacPath.getDac();
           }
@@ -135,7 +141,7 @@ public class DefaultGeoMergeProcessor implements GeoMergeProcessor {
 
     try {
       try {
-        merger.mergeProfiles(getInputFileSuppliers(message), PARAMETERS, localOutputFile);
+        merger.mergeProfiles(DefaultMultiProfileMerger.orderByJulianDateDescending(getInputFileSuppliers(message)), PARAMETERS, localOutputFile);
       } catch (IOException e) {
         throw new RuntimeException("Unable to merge geo data " + outputFile, e);
       }
