@@ -126,7 +126,7 @@ public class DefaultGeoMergeProcessorTest {
     LocalPathSupplier localPathSupplier3 = localPathSuppliers.get(2);
 
     localPathSupplier1.prepare();
-    assertEquals("R123_001.nc", localPathSupplier1.getFileName());
+    assertEquals("R123_002.nc", localPathSupplier1.getFileName());
     assertNotNull(localPathSupplier1.getLocalPath());
     localPathSupplier1.cleanUp();
 
@@ -136,13 +136,13 @@ public class DefaultGeoMergeProcessorTest {
     localPathSupplier2.cleanUp();
 
     localPathSupplier3.prepare();
-    assertEquals("R123_002.nc", localPathSupplier3.getFileName());
+    assertEquals("R123_001.nc", localPathSupplier3.getFileName());
     assertNotNull(localPathSupplier3.getLocalPath());
     localPathSupplier3.cleanUp();
 
-    verify(outputFileStore).downloadLocalFile(eq("/foo/bar/dac/aoml/123/profiles/R123_001.nc"), eq(localPathSupplier1.getLocalPath()));
+    verify(outputFileStore).downloadLocalFile(eq("/foo/bar/dac/aoml/123/profiles/R123_001.nc"), eq(localPathSupplier3.getLocalPath()));
     verify(outputFileStore).downloadLocalFile(eq("/foo/bar/dac/aoml/123/profiles/R123_001D.nc"), eq(localPathSupplier2.getLocalPath()));
-    verify(outputFileStore).downloadLocalFile(eq("/foo/bar/dac/aoml/123/profiles/R123_002.nc"), eq(localPathSupplier3.getLocalPath()));
+    verify(outputFileStore).downloadLocalFile(eq("/foo/bar/dac/aoml/123/profiles/R123_002.nc"), eq(localPathSupplier1.getLocalPath()));
 
     ArgumentCaptor<String> jsonCaptor = ArgumentCaptor.forClass(String.class);
     verify(messageSender, times(3)).sendJson(eq("updateIndexQueue"), jsonCaptor.capture());
@@ -382,18 +382,18 @@ public class DefaultGeoMergeProcessorTest {
     LocalPathSupplier localPathSupplier2 = localPathSuppliers.get(1);
 
     localPathSupplier1.prepare();
-    assertEquals("R123_001.nc", localPathSupplier1.getFileName());
+    assertEquals("R123_001D.nc", localPathSupplier1.getFileName());
     assertNotNull(localPathSupplier1.getLocalPath());
     localPathSupplier1.cleanUp();
 
     localPathSupplier2.prepare();
-    assertEquals("R123_001D.nc", localPathSupplier2.getFileName());
+    assertEquals("R123_001.nc", localPathSupplier2.getFileName());
     assertNotNull(localPathSupplier2.getLocalPath());
     localPathSupplier2.cleanUp();
 
 
-    verify(outputFileStore).downloadLocalFile(eq("/foo/bar/dac/aoml/123/profiles/R123_001.nc"), eq(localPathSupplier1.getLocalPath()));
-    verify(outputFileStore).downloadLocalFile(eq("/foo/bar/dac/aoml/123/profiles/R123_001D.nc"), eq(localPathSupplier2.getLocalPath()));
+    verify(outputFileStore).downloadLocalFile(eq("/foo/bar/dac/aoml/123/profiles/R123_001.nc"), eq(localPathSupplier2.getLocalPath()));
+    verify(outputFileStore).downloadLocalFile(eq("/foo/bar/dac/aoml/123/profiles/R123_001D.nc"), eq(localPathSupplier1.getLocalPath()));
     verify(outputFileStore, times(0)).downloadLocalFile(eq("/foo/bar/dac/aoml/123/profiles/R123_002.nc"), any());
 
     ArgumentCaptor<String> jsonCaptor = ArgumentCaptor.forClass(String.class);

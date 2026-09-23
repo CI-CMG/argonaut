@@ -1,6 +1,7 @@
 package edu.colorado.cires.argonaut.metadata.core;
 
 import edu.colorado.cires.argonaut.messaging.core.databind.MetadataRecord;
+import edu.colorado.cires.argonaut.messaging.core.databind.ProfileOperation;
 import java.util.Optional;
 
 public interface MetadataStore {
@@ -12,6 +13,6 @@ public interface MetadataStore {
   ProfilePage findUpdatedOrMissingMergeFilesPage(IndexPageRequest pageRequest);
   GeoMergePage findUpdatedOrMissingGeoMergeFilesPage(IndexPageRequest pageRequest);
   RemovedFilePage findRemovedFilesPage(RemovedFileSearch pageRequest);
-  RecentProfilePage findUpdatedOrMissingLatestMergeFilesPage(RecentProfileSearch pageRequest);
+  ProfileOperation findUpdatedOrMissingLatestMergeFiles(RecentProfileSearch searchRequest);
 
 }

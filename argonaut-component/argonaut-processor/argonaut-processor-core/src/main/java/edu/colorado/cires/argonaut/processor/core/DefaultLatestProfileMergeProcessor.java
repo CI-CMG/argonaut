@@ -5,6 +5,7 @@ import edu.colorado.cires.argonaut.core.merge.multiprof.LocalPathSupplier;
 import edu.colorado.cires.argonaut.core.merge.multiprof.MultiProfileMerger;
 import edu.colorado.cires.argonaut.file.core.FileStore;
 import edu.colorado.cires.argonaut.messaging.core.databind.ArgoFileType;
+import edu.colorado.cires.argonaut.messaging.core.databind.ArgoFileTypeDetails;
 import edu.colorado.cires.argonaut.messaging.core.databind.MetadataRecord;
 import edu.colorado.cires.argonaut.messaging.core.databind.MetadataRecord.Action;
 import edu.colorado.cires.argonaut.messaging.core.databind.MetadataRecord.FileStatus;
@@ -17,8 +18,11 @@ import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
+import java.util.function.Supplier;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,6 +41,7 @@ public class DefaultLatestProfileMergeProcessor implements LatestProfileMergePro
   private JsonMapper jsonMapper;
   private MultiProfileMerger merger;
   private int maxProfilesPerFile = 1000;
+  private Supplier<Instant> nowGenerator = Instant::now;
 
 
   public void setJsonMapper(JsonMapper jsonMapper) {
@@ -70,6 +75,10 @@ public class DefaultLatestProfileMergeProcessor implements LatestProfileMergePro
 
   public void setMerger(MultiProfileMerger merger) {
     this.merger = merger;
+  }
+
+  public void setNowGenerator(Supplier<Instant> nowGenerator) {
+    this.nowGenerator = nowGenerator;
   }
 
   private List<LocalPathSupplier> getInputFileSuppliers(List<MetadataRecord> group) {
@@ -131,9 +140,7 @@ public class DefaultLatestProfileMergeProcessor implements LatestProfileMergePro
   private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyyMMdd");
 
   private void mergeProfiles(ProfileOperation message) {
-    Instant dateUpdate = message.getFiles().getFirst().getDateUpdate();
-    String modePrefix = message.getFiles().getFirst().getProfileMode().getPrefix();
-    String filePrefix = modePrefix + FORMATTER.format(dateUpdate) + "_prof_";
+    String filePrefix = message.getFileName() + "_prof_";
 
     List<LocalPathSupplier> sorted = DefaultMultiProfileMerger.orderByCycleThenJulD(
         getInputFileSuppliers(
@@ -158,12 +165,13 @@ public class DefaultLatestProfileMergeProcessor implements LatestProfileMergePro
       String fileName = filePrefix + i + ".nc";
 
       String outputFile = outputFileStore.appendToPath(outputFileStore.getRoot(), "latest_data", fileName);
-      Path localOutputFile;
+      Path localOutputDir;
       try {
-        localOutputFile = Files.createTempFile(localTempDir, "latest-merge-", ".nc");
+        localOutputDir = Files.createTempDirectory(localTempDir, "latest-merge-");
       } catch (IOException e) {
         throw new RuntimeException("Unable to create temporary output file", e);
       }
+      Path localOutputFile = localOutputDir.resolve(fileName);
 
       try {
         try {
@@ -180,7 +188,7 @@ public class DefaultLatestProfileMergeProcessor implements LatestProfileMergePro
         LOGGER.info("Updated latest merge file: {}", outputFile);
 
       } finally {
-        FileUtils.deleteQuietly(localOutputFile.toFile());
+        FileUtils.deleteQuietly(localOutputDir.toFile());
       }
     }
 
@@ -188,37 +196,35 @@ public class DefaultLatestProfileMergeProcessor implements LatestProfileMergePro
   }
 
   private void notifyMergeCompleted(ProfileOperation message) {
-    Instant now = Instant.now();
+    Instant now = nowGenerator.get();
 
     for (MetadataRecord metadataRecord : message.getFiles()) {
       messageSender.sendJson(
           updateIndexQueue,
-          jsonMapper.writeValueAsString(MetadataRecord.builder()
+          jsonMapper.writeValueAsString(MetadataRecord.builder(metadataRecord)
               .withTraceId(message.getTraceId())
-              .withFileName(metadataRecord.getFileName())
-              .withFile(metadataRecord.getFile())
-              .withDac(message.getDac())
-              .withFloatId(message.getFloatId())
               .withAction(metadataRecord.getFileStatus() == FileStatus.REMOVED ? Action.LATEST_MERGE_REMOVE : Action.LATEST_MERGE)
-              .withFileType(ArgoFileType.PROFILE_CORE)
               .withActionTimestamp(now)
               .build()));
     }
   }
 
   private void removeOldFiles(ProfileOperation message) {
-    if (!message.getFiles().isEmpty()) {
-      Instant dateUpdate = message.getFiles().getFirst().getDateUpdate();
-      String modePrefix = message.getFiles().getFirst().getProfileMode().getPrefix();
-      String filePrefix = modePrefix + FORMATTER.format(dateUpdate) + "_prof_";
-      // Assuming at most 10 files.  This approach might not be optimal, but does not require updates to FileStore interface and MetadataStore
-      for(int i = 0; i < 10; i++){
-        String file = outputFileStore.appendToPath(outputFileStore.getRoot(), "latest_data", filePrefix + i + ".nc");
-        if (outputFileStore.fileExists(file)) {
-          outputFileStore.delete(file);
-          LOGGER.info("Deleted latest merge file: {}", file);
+    String dirPath = outputFileStore.appendToPath(outputFileStore.getRoot(), "latest_data");
+    List<String> existingFiles = outputFileStore.listFileNamesInDirectory(dirPath);
+
+    Set<String> toRemove = new HashSet<>();
+    for (String fileName : existingFiles) {
+      ArgoFileTypeDetails fileType = ArgoFileType.getFileNameDetails(fileName);
+      if (fileType.getType() == ArgoFileType.LATEST_PROFILE_MERGE) {
+        if (fileName.startsWith(message.getFileName())) {
+          toRemove.add(fileName);
         }
       }
+    }
+
+    for (String fileName : toRemove) {
+      outputFileStore.delete(outputFileStore.appendToPath(dirPath, fileName));
     }
   }
 

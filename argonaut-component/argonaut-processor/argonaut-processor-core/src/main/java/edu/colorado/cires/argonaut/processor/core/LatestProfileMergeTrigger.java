@@ -1,6 +1,6 @@
 package edu.colorado.cires.argonaut.processor.core;
 
-public interface LatestProfileMergeAggregator {
+public interface LatestProfileMergeTrigger {
 
   void trigger();
 

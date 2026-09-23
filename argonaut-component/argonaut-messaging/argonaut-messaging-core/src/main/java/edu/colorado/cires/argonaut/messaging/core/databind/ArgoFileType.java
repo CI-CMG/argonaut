@@ -16,8 +16,10 @@ public enum ArgoFileType {
   TECHNICAL_DATA,
   AUXILIARY,
   PROFILE_MULTI_CYCLE,
-  REMOVAL_TXT;
+  REMOVAL_TXT,
+  LATEST_PROFILE_MERGE;
 
+  private static final Pattern LATEST_PROFILE_MERGE_REGEX = Pattern.compile("([RD])([0-9]{8})_prof_([0-9])\\.nc");
   private static final Pattern REMOVAL_TXT_REGEX = Pattern.compile("([a-z]+)_removal\\.txt");
   private static final Pattern PROFILE_MULTI_CYCLE_REGEX = Pattern.compile("([0-9]+)_prof\\.nc");
   private static final Pattern PROFILE_CORE_REGEX = Pattern.compile("([RD])([0-9]+)_([0-9]+)(D?)\\.nc");
@@ -35,6 +37,7 @@ public enum ArgoFileType {
       case PROFILE_BIOCHEMICAL:
       case SYNTHETIC_PROFILE_SINGLE_CYCLE:
       case MERGED_PROFILE_SINGLE_CYCLE:
+      case LATEST_PROFILE_MERGE:
         return true;
       default:
         return false;
@@ -102,6 +105,10 @@ public enum ArgoFileType {
     matcher = REMOVAL_TXT_REGEX.matcher(fileName);
     if (matcher.matches()) {
       return new ArgoFileTypeDetails(ArgoFileType.REMOVAL_TXT, null, null, null, null);
+    }
+    matcher = LATEST_PROFILE_MERGE_REGEX.matcher(fileName);
+    if (matcher.matches()) {
+      return new ArgoFileTypeDetails(ArgoFileType.LATEST_PROFILE_MERGE, DataMode.valueOf(matcher.group(1)), null, null, null);
     }
     return new ArgoFileTypeDetails(ArgoFileType.AUXILIARY, null, null, null, null);
   }

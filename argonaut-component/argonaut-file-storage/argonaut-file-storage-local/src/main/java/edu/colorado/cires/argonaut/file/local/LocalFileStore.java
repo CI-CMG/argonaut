@@ -9,6 +9,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Stream;
 
 public class LocalFileStore implements FileStore {
 
@@ -113,5 +116,22 @@ public class LocalFileStore implements FileStore {
   @Override
   public boolean fileExists(String path) {
     return Files.isRegularFile(validatePath(path));
+  }
+
+  @Override
+  public List<String> listFileNamesInDirectory(String pathPrefix) {
+    Path path = validatePath(pathPrefix);
+    if (!Files.isDirectory(path)) {
+      return Collections.emptyList();
+    }
+    try (Stream<Path> stream = Files.list(path)) {
+      return stream
+          .filter(Files::isRegularFile)
+          .map(Path::getFileName)
+          .map(Path::toString)
+          .toList();
+    } catch (IOException e) {
+      throw new RuntimeException("Unable to list files in " + path, e);
+    }
   }
 }

@@ -7,10 +7,10 @@ public interface RecentProfileSearch {
 
   ProfileMode getProfileMode();
 
-  Instant getYoungerOrEqual();
+  Instant getLastUpdatedDateGe();
 
-  int getPageNumber();
+  Instant getLastUpdatedDateLt();
 
-  int getPageSize();
+  int getLimit();
 
 }

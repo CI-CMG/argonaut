@@ -29,12 +29,8 @@ public class ArgoFileTypeTest {
     assertEquals(ArgoFileType.SYNTHETIC_PROFILE_SINGLE_CYCLE, ArgoFileType.forFileName("SD6901439_001.nc"));
     assertEquals(ArgoFileType.SYNTHETIC_PROFILE_SINGLE_CYCLE, ArgoFileType.forFileName("SD6901439_001D.nc"));
     assertEquals(ArgoFileType.REMOVAL_TXT, ArgoFileType.forFileName("aoml_removal.txt"));
+    assertEquals(ArgoFileType.LATEST_PROFILE_MERGE, ArgoFileType.forFileName("D20260722_prof_0.nc"));
+    assertEquals(ArgoFileType.LATEST_PROFILE_MERGE, ArgoFileType.forFileName("R20260722_prof_5.nc"));
   }
 
-
-  /*
-  aoml/13857/13857_meta.nc
-  coriolis/4903784/profiles/R4903784_048.nc,20240207103447,55.355,14.559,A,834,IF,20250812074725
-coriolis/4903784/profiles/R4903784_048D.nc,20240207091007,55.378,14.579,A,834,IF,20250812074725
-   */
 }

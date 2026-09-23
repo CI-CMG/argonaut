@@ -17,29 +17,24 @@ public class DefaultRecentProfileSearch implements RecentProfileSearch {
 
   public static class Builder {
 
-    private int pageNumber = 1;
-    private int pageSize = 200;
     private ProfileMode profileMode;
-    private Instant youngerOrEqual;
+    private Instant lastUpdatedDateGe;
+    private Instant lastUpdatedDateLt;
+    private int limit = 10000;
 
     private Builder() {
 
     }
 
     private Builder(RecentProfileSearch src) {
-      withPageNumber(src.getPageNumber());
-      withPageSize(src.getPageSize());
       withProfileMode(src.getProfileMode());
-      withYoungerOrEqual(src.getYoungerOrEqual());
+      withLastUpdatedDateGe(src.getLastUpdatedDateGe());
+      withLastUpdatedDateLt(src.getLastUpdatedDateLt());
+      withLimit(src.getLimit());
     }
 
-    public Builder withPageNumber(int pageNumber) {
-      this.pageNumber = pageNumber;
-      return this;
-    }
-
-    public Builder withPageSize(int pageSize) {
-      this.pageSize = pageSize;
+    public Builder withLimit(int limit) {
+      this.limit = limit;
       return this;
     }
 
@@ -48,27 +43,32 @@ public class DefaultRecentProfileSearch implements RecentProfileSearch {
       return this;
     }
 
-    public Builder withYoungerOrEqual(Instant youngerOrEqual) {
-      this.youngerOrEqual = youngerOrEqual;
+    public Builder withLastUpdatedDateGe(Instant lastUpdatedDateGe) {
+      this.lastUpdatedDateGe = lastUpdatedDateGe;
+      return this;
+    }
+
+    public Builder withLastUpdatedDateLt(Instant lastUpdatedDateLt) {
+      this.lastUpdatedDateLt = lastUpdatedDateLt;
       return this;
     }
 
     public DefaultRecentProfileSearch build() {
-      return new DefaultRecentProfileSearch(pageNumber, pageSize, profileMode, youngerOrEqual);
+      return new DefaultRecentProfileSearch(profileMode, lastUpdatedDateGe, lastUpdatedDateLt, limit);
     }
 
   }
 
-  private final int pageNumber;
-  private final int pageSize;
   private final ProfileMode profileMode;
-  private final Instant youngerOrEqual;
+  private final Instant lastUpdatedDateGe;
+  private final Instant lastUpdatedDateLt;
+  private final int limit;
 
-  private DefaultRecentProfileSearch(int pageNumber, int pageSize, ProfileMode profileMode, Instant youngerOrEqual) {
-    this.pageNumber = pageNumber;
-    this.pageSize = pageSize;
+  private DefaultRecentProfileSearch(ProfileMode profileMode, Instant lastUpdatedDateGe, Instant lastUpdatedDateLt, int limit) {
     this.profileMode = profileMode;
-    this.youngerOrEqual = youngerOrEqual;
+    this.lastUpdatedDateGe = lastUpdatedDateGe;
+    this.lastUpdatedDateLt = lastUpdatedDateLt;
+    this.limit = limit;
   }
 
 
@@ -78,18 +78,18 @@ public class DefaultRecentProfileSearch implements RecentProfileSearch {
   }
 
   @Override
-  public Instant getYoungerOrEqual() {
-    return youngerOrEqual;
+  public Instant getLastUpdatedDateGe() {
+    return lastUpdatedDateGe;
   }
 
   @Override
-  public int getPageNumber() {
-    return pageNumber;
+  public Instant getLastUpdatedDateLt() {
+    return lastUpdatedDateLt;
   }
 
   @Override
-  public int getPageSize() {
-    return pageSize;
+  public int getLimit() {
+    return limit;
   }
 
   @Override
@@ -98,22 +98,22 @@ public class DefaultRecentProfileSearch implements RecentProfileSearch {
       return false;
     }
     DefaultRecentProfileSearch that = (DefaultRecentProfileSearch) o;
-    return pageNumber == that.pageNumber && pageSize == that.pageSize && profileMode == that.profileMode && Objects.equals(youngerOrEqual,
-        that.youngerOrEqual);
+    return limit == that.limit && profileMode == that.profileMode && Objects.equals(lastUpdatedDateGe, that.lastUpdatedDateGe)
+        && Objects.equals(lastUpdatedDateLt, that.lastUpdatedDateLt);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(pageNumber, pageSize, profileMode, youngerOrEqual);
+    return Objects.hash(profileMode, lastUpdatedDateGe, lastUpdatedDateLt, limit);
   }
 
   @Override
   public String toString() {
     return "DefaultRecentProfileSearch{" +
-        "pageNumber=" + pageNumber +
-        ", pageSize=" + pageSize +
-        ", profileMode=" + profileMode +
-        ", youngerOrEqual=" + youngerOrEqual +
+        "profileMode=" + profileMode +
+        ", lastUpdatedDateGe=" + lastUpdatedDateGe +
+        ", lastUpdatedDateLt=" + lastUpdatedDateLt +
+        ", limit=" + limit +
         '}';
   }
 

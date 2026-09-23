@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Path;
+import java.util.List;
 
 public interface FileStore {
 
@@ -26,4 +27,6 @@ public interface FileStore {
   void delete(String path);
 
   boolean fileExists(String path);
+
+  List<String> listFileNamesInDirectory(String pathPrefix);
 }
