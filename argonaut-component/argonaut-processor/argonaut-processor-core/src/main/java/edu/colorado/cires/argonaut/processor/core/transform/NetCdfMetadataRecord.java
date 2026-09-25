@@ -12,6 +12,7 @@ import edu.colorado.cires.argonaut.core.netcdf.synthprofile.v13.ArgoSyntheticPro
 import edu.colorado.cires.argonaut.messaging.core.databind.ArgoFileType;
 import edu.colorado.cires.argonaut.messaging.core.databind.MetadataRecord;
 import edu.colorado.cires.argonaut.messaging.core.databind.MetadataRecord.Action;
+import edu.colorado.cires.argonaut.messaging.core.databind.ProfileMode;
 import edu.colorado.cires.argonaut.processor.core.GeoFilter;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -52,10 +53,16 @@ public final class NetCdfMetadataRecord {
         dataMode = profile.getDataMode();
       }
 
+      ProfileMode profileMode = null;
+      if(profile.getDataMode() != null) {
+        profileMode = ProfileMode.fromPrefix(profile.getDataMode());
+      }
+
       return MetadataRecord.builder()
           .withFile(file)
           .withDac(dac)
           .withFloatId(profile.getPlatformNumber())
+          .withProfileMode(profileMode)
           .withParameterDataMode(dataMode)
           .withDirection(profile.getDirection())
           .withCycleNumber(formatCycleNumber(profile.getCycleNumber()))

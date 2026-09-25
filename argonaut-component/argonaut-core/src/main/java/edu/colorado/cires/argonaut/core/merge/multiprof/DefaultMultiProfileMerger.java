@@ -154,6 +154,42 @@ public class DefaultMultiProfileMerger implements MultiProfileMerger {
     }).toList();
   }
 
+  public static List<LocalPathSupplier> orderByJulianDateAcending(List<LocalPathSupplier> inputFileSuppliers) {
+    return inputFileSuppliers.stream().sorted((lps1, lps2) -> {
+      if (lps1.getJulD().equals(lps2.getJulD())) {
+        String file1 = lps1.getFileName();
+        String file2 = lps2.getFileName();
+        Matcher matcher1 = FILE_NAME_REGEX.matcher(file1);
+        if (!matcher1.matches()) {
+          throw new IllegalArgumentException("Invalid file name: " + file1);
+        }
+        Matcher matcher2 = FILE_NAME_REGEX.matcher(file2);
+        if (!matcher2.matches()) {
+          throw new IllegalArgumentException("Invalid file name: " + file2);
+        }
+        long floatId1 = Long.parseLong(matcher1.group(1));
+        long floatId2 = Long.parseLong(matcher2.group(1));
+        if (floatId1 == floatId2) {
+          String d1 = matcher1.group(3).isEmpty() ? "A" : "D";
+          String d2 = matcher2.group(3).isEmpty() ? "A" : "D";
+          int c1 = Integer.parseInt(matcher1.group(2));
+          int c2 = Integer.parseInt(matcher2.group(2));
+          if (c1 == c2) {
+            // D before A
+            return d2.compareTo(d1);
+          } else {
+            return Integer.compare(c1, c2);
+          }
+        } else {
+          return Long.compare(floatId1, floatId2);
+        }
+      } else {
+        return lps1.getJulD().compareTo(lps2.getJulD());
+      }
+
+    }).toList();
+  }
+
 
   public static List<LocalPathSupplier> orderByCycleThenJulD(List<LocalPathSupplier> inputFileSuppliers) {
     return inputFileSuppliers.stream().sorted((lps1, lps2) -> {

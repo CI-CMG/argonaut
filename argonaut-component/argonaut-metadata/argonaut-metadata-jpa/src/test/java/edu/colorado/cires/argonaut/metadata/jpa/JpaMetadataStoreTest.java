@@ -12,8 +12,10 @@ import edu.colorado.cires.argonaut.messaging.core.databind.GeoMergeInfo;
 import edu.colorado.cires.argonaut.messaging.core.databind.MetadataRecord;
 import edu.colorado.cires.argonaut.messaging.core.databind.MetadataRecord.Action;
 import edu.colorado.cires.argonaut.messaging.core.databind.MetadataRecord.FileStatus;
+import edu.colorado.cires.argonaut.messaging.core.databind.ProfileMode;
 import edu.colorado.cires.argonaut.messaging.core.databind.ProfileOperation;
 import edu.colorado.cires.argonaut.metadata.core.DefaultIndexPageRequest;
+import edu.colorado.cires.argonaut.metadata.core.DefaultRecentProfileSearch;
 import edu.colorado.cires.argonaut.metadata.core.DefaultRemovedFileSearch;
 import edu.colorado.cires.argonaut.metadata.core.GeoMergePage;
 import edu.colorado.cires.argonaut.metadata.core.ProfilePage;
@@ -3166,6 +3168,580 @@ public class JpaMetadataStoreTest {
 
         ),
         page.getPage());
+
+  }
+
+
+  @Test
+  public void testFindLatest() throws Exception {
+
+    Instant now = Instant.parse("2026-09-25T01:00:00Z");
+
+    datastore.updateIndex(MetadataRecord.builder()
+        .withFile("aoml/13857/profiles/D13857_001.nc")
+        .withFileName("D13857_001.nc")
+        .withDac("aoml")
+        .withFloatId("13857")
+        .withCycleNumber("001")
+        .withDirection("A")
+        .withParameterDataMode("D")
+        .withActionTimestamp(now)
+        .withDate(Instant.parse("2025-10-10T14:00:00Z"))
+        .withLatitude(0.267)
+        .withLatitudeMin(0.1)
+        .withLatitudeMax(0.4)
+        .withLongitude(-16.032)
+        .withLongitudeMin(-17.0)
+        .withLongitudeMax(-14.0)
+        .withOcean(ArgoOcean.ATLANTIC_OCEAN)
+        .withProfilerType("845")
+        .withInstitution("A0")
+        .withDateUpdate(Instant.parse("2025-10-10T14:00:00Z"))
+        .withParameters("params")
+        .withAction(Action.UPDATE)
+        .withFileType(ArgoFileType.PROFILE_CORE)
+        .withProfileMode(ProfileMode.DELAYED_MODE)
+        .build());
+
+    datastore.updateIndex(MetadataRecord.builder()
+        .withFile("aoml/13857/profiles/R13857_001.nc")
+        .withFileName("R13857_001.nc")
+        .withDac("aoml")
+        .withFloatId("13857")
+        .withCycleNumber("001")
+        .withDirection("A")
+        .withParameterDataMode("R")
+        .withActionTimestamp(now)
+        .withDate(Instant.parse("2025-10-10T14:00:00Z"))
+        .withLatitude(0.267)
+        .withLatitudeMin(0.1)
+        .withLatitudeMax(0.4)
+        .withLongitude(-16.032)
+        .withLongitudeMin(-17.0)
+        .withLongitudeMax(-14.0)
+        .withOcean(ArgoOcean.ATLANTIC_OCEAN)
+        .withProfilerType("845")
+        .withInstitution("A0")
+        .withDateUpdate(Instant.parse("2025-10-10T14:00:00Z"))
+        .withParameters("params")
+        .withAction(Action.UPDATE)
+        .withFileType(ArgoFileType.PROFILE_CORE)
+        .withProfileMode(ProfileMode.REAL_TIME)
+        .build());
+
+    datastore.updateIndex(MetadataRecord.builder()
+        .withFile("aoml/13857/profiles/D13857_002.nc")
+        .withFileName("D13857_002.nc")
+        .withDac("aoml")
+        .withFloatId("13857")
+        .withCycleNumber("002")
+        .withDirection("A")
+        .withParameterDataMode("D")
+        .withActionTimestamp(Instant.parse("2026-09-24T01:00:00Z"))
+        .withDate(Instant.parse("2025-10-10T14:00:00Z"))
+        .withLatitude(0.267)
+        .withLatitudeMin(0.1)
+        .withLatitudeMax(0.4)
+        .withLongitude(-16.032)
+        .withLongitudeMin(-17.0)
+        .withLongitudeMax(-14.0)
+        .withOcean(ArgoOcean.ATLANTIC_OCEAN)
+        .withProfilerType("845")
+        .withInstitution("A0")
+        .withDateUpdate(Instant.parse("2025-10-10T14:00:00Z"))
+        .withParameters("params")
+        .withAction(Action.UPDATE)
+        .withFileType(ArgoFileType.PROFILE_CORE)
+        .withProfileMode(ProfileMode.DELAYED_MODE)
+        .build());
+
+    datastore.updateIndex(MetadataRecord.builder()
+        .withFile("aoml/13857/profiles/R13857_002.nc")
+        .withFileName("R13857_002.nc")
+        .withDac("aoml")
+        .withFloatId("13857")
+        .withCycleNumber("002")
+        .withDirection("A")
+        .withParameterDataMode("R")
+        .withActionTimestamp(Instant.parse("2026-09-24T01:00:00Z"))
+        .withDate(Instant.parse("2025-10-10T14:00:00Z"))
+        .withLatitude(0.267)
+        .withLatitudeMin(0.1)
+        .withLatitudeMax(0.4)
+        .withLongitude(-16.032)
+        .withLongitudeMin(-17.0)
+        .withLongitudeMax(-14.0)
+        .withOcean(ArgoOcean.ATLANTIC_OCEAN)
+        .withProfilerType("845")
+        .withInstitution("A0")
+        .withDateUpdate(Instant.parse("2025-10-10T14:00:00Z"))
+        .withParameters("params")
+        .withAction(Action.UPDATE)
+        .withFileType(ArgoFileType.PROFILE_CORE)
+        .withProfileMode(ProfileMode.REAL_TIME)
+        .build());
+
+    datastore.updateIndex(MetadataRecord.builder()
+        .withFile("aoml/123/profiles/D123_001.nc")
+        .withFileName("D123_001.nc")
+        .withDac("aoml")
+        .withFloatId("123")
+        .withCycleNumber("001")
+        .withDirection("A")
+        .withParameterDataMode("D")
+        .withActionTimestamp(Instant.parse("2026-09-23T01:00:00Z"))
+        .withDate(Instant.parse("2025-10-10T14:00:00Z"))
+        .withLatitude(0.267)
+        .withLatitudeMin(0.1)
+        .withLatitudeMax(0.4)
+        .withLongitude(-16.032)
+        .withLongitudeMin(-17.0)
+        .withLongitudeMax(-14.0)
+        .withOcean(ArgoOcean.ATLANTIC_OCEAN)
+        .withProfilerType("845")
+        .withInstitution("A0")
+        .withDateUpdate(Instant.parse("2025-10-10T14:00:00Z"))
+        .withParameters("params")
+        .withAction(Action.UPDATE)
+        .withFileType(ArgoFileType.PROFILE_CORE)
+        .withProfileMode(ProfileMode.DELAYED_MODE)
+        .build());
+
+    datastore.updateIndex(MetadataRecord.builder()
+        .withFile("aoml/123/profiles/R123_001.nc")
+        .withFileName("R123_001.nc")
+        .withDac("aoml")
+        .withFloatId("123")
+        .withCycleNumber("001")
+        .withDirection("A")
+        .withParameterDataMode("R")
+        .withActionTimestamp(Instant.parse("2026-09-23T01:00:00Z"))
+        .withDate(Instant.parse("2025-10-10T14:00:00Z"))
+        .withLatitude(0.267)
+        .withLatitudeMin(0.1)
+        .withLatitudeMax(0.4)
+        .withLongitude(-16.032)
+        .withLongitudeMin(-17.0)
+        .withLongitudeMax(-14.0)
+        .withOcean(ArgoOcean.ATLANTIC_OCEAN)
+        .withProfilerType("845")
+        .withInstitution("A0")
+        .withDateUpdate(Instant.parse("2025-10-10T14:00:00Z"))
+        .withParameters("params")
+        .withAction(Action.UPDATE)
+        .withFileType(ArgoFileType.PROFILE_CORE)
+        .withProfileMode(ProfileMode.REAL_TIME)
+        .build());
+
+    // not core profile, should not be in results
+    datastore.updateIndex(MetadataRecord.builder()
+        .withFile("aoml/1111/profiles/BD1111_001.nc")
+        .withFileName("BD1111_001.nc")
+        .withDac("aoml")
+        .withFloatId("1111")
+        .withCycleNumber("001")
+        .withDirection("A")
+        .withParameterDataMode("D")
+        .withActionTimestamp(now)
+        .withDate(Instant.parse("2025-10-10T14:00:00Z"))
+        .withLatitude(0.267)
+        .withLatitudeMin(0.1)
+        .withLatitudeMax(0.4)
+        .withLongitude(-16.032)
+        .withLongitudeMin(-17.0)
+        .withLongitudeMax(-14.0)
+        .withOcean(ArgoOcean.ATLANTIC_OCEAN)
+        .withProfilerType("845")
+        .withInstitution("A0")
+        .withDateUpdate(Instant.parse("2025-10-10T14:00:00Z"))
+        .withParameters("params")
+        .withAction(Action.UPDATE)
+        .withFileType(ArgoFileType.PROFILE_BIOCHEMICAL)
+        .withProfileMode(ProfileMode.DELAYED_MODE)
+        .build());
+
+
+    datastore.updateIndex(MetadataRecord.builder()
+        .withFile("aoml/2222/profiles/D2222_001.nc")
+        .withFileName("D2222_001.nc")
+        .withDac("aoml")
+        .withFloatId("2222")
+        .withCycleNumber("001")
+        .withDirection("A")
+        .withParameterDataMode("D")
+        .withActionTimestamp(Instant.parse("2026-09-24T00:00:00Z"))
+        .withDate(Instant.parse("2025-10-10T14:01:00Z"))
+        .withLatitude(0.267)
+        .withLatitudeMin(0.1)
+        .withLatitudeMax(0.4)
+        .withLongitude(-16.032)
+        .withLongitudeMin(-17.0)
+        .withLongitudeMax(-14.0)
+        .withOcean(ArgoOcean.ATLANTIC_OCEAN)
+        .withProfilerType("845")
+        .withInstitution("A0")
+        .withDateUpdate(Instant.parse("2025-10-10T14:00:00Z"))
+        .withParameters("params")
+        .withAction(Action.UPDATE)
+        .withFileType(ArgoFileType.PROFILE_CORE)
+        .withProfileMode(ProfileMode.DELAYED_MODE)
+        .build());
+
+    datastore.updateIndex(MetadataRecord.builder()
+        .withFile("aoml/2222/profiles/R2222_001.nc")
+        .withFileName("R2222_001.nc")
+        .withDac("aoml")
+        .withFloatId("2222")
+        .withCycleNumber("001")
+        .withDirection("A")
+        .withParameterDataMode("R")
+        .withActionTimestamp(Instant.parse("2026-09-24T00:00:00Z"))
+        .withDate(Instant.parse("2025-10-10T14:00:01Z"))
+        .withLatitude(0.267)
+        .withLatitudeMin(0.1)
+        .withLatitudeMax(0.4)
+        .withLongitude(-16.032)
+        .withLongitudeMin(-17.0)
+        .withLongitudeMax(-14.0)
+        .withOcean(ArgoOcean.ATLANTIC_OCEAN)
+        .withProfilerType("845")
+        .withInstitution("A0")
+        .withDateUpdate(Instant.parse("2025-10-10T14:00:00Z"))
+        .withParameters("params")
+        .withAction(Action.UPDATE)
+        .withFileType(ArgoFileType.PROFILE_CORE)
+        .withProfileMode(ProfileMode.REAL_TIME)
+        .build());
+
+
+
+
+    ProfileOperation results = datastore.findUpdatedOrMissingLatestMergeFiles(DefaultRecentProfileSearch.builder()
+            .withLastUpdatedDateGe(Instant.parse("2026-09-24T00:00:00Z"))
+            .withLastUpdatedDateLt(Instant.parse("2026-09-25T00:00:00Z"))
+            .withProfileMode(ProfileMode.DELAYED_MODE)
+            .withLimit(1000)
+        .build());
+    assertEquals(ProfileOperation.builder()
+        .withFileName("D20260924")
+        .withFiles(Arrays.asList(
+            MetadataRecord.builder()
+                .withDac("aoml")
+                .withFloatId("13857")
+                .withFile("aoml/13857/profiles/D13857_002.nc")
+                .withFileName("D13857_002.nc")
+                .withFileStatus(FileStatus.ACTIVE)
+                .withCycleNumber("002")
+                .withActionTimestamp(Instant.parse("2026-09-24T01:00:00Z"))
+                .withDate(Instant.parse("2025-10-10T14:00:00Z"))
+                .withFileType(ArgoFileType.PROFILE_CORE)
+                .build(),
+            MetadataRecord.builder()
+                .withDac("aoml")
+                .withFloatId("2222")
+                .withFile("aoml/2222/profiles/D2222_001.nc")
+                .withFileName("D2222_001.nc")
+                .withFileStatus(FileStatus.ACTIVE)
+                .withCycleNumber("001")
+                .withActionTimestamp(Instant.parse("2026-09-24T00:00:00Z"))
+                .withDate(Instant.parse("2025-10-10T14:01:00Z"))
+                .withFileType(ArgoFileType.PROFILE_CORE)
+                .build()
+        ))
+        .build(),
+        results);
+
+    results = datastore.findUpdatedOrMissingLatestMergeFiles(DefaultRecentProfileSearch.builder()
+        .withLastUpdatedDateGe(Instant.parse("2026-09-24T00:00:00Z"))
+        .withLastUpdatedDateLt(Instant.parse("2026-09-25T00:00:00Z"))
+        .withProfileMode(ProfileMode.DELAYED_MODE)
+        .withLimit(1)
+        .build());
+    assertEquals(ProfileOperation.builder()
+            .withFileName("D20260924")
+            .withFiles(Arrays.asList(
+                MetadataRecord.builder()
+                    .withDac("aoml")
+                    .withFloatId("13857")
+                    .withFile("aoml/13857/profiles/D13857_002.nc")
+                    .withFileName("D13857_002.nc")
+                    .withFileStatus(FileStatus.ACTIVE)
+                    .withCycleNumber("002")
+                    .withActionTimestamp(Instant.parse("2026-09-24T01:00:00Z"))
+                    .withDate(Instant.parse("2025-10-10T14:00:00Z"))
+                    .withFileType(ArgoFileType.PROFILE_CORE)
+                    .build()
+            ))
+            .build(),
+        results);
+
+
+    results = datastore.findUpdatedOrMissingLatestMergeFiles(DefaultRecentProfileSearch.builder()
+        .withLastUpdatedDateGe(Instant.parse("2026-09-24T00:00:00Z"))
+        .withLastUpdatedDateLt(Instant.parse("2026-09-25T00:00:00Z"))
+        .withProfileMode(ProfileMode.REAL_TIME)
+        .withLimit(1000)
+        .build());
+    assertEquals(ProfileOperation.builder()
+            .withFileName("R20260924")
+            .withFiles(Arrays.asList(
+                MetadataRecord.builder()
+                    .withDac("aoml")
+                    .withFloatId("13857")
+                    .withFile("aoml/13857/profiles/R13857_002.nc")
+                    .withFileName("R13857_002.nc")
+                    .withFileStatus(FileStatus.ACTIVE)
+                    .withCycleNumber("002")
+                    .withActionTimestamp(Instant.parse("2026-09-24T01:00:00Z"))
+                    .withDate(Instant.parse("2025-10-10T14:00:00Z"))
+                    .withFileType(ArgoFileType.PROFILE_CORE)
+                    .build(),
+                MetadataRecord.builder()
+                    .withDac("aoml")
+                    .withFloatId("2222")
+                    .withFile("aoml/2222/profiles/R2222_001.nc")
+                    .withFileName("R2222_001.nc")
+                    .withFileStatus(FileStatus.ACTIVE)
+                    .withCycleNumber("001")
+                    .withActionTimestamp(Instant.parse("2026-09-24T00:00:00Z"))
+                    .withDate(Instant.parse("2025-10-10T14:00:01Z"))
+                    .withFileType(ArgoFileType.PROFILE_CORE)
+                    .build()
+            ))
+            .build(),
+        results);
+
+
+    results = datastore.findUpdatedOrMissingLatestMergeFiles(DefaultRecentProfileSearch.builder()
+        .withLastUpdatedDateGe(Instant.parse("2026-09-25T00:00:00Z"))
+        .withLastUpdatedDateLt(Instant.parse("2026-09-26T00:00:00Z"))
+        .withProfileMode(ProfileMode.DELAYED_MODE)
+        .withLimit(1000)
+        .build());
+    assertEquals(ProfileOperation.builder()
+            .withFileName("D20260925")
+            .withFiles(Arrays.asList(
+                MetadataRecord.builder()
+                    .withDac("aoml")
+                    .withFloatId("13857")
+                    .withFile("aoml/13857/profiles/D13857_001.nc")
+                    .withFileName("D13857_001.nc")
+                    .withFileStatus(FileStatus.ACTIVE)
+                    .withCycleNumber("001")
+                    .withActionTimestamp(now)
+                    .withDate(Instant.parse("2025-10-10T14:00:00Z"))
+                    .withFileType(ArgoFileType.PROFILE_CORE)
+                    .build()
+            ))
+            .build(),
+        results);
+
+
+    datastore.updateIndex(MetadataRecord.builder()
+        .withFile("aoml/13857/profiles/R13857_002.nc")
+        .withFileName("R13857_002.nc")
+        .withDac("aoml")
+        .withFloatId("13857")
+        .withCycleNumber("002")
+        .withActionTimestamp(now)
+        .withAction(Action.REMOVE)
+        .withFileType(ArgoFileType.PROFILE_BIOCHEMICAL)
+        .build());
+
+
+    results = datastore.findUpdatedOrMissingLatestMergeFiles(DefaultRecentProfileSearch.builder()
+        .withLastUpdatedDateGe(Instant.parse("2026-09-24T00:00:00Z"))
+        .withLastUpdatedDateLt(Instant.parse("2026-09-25T00:00:00Z"))
+        .withProfileMode(ProfileMode.REAL_TIME)
+        .withLimit(1000)
+        .build());
+    assertEquals(ProfileOperation.builder()
+            .withFileName("R20260924")
+            .withFiles(Arrays.asList(
+                MetadataRecord.builder()
+                    .withDac("aoml")
+                    .withFloatId("2222")
+                    .withFile("aoml/2222/profiles/R2222_001.nc")
+                    .withFileName("R2222_001.nc")
+                    .withFileStatus(FileStatus.ACTIVE)
+                    .withCycleNumber("001")
+                    .withActionTimestamp(Instant.parse("2026-09-24T00:00:00Z"))
+                    .withDate(Instant.parse("2025-10-10T14:00:01Z"))
+                    .withFileType(ArgoFileType.PROFILE_CORE)
+                    .build()
+            ))
+            .build(),
+        results);
+
+
+    datastore.updateIndex(MetadataRecord.builder()
+        .withFile("aoml/13857/profiles/D13857_002.nc")
+        .withFileName("D13857_002.nc")
+        .withDac("aoml")
+        .withFloatId("13857")
+        .withActionTimestamp(now)
+        .withAction(Action.LATEST_MERGE)
+        .withFileType(ArgoFileType.PROFILE_CORE)
+        .withRelatedFiles(Collections.singletonList("D20260924"))
+        .build());
+
+    datastore.updateIndex(MetadataRecord.builder()
+        .withFile("aoml/2222/profiles/D2222_001.nc")
+        .withFileName("D2222_001.nc")
+        .withDac("aoml")
+        .withFloatId("2222")
+        .withActionTimestamp(now)
+        .withAction(Action.LATEST_MERGE)
+        .withFileType(ArgoFileType.PROFILE_CORE)
+        .withRelatedFiles(Collections.singletonList("D20260924"))
+        .build());
+
+
+    results = datastore.findUpdatedOrMissingLatestMergeFiles(DefaultRecentProfileSearch.builder()
+        .withLastUpdatedDateGe(Instant.parse("2026-09-24T00:00:00Z"))
+        .withLastUpdatedDateLt(Instant.parse("2026-09-25T00:00:00Z"))
+        .withProfileMode(ProfileMode.DELAYED_MODE)
+        .withLimit(1000)
+        .build());
+    assertEquals(ProfileOperation.builder()
+            .withFileName("D20260924")
+            .build(),
+        results);
+
+
+    datastore.updateIndex(MetadataRecord.builder()
+        .withFile("aoml/2222/profiles/D2222_001.nc")
+        .withFileName("D2222_001.nc")
+        .withDac("aoml")
+        .withFloatId("2222")
+        .withActionTimestamp(now)
+        .withAction(Action.REMOVE)
+        .withFileType(ArgoFileType.PROFILE_CORE)
+        .build());
+
+
+    results = datastore.findUpdatedOrMissingLatestMergeFiles(DefaultRecentProfileSearch.builder()
+        .withLastUpdatedDateGe(Instant.parse("2026-09-24T00:00:00Z"))
+        .withLastUpdatedDateLt(Instant.parse("2026-09-25T00:00:00Z"))
+        .withProfileMode(ProfileMode.DELAYED_MODE)
+        .withLimit(1000)
+        .build());
+    assertEquals(ProfileOperation.builder()
+            .withFileName("D20260924")
+            .withFiles(Arrays.asList(
+                MetadataRecord.builder()
+                    .withDac("aoml")
+                    .withFloatId("13857")
+                    .withFile("aoml/13857/profiles/D13857_002.nc")
+                    .withFileName("D13857_002.nc")
+                    .withFileStatus(FileStatus.ACTIVE)
+                    .withCycleNumber("002")
+                    .withActionTimestamp(Instant.parse("2026-09-24T01:00:00Z"))
+                    .withDate(Instant.parse("2025-10-10T14:00:00Z"))
+                    .withFileType(ArgoFileType.PROFILE_CORE)
+                    .build(),
+                MetadataRecord.builder()
+                    .withDac("aoml")
+                    .withFloatId("2222")
+                    .withFile("aoml/2222/profiles/D2222_001.nc")
+                    .withFileName("D2222_001.nc")
+                    .withFileStatus(FileStatus.REMOVED)
+                    .withCycleNumber("001")
+                    .withActionTimestamp(Instant.parse("2026-09-24T00:00:00Z"))
+                    .withDate(Instant.parse("2025-10-10T14:01:00Z"))
+                    .withFileType(ArgoFileType.PROFILE_CORE)
+                    .build()
+            ))
+            .build(),
+        results);
+
+
+    datastore.updateIndex(MetadataRecord.builder()
+        .withFile("aoml/13857/profiles/D13857_002.nc")
+        .withFileName("D13857_002.nc")
+        .withDac("aoml")
+        .withFloatId("13857")
+        .withActionTimestamp(now)
+        .withAction(Action.LATEST_MERGE)
+        .withFileType(ArgoFileType.PROFILE_CORE)
+        .withRelatedFiles(Collections.singletonList("D20260924"))
+        .build());
+
+
+    datastore.updateIndex(MetadataRecord.builder()
+        .withFile("aoml/2222/profiles/D2222_001.nc")
+        .withFileName("D2222_001.nc")
+        .withDac("aoml")
+        .withFloatId("2222")
+        .withActionTimestamp(now)
+        .withAction(Action.LATEST_MERGE_REMOVE)
+        .withFileType(ArgoFileType.PROFILE_CORE)
+        .withRelatedFiles(Collections.singletonList("D20260924"))
+        .build());
+
+
+    results = datastore.findUpdatedOrMissingLatestMergeFiles(DefaultRecentProfileSearch.builder()
+        .withLastUpdatedDateGe(Instant.parse("2026-09-24T00:00:00Z"))
+        .withLastUpdatedDateLt(Instant.parse("2026-09-25T00:00:00Z"))
+        .withProfileMode(ProfileMode.DELAYED_MODE)
+        .withLimit(1000)
+        .build());
+    assertEquals(ProfileOperation.builder()
+            .withFileName("D20260924")
+            .build(),
+        results);
+
+
+    datastore.updateIndex(MetadataRecord.builder()
+        .withFile("aoml/13857/profiles/D13857_002.nc")
+        .withFileName("D13857_002.nc")
+        .withDac("aoml")
+        .withFloatId("13857")
+        .withCycleNumber("002")
+        .withDirection("A")
+        .withParameterDataMode("D")
+        .withActionTimestamp(Instant.parse("2026-09-24T01:00:00Z"))
+        .withDate(Instant.parse("2025-10-10T14:00:00Z"))
+        .withLatitude(0.267)
+        .withLatitudeMin(0.1)
+        .withLatitudeMax(0.4)
+        .withLongitude(-16.032)
+        .withLongitudeMin(-17.0)
+        .withLongitudeMax(-14.0)
+        .withOcean(ArgoOcean.ATLANTIC_OCEAN)
+        .withProfilerType("845")
+        .withInstitution("A0")
+        .withDateUpdate(Instant.parse("2025-10-10T14:00:00Z"))
+        .withParameters("params")
+        .withAction(Action.UPDATE)
+        .withFileType(ArgoFileType.PROFILE_CORE)
+        .withProfileMode(ProfileMode.DELAYED_MODE)
+        .build());
+
+
+    results = datastore.findUpdatedOrMissingLatestMergeFiles(DefaultRecentProfileSearch.builder()
+        .withLastUpdatedDateGe(Instant.parse("2026-09-24T00:00:00Z"))
+        .withLastUpdatedDateLt(Instant.parse("2026-09-25T00:00:00Z"))
+        .withProfileMode(ProfileMode.DELAYED_MODE)
+        .withLimit(1000)
+        .build());
+    assertEquals(ProfileOperation.builder()
+            .withFileName("D20260924")
+            .withFiles(Arrays.asList(
+                MetadataRecord.builder()
+                    .withDac("aoml")
+                    .withFloatId("13857")
+                    .withFile("aoml/13857/profiles/D13857_002.nc")
+                    .withFileName("D13857_002.nc")
+                    .withFileStatus(FileStatus.ACTIVE)
+                    .withCycleNumber("002")
+                    .withActionTimestamp(Instant.parse("2026-09-24T01:00:00Z"))
+                    .withDate(Instant.parse("2025-10-10T14:00:00Z"))
+                    .withFileType(ArgoFileType.PROFILE_CORE)
+                    .build()
+            ))
+            .build(),
+        results);
 
   }
 

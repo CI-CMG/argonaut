@@ -42,7 +42,6 @@ class Remover {
         }
       }
       existing.setFileStatus(FileStatus.REMOVED.name());
-      existing.setLastUpdatedTime(record.getActionTimestamp().atOffset(ZoneOffset.UTC).toZonedDateTime());
     }
   }
 
@@ -126,7 +125,6 @@ class Remover {
           em.remove(frt);
         }
       }
-      existing.setLastUpdatedTime(record.getActionTimestamp().atOffset(ZoneOffset.UTC).toZonedDateTime());
     }
   }
 

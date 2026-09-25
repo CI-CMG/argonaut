@@ -56,6 +56,8 @@ public class ProfileFileEntity {
   private Double longitudeMax;
   @Column(name = "ocean", length = 1)
   private String ocean;
+  @Column(name = "data_mode", length = 1)
+  private String dataMode;
   @Column(name = "profiler_type", length = 4)
   private String profilerType;
   @Column(name = "institution", length = 2)
@@ -76,6 +78,8 @@ public class ProfileFileEntity {
   private ZonedDateTime lastUpdatedTime;
   @Column(name = "file_name", nullable = false, length = 20)
   private String fileName;
+  @Column(name = "latest_merge_file_Name", length = 9)
+  private String latestMergeFileName;
 
   @OneToMany(mappedBy = "profile", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<FileRemovedTimeEntity> removedTimes = new ArrayList<>();
@@ -291,5 +295,21 @@ public class ProfileFileEntity {
 
   public void setRemovedTimes(List<FileRemovedTimeEntity> removedTimes) {
     this.removedTimes = removedTimes;
+  }
+
+  public String getDataMode() {
+    return dataMode;
+  }
+
+  public void setDataMode(String dataMode) {
+    this.dataMode = dataMode;
+  }
+
+  public String getLatestMergeFileName() {
+    return latestMergeFileName;
+  }
+
+  public void setLatestMergeFileName(String latestMergeFileName) {
+    this.latestMergeFileName = latestMergeFileName;
   }
 }

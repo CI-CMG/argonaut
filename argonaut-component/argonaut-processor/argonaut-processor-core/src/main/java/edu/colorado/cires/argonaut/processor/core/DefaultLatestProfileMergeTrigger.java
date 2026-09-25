@@ -15,6 +15,7 @@ import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -137,7 +138,7 @@ public class DefaultLatestProfileMergeTrigger implements LatestProfileMergeTrigg
 
     UUID traceId = this.traceIdGenerator.get();
 
-    for (ProfileMode profileMode : ProfileMode.values()) {
+    for (ProfileMode profileMode : Arrays.asList(ProfileMode.REAL_TIME, ProfileMode.DELAYED_MODE)) {
       for (LocalDate date : expectedDates) {
         ProfileOperation result = metadataStore.findUpdatedOrMissingLatestMergeFiles(
             DefaultRecentProfileSearch.builder()

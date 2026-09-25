@@ -26,6 +26,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Instant;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import org.apache.commons.io.FileUtils;
@@ -108,7 +109,7 @@ public class DefaultLatestProfileMergeProcessorTest {
             .withFileStatus(FileStatus.ACTIVE)
             .withCycleNumber("001")
             .withActionTimestamp(Instant.parse("2026-09-23T12:00:00Z"))
-            .withDate(Instant.parse("2022-09-23T12:00:00Z"))
+            .withDate(Instant.parse("2020-09-23T01:00:00Z"))
             .withFileType(ArgoFileType.PROFILE_CORE)
             .build(),
         MetadataRecord.builder()
@@ -119,7 +120,7 @@ public class DefaultLatestProfileMergeProcessorTest {
             .withFileStatus(FileStatus.REMOVED)
             .withCycleNumber("001")
             .withActionTimestamp(Instant.parse("2026-09-23T02:00:00Z"))
-            .withDate(Instant.parse("2021-09-23T12:00:00Z"))
+            .withDate(Instant.parse("2020-09-23T03:00:00Z"))
             .withFileType(ArgoFileType.PROFILE_CORE)
             .build(),
         MetadataRecord.builder()
@@ -130,7 +131,7 @@ public class DefaultLatestProfileMergeProcessorTest {
             .withFileStatus(FileStatus.ACTIVE)
             .withCycleNumber("001")
             .withActionTimestamp(Instant.parse("2026-09-23T13:00:00Z"))
-            .withDate(Instant.parse("2020-09-23T12:00:00Z"))
+            .withDate(Instant.parse("2020-09-23T00:00:00Z"))
             .withFileType(ArgoFileType.PROFILE_CORE)
             .build(),
         MetadataRecord.builder()
@@ -141,7 +142,7 @@ public class DefaultLatestProfileMergeProcessorTest {
             .withFileStatus(FileStatus.ACTIVE)
             .withCycleNumber("002")
             .withActionTimestamp(Instant.parse("2026-09-23T13:30:00Z"))
-            .withDate(Instant.parse("2020-09-23T12:30:00Z"))
+            .withDate(Instant.parse("2020-09-23T02:00:00Z"))
             .withFileType(ArgoFileType.PROFILE_CORE)
             .build()
     );
@@ -190,6 +191,7 @@ public class DefaultLatestProfileMergeProcessorTest {
           .withAction(record.getFileStatus() == FileStatus.REMOVED ? Action.LATEST_MERGE_REMOVE : Action.LATEST_MERGE)
           .withActionTimestamp(now)
           .withTraceId(traceId)
+          .withRelatedFiles(Collections.singletonList(fileName))
           .build())));
     }
 

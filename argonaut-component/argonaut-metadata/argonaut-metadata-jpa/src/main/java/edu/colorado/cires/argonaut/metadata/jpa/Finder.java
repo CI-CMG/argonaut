@@ -14,6 +14,7 @@ import edu.colorado.cires.argonaut.metadata.core.DefaultRemovedFileSearch;
 import edu.colorado.cires.argonaut.metadata.core.GeoMergePage;
 import edu.colorado.cires.argonaut.metadata.core.IndexPageRequest;
 import edu.colorado.cires.argonaut.metadata.core.ProfilePage;
+import edu.colorado.cires.argonaut.metadata.core.RecentProfileSearch;
 import edu.colorado.cires.argonaut.metadata.core.RemovedFilePage;
 import edu.colorado.cires.argonaut.metadata.core.RemovedFileSearch;
 import edu.colorado.cires.argonaut.metadata.jpa.entity.CycleEntity;
@@ -24,8 +25,10 @@ import edu.colorado.cires.argonaut.metadata.jpa.entity.ProfileFileEntity;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import java.time.Instant;
+import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -35,6 +38,8 @@ import java.util.List;
 import java.util.Optional;
 
 class Finder {
+
+  private static final DateTimeFormatter LATEST_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMdd");
 
   private static final List<ArgoFileType> DEFAULT_REMOVABLE_PROFILE_TYPES = Arrays.asList(
       ArgoFileType.METADATA,
@@ -453,6 +458,68 @@ class Finder {
                 .withFiles(Collections.singletonList(fileInfo))
                 .build();
           }).toList()).build();
+    }
+  }
+
+  ProfileOperation findUpdatedOrMissingLatestMergeFiles(RecentProfileSearch pageRequest) {
+
+    String fileName = pageRequest.getProfileMode().getPrefix() + LATEST_FORMATTER.format(pageRequest.getLastUpdatedDateGe().atZone(ZoneId.of("UTC")).toLocalDate());
+
+    try (EntityManager em = entityManagerFactory.createEntityManager()) {
+
+
+       long count = em.createQuery(
+              """
+                     SELECT COUNT(profile.file) FROM ProfileFileEntity profile 
+                     WHERE profile.lastUpdatedTime >= :updatedGe AND profile.lastUpdatedTime < :updatedLt AND profile.dataMode = :dataMode
+                     AND profile.fileType = 'PROFILE_CORE'
+                     AND ((profile.fileStatus = 'ACTIVE' AND profile.latestMergeFileName IS NULL) OR (profile.fileStatus = 'REMOVED' AND profile.latestMergeFileName IS NOT NULL))
+                  """, Long.class)
+          .setParameter("updatedGe", pageRequest.getLastUpdatedDateGe().atZone(ZoneId.of("UTC")))
+          .setParameter("updatedLt", pageRequest.getLastUpdatedDateLt().atZone(ZoneId.of("UTC")))
+          .setParameter("dataMode", pageRequest.getProfileMode().getPrefix())
+          .setMaxResults(pageRequest.getLimit())
+          .getSingleResult();
+
+       List<ProfileFileEntity> results;
+       if (count > 0L) {
+         results = em.createQuery(
+                 """
+                        SELECT profile FROM ProfileFileEntity profile 
+                        WHERE profile.lastUpdatedTime >= :updatedGe AND profile.lastUpdatedTime < :updatedLt AND profile.dataMode = :dataMode
+                        AND profile.fileType = 'PROFILE_CORE'
+                        AND ((profile.fileStatus = 'ACTIVE') OR (profile.fileStatus = 'REMOVED' AND profile.latestMergeFileName IS NOT NULL))
+                        order by profile.date
+                     """, ProfileFileEntity.class)
+             .setParameter("updatedGe", pageRequest.getLastUpdatedDateGe().atZone(ZoneId.of("UTC")))
+             .setParameter("updatedLt", pageRequest.getLastUpdatedDateLt().atZone(ZoneId.of("UTC")))
+             .setParameter("dataMode", pageRequest.getProfileMode().getPrefix())
+             .setMaxResults(pageRequest.getLimit())
+             .getResultList();
+       } else {
+         results = Collections.emptyList();
+       }
+
+
+      List<MetadataRecord> files = new ArrayList<>(results.size());
+      for (ProfileFileEntity profile : results) {
+        files.add(MetadataRecord.builder()
+            .withDac(profile.getCycle().getFloatId().getDac().getDac())
+            .withFloatId(profile.getCycle().getFloatId().getFloatId())
+            .withFile(profile.getFile())
+            .withFileName(profile.getFileName())
+            .withFileStatus(FileStatus.valueOf(profile.getFileStatus()))
+            .withCycleNumber(profile.getCycle().getCycleNumber())
+            .withActionTimestamp(profile.getLastUpdatedTime().toInstant())
+            .withDate(profile.getDate() == null ? null : profile.getDate().toInstant())
+            .withFileType(ArgoFileType.PROFILE_CORE)
+            .build());
+      }
+
+      return ProfileOperation.builder()
+          .withFileName(fileName)
+          .withFiles(files)
+          .build();
     }
   }
 }

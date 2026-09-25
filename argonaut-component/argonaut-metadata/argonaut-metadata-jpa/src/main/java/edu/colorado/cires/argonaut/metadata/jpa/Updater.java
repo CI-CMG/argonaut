@@ -179,6 +179,8 @@ class Updater {
           entity.setFileName(record.getFileName());
           entity.setFileType(record.getFileType().toString());
           entity.setFileStatus(ACTIVE.toString());
+          entity.setDataMode(record.getProfileMode() == null ? null : record.getProfileMode().getPrefix());
+          entity.setLatestMergeFileName(null);
           if (record.getDate() == null) {
             entity.setDate(null);
             entity.setYear(null);

@@ -58,6 +58,12 @@ public class JpaMetadataStore implements MetadataStore {
       case GEO_MERGE_REMOVE:
         multiFloatMerger.updateGeoFloatMerge(record, true);
         break;
+      case LATEST_MERGE:
+        multiFloatMerger.updateLatestMerge(record, false);
+        break;
+      case LATEST_MERGE_REMOVE:
+        multiFloatMerger.updateLatestMerge(record, true);
+        break;
       case NONE:
       default:
         break;
@@ -97,7 +103,7 @@ public class JpaMetadataStore implements MetadataStore {
 
   @Override
   public ProfileOperation findUpdatedOrMissingLatestMergeFiles(RecentProfileSearch pageRequest) {
-    throw  new UnsupportedOperationException("Not supported yet.");
+    return finder.findUpdatedOrMissingLatestMergeFiles(pageRequest);
   }
 
 }

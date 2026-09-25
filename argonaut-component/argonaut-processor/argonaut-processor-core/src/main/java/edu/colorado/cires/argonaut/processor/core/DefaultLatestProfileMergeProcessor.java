@@ -15,9 +15,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -137,12 +137,10 @@ public class DefaultLatestProfileMergeProcessor implements LatestProfileMergePro
     return activeFiles == 0L;
   }
 
-  private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyyMMdd");
-
   private void mergeProfiles(ProfileOperation message) {
     String filePrefix = message.getFileName() + "_prof_";
 
-    List<LocalPathSupplier> sorted = DefaultMultiProfileMerger.orderByCycleThenJulD(
+    List<LocalPathSupplier> sorted = DefaultMultiProfileMerger.orderByJulianDateAcending(
         getInputFileSuppliers(
             message.getFiles().stream().filter(mr -> FileStatus.ACTIVE == mr.getFileStatus()).toList()
         ));
@@ -205,6 +203,7 @@ public class DefaultLatestProfileMergeProcessor implements LatestProfileMergePro
               .withTraceId(message.getTraceId())
               .withAction(metadataRecord.getFileStatus() == FileStatus.REMOVED ? Action.LATEST_MERGE_REMOVE : Action.LATEST_MERGE)
               .withActionTimestamp(now)
+              .withRelatedFiles(Collections.singletonList(message.getFileName()))
               .build()));
     }
   }

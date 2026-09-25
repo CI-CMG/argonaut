@@ -72,4 +72,29 @@ class MultiFloatMerger {
       }
     }
   }
+
+  void updateLatestMerge(MetadataRecord record, boolean remove) {
+    if (record.getFileType() == ArgoFileType.PROFILE_CORE) {
+      while (true) {
+        try (EntityManager em = entityManagerFactory.createEntityManager()) {
+          EntityTransaction tx = em.getTransaction();
+          tx.begin();
+          try {
+            ProfileFileEntity entity = em.find(ProfileFileEntity.class, record.getFile(), LockModeType.OPTIMISTIC);
+            if (entity != null) {
+              LOGGER.info("Updating latest merge for " + record.getFile());
+              entity.setLatestMergeFileName(remove ? null : record.getRelatedFiles().get(0));
+            }
+            tx.commit();
+            break;
+          } catch (OptimisticLockException e) {
+            tx.rollback();
+          } catch (Exception e) {
+            tx.rollback();
+            throw e;
+          }
+        }
+      }
+    }
+  }
 }
