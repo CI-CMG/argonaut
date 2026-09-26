@@ -4,6 +4,7 @@ import static edu.colorado.cires.argonaut.messaging.core.databind.MetadataRecord
 
 import edu.colorado.cires.argonaut.messaging.core.databind.MetadataRecord;
 import edu.colorado.cires.argonaut.messaging.core.databind.MetadataRecord.FileStatus;
+import edu.colorado.cires.argonaut.messaging.core.databind.ProfileMode;
 import edu.colorado.cires.argonaut.metadata.jpa.entity.CycleEntity;
 import edu.colorado.cires.argonaut.metadata.jpa.entity.DacEntity;
 import edu.colorado.cires.argonaut.metadata.jpa.entity.FloatEntity;
@@ -117,7 +118,7 @@ class Updater {
   }
 
   private void createCycleIfMissing(MetadataRecord record) {
-    String dataMode = Objects.requireNonNull(record.getParameterDataMode());
+    ProfileMode dataMode = Objects.requireNonNull(record.getProfileMode());
     String direction = Objects.requireNonNull(record.getDirection());
     String cycleNumber = Objects.requireNonNull(record.getCycleNumber());
     String id = getCycleId(record);
@@ -138,7 +139,7 @@ class Updater {
             entity = new CycleEntity();
             entity.setId(id);
             entity.setDirection(direction.charAt(0));
-            entity.setDataMode(dataMode.charAt(0));
+            entity.setDataMode(dataMode.getCharacter().charAt(0));
             entity.setFloatId(floatEntity);
             entity.setCycleNumber(cycleNumber);
             em.merge(entity);
@@ -179,7 +180,8 @@ class Updater {
           entity.setFileName(record.getFileName());
           entity.setFileType(record.getFileType().toString());
           entity.setFileStatus(ACTIVE.toString());
-          entity.setDataMode(record.getProfileMode() == null ? null : record.getProfileMode().getPrefix());
+          entity.setDataModeFilePrefix(record.getProfileMode() == null ? null : record.getProfileMode().getFilePrefix());
+          entity.setDataMode(record.getProfileMode() == null ? null : record.getProfileMode().getCharacter());
           entity.setLatestMergeFileName(null);
           if (record.getDate() == null) {
             entity.setDate(null);

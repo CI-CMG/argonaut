@@ -197,14 +197,13 @@ public class DefaultLatestProfileMergeProcessor implements LatestProfileMergePro
     Instant now = nowGenerator.get();
 
     for (MetadataRecord metadataRecord : message.getFiles()) {
-      messageSender.sendJson(
-          updateIndexQueue,
-          jsonMapper.writeValueAsString(MetadataRecord.builder(metadataRecord)
-              .withTraceId(message.getTraceId())
-              .withAction(metadataRecord.getFileStatus() == FileStatus.REMOVED ? Action.LATEST_MERGE_REMOVE : Action.LATEST_MERGE)
-              .withActionTimestamp(now)
-              .withRelatedFiles(Collections.singletonList(message.getFileName()))
-              .build()));
+      String json = jsonMapper.writeValueAsString(MetadataRecord.builder(metadataRecord)
+          .withTraceId(message.getTraceId())
+          .withAction(metadataRecord.getFileStatus() == FileStatus.REMOVED ? Action.LATEST_MERGE_REMOVE : Action.LATEST_MERGE)
+          .withActionTimestamp(now)
+          .withRelatedFiles(Collections.singletonList(message.getFileName()))
+          .build());
+      messageSender.sendJson(updateIndexQueue, json);
     }
   }
 

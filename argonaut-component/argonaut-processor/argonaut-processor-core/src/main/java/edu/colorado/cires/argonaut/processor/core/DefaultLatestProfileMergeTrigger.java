@@ -118,7 +118,7 @@ public class DefaultLatestProfileMergeTrigger implements LatestProfileMergeTrigg
 
   }
 
-  public void execute() {
+  private void execute() {
     LOGGER.info("Triggered Recent Profile Merge Aggregator");
     String outputDirectory = outputFileStore.appendToPath(outputFileStore.getRoot(), "latest_data");
     List<String> existingFiles = outputFileStore.listFileNamesInDirectory(outputDirectory);
@@ -148,6 +148,7 @@ public class DefaultLatestProfileMergeTrigger implements LatestProfileMergeTrigg
                 .withLastUpdatedDateLt(date.plusDays(1).atStartOfDay().toInstant(ZoneOffset.UTC))
                 .build());
         if (!result.getFiles().isEmpty()) {
+          LOGGER.info("Triggering recent merge {}", result.getFileName());
           messageSender.sendJson(mergeQueue, jsonMapper.writeValueAsString(ProfileOperation.builder(result).withTraceId(traceId).build()));
         }
       }

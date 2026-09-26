@@ -82,8 +82,9 @@ class MultiFloatMerger {
           try {
             ProfileFileEntity entity = em.find(ProfileFileEntity.class, record.getFile(), LockModeType.OPTIMISTIC);
             if (entity != null) {
-              LOGGER.info("Updating latest merge for " + record.getFile());
-              entity.setLatestMergeFileName(remove ? null : record.getRelatedFiles().get(0));
+              String fileName = record.getRelatedFiles().get(0);
+              LOGGER.info("Updating latest merge for {} - {}", record.getFile(), fileName);
+              entity.setLatestMergeFileName(remove ? null : fileName);
             }
             tx.commit();
             break;

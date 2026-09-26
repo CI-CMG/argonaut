@@ -47,10 +47,9 @@ import tools.jackson.databind.json.JsonMapper;
 @UseAdviceWith
 public class PostValidationTest {
 
-  //TODO
-//  static {
-//    System.setProperty("camel.threads.virtual.enabled", "true");
-//  }
+  static {
+    System.setProperty("camel.threads.virtual.enabled", "true");
+  }
 
   @Autowired
   private CamelContext camelContext;

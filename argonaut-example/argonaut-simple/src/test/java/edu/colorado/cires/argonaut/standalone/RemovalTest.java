@@ -41,6 +41,10 @@ import tools.jackson.databind.json.JsonMapper;
 @DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
 public class RemovalTest {
 
+  static {
+    System.setProperty("camel.threads.virtual.enabled", "true");
+  }
+
   @Autowired
   @Qualifier("jsonMapper")
   private JsonMapper jsonMapper;

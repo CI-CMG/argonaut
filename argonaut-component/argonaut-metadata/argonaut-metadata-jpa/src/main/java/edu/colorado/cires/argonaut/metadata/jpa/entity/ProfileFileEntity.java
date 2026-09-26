@@ -56,6 +56,8 @@ public class ProfileFileEntity {
   private Double longitudeMax;
   @Column(name = "ocean", length = 1)
   private String ocean;
+  @Column(name = "data_mode_file_prefix", length = 1)
+  private String dataModeFilePrefix;
   @Column(name = "data_mode", length = 1)
   private String dataMode;
   @Column(name = "profiler_type", length = 4)
@@ -311,5 +313,25 @@ public class ProfileFileEntity {
 
   public void setLatestMergeFileName(String latestMergeFileName) {
     this.latestMergeFileName = latestMergeFileName;
+  }
+
+  public String getDataModeFilePrefix() {
+    return dataModeFilePrefix;
+  }
+
+  public void setDataModeFilePrefix(String dataModeFilePrefix) {
+    this.dataModeFilePrefix = dataModeFilePrefix;
+  }
+
+  @Override
+  public String toString() {
+    return "ProfileFileEntity{" +
+        "file='" + file + '\'' +
+        ", fileStatus='" + fileStatus + '\'' +
+        ", dataMode='" + dataMode + '\'' +
+        ", dataModeFilePrefix='" + dataModeFilePrefix + '\'' +
+        ", latestMergeFileName='" + latestMergeFileName + '\'' +
+        ", fileType='" + fileType + '\'' +
+        '}';
   }
 }

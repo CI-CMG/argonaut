@@ -4,9 +4,9 @@
   <Appenders>
     <Console name="Console" target="SYSTEM_OUT">
       <PatternLayout>
-<!--        <Pattern>%d{ISO8601} %5level %36X{MBIngestTraceId} %pid{-} -&#45;&#45; [%15.15t] %c : %m%n%throwable</Pattern>-->
+<!--        <Pattern>%d{ISO8601} %5level %pid{-} -&#45;&#45; [%15.15t] %c : %m%n%throwable</Pattern>-->
         <Pattern>
-          %style{%d{ISO8601}}{dim} %highlight{%5level} %36X{MBIngestTraceId} %style{[%15.15t]}{dim} %style{%c}{blue} %style{:}{dim} %highlight{%m%n%throwable}
+          %style{%d{ISO8601}}{dim} %highlight{%5level} %style{[%15.15t]}{dim} %style{%c}{blue} %style{:}{dim} %highlight{%m%n%throwable}
         </Pattern>
       </PatternLayout>
     </Console>

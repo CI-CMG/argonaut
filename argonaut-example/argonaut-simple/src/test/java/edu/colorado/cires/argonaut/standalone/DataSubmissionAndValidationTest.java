@@ -48,10 +48,9 @@ import tools.jackson.databind.json.JsonMapper;
 @MockEndpointsAndSkip("seda:validation-success|seda:file-output-failure")
 public class DataSubmissionAndValidationTest {
 
-  //TODO
-//  static {
-//    System.setProperty("camel.threads.virtual.enabled", "true");
-//  }
+  static {
+    System.setProperty("camel.threads.virtual.enabled", "true");
+  }
 
   @EndpointInject("mock:seda:validation-success")
   private MockEndpoint validationSuccess;

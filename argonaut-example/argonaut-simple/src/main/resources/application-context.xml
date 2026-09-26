@@ -259,6 +259,27 @@
     <property name="outputFileStore" ref="outputFileStore"/>
   </bean>
 
+  <bean id="latestMergeTrigger" class="edu.colorado.cires.argonaut.processor.core.DefaultLatestProfileMergeTrigger">
+    <property name="metadataStore" ref="metadataStore"/>
+    <property name="messageSender" ref="messageSender"/>
+    <property name="jsonMapper" ref="jsonMapper"/>
+    <property name="mergeQueue" value="seda:latest-merge"/>
+    <property name="enabled" value="${latest-merge.enabled}"/>
+    <property name="outputFileStore" ref="outputFileStore"/>
+    <property name="daysBack" value="${latest-merge.days-back}"/>
+    <property name="limit" value="${latest-merge.max-results-per-day}"/>
+  </bean>
+
+  <bean id="latestMergeProcessor" class="edu.colorado.cires.argonaut.processor.core.DefaultLatestProfileMergeProcessor">
+    <property name="outputFileStore" ref="outputFileStore"/>
+    <property name="localTempDir" value="${work-directory}"/>
+    <property name="messageSender" ref="messageSender"/>
+    <property name="updateIndexQueue" value="seda:update-index"/>
+    <property name="jsonMapper" ref="jsonMapper"/>
+    <property name="merger" ref="onePerFileMultiProfileMerger"/>
+    <property name="maxProfilesPerFile" value="${latest-merge.max-profiles-per-file}"/>
+  </bean>
+
   <camelContext id="argonaut-camel" xmlns="http://camel.apache.org/schema/spring">
     <template id="producerTemplate"/>
     <routeContextRef ref="dac-submission-routes"/>

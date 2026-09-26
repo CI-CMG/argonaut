@@ -55,7 +55,7 @@ public final class NetCdfMetadataRecord {
 
       ProfileMode profileMode = null;
       if(profile.getDataMode() != null) {
-        profileMode = ProfileMode.fromPrefix(profile.getDataMode());
+        profileMode = ProfileMode.fromCharacter(profile.getDataMode());
       }
 
       return MetadataRecord.builder()

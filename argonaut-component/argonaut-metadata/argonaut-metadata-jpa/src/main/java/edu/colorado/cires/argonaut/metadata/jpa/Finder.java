@@ -5,6 +5,7 @@ import edu.colorado.cires.argonaut.messaging.core.databind.ArgoOcean;
 import edu.colorado.cires.argonaut.messaging.core.databind.GeoMergeInfo;
 import edu.colorado.cires.argonaut.messaging.core.databind.MetadataRecord;
 import edu.colorado.cires.argonaut.messaging.core.databind.MetadataRecord.FileStatus;
+import edu.colorado.cires.argonaut.messaging.core.databind.ProfileMode;
 import edu.colorado.cires.argonaut.messaging.core.databind.ProfileOperation;
 import edu.colorado.cires.argonaut.metadata.core.DefaultGeoMergePage;
 import edu.colorado.cires.argonaut.metadata.core.DefaultIndexPageRequest;
@@ -132,6 +133,7 @@ class Finder {
             .withDateUpdate(result.getDateUpdate() == null ? null : result.getDateUpdate().toInstant())
             .withParameters(result.getParameters())
             .withParameterDataMode(result.getParameterDataMode())
+            .withProfileMode(ProfileMode.fromCharacter(result.getDataMode()))
             .withActionTimestamp(result.getLastUpdatedTime().toInstant())
             .build());
       }
@@ -463,7 +465,7 @@ class Finder {
 
   ProfileOperation findUpdatedOrMissingLatestMergeFiles(RecentProfileSearch pageRequest) {
 
-    String fileName = pageRequest.getProfileMode().getPrefix() + LATEST_FORMATTER.format(pageRequest.getLastUpdatedDateGe().atZone(ZoneId.of("UTC")).toLocalDate());
+    String fileName = pageRequest.getProfileMode().getFilePrefix() + LATEST_FORMATTER.format(pageRequest.getLastUpdatedDateGe().atZone(ZoneId.of("UTC")).toLocalDate());
 
     try (EntityManager em = entityManagerFactory.createEntityManager()) {
 
@@ -471,13 +473,13 @@ class Finder {
        long count = em.createQuery(
               """
                      SELECT COUNT(profile.file) FROM ProfileFileEntity profile 
-                     WHERE profile.lastUpdatedTime >= :updatedGe AND profile.lastUpdatedTime < :updatedLt AND profile.dataMode = :dataMode
+                     WHERE profile.lastUpdatedTime >= :updatedGe AND profile.lastUpdatedTime < :updatedLt AND profile.dataModeFilePrefix = :dataMode
                      AND profile.fileType = 'PROFILE_CORE'
                      AND ((profile.fileStatus = 'ACTIVE' AND profile.latestMergeFileName IS NULL) OR (profile.fileStatus = 'REMOVED' AND profile.latestMergeFileName IS NOT NULL))
                   """, Long.class)
           .setParameter("updatedGe", pageRequest.getLastUpdatedDateGe().atZone(ZoneId.of("UTC")))
           .setParameter("updatedLt", pageRequest.getLastUpdatedDateLt().atZone(ZoneId.of("UTC")))
-          .setParameter("dataMode", pageRequest.getProfileMode().getPrefix())
+          .setParameter("dataMode", pageRequest.getProfileMode().getFilePrefix())
           .setMaxResults(pageRequest.getLimit())
           .getSingleResult();
 
@@ -486,14 +488,14 @@ class Finder {
          results = em.createQuery(
                  """
                         SELECT profile FROM ProfileFileEntity profile 
-                        WHERE profile.lastUpdatedTime >= :updatedGe AND profile.lastUpdatedTime < :updatedLt AND profile.dataMode = :dataMode
+                        WHERE profile.lastUpdatedTime >= :updatedGe AND profile.lastUpdatedTime < :updatedLt AND profile.dataModeFilePrefix = :dataMode
                         AND profile.fileType = 'PROFILE_CORE'
                         AND ((profile.fileStatus = 'ACTIVE') OR (profile.fileStatus = 'REMOVED' AND profile.latestMergeFileName IS NOT NULL))
                         order by profile.date
                      """, ProfileFileEntity.class)
              .setParameter("updatedGe", pageRequest.getLastUpdatedDateGe().atZone(ZoneId.of("UTC")))
              .setParameter("updatedLt", pageRequest.getLastUpdatedDateLt().atZone(ZoneId.of("UTC")))
-             .setParameter("dataMode", pageRequest.getProfileMode().getPrefix())
+             .setParameter("dataMode", pageRequest.getProfileMode().getFilePrefix())
              .setMaxResults(pageRequest.getLimit())
              .getResultList();
        } else {
