@@ -73,6 +73,10 @@
       <groupId>io.github.ci-cmg</groupId>
       <artifactId>argo-file-checker-exec</artifactId>
     </dependency>
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-csv</artifactId>
+    </dependency>
   </dependencies>
 
 </project>

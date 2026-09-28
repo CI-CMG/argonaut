@@ -1,0 +1,12 @@
+# Title : Bio-Profile directory file of the Argo Global Data Assembly Center
+# Description : The directory file describes all individual bio-profile files of the ARGO GDAC data store.
+# Project : ARGO
+# Format version : 2.2
+# Date of update : 20260928202402
+# HTTP root number 1 : https://example.com/argo/dac
+# HTTP root number 2 : https://foo.bar/argo/dac
+# GDAC node : TEST
+file,date,latitude,longitude,ocean,profiler_type,institution,parameters,parameter_data_mode,date_update
+aoml/1901378/profiles/BD1901378_001.nc,20091012133909,31.689,-64.201,A,846,AO,PRES TEMP_DOXY BPHASE_DOXY DOXY UV_INTENSITY_DARK_NITRATE UV_INTENSITY_NITRATE NITRATE,RRRDRRD,20260624060515
+aoml/1901378/profiles/BD1901378_002.nc,20091013130557,31.756,-64.282,A,846,AO,PRES TEMP_DOXY BPHASE_DOXY DOXY UV_INTENSITY_DARK_NITRATE UV_INTENSITY_NITRATE NITRATE,RRRDRRD,20260624060515
+aoml/1901378/profiles/BD1901378_003.nc,20091014133642,31.741,-64.323,A,846,AO,PRES TEMP_DOXY BPHASE_DOXY DOXY UV_INTENSITY_DARK_NITRATE UV_INTENSITY_NITRATE NITRATE,RRRDRRD,20260624060515

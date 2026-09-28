@@ -14,5 +14,6 @@ public interface MetadataStore {
   GeoMergePage findUpdatedOrMissingGeoMergeFilesPage(IndexPageRequest pageRequest);
   RemovedFilePage findRemovedFilesPage(RemovedFileSearch pageRequest);
   ProfileOperation findUpdatedOrMissingLatestMergeFiles(RecentProfileSearch searchRequest);
+  MetadataRecordPage getBioProfileIndexPage(IndexPageRequest pageRequest);
 
 }
