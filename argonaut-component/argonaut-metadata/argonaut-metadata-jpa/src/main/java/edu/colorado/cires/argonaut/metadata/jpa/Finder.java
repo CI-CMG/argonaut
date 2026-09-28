@@ -9,11 +9,13 @@ import edu.colorado.cires.argonaut.messaging.core.databind.ProfileMode;
 import edu.colorado.cires.argonaut.messaging.core.databind.ProfileOperation;
 import edu.colorado.cires.argonaut.metadata.core.DefaultGeoMergePage;
 import edu.colorado.cires.argonaut.metadata.core.DefaultIndexPageRequest;
+import edu.colorado.cires.argonaut.metadata.core.DefaultMetadataRecordPage;
 import edu.colorado.cires.argonaut.metadata.core.DefaultProfilePage;
 import edu.colorado.cires.argonaut.metadata.core.DefaultRemovedFilePage;
 import edu.colorado.cires.argonaut.metadata.core.DefaultRemovedFileSearch;
 import edu.colorado.cires.argonaut.metadata.core.GeoMergePage;
 import edu.colorado.cires.argonaut.metadata.core.IndexPageRequest;
+import edu.colorado.cires.argonaut.metadata.core.MetadataRecordPage;
 import edu.colorado.cires.argonaut.metadata.core.ProfilePage;
 import edu.colorado.cires.argonaut.metadata.core.RecentProfileSearch;
 import edu.colorado.cires.argonaut.metadata.core.RemovedFilePage;
@@ -113,7 +115,7 @@ class Finder {
         return Optional.of(MetadataRecord.builder()
             .withDirection(result.getCycle().getDirection().toString())
             .withCycleNumber(result.getCycle().getCycleNumber())
-            .withParameterDataMode(result.getCycle().getCycleNumber())
+            .withParameterDataMode(result.getParameterDataMode())
             .withFileType(ArgoFileType.valueOf(result.getFileType()))
             .withDac(result.getCycle().getFloatId().getDac().getDac())
             .withFile(result.getFile())
@@ -524,4 +526,45 @@ class Finder {
           .build();
     }
   }
+
+  MetadataRecordPage getBioProfileIndexPage(IndexPageRequest pageRequest) {
+
+    try (EntityManager em = entityManagerFactory.createEntityManager()) {
+      long count = em.createQuery(
+              """
+                  SELECT COUNT(profile.file) FROM ProfileFileEntity profile 
+                  WHERE profile.fileStatus = 'ACTIVE' AND profile.fileType = 'PROFILE_BIOCHEMICAL'
+                  """, Long.class)
+          .getSingleResult();
+
+      List<ProfileFileEntity> pageResults = em.createQuery(
+              """
+                    SELECT profile FROM ProfileFileEntity profile 
+                    WHERE profile.fileStatus = 'ACTIVE' AND profile.fileType = 'PROFILE_BIOCHEMICAL'
+                    ORDER BY profile.file
+                  """, ProfileFileEntity.class)
+          .setMaxResults(pageRequest.getPageSize())
+          .setFirstResult((pageRequest.getPageNumber() - 1) * pageRequest.getPageSize())
+          .getResultList();
+
+      return DefaultMetadataRecordPage.builder()
+          .withTotalRecords(count)
+          .withIndexPageRequest(DefaultIndexPageRequest.builder(pageRequest).build())
+          .withPage(pageResults.stream().map(profile -> MetadataRecord.builder()
+                  .withFile(profile.getFile())
+                  .withDate(profile.getDate() == null ? null : profile.getDate().toInstant())
+                  .withLatitude(profile.getLatitude())
+                  .withLongitude(profile.getLongitude())
+                  .withOcean(profile.getOcean() == null ? null : ArgoOcean.fromCode(profile.getOcean()))
+                  .withProfilerType(profile.getProfilerType())
+                  .withInstitution(profile.getInstitution())
+                  .withParameters(profile.getParameters())
+                  .withParameterDataMode(profile.getParameterDataMode())
+                  .withDateUpdate(profile.getDateUpdate() == null ? null : profile.getDateUpdate().toInstant())
+                  .build())
+              .toList())
+          .build();
+    }
+  }
+
 }

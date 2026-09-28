@@ -4,6 +4,7 @@ import edu.colorado.cires.argonaut.messaging.core.databind.MetadataRecord;
 import edu.colorado.cires.argonaut.messaging.core.databind.ProfileOperation;
 import edu.colorado.cires.argonaut.metadata.core.GeoMergePage;
 import edu.colorado.cires.argonaut.metadata.core.IndexPageRequest;
+import edu.colorado.cires.argonaut.metadata.core.MetadataRecordPage;
 import edu.colorado.cires.argonaut.metadata.core.MetadataStore;
 import edu.colorado.cires.argonaut.metadata.core.ProfilePage;
 import edu.colorado.cires.argonaut.metadata.core.RecentProfileSearch;
@@ -104,6 +105,11 @@ public class JpaMetadataStore implements MetadataStore {
   @Override
   public ProfileOperation findUpdatedOrMissingLatestMergeFiles(RecentProfileSearch pageRequest) {
     return finder.findUpdatedOrMissingLatestMergeFiles(pageRequest);
+  }
+
+  @Override
+  public MetadataRecordPage getBioProfileIndexPage(IndexPageRequest pageRequest) {
+    return finder.getBioProfileIndexPage(pageRequest);
   }
 
 }
