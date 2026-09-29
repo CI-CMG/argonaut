@@ -66,8 +66,6 @@ public class ProfileFileEntity {
   private String institution;
   @Column(name = "date_update")
   private ZonedDateTime dateUpdate;
-  @Column(name = "parameters", length = 100)
-  private String parameters;
   @Column(name = "parameter_data_mode", length = 100)
   private String parameterDataMode;
   @Column(name = "synthetic_merge_time")
@@ -85,6 +83,9 @@ public class ProfileFileEntity {
 
   @OneToMany(mappedBy = "profile", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<FileRemovedTimeEntity> removedTimes = new ArrayList<>();
+
+  @OneToMany(mappedBy = "profile", cascade = CascadeType.ALL, orphanRemoval = true)
+  private List<ProfileParameterEntity> parameters = new ArrayList<>();
 
 
   public String getFile() {
@@ -207,14 +208,6 @@ public class ProfileFileEntity {
     this.dateUpdate = dateUpdate;
   }
 
-  public String getParameters() {
-    return parameters;
-  }
-
-  public void setParameters(String parameters) {
-    this.parameters = parameters;
-  }
-
   public String getParameterDataMode() {
     return parameterDataMode;
   }
@@ -321,6 +314,14 @@ public class ProfileFileEntity {
 
   public void setDataModeFilePrefix(String dataModeFilePrefix) {
     this.dataModeFilePrefix = dataModeFilePrefix;
+  }
+
+  public List<ProfileParameterEntity> getParameters() {
+    return parameters;
+  }
+
+  public void setParameters(List<ProfileParameterEntity> parameters) {
+    this.parameters = parameters;
   }
 
   @Override

@@ -11,6 +11,7 @@ import edu.colorado.cires.argonaut.metadata.jpa.entity.FloatEntity;
 import edu.colorado.cires.argonaut.metadata.jpa.entity.MetadataFileEntity;
 import edu.colorado.cires.argonaut.metadata.jpa.entity.ProfileFileEntity;
 import edu.colorado.cires.argonaut.metadata.jpa.entity.ProfileMergeFileEntity;
+import edu.colorado.cires.argonaut.metadata.jpa.entity.ProfileParameterEntity;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.EntityTransaction;
@@ -18,7 +19,9 @@ import jakarta.persistence.LockModeType;
 import jakarta.persistence.OptimisticLockException;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
+import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
 class Updater {
 
@@ -111,7 +114,7 @@ class Updater {
   private static String getCycleId(MetadataRecord record) {
     String dac = Objects.requireNonNull(record.getDac());
     String floatId = Objects.requireNonNull(record.getFloatId());
-    String dataMode = Objects.requireNonNull(record.getParameterDataMode());
+    String dataMode = Objects.requireNonNull(record.getProfileMode()).getFilePrefix();
     String direction = Objects.requireNonNull(record.getDirection());
     String cycleNumber = Objects.requireNonNull(record.getCycleNumber());
     return dac + "_" + dataMode + floatId + cycleNumber + direction;
@@ -205,13 +208,24 @@ class Updater {
           entity.setProfilerType(record.getProfilerType());
           entity.setInstitution(record.getInstitution());
           entity.setDateUpdate(record.getDateUpdate() == null ? null : record.getDateUpdate().atOffset(ZoneOffset.UTC).toZonedDateTime());
-          entity.setParameters(record.getParameters());
           entity.setParameterDataMode(record.getParameterDataMode());
           entity.setSyntheticMergeTime(null);
           entity.setMultiFloatMergeTime(null);
           entity.setGeoMergeTime(null);
           entity.setLastUpdatedTime(record.getActionTimestamp().atOffset(ZoneOffset.UTC).toZonedDateTime());
           entity.getRemovedTimes().clear();
+
+          List<ProfileParameterEntity> parameters = entity.getParameters();
+          parameters.clear();
+          for (int i = 0; i < record.getParameters().size(); i++) {
+            String parameterName =  record.getParameters().get(i);
+            ProfileParameterEntity parameter = new ProfileParameterEntity();
+            parameter.setId(UUID.randomUUID());
+            parameter.setParameterName(parameterName);
+            parameter.setProfile(entity);
+            parameter.setParameterIndex(i);
+            parameters.add(parameter);
+          }
 
           if (add) {
             em.persist(entity);
@@ -257,7 +271,8 @@ class Updater {
     entity.setProfilerType(record.getProfilerType());
     entity.setInstitution(record.getInstitution());
     entity.setDateUpdate(record.getDateUpdate() == null ? null : record.getDateUpdate().atOffset(ZoneOffset.UTC).toZonedDateTime());
-    entity.setParameters(record.getParameters());
+    // TODO fix me
+//    entity.setParameters(record.getParameters());
     entity.setParameterDataMode(record.getParameterDataMode());
     entity.setLastUpdatedTime(record.getActionTimestamp().atOffset(ZoneOffset.UTC).toZonedDateTime());
 
@@ -312,7 +327,8 @@ class Updater {
         entity.setProfilerType(record.getProfilerType());
         entity.setInstitution(record.getInstitution());
         entity.setDateUpdate(record.getDateUpdate() == null ? null : record.getDateUpdate().atOffset(ZoneOffset.UTC).toZonedDateTime());
-        entity.setParameters(record.getParameters());
+        // TODO fix me
+//        entity.setParameters(record.getParameters());
         entity.setParameterDataMode(record.getParameterDataMode());
         entity.setLastUpdatedTime(record.getActionTimestamp().atOffset(ZoneOffset.UTC).toZonedDateTime());
         entity.getSyntheticMerges().clear();

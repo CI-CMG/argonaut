@@ -58,7 +58,7 @@ public class MetadataRecord implements TracedMessage {
     private String profilerType;
     private String institution;
     private Instant dateUpdate;
-    private String parameters;
+    private List<String> parameters = Collections.emptyList();
     private String parameterDataMode;
     private String direction;
     private String cycleNumber;
@@ -71,7 +71,7 @@ public class MetadataRecord implements TracedMessage {
     private UUID traceId;
     private String fileName;
     private ProfileMode profileMode;
-    private List<String> relatedFiles = new ArrayList<>();
+    private List<String> relatedFiles = Collections.emptyList();
     private Map<String, Object> otherFields = new HashMap<>();
 
     private Builder() {
@@ -91,7 +91,7 @@ public class MetadataRecord implements TracedMessage {
       profilerType = source.profilerType;
       institution = source.institution;
       dateUpdate = source.dateUpdate;
-      parameters = source.parameters;
+      parameters = new ArrayList<>(source.parameters);
       parameterDataMode = source.parameterDataMode;
       direction = source.direction;
       cycleNumber = source.cycleNumber;
@@ -178,8 +178,12 @@ public class MetadataRecord implements TracedMessage {
       return this;
     }
 
-    public Builder withParameters(String parameters) {
-      this.parameters = parameters;
+    public Builder withParameters(List<String> parameters) {
+      if (parameters == null) {
+        this.parameters = Collections.emptyList();
+      } else {
+        this.parameters = new ArrayList<>(parameters);
+      }
       return this;
     }
 
@@ -263,7 +267,7 @@ public class MetadataRecord implements TracedMessage {
           profilerType,
           institution,
           dateUpdate,
-          parameters,
+          Collections.unmodifiableList(parameters),
           parameterDataMode,
           direction,
           cycleNumber,
@@ -295,7 +299,7 @@ public class MetadataRecord implements TracedMessage {
   private final String profilerType;
   private final String institution;
   private final Instant dateUpdate;
-  private final String parameters;
+  private final List<String> parameters;
   private final String parameterDataMode;
   private final String direction;
   private final String cycleNumber;
@@ -312,7 +316,7 @@ public class MetadataRecord implements TracedMessage {
   private final Map<String, Object> otherFields;
 
   private MetadataRecord(String file, Instant date, Double latitude, Double latitudeMin, Double latitudeMax, Double longitude, Double longitudeMin,
-      Double longitudeMax, ArgoOcean ocean, String profilerType, String institution, Instant dateUpdate, String parameters, String parameterDataMode,
+      Double longitudeMax, ArgoOcean ocean, String profilerType, String institution, Instant dateUpdate, List<String> parameters, String parameterDataMode,
       String direction, String cycleNumber, Action action, ArgoFileType fileType, FileStatus fileStatus, String dac, String floatId,
       Instant actionTimestamp,
       UUID traceId, String fileName, ProfileMode profileMode, List<String> relatedFiles,
@@ -402,7 +406,7 @@ public class MetadataRecord implements TracedMessage {
     return dateUpdate;
   }
 
-  public String getParameters() {
+  public List<String> getParameters() {
     return parameters;
   }
 

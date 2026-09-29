@@ -43,7 +43,7 @@ public class DefaultBioProfileIndexProcessor extends BaseIndexProcessor {
         record.getOcean() == null ? null : record.getOcean().getCode(),
         record.getProfilerType(),
         record.getInstitution(),
-        record.getParameters(),
+        String.join(" ", record.getParameters()),
         record.getParameterDataMode(),
         formatDate(record.getDateUpdate()));
   }

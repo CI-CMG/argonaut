@@ -4,6 +4,7 @@ import edu.colorado.cires.argonaut.core.netcdf.metadata.v31.ArgoMetadataV31;
 import edu.colorado.cires.argonaut.core.netcdf.metadata.v31.ArgoMetadataV31Reader;
 import edu.colorado.cires.argonaut.core.netcdf.profile.v31.ArgoMultiProfileV31;
 import edu.colorado.cires.argonaut.core.netcdf.profile.v31.ArgoProfileV31;
+import edu.colorado.cires.argonaut.core.netcdf.profile.v31.ArgoProfileV31Parameter;
 import edu.colorado.cires.argonaut.core.netcdf.profile.v31.ArgoProfileV31Reader;
 import edu.colorado.cires.argonaut.core.netcdf.synthprofile.v13.ArgoSyntheticMultiProfileV13;
 import edu.colorado.cires.argonaut.core.netcdf.synthprofile.v13.ArgoSyntheticProfileV13;
@@ -17,6 +18,7 @@ import edu.colorado.cires.argonaut.processor.core.GeoFilter;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.time.Instant;
+import java.util.stream.Collectors;
 
 public final class NetCdfMetadataRecord {
 
@@ -29,9 +31,9 @@ public final class NetCdfMetadataRecord {
       ArgoMultiProfileV31 multiProfile = reader.getMultiProfile();
       ArgoProfileV31 profile = null;
       for (int profileIndex = 0; profileIndex < multiProfile.getNumberOfProfiles(); profileIndex++) {
-        ArgoProfileV31 pressProfile = multiProfile.getProfile(profileIndex);
-        if (pressProfile.getStationParameters().contains("PRES")) {
-          profile = pressProfile;
+        ArgoProfileV31 aProfile = multiProfile.getProfile(profileIndex);
+        if(aProfile.getStationParameters().size() > 1 && aProfile.getStationParameters().contains("PRES")){
+          profile = aProfile;
           break;
         }
       }
@@ -48,10 +50,7 @@ public final class NetCdfMetadataRecord {
           break;
       }
 
-      String dataMode = profile.getParameter("PRES").getDataMode();
-      if (dataMode == null) {
-        dataMode = profile.getDataMode();
-      }
+      String parameterDataMode = profile.getParameters().stream().map(ArgoProfileV31Parameter::getDataMode).collect(Collectors.joining());
 
       ProfileMode profileMode = null;
       if(profile.getDataMode() != null) {
@@ -63,7 +62,8 @@ public final class NetCdfMetadataRecord {
           .withDac(dac)
           .withFloatId(profile.getPlatformNumber())
           .withProfileMode(profileMode)
-          .withParameterDataMode(dataMode)
+          .withParameterDataMode(parameterDataMode)
+          .withParameters(profile.getStationParameters())
           .withDirection(profile.getDirection())
           .withCycleNumber(formatCycleNumber(profile.getCycleNumber()))
           .withDate(profile.getJulianDate())

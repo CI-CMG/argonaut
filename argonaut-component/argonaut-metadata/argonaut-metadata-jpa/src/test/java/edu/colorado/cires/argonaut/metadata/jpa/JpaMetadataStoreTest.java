@@ -59,6 +59,7 @@ public class JpaMetadataStoreTest {
       EntityTransaction tx = em.getTransaction();
       tx.begin();
       try {
+        em.createQuery("delete from ProfileParameterEntity ").executeUpdate();
         em.createQuery("delete from FileRemovedTimeEntity").executeUpdate();
         em.createQuery("delete from MetadataSyntheticMergeEntity").executeUpdate();
         em.createQuery("delete from ProfileMergeFileEntity").executeUpdate();
@@ -100,7 +101,7 @@ public class JpaMetadataStoreTest {
         .withProfilerType("845")
         .withInstitution("A0")
         .withDateUpdate(dateUpdate1)
-        .withParameters("params")
+        .withParameters(Arrays.asList("params"))
         .withAction(Action.UPDATE)
         .withActionTimestamp(Instant.now())
         .withFileType(ArgoFileType.PROFILE_CORE)
@@ -128,7 +129,7 @@ public class JpaMetadataStoreTest {
         .withProfilerType("846")
         .withInstitution("A1")
         .withDateUpdate(dateUpdate2)
-        .withParameters("params2")
+        .withParameters(Arrays.asList("params2"))
         .withAction(Action.UPDATE)
         .withActionTimestamp(Instant.now())
         .withFileType(ArgoFileType.PROFILE_CORE)
@@ -156,7 +157,7 @@ public class JpaMetadataStoreTest {
         .withProfilerType("847")
         .withInstitution("A2")
         .withDateUpdate(dateUpdate3)
-        .withParameters("params3")
+        .withParameters(Arrays.asList("params3"))
         .withAction(Action.UPDATE)
         .withActionTimestamp(Instant.now())
         .withFileType(ArgoFileType.PROFILE_CORE)
@@ -190,7 +191,7 @@ public class JpaMetadataStoreTest {
         .withProfilerType("847")
         .withInstitution("A2")
         .withDateUpdate(dateUpdate3)
-        .withParameters("params3")
+        .withParameters(Arrays.asList("params3"))
         .withAction(Action.UPDATE)
         .withActionTimestamp(Instant.now())
         .withFileType(ArgoFileType.PROFILE_CORE)
@@ -216,7 +217,7 @@ public class JpaMetadataStoreTest {
         .withProfilerType("847")
         .withInstitution("A2")
         .withDateUpdate(dateUpdate3)
-        .withParameters("params3")
+        .withParameters(Arrays.asList("params3"))
         .withAction(Action.UPDATE)
         .withActionTimestamp(Instant.now())
         .withFileType(ArgoFileType.PROFILE_CORE)
@@ -242,7 +243,7 @@ public class JpaMetadataStoreTest {
         .withProfilerType("847")
         .withInstitution("A2")
         .withDateUpdate(dateUpdate3)
-        .withParameters("params3")
+        .withParameters(Arrays.asList("params3"))
         .withAction(Action.UPDATE)
         .withActionTimestamp(Instant.now())
         .withFileType(ArgoFileType.PROFILE_CORE)
@@ -316,7 +317,7 @@ public class JpaMetadataStoreTest {
         .withProfilerType("845")
         .withInstitution("A0")
         .withDateUpdate(date)
-        .withParameters("params")
+        .withParameters(Arrays.asList("params"))
         .withAction(Action.UPDATE)
         .withFileType(ArgoFileType.PROFILE_CORE)
         .build());
@@ -342,7 +343,7 @@ public class JpaMetadataStoreTest {
         .withProfilerType("845")
         .withInstitution("A0")
         .withDateUpdate(date)
-        .withParameters("params")
+        .withParameters(Arrays.asList("params"))
         .withAction(Action.UPDATE)
         .withFileType(ArgoFileType.PROFILE_BIOCHEMICAL)
         .build());
@@ -387,7 +388,7 @@ public class JpaMetadataStoreTest {
         .withProfilerType("845")
         .withInstitution("A0")
         .withDateUpdate(date)
-        .withParameters("params")
+        .withParameters(Arrays.asList("params"))
         .withAction(Action.UPDATE)
         .withFileType(ArgoFileType.PROFILE_CORE)
         .build());
@@ -413,7 +414,7 @@ public class JpaMetadataStoreTest {
         .withProfilerType("845")
         .withInstitution("A0")
         .withDateUpdate(date)
-        .withParameters("params")
+        .withParameters(Arrays.asList("params"))
         .withAction(Action.UPDATE)
         .withFileType(ArgoFileType.PROFILE_BIOCHEMICAL)
         .build());
@@ -441,7 +442,7 @@ public class JpaMetadataStoreTest {
         .withProfilerType("845")
         .withInstitution("A0")
         .withDateUpdate(date)
-        .withParameters("params")
+        .withParameters(Arrays.asList("params"))
         .withAction(Action.UPDATE)
         .withFileType(ArgoFileType.PROFILE_CORE)
         .build());
@@ -467,7 +468,7 @@ public class JpaMetadataStoreTest {
         .withProfilerType("845")
         .withInstitution("A0")
         .withDateUpdate(date)
-        .withParameters("params")
+        .withParameters(Arrays.asList("params"))
         .withAction(Action.UPDATE)
         .withFileType(ArgoFileType.PROFILE_BIOCHEMICAL)
         .build());
@@ -586,7 +587,7 @@ public class JpaMetadataStoreTest {
         .withProfilerType("845")
         .withInstitution("A0")
         .withDateUpdate(date)
-        .withParameters("params")
+        .withParameters(Arrays.asList("params"))
         .withAction(Action.UPDATE)
         .withFileType(ArgoFileType.PROFILE_CORE)
         .build());
@@ -612,7 +613,7 @@ public class JpaMetadataStoreTest {
         .withProfilerType("845")
         .withInstitution("A0")
         .withDateUpdate(date)
-        .withParameters("params")
+        .withParameters(Arrays.asList("params"))
         .withAction(Action.UPDATE)
         .withFileType(ArgoFileType.PROFILE_BIOCHEMICAL)
         .build());
@@ -655,7 +656,7 @@ public class JpaMetadataStoreTest {
         .withProfilerType("845")
         .withInstitution("A0")
         .withDateUpdate(date)
-        .withParameters("params")
+        .withParameters(Arrays.asList("params"))
         .withAction(Action.UPDATE)
         .withFileType(ArgoFileType.PROFILE_CORE)
         .build());
@@ -681,7 +682,7 @@ public class JpaMetadataStoreTest {
         .withProfilerType("845")
         .withInstitution("A0")
         .withDateUpdate(date)
-        .withParameters("params")
+        .withParameters(Arrays.asList("params"))
         .withAction(Action.UPDATE)
         .withFileType(ArgoFileType.PROFILE_BIOCHEMICAL)
         .build());
@@ -724,7 +725,7 @@ public class JpaMetadataStoreTest {
         .withProfilerType("845")
         .withInstitution("A0")
         .withDateUpdate(date)
-        .withParameters("params")
+        .withParameters(Arrays.asList("params"))
         .withAction(Action.UPDATE)
         .withFileType(ArgoFileType.PROFILE_CORE)
         .build());
@@ -750,7 +751,7 @@ public class JpaMetadataStoreTest {
         .withProfilerType("845")
         .withInstitution("A0")
         .withDateUpdate(date)
-        .withParameters("params")
+        .withParameters(Arrays.asList("params"))
         .withAction(Action.UPDATE)
         .withFileType(ArgoFileType.PROFILE_BIOCHEMICAL)
         .build());
@@ -776,7 +777,7 @@ public class JpaMetadataStoreTest {
         .withProfilerType("845")
         .withInstitution("A0")
         .withDateUpdate(date)
-        .withParameters("params")
+        .withParameters(Arrays.asList("params"))
         .withAction(Action.UPDATE)
         .withFileType(ArgoFileType.PROFILE_CORE)
         .build());
@@ -802,7 +803,7 @@ public class JpaMetadataStoreTest {
         .withProfilerType("845")
         .withInstitution("A0")
         .withDateUpdate(date)
-        .withParameters("params")
+        .withParameters(Arrays.asList("params"))
         .withAction(Action.UPDATE)
         .withFileType(ArgoFileType.PROFILE_BIOCHEMICAL)
         .build());
@@ -828,7 +829,7 @@ public class JpaMetadataStoreTest {
         .withProfilerType("845")
         .withInstitution("A0")
         .withDateUpdate(date)
-        .withParameters("params")
+        .withParameters(Arrays.asList("params"))
         .withAction(Action.UPDATE)
         .withFileType(ArgoFileType.PROFILE_CORE)
         .build());
@@ -854,7 +855,7 @@ public class JpaMetadataStoreTest {
         .withProfilerType("845")
         .withInstitution("A0")
         .withDateUpdate(date)
-        .withParameters("params")
+        .withParameters(Arrays.asList("params"))
         .withAction(Action.UPDATE)
         .withFileType(ArgoFileType.PROFILE_BIOCHEMICAL)
         .build());
@@ -1397,7 +1398,7 @@ public class JpaMetadataStoreTest {
         .withProfilerType("845")
         .withInstitution("A0")
         .withDateUpdate(date)
-        .withParameters("params")
+        .withParameters(Arrays.asList("params"))
         .withAction(Action.UPDATE)
         .withFileType(ArgoFileType.PROFILE_CORE)
         .build());
@@ -1423,7 +1424,7 @@ public class JpaMetadataStoreTest {
         .withProfilerType("845")
         .withInstitution("A0")
         .withDateUpdate(date)
-        .withParameters("params")
+        .withParameters(Arrays.asList("params"))
         .withAction(Action.UPDATE)
         .withFileType(ArgoFileType.PROFILE_BIOCHEMICAL)
         .build());
@@ -1468,7 +1469,7 @@ public class JpaMetadataStoreTest {
         .withProfilerType("845")
         .withInstitution("A0")
         .withDateUpdate(date)
-        .withParameters("params")
+        .withParameters(Arrays.asList("params"))
         .withAction(Action.UPDATE)
         .withFileType(ArgoFileType.PROFILE_CORE)
         .build());
@@ -1494,7 +1495,7 @@ public class JpaMetadataStoreTest {
         .withProfilerType("845")
         .withInstitution("A0")
         .withDateUpdate(date)
-        .withParameters("params")
+        .withParameters(Arrays.asList("params"))
         .withAction(Action.UPDATE)
         .withFileType(ArgoFileType.PROFILE_BIOCHEMICAL)
         .build());
@@ -1522,7 +1523,7 @@ public class JpaMetadataStoreTest {
         .withProfilerType("845")
         .withInstitution("A0")
         .withDateUpdate(date)
-        .withParameters("params")
+        .withParameters(Arrays.asList("params"))
         .withAction(Action.UPDATE)
         .withFileType(ArgoFileType.PROFILE_CORE)
         .build());
@@ -1548,7 +1549,7 @@ public class JpaMetadataStoreTest {
         .withProfilerType("845")
         .withInstitution("A0")
         .withDateUpdate(date)
-        .withParameters("params")
+        .withParameters(Arrays.asList("params"))
         .withAction(Action.UPDATE)
         .withFileType(ArgoFileType.PROFILE_BIOCHEMICAL)
         .build());
@@ -1627,7 +1628,7 @@ public class JpaMetadataStoreTest {
         .withProfilerType("845")
         .withInstitution("A0")
         .withDateUpdate(date)
-        .withParameters("params")
+        .withParameters(Arrays.asList("params"))
         .withAction(Action.UPDATE)
         .withFileType(ArgoFileType.PROFILE_CORE)
         .build());
@@ -1653,7 +1654,7 @@ public class JpaMetadataStoreTest {
         .withProfilerType("845")
         .withInstitution("A0")
         .withDateUpdate(date)
-        .withParameters("params")
+        .withParameters(Arrays.asList("params"))
         .withAction(Action.UPDATE)
         .withFileType(ArgoFileType.PROFILE_BIOCHEMICAL)
         .build());
@@ -1799,7 +1800,7 @@ public class JpaMetadataStoreTest {
         .withProfilerType("845")
         .withInstitution("A0")
         .withDateUpdate(date)
-        .withParameters("params")
+        .withParameters(Arrays.asList("params"))
         .withAction(Action.UPDATE)
         .withFileType(ArgoFileType.PROFILE_CORE)
         .build());
@@ -1825,7 +1826,7 @@ public class JpaMetadataStoreTest {
         .withProfilerType("845")
         .withInstitution("A0")
         .withDateUpdate(date)
-        .withParameters("params")
+        .withParameters(Arrays.asList("params"))
         .withAction(Action.UPDATE)
         .withFileType(ArgoFileType.PROFILE_CORE)
         .build());
@@ -1851,7 +1852,7 @@ public class JpaMetadataStoreTest {
         .withProfilerType("845")
         .withInstitution("A0")
         .withDateUpdate(date)
-        .withParameters("params")
+        .withParameters(Arrays.asList("params"))
         .withAction(Action.UPDATE)
         .withFileType(ArgoFileType.PROFILE_CORE)
         .build());
@@ -1877,7 +1878,7 @@ public class JpaMetadataStoreTest {
         .withProfilerType("845")
         .withInstitution("A0")
         .withDateUpdate(date)
-        .withParameters("params")
+        .withParameters(Arrays.asList("params"))
         .withAction(Action.UPDATE)
         .withFileType(ArgoFileType.PROFILE_BIOCHEMICAL)
         .build());
@@ -1977,7 +1978,7 @@ public class JpaMetadataStoreTest {
         .withProfilerType("845")
         .withInstitution("A0")
         .withDateUpdate(date)
-        .withParameters("params")
+        .withParameters(Arrays.asList("params"))
         .withAction(Action.UPDATE)
         .withFileType(ArgoFileType.PROFILE_CORE)
         .build());
@@ -2004,7 +2005,7 @@ public class JpaMetadataStoreTest {
         .withProfilerType("845")
         .withInstitution("A0")
         .withDateUpdate(date)
-        .withParameters("params")
+        .withParameters(Arrays.asList("params"))
         .withAction(Action.UPDATE)
         .withFileType(ArgoFileType.PROFILE_CORE)
         .build());
@@ -2040,7 +2041,7 @@ public class JpaMetadataStoreTest {
         .withProfilerType("845")
         .withInstitution("A0")
         .withDateUpdate(date)
-        .withParameters("params")
+        .withParameters(Arrays.asList("params"))
         .withAction(Action.UPDATE)
         .withFileType(ArgoFileType.PROFILE_CORE)
         .build());
@@ -2077,7 +2078,7 @@ public class JpaMetadataStoreTest {
         .withProfilerType("845")
         .withInstitution("A0")
         .withDateUpdate(date)
-        .withParameters("params")
+        .withParameters(Arrays.asList("params"))
         .withAction(Action.UPDATE)
         .withFileType(ArgoFileType.PROFILE_CORE)
         .build());
@@ -2125,7 +2126,7 @@ public class JpaMetadataStoreTest {
         .withProfilerType("845")
         .withInstitution("A0")
         .withDateUpdate(date)
-        .withParameters("params")
+        .withParameters(Arrays.asList("params"))
         .withAction(Action.UPDATE)
         .withFileType(ArgoFileType.PROFILE_CORE)
         .build());
@@ -2268,7 +2269,7 @@ public class JpaMetadataStoreTest {
         .withProfilerType("845")
         .withInstitution("A0")
         .withDateUpdate(now)
-        .withParameters("params")
+        .withParameters(Arrays.asList("params"))
         .withAction(Action.UPDATE)
         .withFileType(ArgoFileType.PROFILE_CORE)
         .build());
@@ -2294,7 +2295,7 @@ public class JpaMetadataStoreTest {
         .withProfilerType("845")
         .withInstitution("A0")
         .withDateUpdate(now)
-        .withParameters("params")
+        .withParameters(Arrays.asList("params"))
         .withAction(Action.UPDATE)
         .withFileType(ArgoFileType.PROFILE_CORE)
         .build());
@@ -2321,7 +2322,7 @@ public class JpaMetadataStoreTest {
         .withProfilerType("845")
         .withInstitution("A0")
         .withDateUpdate(now)
-        .withParameters("params")
+        .withParameters(Arrays.asList("params"))
         .withAction(Action.UPDATE)
         .withFileType(ArgoFileType.PROFILE_CORE)
         .build());
@@ -2356,7 +2357,7 @@ public class JpaMetadataStoreTest {
         .withProfilerType("845")
         .withInstitution("A0")
         .withDateUpdate(now)
-        .withParameters("params")
+        .withParameters(Arrays.asList("params"))
         .withAction(Action.UPDATE)
         .withFileType(ArgoFileType.PROFILE_CORE)
         .build());
@@ -2382,7 +2383,7 @@ public class JpaMetadataStoreTest {
         .withProfilerType("845")
         .withInstitution("A0")
         .withDateUpdate(now)
-        .withParameters("params")
+        .withParameters(Arrays.asList("params"))
         .withAction(Action.UPDATE)
         .withFileType(ArgoFileType.PROFILE_BIOCHEMICAL)
         .build());
@@ -2511,7 +2512,7 @@ public class JpaMetadataStoreTest {
         .withProfilerType("845")
         .withInstitution("A0")
         .withDateUpdate(Instant.now())
-        .withParameters("params")
+        .withParameters(Arrays.asList("params"))
         .withAction(Action.UPDATE)
         .withFileType(ArgoFileType.PROFILE_CORE)
         .build());
@@ -2538,7 +2539,7 @@ public class JpaMetadataStoreTest {
         .withProfilerType("845")
         .withInstitution("A0")
         .withDateUpdate(Instant.now())
-        .withParameters("params")
+        .withParameters(Arrays.asList("params"))
         .withAction(Action.UPDATE)
         .withFileType(ArgoFileType.PROFILE_CORE)
         .build());
@@ -2575,7 +2576,7 @@ public class JpaMetadataStoreTest {
         .withProfilerType("845")
         .withInstitution("A0")
         .withDateUpdate(Instant.now())
-        .withParameters("params")
+        .withParameters(Arrays.asList("params"))
         .withAction(Action.UPDATE)
         .withFileType(ArgoFileType.PROFILE_CORE)
         .build());
@@ -2623,7 +2624,7 @@ public class JpaMetadataStoreTest {
         .withProfilerType("845")
         .withInstitution("A0")
         .withDateUpdate(Instant.now())
-        .withParameters("params")
+        .withParameters(Arrays.asList("params"))
         .withAction(Action.UPDATE)
         .withFileType(ArgoFileType.PROFILE_CORE)
         .build());
@@ -2754,7 +2755,7 @@ public class JpaMetadataStoreTest {
         .withProfilerType("845")
         .withInstitution("A0")
         .withDateUpdate(Instant.now())
-        .withParameters("params")
+        .withParameters(Arrays.asList("params"))
         .withAction(Action.UPDATE)
         .withFileType(ArgoFileType.PROFILE_CORE)
         .build());
@@ -2780,7 +2781,7 @@ public class JpaMetadataStoreTest {
         .withProfilerType("845")
         .withInstitution("A0")
         .withDateUpdate(Instant.now())
-        .withParameters("params")
+        .withParameters(Arrays.asList("params"))
         .withAction(Action.UPDATE)
         .withFileType(ArgoFileType.PROFILE_CORE)
         .build());
@@ -2840,7 +2841,7 @@ public class JpaMetadataStoreTest {
         .withProfilerType("845")
         .withInstitution("A0")
         .withDateUpdate(Instant.now())
-        .withParameters("params")
+        .withParameters(Arrays.asList("params"))
         .withAction(Action.UPDATE)
         .withFileType(ArgoFileType.PROFILE_BIOCHEMICAL)
         .build());
@@ -2866,7 +2867,7 @@ public class JpaMetadataStoreTest {
         .withProfilerType("845")
         .withInstitution("A0")
         .withDateUpdate(Instant.now())
-        .withParameters("params")
+        .withParameters(Arrays.asList("params"))
         .withAction(Action.UPDATE)
         .withFileType(ArgoFileType.PROFILE_BIOCHEMICAL)
         .build());
@@ -3258,7 +3259,7 @@ public class JpaMetadataStoreTest {
         .withProfilerType("845")
         .withInstitution("A0")
         .withDateUpdate(Instant.parse("2025-10-10T14:00:00Z"))
-        .withParameters("params")
+        .withParameters(Arrays.asList("params"))
         .withAction(Action.UPDATE)
         .withFileType(ArgoFileType.PROFILE_CORE)
         .withProfileMode(ProfileMode.DELAYED_MODE)
@@ -3285,7 +3286,7 @@ public class JpaMetadataStoreTest {
         .withProfilerType("845")
         .withInstitution("A0")
         .withDateUpdate(Instant.parse("2025-10-10T14:00:00Z"))
-        .withParameters("params")
+        .withParameters(Arrays.asList("params"))
         .withAction(Action.UPDATE)
         .withFileType(ArgoFileType.PROFILE_CORE)
         .withProfileMode(ProfileMode.REAL_TIME)
@@ -3312,7 +3313,7 @@ public class JpaMetadataStoreTest {
         .withProfilerType("845")
         .withInstitution("A0")
         .withDateUpdate(Instant.parse("2025-10-10T14:00:00Z"))
-        .withParameters("params")
+        .withParameters(Arrays.asList("params"))
         .withAction(Action.UPDATE)
         .withFileType(ArgoFileType.PROFILE_CORE)
         .withProfileMode(ProfileMode.DELAYED_MODE)
@@ -3339,7 +3340,7 @@ public class JpaMetadataStoreTest {
         .withProfilerType("845")
         .withInstitution("A0")
         .withDateUpdate(Instant.parse("2025-10-10T14:00:00Z"))
-        .withParameters("params")
+        .withParameters(Arrays.asList("params"))
         .withAction(Action.UPDATE)
         .withFileType(ArgoFileType.PROFILE_CORE)
         .withProfileMode(ProfileMode.REAL_TIME)
@@ -3366,7 +3367,7 @@ public class JpaMetadataStoreTest {
         .withProfilerType("845")
         .withInstitution("A0")
         .withDateUpdate(Instant.parse("2025-10-10T14:00:00Z"))
-        .withParameters("params")
+        .withParameters(Arrays.asList("params"))
         .withAction(Action.UPDATE)
         .withFileType(ArgoFileType.PROFILE_CORE)
         .withProfileMode(ProfileMode.DELAYED_MODE)
@@ -3393,7 +3394,7 @@ public class JpaMetadataStoreTest {
         .withProfilerType("845")
         .withInstitution("A0")
         .withDateUpdate(Instant.parse("2025-10-10T14:00:00Z"))
-        .withParameters("params")
+        .withParameters(Arrays.asList("params"))
         .withAction(Action.UPDATE)
         .withFileType(ArgoFileType.PROFILE_CORE)
         .withProfileMode(ProfileMode.REAL_TIME)
@@ -3421,7 +3422,7 @@ public class JpaMetadataStoreTest {
         .withProfilerType("845")
         .withInstitution("A0")
         .withDateUpdate(Instant.parse("2025-10-10T14:00:00Z"))
-        .withParameters("params")
+        .withParameters(Arrays.asList("params"))
         .withAction(Action.UPDATE)
         .withFileType(ArgoFileType.PROFILE_BIOCHEMICAL)
         .withProfileMode(ProfileMode.DELAYED_MODE)
@@ -3449,7 +3450,7 @@ public class JpaMetadataStoreTest {
         .withProfilerType("845")
         .withInstitution("A0")
         .withDateUpdate(Instant.parse("2025-10-10T14:00:00Z"))
-        .withParameters("params")
+        .withParameters(Arrays.asList("params"))
         .withAction(Action.UPDATE)
         .withFileType(ArgoFileType.PROFILE_CORE)
         .withProfileMode(ProfileMode.DELAYED_MODE)
@@ -3476,7 +3477,7 @@ public class JpaMetadataStoreTest {
         .withProfilerType("845")
         .withInstitution("A0")
         .withDateUpdate(Instant.parse("2025-10-10T14:00:00Z"))
-        .withParameters("params")
+        .withParameters(Arrays.asList("params"))
         .withAction(Action.UPDATE)
         .withFileType(ArgoFileType.PROFILE_CORE)
         .withProfileMode(ProfileMode.REAL_TIME)
@@ -3782,7 +3783,7 @@ public class JpaMetadataStoreTest {
         .withProfilerType("845")
         .withInstitution("A0")
         .withDateUpdate(Instant.parse("2025-10-10T14:00:00Z"))
-        .withParameters("params")
+        .withParameters(Arrays.asList("params"))
         .withAction(Action.UPDATE)
         .withFileType(ArgoFileType.PROFILE_CORE)
         .withProfileMode(ProfileMode.DELAYED_MODE)
@@ -3843,7 +3844,7 @@ public class JpaMetadataStoreTest {
         .withProfilerType("845")
         .withInstitution("A0")
         .withDateUpdate(Instant.parse("2025-10-10T14:00:00Z"))
-        .withParameters("params")
+        .withParameters(Arrays.asList("params"))
         .withAction(Action.UPDATE)
         .withFileType(ArgoFileType.PROFILE_CORE)
         .withProfileMode(ProfileMode.DELAYED_MODE)
@@ -3871,7 +3872,7 @@ public class JpaMetadataStoreTest {
         .withProfilerType("846")
         .withInstitution("AO")
         .withDateUpdate(Instant.parse("2026-06-24T06:05:15Z"))
-        .withParameters("PRES TEMP_DOXY BPHASE_DOXY DOXY UV_INTENSITY_DARK_NITRATE UV_INTENSITY_NITRATE NITRATE")
+        .withParameters(Arrays.asList("PRES", "TEMP_DOXY BPHASE_DOXY", "DOXY UV_INTENSITY_DARK_NITRATE", "UV_INTENSITY_NITRATE", "NITRATE"))
         .withAction(Action.UPDATE)
         .withFileType(ArgoFileType.PROFILE_BIOCHEMICAL)
         .build());
@@ -3898,7 +3899,7 @@ public class JpaMetadataStoreTest {
         .withProfilerType("846")
         .withInstitution("AO")
         .withDateUpdate(Instant.parse("2026-06-24T06:05:15Z"))
-        .withParameters("PRES TEMP_DOXY BPHASE_DOXY DOXY UV_INTENSITY_DARK_NITRATE UV_INTENSITY_NITRATE NITRATE")
+        .withParameters(Arrays.asList("PRES", "TEMP_DOXY BPHASE_DOXY", "DOXY UV_INTENSITY_DARK_NITRATE", "UV_INTENSITY_NITRATE", "NITRATE"))
         .withAction(Action.UPDATE)
         .withFileType(ArgoFileType.PROFILE_BIOCHEMICAL)
         .build());
@@ -3926,7 +3927,7 @@ public class JpaMetadataStoreTest {
         .withProfilerType("846")
         .withInstitution("AO")
         .withDateUpdate(Instant.parse("2026-06-24T06:05:15Z"))
-        .withParameters("PRES TEMP_DOXY BPHASE_DOXY DOXY UV_INTENSITY_DARK_NITRATE UV_INTENSITY_NITRATE NITRATE")
+        .withParameters(Arrays.asList("PRES", "TEMP_DOXY BPHASE_DOXY", "DOXY UV_INTENSITY_DARK_NITRATE", "UV_INTENSITY_NITRATE", "NITRATE"))
         .withAction(Action.UPDATE)
         .withFileType(ArgoFileType.PROFILE_BIOCHEMICAL)
         .build());
@@ -3954,7 +3955,7 @@ public class JpaMetadataStoreTest {
         .withProfilerType("846")
         .withInstitution("AO")
         .withDateUpdate(Instant.parse("2026-06-24T06:05:15Z"))
-        .withParameters("PRES TEMP_DOXY BPHASE_DOXY DOXY UV_INTENSITY_DARK_NITRATE UV_INTENSITY_NITRATE NITRATE")
+        .withParameters(Arrays.asList("PRES", "TEMP_DOXY BPHASE_DOXY", "DOXY UV_INTENSITY_DARK_NITRATE", "UV_INTENSITY_NITRATE", "NITRATE"))
         .withAction(Action.UPDATE)
         .withFileType(ArgoFileType.PROFILE_BIOCHEMICAL)
         .build());
@@ -3986,7 +3987,7 @@ public class JpaMetadataStoreTest {
                     .withOcean(ArgoOcean.ATLANTIC_OCEAN)
                     .withProfilerType("846")
                     .withInstitution("AO")
-                    .withParameters("PRES TEMP_DOXY BPHASE_DOXY DOXY UV_INTENSITY_DARK_NITRATE UV_INTENSITY_NITRATE NITRATE")
+                    .withParameters(Arrays.asList("PRES", "TEMP_DOXY BPHASE_DOXY", "DOXY UV_INTENSITY_DARK_NITRATE", "UV_INTENSITY_NITRATE", "NITRATE"))
                     .withParameterDataMode("RRRDRRD")
                     .withDateUpdate(Instant.parse("2026-06-24T06:05:15Z"))
                     .build(),
@@ -3998,7 +3999,7 @@ public class JpaMetadataStoreTest {
                     .withOcean(ArgoOcean.ATLANTIC_OCEAN)
                     .withProfilerType("846")
                     .withInstitution("AO")
-                    .withParameters("PRES TEMP_DOXY BPHASE_DOXY DOXY UV_INTENSITY_DARK_NITRATE UV_INTENSITY_NITRATE NITRATE")
+                    .withParameters(Arrays.asList("PRES", "TEMP_DOXY BPHASE_DOXY", "DOXY UV_INTENSITY_DARK_NITRATE", "UV_INTENSITY_NITRATE", "NITRATE"))
                     .withParameterDataMode("RRRDRRD")
                     .withDateUpdate(Instant.parse("2026-06-24T06:05:15Z"))
                     .build()
@@ -4021,7 +4022,7 @@ public class JpaMetadataStoreTest {
                     .withOcean(ArgoOcean.ATLANTIC_OCEAN)
                     .withProfilerType("846")
                     .withInstitution("AO")
-                    .withParameters("PRES TEMP_DOXY BPHASE_DOXY DOXY UV_INTENSITY_DARK_NITRATE UV_INTENSITY_NITRATE NITRATE")
+                    .withParameters(Arrays.asList("PRES", "TEMP_DOXY BPHASE_DOXY", "DOXY UV_INTENSITY_DARK_NITRATE", "UV_INTENSITY_NITRATE", "NITRATE"))
                     .withParameterDataMode("RRRDRRD")
                     .withDateUpdate(Instant.parse("2026-06-24T06:05:15Z"))
                     .build()

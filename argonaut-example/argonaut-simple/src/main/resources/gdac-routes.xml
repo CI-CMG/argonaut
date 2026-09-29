@@ -224,6 +224,11 @@
       <bean ref="latestMergeProcessor" method="merge"/>
     </route>
 
+    <route id="bio-profile-index-cron">
+      <from uri="cron:bio-profile-index?schedule={{bio-profile-index.cron}}"/>
+      <bean ref="bioProfileIndexProcessor" method="generateIndex"/>
+    </route>
+
   </routeContext>
 
 </beans>

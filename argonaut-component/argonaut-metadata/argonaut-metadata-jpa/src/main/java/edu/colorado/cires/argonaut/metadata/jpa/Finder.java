@@ -25,6 +25,7 @@ import edu.colorado.cires.argonaut.metadata.jpa.entity.FileRemovedTimeEntity;
 import edu.colorado.cires.argonaut.metadata.jpa.entity.FloatEntity;
 import edu.colorado.cires.argonaut.metadata.jpa.entity.MetadataFileEntity;
 import edu.colorado.cires.argonaut.metadata.jpa.entity.ProfileFileEntity;
+import edu.colorado.cires.argonaut.metadata.jpa.entity.ProfileParameterEntity;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import java.time.Instant;
@@ -92,7 +93,8 @@ class Finder {
             .withProfilerType(result.getProfilerType())
             .withInstitution(result.getInstitution())
             .withDateUpdate(result.getDateUpdate() == null ? null : result.getDateUpdate().toInstant())
-            .withParameters(result.getParameters())
+            // TODO fix me
+//            .withParameters(result.getParameters())
             .withParameterDataMode(result.getParameterDataMode())
             .withActionTimestamp(result.getLastUpdatedTime().toInstant())
             .build());
@@ -115,7 +117,6 @@ class Finder {
         return Optional.of(MetadataRecord.builder()
             .withDirection(result.getCycle().getDirection().toString())
             .withCycleNumber(result.getCycle().getCycleNumber())
-            .withParameterDataMode(result.getParameterDataMode())
             .withFileType(ArgoFileType.valueOf(result.getFileType()))
             .withDac(result.getCycle().getFloatId().getDac().getDac())
             .withFile(result.getFile())
@@ -133,7 +134,7 @@ class Finder {
             .withProfilerType(result.getProfilerType())
             .withInstitution(result.getInstitution())
             .withDateUpdate(result.getDateUpdate() == null ? null : result.getDateUpdate().toInstant())
-            .withParameters(result.getParameters())
+            .withParameters(result.getParameters().stream().map(ProfileParameterEntity::getParameterName).toList())
             .withParameterDataMode(result.getParameterDataMode())
             .withProfileMode(ProfileMode.fromCharacter(result.getDataMode()))
             .withActionTimestamp(result.getLastUpdatedTime().toInstant())
@@ -547,21 +548,23 @@ class Finder {
           .setFirstResult((pageRequest.getPageNumber() - 1) * pageRequest.getPageSize())
           .getResultList();
 
+
+
       return DefaultMetadataRecordPage.builder()
           .withTotalRecords(count)
           .withIndexPageRequest(DefaultIndexPageRequest.builder(pageRequest).build())
           .withPage(pageResults.stream().map(profile -> MetadataRecord.builder()
-                  .withFile(profile.getFile())
-                  .withDate(profile.getDate() == null ? null : profile.getDate().toInstant())
-                  .withLatitude(profile.getLatitude())
-                  .withLongitude(profile.getLongitude())
-                  .withOcean(profile.getOcean() == null ? null : ArgoOcean.fromCode(profile.getOcean()))
-                  .withProfilerType(profile.getProfilerType())
-                  .withInstitution(profile.getInstitution())
-                  .withParameters(profile.getParameters())
-                  .withParameterDataMode(profile.getParameterDataMode())
-                  .withDateUpdate(profile.getDateUpdate() == null ? null : profile.getDateUpdate().toInstant())
-                  .build())
+            .withFile(profile.getFile())
+            .withDate(profile.getDate() == null ? null : profile.getDate().toInstant())
+            .withLatitude(profile.getLatitude())
+            .withLongitude(profile.getLongitude())
+            .withOcean(profile.getOcean() == null ? null : ArgoOcean.fromCode(profile.getOcean()))
+            .withProfilerType(profile.getProfilerType())
+            .withInstitution(profile.getInstitution())
+            .withParameters(profile.getParameters().stream().sorted(Comparator.comparingInt(ProfileParameterEntity::getParameterIndex)).map(ProfileParameterEntity::getParameterName).toList())
+            .withParameterDataMode(profile.getParameterDataMode())
+            .withDateUpdate(profile.getDateUpdate() == null ? null : profile.getDateUpdate().toInstant())
+            .build())
               .toList())
           .build();
     }

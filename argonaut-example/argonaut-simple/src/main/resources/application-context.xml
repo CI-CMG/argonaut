@@ -280,6 +280,19 @@
     <property name="maxProfilesPerFile" value="${latest-merge.max-profiles-per-file}"/>
   </bean>
 
+  <bean id="accessPathsMap" class="edu.colorado.cires.argonaut.standalone.PropertiesMapConverter" factory-method="fromPropertyValue">
+    <constructor-arg value="${index-access-paths}"/>
+  </bean>
+
+  <bean id="bioProfileIndexProcessor" class="edu.colorado.cires.argonaut.processor.core.DefaultBioProfileIndexProcessor">
+    <property name="outputFileStore" ref="outputFileStore"/>
+    <property name="localTempDir" value="${work-directory}"/>
+    <property name="metadataStore" ref="metadataStore"/>
+    <property name="pageSize" value="${bio-profile-index.page-size}"/>
+    <property name="gdacNode" value="${gdac-institution}"/>
+    <property name="accessPathDocumentation" ref="accessPathsMap"/>
+  </bean>
+
   <camelContext id="argonaut-camel" xmlns="http://camel.apache.org/schema/spring">
     <template id="producerTemplate"/>
     <routeContextRef ref="dac-submission-routes"/>
