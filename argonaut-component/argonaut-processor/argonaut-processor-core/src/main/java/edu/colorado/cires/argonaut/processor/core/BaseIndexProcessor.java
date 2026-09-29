@@ -6,10 +6,10 @@ import edu.colorado.cires.argonaut.metadata.core.DefaultIndexPageRequest;
 import edu.colorado.cires.argonaut.metadata.core.IndexPageRequest;
 import edu.colorado.cires.argonaut.metadata.core.MetadataRecordPage;
 import edu.colorado.cires.argonaut.metadata.core.MetadataStore;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.Writer;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.nio.charset.StandardCharsets;
@@ -31,6 +31,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public abstract class BaseIndexProcessor implements IndexProcessor {
+
   private static final Logger LOGGER = LoggerFactory.getLogger(BaseIndexProcessor.class);
   private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
 
@@ -109,17 +110,17 @@ public abstract class BaseIndexProcessor implements IndexProcessor {
     }
   }
 
-  private void writeHeader(FileWriter writer) {
+  private void writeHeader(CSVPrinter printer) {
     try {
-      writer.write("# Title : " + title + "\n");
-      writer.write("# Description : " + description + "\n");
-      writer.write("# Project : " + project + "\n");
-      writer.write("# Format version : " + formatVersion + "\n");
-      writer.write("# Date of update : " + DATE_TIME_FORMATTER.format(nowGenerator.get().atZone(ZoneId.of("UTC")).toLocalDateTime()) + "\n");
+      printer.printComment("Title : " + title);
+      printer.printComment("Description : " + description);
+      printer.printComment("Project : " + project);
+      printer.printComment("Format version : " + formatVersion);
+      printer.printComment("Date of update : " + DATE_TIME_FORMATTER.format(nowGenerator.get().atZone(ZoneId.of("UTC")).toLocalDateTime()));
       for (Map.Entry<String, String> entry : accessPathDocumentation.entrySet()) {
-        writer.write("# " + entry.getKey() + " : " + entry.getValue() + "\n");
+        printer.printComment(entry.getKey() + " : " + entry.getValue());
       }
-      writer.write("# GDAC node : " + gdacNode + "\n");
+      printer.printComment("GDAC node : " + gdacNode);
     } catch (IOException e) {
       throw new RuntimeException("Unable to write header comments", e);
     }
@@ -133,7 +134,19 @@ public abstract class BaseIndexProcessor implements IndexProcessor {
     }
   }
 
-  protected abstract void writeColumnHeaders(CSVPrinter printer) throws IOException;
+  protected void writeColumnHeaders(CSVPrinter printer) throws IOException {
+    printer.printRecord(
+        "file",
+        "date",
+        "latitude",
+        "longitude",
+        "ocean",
+        "profiler_type",
+        "institution",
+        "parameters",
+        "parameter_data_mode",
+        "date_update");
+  }
 
   protected static BigDecimal formatLatLon(Double value) {
     return value == null ? null : BigDecimal.valueOf(value).setScale(3, RoundingMode.DOWN);
@@ -154,7 +167,19 @@ public abstract class BaseIndexProcessor implements IndexProcessor {
     }
   }
 
-  protected abstract void writeRecord(CSVPrinter printer, MetadataRecord record) throws IOException;
+  protected void writeRecord(CSVPrinter printer, MetadataRecord record) throws IOException {
+    printer.printRecord(
+        record.getFile(),
+        formatDate(record.getDate()),
+        formatLatLon(record.getLatitude()),
+        formatLatLon(record.getLongitude()),
+        record.getOcean() == null ? null : record.getOcean().getCode(),
+        record.getProfilerType(),
+        record.getInstitution(),
+        String.join(" ", record.getParameters()),
+        record.getParameterDataMode(),
+        formatDate(record.getDateUpdate()));
+  }
 
   protected abstract MetadataRecordPage queryPage(MetadataStore metadataStore, IndexPageRequest indexPageRequest);
 
@@ -166,10 +191,10 @@ public abstract class BaseIndexProcessor implements IndexProcessor {
     try {
       Path textFile = dir.resolve(textFileName);
       try (
-          FileWriter writer = new FileWriter(textFile.toFile(), StandardCharsets.UTF_8, true);
-          CSVPrinter printer = new CSVPrinter(writer, CSVFormat.DEFAULT.builder().setTrim(true).get())
+          Writer writer = Files.newBufferedWriter(textFile, StandardCharsets.UTF_8);
+          CSVPrinter printer = new CSVPrinter(writer, CSVFormat.RFC4180.builder().setCommentMarker('#').setTrim(true).get())
       ) {
-        writeHeader(writer);
+        writeHeader(printer);
         writeColumnHeadersInternal(printer);
         MetadataRecordPage page = queryPage(metadataStore, DefaultIndexPageRequest.builder().withPageSize(pageSize).build());
         writePage(printer, page);
@@ -186,7 +211,7 @@ public abstract class BaseIndexProcessor implements IndexProcessor {
       try {
         String path = outputFileStore.appendToPath(outputFileStore.getRoot(), textFileName);
         outputFileStore.uploadLocalFile(textFile, path);
-        try(InputStream in = Files.newInputStream(textFile);
+        try (InputStream in = Files.newInputStream(textFile);
             OutputStream out = new GZIPOutputStream(outputFileStore.getOutputStream(path + ".gz"))) {
           IOUtils.copy(in, out);
         }

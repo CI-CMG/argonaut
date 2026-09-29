@@ -112,4 +112,9 @@ public class JpaMetadataStore implements MetadataStore {
     return finder.getBioProfileIndexPage(pageRequest);
   }
 
+  @Override
+  public MetadataRecordPage getSyntheticProfileIndexPage(IndexPageRequest pageRequest) {
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
+
 }

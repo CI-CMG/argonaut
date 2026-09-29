@@ -1,0 +1,12 @@
+# Title : Synthetic-Profile directory file of the Argo Global Data Assembly Center
+# Description : The directory file describes all individual synthetic-profile files of the argo GDAC data store.
+# Project : ARGO
+# Format version : 2.2
+# Date of update : 20260928202402
+# HTTP root number 1 : https://example.com/argo/dac
+# HTTP root number 2 : https://foo.bar/argo/dac
+# GDAC node : TEST
+file,date,latitude,longitude,ocean,profiler_type,institution,parameters,parameter_data_mode,date_update
+meds/4902688/profiles/SR4902688_162.nc,20260926154400,50.299,-47.487,A,834,ME,PRES TEMP PSAL DOXY DOWN_IRRADIANCE380 DOWN_IRRADIANCE412 DOWN_IRRADIANCE490 DOWNWELLING_PAR CHLA BBP700,RRRARRRRAA,20260927000351
+meds/4902719/profiles/SR4902719_001.nc,20260513113200,59.332,-39.900,A,834,ME,PRES TEMP PSAL DOXY DOWN_IRRADIANCE380 DOWN_IRRADIANCE412 DOWN_IRRADIANCE490 DOWNWELLING_PAR PH_IN_SITU_TOTAL,RRRARRRRR,20260731003320
+meds/4902719/profiles/SR4902719_002.nc,20260523114900,59.390,-40.266,A,834,ME,PRES TEMP PSAL DOXY DOWN_IRRADIANCE380 DOWN_IRRADIANCE412 DOWN_IRRADIANCE490 DOWNWELLING_PAR PH_IN_SITU_TOTAL,RRRARRRRR,20260731003330
