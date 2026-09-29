@@ -114,7 +114,7 @@ public class JpaMetadataStore implements MetadataStore {
 
   @Override
   public MetadataRecordPage getSyntheticProfileIndexPage(IndexPageRequest pageRequest) {
-    throw new UnsupportedOperationException("Not supported yet.");
+    return finder.getSyntheticProfileIndexPage(pageRequest);
   }
 
 }

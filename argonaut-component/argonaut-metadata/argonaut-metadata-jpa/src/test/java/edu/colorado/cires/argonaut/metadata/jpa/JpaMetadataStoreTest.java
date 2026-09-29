@@ -4033,4 +4033,221 @@ public class JpaMetadataStoreTest {
 
   }
 
+
+  @Test
+  public void testFindSynthIndex() throws Exception {
+
+    Instant now = Instant.parse("2026-09-25T01:00:00Z");
+
+    // should not be in results, core profile
+    datastore.updateIndex(MetadataRecord.builder()
+        .withFile("aoml/13857/profiles/D13857_001.nc")
+        .withFileName("D13857_001.nc")
+        .withDac("aoml")
+        .withFloatId("13857")
+        .withCycleNumber("001")
+        .withDirection("A")
+        .withParameterDataMode("D")
+        .withProfileMode(ProfileMode.DELAYED_MODE)
+        .withActionTimestamp(now)
+        .withDate(Instant.parse("2025-10-10T14:00:00Z"))
+        .withLatitude(0.267)
+        .withLatitudeMin(0.1)
+        .withLatitudeMax(0.4)
+        .withLongitude(-16.032)
+        .withLongitudeMin(-17.0)
+        .withLongitudeMax(-14.0)
+        .withOcean(ArgoOcean.ATLANTIC_OCEAN)
+        .withProfilerType("845")
+        .withInstitution("A0")
+        .withDateUpdate(Instant.parse("2025-10-10T14:00:00Z"))
+        .withParameters(Arrays.asList("params"))
+        .withAction(Action.UPDATE)
+        .withFileType(ArgoFileType.PROFILE_CORE)
+        .withProfileMode(ProfileMode.DELAYED_MODE)
+        .build());
+
+    // in results
+    datastore.updateIndex(MetadataRecord.builder()
+        .withFile("aoml/1901378/profiles/SD1901378_002.nc")
+        .withFileName("SD1901378_002.nc")
+        .withDac("aoml")
+        .withFloatId("1901378")
+        .withCycleNumber("002")
+        .withDirection("A")
+        .withParameterDataMode("RRRDRRD")
+        .withProfileMode(ProfileMode.DELAYED_MODE)
+        .withActionTimestamp(now)
+        .withDate(Instant.parse("2009-10-13T13:05:57Z"))
+        .withLatitude(31.7562)
+        .withLatitudeMin(0.1)
+        .withLatitudeMax(0.4)
+        .withLongitude(-64.2821)
+        .withLongitudeMin(-17.0)
+        .withLongitudeMax(-14.0)
+        .withOcean(ArgoOcean.ATLANTIC_OCEAN)
+        .withProfilerType("846")
+        .withInstitution("AO")
+        .withDateUpdate(Instant.parse("2026-06-24T06:05:15Z"))
+        .withParameters(Arrays.asList("PRES", "TEMP_DOXY BPHASE_DOXY", "DOXY UV_INTENSITY_DARK_NITRATE", "UV_INTENSITY_NITRATE", "NITRATE"))
+        .withAction(Action.UPDATE)
+        .withFileType(ArgoFileType.SYNTHETIC_PROFILE_SINGLE_CYCLE)
+        .build());
+
+    // in results
+    datastore.updateIndex(MetadataRecord.builder()
+        .withFile("aoml/1901378/profiles/SD1901378_003.nc")
+        .withFileName("SD1901378_003.nc")
+        .withDac("aoml")
+        .withFloatId("1901378")
+        .withCycleNumber("003")
+        .withDirection("A")
+        .withParameterDataMode("RRRDRRD")
+        .withProfileMode(ProfileMode.DELAYED_MODE)
+        .withActionTimestamp(now)
+        .withDate(Instant.parse("2009-10-14T13:36:42Z"))
+        .withLatitude(31.741)
+        .withLatitudeMin(0.1)
+        .withLatitudeMax(0.4)
+        .withLongitude(-64.323)
+        .withLongitudeMin(-17.0)
+        .withLongitudeMax(-14.0)
+        .withOcean(ArgoOcean.ATLANTIC_OCEAN)
+        .withProfilerType("846")
+        .withInstitution("AO")
+        .withDateUpdate(Instant.parse("2026-06-24T06:05:15Z"))
+        .withParameters(Arrays.asList("PRES", "TEMP_DOXY BPHASE_DOXY", "DOXY UV_INTENSITY_DARK_NITRATE", "UV_INTENSITY_NITRATE", "NITRATE"))
+        .withAction(Action.UPDATE)
+        .withFileType(ArgoFileType.SYNTHETIC_PROFILE_SINGLE_CYCLE)
+        .build());
+
+
+    // in results
+    datastore.updateIndex(MetadataRecord.builder()
+        .withFile("aoml/1901378/profiles/SD1901378_001.nc")
+        .withFileName("SD1901378_001.nc")
+        .withDac("aoml")
+        .withFloatId("1901378")
+        .withCycleNumber("001")
+        .withDirection("A")
+        .withParameterDataMode("RRRDRRD")
+        .withProfileMode(ProfileMode.DELAYED_MODE)
+        .withActionTimestamp(now)
+        .withDate(Instant.parse("2009-10-12T13:39:09Z"))
+        .withLatitude(31.6897)
+        .withLatitudeMin(0.1)
+        .withLatitudeMax(0.4)
+        .withLongitude(-64.2017)
+        .withLongitudeMin(-17.0)
+        .withLongitudeMax(-14.0)
+        .withOcean(ArgoOcean.ATLANTIC_OCEAN)
+        .withProfilerType("846")
+        .withInstitution("AO")
+        .withDateUpdate(Instant.parse("2026-06-24T06:05:15Z"))
+        .withParameters(Arrays.asList("PRES", "TEMP_DOXY BPHASE_DOXY", "DOXY UV_INTENSITY_DARK_NITRATE", "UV_INTENSITY_NITRATE", "NITRATE"))
+        .withAction(Action.UPDATE)
+        .withFileType(ArgoFileType.SYNTHETIC_PROFILE_SINGLE_CYCLE)
+        .build());
+
+
+    // not in results, removed
+    datastore.updateIndex(MetadataRecord.builder()
+        .withFile("aoml/1901378/profiles/SD1901378_004.nc")
+        .withFileName("SD1901378_004.nc")
+        .withDac("aoml")
+        .withFloatId("1901378")
+        .withCycleNumber("004")
+        .withDirection("A")
+        .withParameterDataMode("RRRDRRD")
+        .withProfileMode(ProfileMode.DELAYED_MODE)
+        .withActionTimestamp(now)
+        .withDate(Instant.parse("2009-10-12T13:39:09Z"))
+        .withLatitude(31.6897)
+        .withLatitudeMin(0.1)
+        .withLatitudeMax(0.4)
+        .withLongitude(-64.2017)
+        .withLongitudeMin(-17.0)
+        .withLongitudeMax(-14.0)
+        .withOcean(ArgoOcean.ATLANTIC_OCEAN)
+        .withProfilerType("846")
+        .withInstitution("AO")
+        .withDateUpdate(Instant.parse("2026-06-24T06:05:15Z"))
+        .withParameters(Arrays.asList("PRES", "TEMP_DOXY BPHASE_DOXY", "DOXY UV_INTENSITY_DARK_NITRATE", "UV_INTENSITY_NITRATE", "NITRATE"))
+        .withAction(Action.UPDATE)
+        .withFileType(ArgoFileType.SYNTHETIC_PROFILE_SINGLE_CYCLE)
+        .build());
+
+    datastore.updateIndex(MetadataRecord.builder()
+        .withFile("aoml/1901378/profiles/SD1901378_004.nc")
+        .withFileName("SD1901378_004.nc")
+        .withDac("aoml")
+        .withFloatId("1901378")
+        .withCycleNumber("004")
+        .withActionTimestamp(now)
+        .withAction(Action.REMOVE)
+        .withFileType(ArgoFileType.SYNTHETIC_PROFILE_SINGLE_CYCLE)
+        .build());
+
+
+
+
+    MetadataRecordPage results = datastore.getSyntheticProfileIndexPage(DefaultIndexPageRequest.builder().withPageSize(2).withPageNumber(1).build());
+
+    assertEquals(DefaultMetadataRecordPage.builder()
+            .withTotalRecords(3)
+            .withPage(Arrays.asList(
+                MetadataRecord.builder()
+                    .withFile("aoml/1901378/profiles/SD1901378_001.nc")
+                    .withDate(Instant.parse("2009-10-12T13:39:09Z"))
+                    .withLatitude(31.6897)
+                    .withLongitude(-64.2017)
+                    .withOcean(ArgoOcean.ATLANTIC_OCEAN)
+                    .withProfilerType("846")
+                    .withInstitution("AO")
+                    .withParameters(Arrays.asList("PRES", "TEMP_DOXY BPHASE_DOXY", "DOXY UV_INTENSITY_DARK_NITRATE", "UV_INTENSITY_NITRATE", "NITRATE"))
+                    .withParameterDataMode("RRRDRRD")
+                    .withDateUpdate(Instant.parse("2026-06-24T06:05:15Z"))
+                    .build(),
+                MetadataRecord.builder()
+                    .withFile("aoml/1901378/profiles/SD1901378_002.nc")
+                    .withDate(Instant.parse("2009-10-13T13:05:57Z"))
+                    .withLatitude(31.7562)
+                    .withLongitude(-64.2821)
+                    .withOcean(ArgoOcean.ATLANTIC_OCEAN)
+                    .withProfilerType("846")
+                    .withInstitution("AO")
+                    .withParameters(Arrays.asList("PRES", "TEMP_DOXY BPHASE_DOXY", "DOXY UV_INTENSITY_DARK_NITRATE", "UV_INTENSITY_NITRATE", "NITRATE"))
+                    .withParameterDataMode("RRRDRRD")
+                    .withDateUpdate(Instant.parse("2026-06-24T06:05:15Z"))
+                    .build()
+            ))
+            .withIndexPageRequest(DefaultIndexPageRequest.builder().withPageNumber(1).withPageSize(2).build())
+            .build(),
+        results);
+
+
+    results = datastore.getSyntheticProfileIndexPage(DefaultIndexPageRequest.builder().withPageSize(2).withPageNumber(2).build());
+
+    assertEquals(DefaultMetadataRecordPage.builder()
+            .withTotalRecords(3)
+            .withPage(Arrays.asList(
+                MetadataRecord.builder()
+                    .withFile("aoml/1901378/profiles/SD1901378_003.nc")
+                    .withDate(Instant.parse("2009-10-14T13:36:42Z"))
+                    .withLatitude(31.741)
+                    .withLongitude(-64.323)
+                    .withOcean(ArgoOcean.ATLANTIC_OCEAN)
+                    .withProfilerType("846")
+                    .withInstitution("AO")
+                    .withParameters(Arrays.asList("PRES", "TEMP_DOXY BPHASE_DOXY", "DOXY UV_INTENSITY_DARK_NITRATE", "UV_INTENSITY_NITRATE", "NITRATE"))
+                    .withParameterDataMode("RRRDRRD")
+                    .withDateUpdate(Instant.parse("2026-06-24T06:05:15Z"))
+                    .build()
+            ))
+            .withIndexPageRequest(DefaultIndexPageRequest.builder().withPageNumber(2).withPageSize(2).build())
+            .build(),
+        results);
+
+  }
+
 }

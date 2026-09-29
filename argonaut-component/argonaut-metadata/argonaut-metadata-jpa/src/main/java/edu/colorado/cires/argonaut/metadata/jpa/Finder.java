@@ -550,24 +550,56 @@ class Finder {
 
 
 
-      return DefaultMetadataRecordPage.builder()
-          .withTotalRecords(count)
-          .withIndexPageRequest(DefaultIndexPageRequest.builder(pageRequest).build())
-          .withPage(pageResults.stream().map(profile -> MetadataRecord.builder()
-            .withFile(profile.getFile())
-            .withDate(profile.getDate() == null ? null : profile.getDate().toInstant())
-            .withLatitude(profile.getLatitude())
-            .withLongitude(profile.getLongitude())
-            .withOcean(profile.getOcean() == null ? null : ArgoOcean.fromCode(profile.getOcean()))
-            .withProfilerType(profile.getProfilerType())
-            .withInstitution(profile.getInstitution())
-            .withParameters(profile.getParameters().stream().sorted(Comparator.comparingInt(ProfileParameterEntity::getParameterIndex)).map(ProfileParameterEntity::getParameterName).toList())
-            .withParameterDataMode(profile.getParameterDataMode())
-            .withDateUpdate(profile.getDateUpdate() == null ? null : profile.getDateUpdate().toInstant())
-            .build())
-              .toList())
-          .build();
+      return createMetadataRecordPage(count, pageResults, pageRequest);
     }
   }
+
+  private static DefaultMetadataRecordPage createMetadataRecordPage(long count, List<ProfileFileEntity> pageResults, IndexPageRequest pageRequest) {
+    return DefaultMetadataRecordPage.builder()
+        .withTotalRecords(count)
+        .withIndexPageRequest(DefaultIndexPageRequest.builder(pageRequest).build())
+        .withPage(pageResults.stream().map(profile -> MetadataRecord.builder()
+                .withFile(profile.getFile())
+                .withDate(profile.getDate() == null ? null : profile.getDate().toInstant())
+                .withLatitude(profile.getLatitude())
+                .withLongitude(profile.getLongitude())
+                .withOcean(profile.getOcean() == null ? null : ArgoOcean.fromCode(profile.getOcean()))
+                .withProfilerType(profile.getProfilerType())
+                .withInstitution(profile.getInstitution())
+                .withParameters(profile.getParameters().stream().sorted(Comparator.comparingInt(ProfileParameterEntity::getParameterIndex)).map(ProfileParameterEntity::getParameterName).toList())
+                .withParameterDataMode(profile.getParameterDataMode())
+                .withDateUpdate(profile.getDateUpdate() == null ? null : profile.getDateUpdate().toInstant())
+                .build())
+            .toList())
+        .build();
+  }
+
+
+  MetadataRecordPage getSyntheticProfileIndexPage(IndexPageRequest pageRequest) {
+
+    try (EntityManager em = entityManagerFactory.createEntityManager()) {
+      long count = em.createQuery(
+              """
+                  SELECT COUNT(profile.file) FROM ProfileFileEntity profile 
+                  WHERE profile.fileStatus = 'ACTIVE' AND profile.fileType = 'SYNTHETIC_PROFILE_SINGLE_CYCLE'
+                  """, Long.class)
+          .getSingleResult();
+
+      List<ProfileFileEntity> pageResults = em.createQuery(
+              """
+                    SELECT profile FROM ProfileFileEntity profile 
+                    WHERE profile.fileStatus = 'ACTIVE' AND profile.fileType = 'SYNTHETIC_PROFILE_SINGLE_CYCLE'
+                    ORDER BY profile.file
+                  """, ProfileFileEntity.class)
+          .setMaxResults(pageRequest.getPageSize())
+          .setFirstResult((pageRequest.getPageNumber() - 1) * pageRequest.getPageSize())
+          .getResultList();
+
+      return createMetadataRecordPage(count, pageResults, pageRequest);
+    }
+  }
+
+
+
 
 }
