@@ -199,6 +199,7 @@ public class DefaultSyntheticProfileProcessor implements SyntheticProfileProcess
         updateIndexQueue,
         jsonMapper.writeValueAsString(MetadataRecord.builder(syntheticMerge)
             .withAction(remove ? Action.REMOVE : Action.UPDATE)
+            .withTraceId(message.getTraceId())
             .withActionTimestamp(now)
             .build()));
 

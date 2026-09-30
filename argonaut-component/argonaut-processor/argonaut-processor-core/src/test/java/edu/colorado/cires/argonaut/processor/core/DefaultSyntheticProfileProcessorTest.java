@@ -20,6 +20,7 @@ import edu.colorado.cires.argonaut.messaging.core.databind.ArgoOcean;
 import edu.colorado.cires.argonaut.messaging.core.databind.MetadataRecord;
 import edu.colorado.cires.argonaut.messaging.core.databind.MetadataRecord.Action;
 import edu.colorado.cires.argonaut.messaging.core.databind.MetadataRecord.FileStatus;
+import edu.colorado.cires.argonaut.messaging.core.databind.ProfileMode;
 import edu.colorado.cires.argonaut.messaging.core.databind.ProfileOperation;
 import edu.colorado.cires.argonaut.messaging.core.queue.MessageSender;
 import edu.colorado.cires.argonaut.messaging.core.util.ArgonautJsonMapperFactory;
@@ -160,13 +161,15 @@ public class DefaultSyntheticProfileProcessorTest {
         .withFloatId("4902691")
         .withDirection("A")
         .withCycleNumber("034")
-        .withParameterDataMode("R")
+        .withParameterDataMode("RRRRRRRRR")
         .withLatitude(46.97475814819336)
         .withLongitude(-128.1387481689453)
         .withOcean(ArgoOcean.INDIAN_OCEAN)
         .withProfilerType("834")
         .withFileType(ArgoFileType.SYNTHETIC_PROFILE_SINGLE_CYCLE)
         .withInstitution("ME")
+        .withProfileMode(ProfileMode.REAL_TIME)
+        .withParameters(Arrays.asList("PRES", "TEMP", "PSAL", "DOXY", "DOWN_IRRADIANCE380", "DOWN_IRRADIANCE412", "DOWN_IRRADIANCE490", "DOWNWELLING_PAR", "NITRATE"))
         .build(), jsonMap.get("meds/4902691/profiles/SR4902691_034.nc"));
 
   }

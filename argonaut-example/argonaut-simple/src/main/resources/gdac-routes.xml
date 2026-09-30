@@ -229,6 +229,11 @@
       <bean ref="bioProfileIndexProcessor" method="generateIndex"/>
     </route>
 
+    <route id="synth-profile-index-cron">
+      <from uri="cron:synth-profile-index?schedule={{synthetic-profile-index.cron}}"/>
+      <bean ref="synthProfileIndexProcessor" method="generateIndex"/>
+    </route>
+
   </routeContext>
 
 </beans>

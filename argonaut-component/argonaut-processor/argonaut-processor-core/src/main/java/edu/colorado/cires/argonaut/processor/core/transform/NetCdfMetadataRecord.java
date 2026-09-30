@@ -10,6 +10,7 @@ import edu.colorado.cires.argonaut.core.netcdf.synthprofile.v13.ArgoSyntheticMul
 import edu.colorado.cires.argonaut.core.netcdf.synthprofile.v13.ArgoSyntheticProfileV13;
 import edu.colorado.cires.argonaut.core.netcdf.synthprofile.v13.ArgoSyntheticProfileV13Parameter;
 import edu.colorado.cires.argonaut.core.netcdf.synthprofile.v13.ArgoSyntheticProfileV13Reader;
+import edu.colorado.cires.argonaut.core.util.CommonParameterValues;
 import edu.colorado.cires.argonaut.messaging.core.databind.ArgoFileType;
 import edu.colorado.cires.argonaut.messaging.core.databind.MetadataRecord;
 import edu.colorado.cires.argonaut.messaging.core.databind.MetadataRecord.Action;
@@ -55,6 +56,8 @@ public final class NetCdfMetadataRecord {
       ProfileMode profileMode = null;
       if(profile.getDataMode() != null) {
         profileMode = ProfileMode.fromCharacter(profile.getDataMode());
+      } else {
+        profileMode = ProfileMode.fromCharacter(profile.getParameters().stream().filter(p -> p.getParameterName().equals("PRES")).findFirst().orElseThrow().getDataMode());
       }
 
       return MetadataRecord.builder()
@@ -84,9 +87,10 @@ public final class NetCdfMetadataRecord {
     try (ArgoSyntheticProfileV13Reader reader = new ArgoSyntheticProfileV13Reader(ncFile)) {
       ArgoSyntheticMultiProfileV13 multiProfile = reader.getMultiProfile();
       ArgoSyntheticProfileV13 profile = null;
-      for (ArgoSyntheticProfileV13 pressProfile : multiProfile.getProfiles()) {
-        if (pressProfile.getStationParameters().contains("PRES")) {
-          profile = pressProfile;
+      for (int profileIndex = 0; profileIndex < multiProfile.getNumberOfProfiles(); profileIndex++) {
+        ArgoSyntheticProfileV13 aProfile = multiProfile.getProfiles().get(profileIndex);
+        if(aProfile.getStationParameters().size() > 1 && aProfile.getStationParameters().contains("PRES")){
+          profile = aProfile;
           break;
         }
       }
@@ -94,14 +98,27 @@ public final class NetCdfMetadataRecord {
         throw new IllegalArgumentException("Pressure profile could not be found");
       }
 
-      ArgoSyntheticProfileV13Parameter parameter = profile.getParameters().stream().filter(p -> p.getParameterName().equals("PRES")).findFirst().orElseThrow();
+      ArgoSyntheticProfileV13Parameter presParam = profile.getParameters().stream().filter(p -> p.getParameterName().equals("PRES")).findFirst().orElseThrow();
+
+
+      ProfileMode profileMode = null;
+      if(profile.getDataMode() != null) {
+        profileMode = ProfileMode.fromCharacter(profile.getDataMode());
+      } else {
+        profileMode = ProfileMode.fromCharacter(presParam.getDataMode());
+      }
+
+      String parameterDataMode = profile.getParameters().stream().map(CommonParameterValues::getDataMode).collect(Collectors.joining());
+
 
       return MetadataRecord.builder()
           .withFile(file)
           .withFileName(fileName)
           .withDac(dac)
           .withFloatId(profile.getPlatformNumber())
-          .withParameterDataMode(parameter.getDataMode())
+          .withProfileMode(profileMode)
+          .withParameterDataMode(parameterDataMode)
+          .withParameters(profile.getStationParameters())
           .withDirection(profile.getDirection())
           .withCycleNumber(formatCycleNumber(profile.getCycleNumber()))
           .withDate(profile.getJulianDate())

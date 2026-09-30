@@ -293,6 +293,15 @@
     <property name="accessPathDocumentation" ref="accessPathsMap"/>
   </bean>
 
+  <bean id="synthProfileIndexProcessor" class="edu.colorado.cires.argonaut.processor.core.DefaultSyntheticProfileIndexProcessor">
+    <property name="outputFileStore" ref="outputFileStore"/>
+    <property name="localTempDir" value="${work-directory}"/>
+    <property name="metadataStore" ref="metadataStore"/>
+    <property name="pageSize" value="${bio-profile-index.page-size}"/>
+    <property name="gdacNode" value="${gdac-institution}"/>
+    <property name="accessPathDocumentation" ref="accessPathsMap"/>
+  </bean>
+
   <camelContext id="argonaut-camel" xmlns="http://camel.apache.org/schema/spring">
     <template id="producerTemplate"/>
     <routeContextRef ref="dac-submission-routes"/>
