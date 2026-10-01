@@ -44,6 +44,11 @@
       <version>${project.version}</version>
     </dependency>
     <dependency>
+      <groupId>io.github.ci-cmg.argo</groupId>
+      <artifactId>argonaut-audit-core</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
     </dependency>

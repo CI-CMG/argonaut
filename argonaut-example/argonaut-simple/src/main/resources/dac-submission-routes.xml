@@ -22,6 +22,10 @@
       <bean ref="serializationProcessor" method="serialize"/>
       <to uri="seda:submit-work"/>
     </route>
+    <route id="aoml-dac-submission-report">
+      <from uri="cron:aoml-report-cron?schedule={{dac.report.cron}}"/>
+      <bean ref="submissionReportTrigger" method="trigger('aoml')"/>
+    </route>
 
     <route id="bodc-dac-submission">
       <errorHandler>
@@ -36,6 +40,10 @@
       <bean ref="moveSubmitToProcessingProcessor" method="moveToProcessing"/>
       <bean ref="serializationProcessor" method="serialize"/>
       <to uri="seda:submit-work"/>
+    </route>
+    <route id="bodc-dac-submission-report">
+      <from uri="cron:bodc-report-cron?schedule={{dac.report.cron}}"/>
+      <bean ref="submissionReportTrigger" method="trigger('bodc')"/>
     </route>
 
     <route id="coriolis-dac-submission">
@@ -52,6 +60,10 @@
       <bean ref="serializationProcessor" method="serialize"/>
       <to uri="seda:submit-work"/>
     </route>
+    <route id="coriolis-dac-submission-report">
+      <from uri="cron:coriolis-report-cron?schedule={{dac.report.cron}}"/>
+      <bean ref="submissionReportTrigger" method="trigger('coriolis')"/>
+    </route>
 
     <route id="csio-dac-submission">
       <errorHandler>
@@ -66,6 +78,10 @@
       <bean ref="moveSubmitToProcessingProcessor" method="moveToProcessing"/>
       <bean ref="serializationProcessor" method="serialize"/>
       <to uri="seda:submit-work"/>
+    </route>
+    <route id="csio-dac-submission-report">
+      <from uri="cron:csio-report-cron?schedule={{dac.report.cron}}"/>
+      <bean ref="submissionReportTrigger" method="trigger('csio')"/>
     </route>
 
     <route id="csiro-dac-submission">
@@ -82,6 +98,10 @@
       <bean ref="serializationProcessor" method="serialize"/>
       <to uri="seda:submit-work"/>
     </route>
+    <route id="csiro-dac-submission-report">
+      <from uri="cron:csiro-report-cron?schedule={{dac.report.cron}}"/>
+      <bean ref="submissionReportTrigger" method="trigger('csiro')"/>
+    </route>
 
     <route id="incois-dac-submission">
       <errorHandler>
@@ -96,6 +116,10 @@
       <bean ref="moveSubmitToProcessingProcessor" method="moveToProcessing"/>
       <bean ref="serializationProcessor" method="serialize"/>
       <to uri="seda:submit-work"/>
+    </route>
+    <route id="incois-dac-submission-report">
+      <from uri="cron:incois-report-cron?schedule={{dac.report.cron}}"/>
+      <bean ref="submissionReportTrigger" method="trigger('incois')"/>
     </route>
 
     <route id="jma-dac-submission">
@@ -112,6 +136,10 @@
       <bean ref="serializationProcessor" method="serialize"/>
       <to uri="seda:submit-work"/>
     </route>
+    <route id="jma-dac-submission-report">
+      <from uri="cron:jma-report-cron?schedule={{dac.report.cron}}"/>
+      <bean ref="submissionReportTrigger" method="trigger('jma')"/>
+    </route>
 
     <route id="kiost-dac-submission">
       <errorHandler>
@@ -126,6 +154,10 @@
       <bean ref="moveSubmitToProcessingProcessor" method="moveToProcessing"/>
       <bean ref="serializationProcessor" method="serialize"/>
       <to uri="seda:submit-work"/>
+    </route>
+    <route id="kiost-dac-submission-report">
+      <from uri="cron:kiost-report-cron?schedule={{dac.report.cron}}"/>
+      <bean ref="submissionReportTrigger" method="trigger('kiost')"/>
     </route>
 
     <route id="kma-dac-submission">
@@ -142,6 +174,10 @@
       <bean ref="serializationProcessor" method="serialize"/>
       <to uri="seda:submit-work"/>
     </route>
+    <route id="kma-dac-submission-report">
+      <from uri="cron:kma-report-cron?schedule={{dac.report.cron}}"/>
+      <bean ref="submissionReportTrigger" method="trigger('kma')"/>
+    </route>
 
     <route id="meds-dac-submission">
       <errorHandler>
@@ -156,6 +192,10 @@
       <bean ref="moveSubmitToProcessingProcessor" method="moveToProcessing"/>
       <bean ref="serializationProcessor" method="serialize"/>
       <to uri="seda:submit-work"/>
+    </route>
+    <route id="meds-dac-submission-report">
+      <from uri="cron:meds-report-cron?schedule={{dac.report.cron}}"/>
+      <bean ref="submissionReportTrigger" method="trigger('meds')"/>
     </route>
 
     <route id="nmdis-dac-submission">
@@ -172,9 +212,13 @@
       <bean ref="serializationProcessor" method="serialize"/>
       <to uri="seda:submit-work"/>
     </route>
+    <route id="nmdis-dac-submission-report">
+      <from uri="cron:nmdis-report-cron?schedule={{dac.report.cron}}"/>
+      <bean ref="submissionReportTrigger" method="trigger('nmdis')"/>
+    </route>
 
     <!-- DAC submission directory template -->
-    <!-- Replace DAC-CODE with the short name of the DAC.  Ex. 'aoml'.  3 places. -->
+    <!-- Replace DAC-CODE with the short name of the DAC.  Ex. 'aoml'.  6 places. -->
     <!--
     <route id="DAC-CODE-dac-submission">
       <errorHandler>
@@ -189,6 +233,10 @@
       <bean ref="moveSubmitToWorkProcessor" method="moveToWork"/>
       <bean ref="serializationProcessor" method="serialize"/>
       <to uri="seda:submit-work"/>
+    </route>
+    <route id="DAC-CODE-submission-report">
+      <from uri="cron:DAC-CODE-report-cron?schedule={{dac.report.cron}}"/>
+      <bean ref="submissionReportTrigger" method="trigger('DAC-CODE')"/>
     </route>
     -->
 

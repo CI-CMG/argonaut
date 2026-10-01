@@ -40,6 +40,9 @@ public class AuditEntity {
   @Column(name = "file_name", nullable = false, length = 100)
   private String fileName;
 
+  @Column(name = "report_date")
+  private ZonedDateTime reportDate;
+
   public UUID getId() {
     return id;
   }
@@ -112,6 +115,14 @@ public class AuditEntity {
     this.fileName = fileName;
   }
 
+  public ZonedDateTime getReportDate() {
+    return reportDate;
+  }
+
+  public void setReportDate(ZonedDateTime reportDate) {
+    this.reportDate = reportDate;
+  }
+
   @Override
   public String toString() {
     return "AuditEntity{" +
@@ -124,6 +135,7 @@ public class AuditEntity {
         ", message='" + message + '\'' +
         ", stackTrace='" + stackTrace + '\'' +
         ", fileName='" + fileName + '\'' +
+        ", reportDate=" + reportDate +
         '}';
   }
 }

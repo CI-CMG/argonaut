@@ -42,8 +42,8 @@
     <constructor-arg type="java.lang.Class" value="edu.colorado.cires.argonaut.processor.core.GeoFilter"/>
   </bean>
 
-    <bean id="auditProcessor" class="org.mockito.Mockito" factory-method="mock">
-      <constructor-arg type="java.lang.Class" value="edu.colorado.cires.argonaut.audit.jpa.JpaAuditStorageProcessor"/>
-    </bean>
+  <bean id="auditProcessor" class="org.mockito.Mockito" factory-method="mock">
+    <constructor-arg type="java.lang.Class" value="edu.colorado.cires.argonaut.audit.jpa.JpaAuditStore"/>
+  </bean>
 
 </beans>

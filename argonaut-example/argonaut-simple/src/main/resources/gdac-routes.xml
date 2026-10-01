@@ -213,6 +213,13 @@
       <to uri="seda:update-index"/>
     </route>
 
+    <route id="submission-report">
+      <from uri="seda:submission-report?concurrentConsumers=5"/>
+      <bean ref="deserializationProcessor" method="deserialize(${body}, edu.colorado.cires.argonaut.messaging.core.databind.SubmissionReportSet"/>
+      <bean ref="submissionReportGenerator" method="generateReport"/>
+      <bean ref="submissionReportFileSaver" method="generateReport"/>
+    </route>
+
     <route id="latest-merge-cron">
       <from uri="cron:latest-merge?schedule={{latest-merge.cron}}"/>
       <bean ref="latestMergeTrigger" method="trigger"/>

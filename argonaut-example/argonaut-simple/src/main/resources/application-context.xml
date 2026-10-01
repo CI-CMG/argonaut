@@ -237,8 +237,12 @@
     <property name="jsonMapper" ref="jsonMapper"/>
   </bean>
 
-  <bean id="auditProcessor" class="edu.colorado.cires.argonaut.audit.jpa.JpaAuditStorageProcessor">
+  <bean id="auditStore" class="edu.colorado.cires.argonaut.audit.jpa.JpaAuditStore">
     <property name="entityManagerFactory" ref="auditEntityManagerFactory"/>
+  </bean>
+
+  <bean id="auditProcessor" class="edu.colorado.cires.argonaut.processor.core.DefaultAuditProcessor">
+    <property name="auditStore" ref="auditStore"/>
   </bean>
 
   <bean id="removalFileValidationProcessor" class="edu.colorado.cires.argonaut.processor.core.DefaultRemovalFileValidationProcessor">
@@ -300,6 +304,26 @@
     <property name="pageSize" value="${bio-profile-index.page-size}"/>
     <property name="gdacNode" value="${gdac-institution}"/>
     <property name="accessPathDocumentation" ref="accessPathsMap"/>
+  </bean>
+
+  <bean id="submissionReportTrigger" class="edu.colorado.cires.argonaut.processor.core.DefaultSubmissionReportTrigger">
+    <property name="messageSender" ref="messageSender"/>
+    <property name="reportGenerationQueue" value="seda:submission-report"/>
+    <property name="auditStore" ref="auditStore"/>
+    <property name="enabled" value="${dac.report.enabled}"/>
+    <property name="jsonMapper" ref="jsonMapper"/>
+    <property name="maxRecordsPerReport" value="${dac.report.max-records}"/>
+    <property name="minutesBack" value="${dac.report.minutes-back}"/>
+  </bean>
+
+  <bean id="submissionReportGenerator" class="edu.colorado.cires.argonaut.processor.core.HtmlSubmissionReportGenerator">
+    <property name="auditStore" ref="auditStore"/>
+    <property name="environment" value="${gdac-institution}"/>
+  </bean>
+  
+  <bean id="submissionReportFileSaver" class="edu.colorado.cires.argonaut.standalone.SubmissionReportFileSaver">
+    <property name="submissionFileStore" ref="submissionFileStore"/>
+    <property name="auditStore" ref="auditStore"/>
   </bean>
 
   <camelContext id="argonaut-camel" xmlns="http://camel.apache.org/schema/spring">

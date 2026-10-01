@@ -1,8 +1,8 @@
-package edu.colorado.cires.argonaut.audit.core;
+package edu.colorado.cires.argonaut.processor.core;
 
 import edu.colorado.cires.argonaut.messaging.core.databind.AuditMessage;
 
-public interface AuditStorageProcessor {
+public interface AuditProcessor {
 
   void recordEvent(AuditMessage auditMessage);
 

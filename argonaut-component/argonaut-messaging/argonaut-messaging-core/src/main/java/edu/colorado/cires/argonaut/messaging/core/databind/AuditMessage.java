@@ -30,6 +30,7 @@ public class AuditMessage {
   public static final class Builder {
 
     private UUID traceId;
+    private UUID eventId;
     private String dac;
     private Instant timestamp;
     private EventType eventType;
@@ -45,6 +46,7 @@ public class AuditMessage {
 
     private Builder(AuditMessage source) {
       this.traceId = source.traceId;
+      this.eventId = source.eventId;
       this.dac = source.dac;
       this.timestamp = source.timestamp;
       this.eventType = source.eventType;
@@ -64,6 +66,11 @@ public class AuditMessage {
 
     public Builder withTraceId(UUID traceId) {
       this.traceId = traceId;
+      return this;
+    }
+
+    public Builder withEventId(UUID eventId) {
+      this.eventId = eventId;
       return this;
     }
 
@@ -103,11 +110,12 @@ public class AuditMessage {
     }
 
     public AuditMessage build() {
-      return new AuditMessage(traceId, dac, timestamp, eventType, processor, message, stackTrace, fileName, otherFields);
+      return new AuditMessage(traceId, eventId, dac, timestamp, eventType, processor, message, stackTrace, fileName, otherFields);
     }
   }
 
   private final UUID traceId;
+  private final UUID eventId;
   private final String dac;
   private final Instant timestamp;
   private final EventType eventType;
@@ -117,9 +125,10 @@ public class AuditMessage {
   private final String fileName;
   private final Map<String, Object> otherFields;
 
-  private AuditMessage(UUID traceId, String dac, Instant timestamp, EventType eventType, AuditEventProcessor processor, String message, String stackTrace, String fileName,
+  private AuditMessage(UUID traceId, UUID eventId, String dac, Instant timestamp, EventType eventType, AuditEventProcessor processor, String message, String stackTrace, String fileName,
       Map<String, Object> otherFields) {
     this.traceId = traceId;
+    this.eventId = eventId;
     this.dac = dac;
     this.timestamp = timestamp;
     this.eventType = eventType;
@@ -136,6 +145,10 @@ public class AuditMessage {
 
   public UUID getTraceId() {
     return traceId;
+  }
+
+  public UUID getEventId() {
+    return eventId;
   }
 
   public String getDac() {
@@ -174,25 +187,26 @@ public class AuditMessage {
       return false;
     }
     AuditMessage that = (AuditMessage) o;
-    return Objects.equals(traceId, that.traceId) && Objects.equals(dac, that.dac) && Objects.equals(timestamp,
-        that.timestamp) && eventType == that.eventType && Objects.equals(processor, that.processor) && Objects.equals(message,
-        that.message) && Objects.equals(stackTrace, that.stackTrace) && Objects.equals(fileName, that.fileName)
-        && Objects.equals(otherFields, that.otherFields);
+    return Objects.equals(traceId, that.traceId) && Objects.equals(eventId, that.eventId) && Objects.equals(dac, that.dac)
+        && Objects.equals(timestamp, that.timestamp) && eventType == that.eventType && processor == that.processor
+        && Objects.equals(message, that.message) && Objects.equals(stackTrace, that.stackTrace) && Objects.equals(
+        fileName, that.fileName) && Objects.equals(otherFields, that.otherFields);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(traceId, dac, timestamp, eventType, processor, message, stackTrace, fileName, otherFields);
+    return Objects.hash(traceId, eventId, dac, timestamp, eventType, processor, message, stackTrace, fileName, otherFields);
   }
 
   @Override
   public String toString() {
     return "AuditMessage{" +
         "traceId=" + traceId +
+        ", eventId=" + eventId +
         ", dac='" + dac + '\'' +
         ", timestamp=" + timestamp +
         ", eventType=" + eventType +
-        ", processor='" + processor + '\'' +
+        ", processor=" + processor +
         ", message='" + message + '\'' +
         ", stackTrace='" + stackTrace + '\'' +
         ", fileName='" + fileName + '\'' +
