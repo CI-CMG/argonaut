@@ -12,12 +12,14 @@ import java.nio.file.Path;
 import java.time.Instant;
 import java.util.UUID;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.function.TriFunction;
 
 public class DefaultMetadataRecordTransformationProcessor implements MetadataRecordTransformationProcessor {
 
   private FileStore outputFileStore;
   private Path localTempDir;
   private GeoFilter geoFilter;
+  private TriFunction<String, String, Path, MetadataRecord> trajectoryReader;
 
   @Override
   public MetadataRecord transformNcSubmissionMessage(NcSubmissionMessage message) {
@@ -70,6 +72,9 @@ public class DefaultMetadataRecordTransformationProcessor implements MetadataRec
           case PROFILE_BIOCHEMICAL:
             metadataRecord = NetCdfMetadataRecord.fromV31Profile(file, dac, ncFile, geoFilter);
             break;
+          case TRAJECTORY:
+            metadataRecord = trajectoryReader.apply(file, dac, ncFile);
+            break;
           case METADATA:
             metadataRecord = NetCdfMetadataRecord.fromV31Metadata(file, dac, ncFile, geoFilter);
             break;
@@ -77,7 +82,7 @@ public class DefaultMetadataRecordTransformationProcessor implements MetadataRec
             // TODO Traj files etc.
             throw new UnsupportedOperationException("Unsupported file type: " + fileType);
         }
-      } catch (IOException e) {
+      } catch (Exception e) {
         throw new RuntimeException("Unable to parse NetCDF file " + path, e);
       }
       return MetadataRecord.builder(metadataRecord)
@@ -105,5 +110,9 @@ public class DefaultMetadataRecordTransformationProcessor implements MetadataRec
 
   public void setGeoFilter(GeoFilter geoFilter) {
     this.geoFilter = geoFilter;
+  }
+
+  public void setTrajectoryReader(TriFunction<String, String, Path, MetadataRecord> trajectoryReader) {
+    this.trajectoryReader = trajectoryReader;
   }
 }

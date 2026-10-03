@@ -150,6 +150,7 @@
     <property name="outputFileStore" ref="outputFileStore"/>
     <property name="localTempDir" value="${work-directory}"/>
     <property name="geoFilter" ref="geoFilter"/>
+    <property name="trajectoryReader" ref="trajectoryReader"/>
   </bean>
 
   <bean id="metadataStore" class="edu.colorado.cires.argonaut.metadata.jpa.JpaMetadataStore">
@@ -325,6 +326,8 @@
     <property name="submissionFileStore" ref="submissionFileStore"/>
     <property name="auditStore" ref="auditStore"/>
   </bean>
+
+  <bean id="trajectoryReader" class="edu.colorado.cires.argonaut.processor.core.ReaderFactory" factory-method="trajectoryReader"/>
 
   <camelContext id="argonaut-camel" xmlns="http://camel.apache.org/schema/spring">
     <template id="producerTemplate"/>

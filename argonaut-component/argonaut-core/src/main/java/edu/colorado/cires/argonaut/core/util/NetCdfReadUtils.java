@@ -182,6 +182,14 @@ public final class NetCdfReadUtils {
     });
   }
 
+  public static Instant getLevel1Instant(NetcdfFile netcdfFile, int level1Index, String variable) {
+    String value = getLevel1String(netcdfFile, level1Index, variable);
+    if (value == null) {
+      return null;
+    }
+    return LocalDateTime.parse(value, DATE_TIME_FORMATTER).atZone(ZoneId.of("UTC")).toInstant();
+  }
+
   public static Instant getLevel2Instant(NetcdfFile netcdf, int indexLevel1, int indexLevel2, String variableName) {
     String value = getLevel2String(netcdf, indexLevel1, indexLevel2, variableName);
     if (value == null) {
