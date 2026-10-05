@@ -2,7 +2,6 @@ package edu.colorado.cires.argonaut.processor.core;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.doubleThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -16,6 +15,7 @@ import edu.colorado.cires.argonaut.messaging.core.databind.ArgoOcean;
 import edu.colorado.cires.argonaut.messaging.core.databind.MetadataRecord;
 import edu.colorado.cires.argonaut.messaging.core.databind.NcSubmissionMessage;
 import edu.colorado.cires.argonaut.messaging.core.databind.NcSubmissionMessage.Operation;
+import edu.colorado.cires.argonaut.processor.core.transform.NetCdfMetadataRecord;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -24,7 +24,7 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.UUID;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.function.TriFunction;
+import org.apache.commons.lang3.function.FailableFunction;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
@@ -54,18 +54,17 @@ public class DefaultMetadataRecordTransformationProcessorTest {
     return localFileStore;
   }
 
-  private MetadataRecordTransformationProcessor createProcessor(TriFunction<String, String, Path, MetadataRecord> trajectoryReader) {
+  private MetadataRecordTransformationProcessor createProcessor(FailableFunction<ReadFileRequest, MetadataRecord, IOException> fileReader) {
     DefaultMetadataRecordTransformationProcessor processor = new DefaultMetadataRecordTransformationProcessor();
     processor.setLocalTempDir(tempDir);
     processor.setOutputFileStore(createFileStore());
-    processor.setGeoFilter(createGeoFilter());
-    processor.setTrajectoryReader(trajectoryReader);
+    processor.setFileReader(fileReader);
     return processor;
   }
 
   @Test
   public void testReadProfile() {
-    MetadataRecordTransformationProcessor processor = createProcessor(null);
+    MetadataRecordTransformationProcessor processor = createProcessor(read -> NetCdfMetadataRecord.fromV31Profile(read.file(), read.message().getDac(), read.ncFile(), createGeoFilter()));
     Instant now = Instant.now();
     // file,date,latitude,longitude,ocean,profiler_type,institution,date_update
     /// aoml/13857/profiles/D13857_001.nc,19970729200300,0.267,-16.032,A,845,AO,20260220143529
@@ -92,7 +91,7 @@ public class DefaultMetadataRecordTransformationProcessorTest {
   }
 
   @Test
-  void testReadTrajectory() {
+  void testReadTrajectory() throws IOException {
     NcSubmissionMessage message = NcSubmissionMessage.builder()
       .withTraceId(UUID.randomUUID())
       .withOperation(Operation.ADD)
@@ -103,11 +102,11 @@ public class DefaultMetadataRecordTransformationProcessorTest {
       .withFileType(ArgoFileType.TRAJECTORY)
       .build();
 
-    TriFunction<String, String, Path, MetadataRecord> trajectoryReader = mock(TriFunction.class);
-    when(trajectoryReader.apply(any(), anyString(), any())).thenReturn(MetadataRecord.builder().build());
+    FailableFunction<ReadFileRequest, MetadataRecord, IOException> trajectoryReader = mock(FailableFunction.class);
+    when(trajectoryReader.apply(any())).thenReturn(MetadataRecord.builder().build());
 
     MetadataRecord actual = createProcessor(trajectoryReader).transformNcSubmissionMessage(message);
-    verify(trajectoryReader, times(1)).apply(any(), anyString(), any());
+    verify(trajectoryReader, times(1)).apply(any());
 
     assertEquals(
       MetadataRecord.builder()

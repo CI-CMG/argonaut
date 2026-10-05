@@ -2,7 +2,7 @@ package edu.colorado.cires.argonaut.core.netcdf.trajectory.v31;
 
 import java.time.Instant;
 
-public interface ArgoTrajectoryV31 extends AutoCloseable {
+public interface ArgoTrajectoryV31 {
 
   String getTitle();
 
@@ -52,14 +52,17 @@ public interface ArgoTrajectoryV31 extends AutoCloseable {
   // Number of measurements
   Integer getNMeasurements();
 
+  // Number of parameters
+  Integer getNParameters();
+
   // Length of history
   Integer getNHistory();
 
   // Number of cycles
   Integer getNCycles();
 
-  // List of available station parameters
-  String getTrajectoryParameter(Integer nMeasurement);
+  // Name of station parameter
+  String getTrajectoryParameter(Integer nParameter);
 
   // Data center in charge of Float data processing
   String getDataCenter();

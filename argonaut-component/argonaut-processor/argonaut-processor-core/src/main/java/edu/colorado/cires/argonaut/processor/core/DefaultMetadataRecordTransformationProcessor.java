@@ -5,21 +5,18 @@ import edu.colorado.cires.argonaut.messaging.core.databind.ArgoFileType;
 import edu.colorado.cires.argonaut.messaging.core.databind.MetadataRecord;
 import edu.colorado.cires.argonaut.messaging.core.databind.MetadataRecord.Action;
 import edu.colorado.cires.argonaut.messaging.core.databind.NcSubmissionMessage;
-import edu.colorado.cires.argonaut.processor.core.transform.NetCdfMetadataRecord;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
-import java.util.UUID;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.function.TriFunction;
+import org.apache.commons.lang3.function.FailableFunction;
 
 public class DefaultMetadataRecordTransformationProcessor implements MetadataRecordTransformationProcessor {
 
   private FileStore outputFileStore;
   private Path localTempDir;
-  private GeoFilter geoFilter;
-  private TriFunction<String, String, Path, MetadataRecord> trajectoryReader;
+  private FailableFunction<ReadFileRequest, MetadataRecord, IOException> fileReader;
 
   @Override
   public MetadataRecord transformNcSubmissionMessage(NcSubmissionMessage message) {
@@ -30,7 +27,7 @@ public class DefaultMetadataRecordTransformationProcessor implements MetadataRec
     file = outputFileStore.appendToPath(file, message.getFileName());
     switch (message.getOperation()) {
       case ADD:
-        return createUpdateMessage(message.getFileType(), file, message.getDac(), message.getFileName(), message.getTraceId());
+        return createUpdateMessage(message, file);
       case REMOVE:
         return MetadataRecord.builder()
             .withDac(message.getDac())
@@ -51,7 +48,7 @@ public class DefaultMetadataRecordTransformationProcessor implements MetadataRec
     }
   }
 
-  private MetadataRecord createUpdateMessage(ArgoFileType fileType, String file, String dac, String fileName, UUID traceId) {
+  private MetadataRecord createUpdateMessage(NcSubmissionMessage message, String file) {
     String path = outputFileStore.appendToPath(outputFileStore.getRoot(), "dac", file);
     Path ncFile;
     try {
@@ -67,27 +64,13 @@ public class DefaultMetadataRecordTransformationProcessor implements MetadataRec
       }
       MetadataRecord metadataRecord;
       try {
-        switch (fileType) {
-          case PROFILE_CORE:
-          case PROFILE_BIOCHEMICAL:
-            metadataRecord = NetCdfMetadataRecord.fromV31Profile(file, dac, ncFile, geoFilter);
-            break;
-          case TRAJECTORY:
-            metadataRecord = trajectoryReader.apply(file, dac, ncFile);
-            break;
-          case METADATA:
-            metadataRecord = NetCdfMetadataRecord.fromV31Metadata(file, dac, ncFile, geoFilter);
-            break;
-          default:
-            // TODO Traj files etc.
-            throw new UnsupportedOperationException("Unsupported file type: " + fileType);
-        }
+        metadataRecord = fileReader.apply(new ReadFileRequest(file, ncFile, message));
       } catch (Exception e) {
         throw new RuntimeException("Unable to parse NetCDF file " + path, e);
       }
       return MetadataRecord.builder(metadataRecord)
-          .withTraceId(traceId)
-          .withFileName(fileName)
+          .withTraceId(message.getTraceId())
+          .withFileName(message.getFileName())
           .build();
     } finally {
       FileUtils.deleteQuietly(ncFile.toFile());
@@ -108,11 +91,7 @@ public class DefaultMetadataRecordTransformationProcessor implements MetadataRec
     }
   }
 
-  public void setGeoFilter(GeoFilter geoFilter) {
-    this.geoFilter = geoFilter;
-  }
-
-  public void setTrajectoryReader(TriFunction<String, String, Path, MetadataRecord> trajectoryReader) {
-    this.trajectoryReader = trajectoryReader;
+  public void setFileReader(FailableFunction<ReadFileRequest, MetadataRecord, IOException> fileReader) {
+    this.fileReader = fileReader;
   }
 }

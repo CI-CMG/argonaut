@@ -21,12 +21,16 @@ public class NetCdfArgoTrajectoryV31 implements ArgoTrajectoryV31, AutoCloseable
 
   private final NetcdfFile netcdfFile;
 
-  public NetCdfArgoTrajectoryV31(Path path) throws IOException {
+  private NetCdfArgoTrajectoryV31(Path path) throws IOException {
     this.netcdfFile = NetcdfFiles.open(path.toString());
   }
 
+  public static NetCdfArgoTrajectoryV31 create(Path path) throws IOException {
+    return new NetCdfArgoTrajectoryV31(path);
+  }
+
   @Override
-  public void close() throws Exception {
+  public void close() throws IOException {
     netcdfFile.close();
   }
 
@@ -82,7 +86,7 @@ public class NetCdfArgoTrajectoryV31 implements ArgoTrajectoryV31, AutoCloseable
 
   @Override
   public String getFormatVersion() {
-    return getString(netcdfFile, "formatVersion");
+    return getString(netcdfFile, "FORMAT_VERSION");
   }
 
   @Override
@@ -136,8 +140,13 @@ public class NetCdfArgoTrajectoryV31 implements ArgoTrajectoryV31, AutoCloseable
   }
 
   @Override
-  public String getTrajectoryParameter(Integer nMeasurement) {
-    return getLevel1String(netcdfFile, nMeasurement, "TRAJECTORY_PARAMETER");
+  public Integer getNParameters() {
+    return getDimensionSize(netcdfFile, "N_PARAM");
+  }
+
+  @Override
+  public String getTrajectoryParameter(Integer nParameter) {
+    return getLevel1String(netcdfFile, nParameter, "TRAJECTORY_PARAMETER");
   }
 
   @Override

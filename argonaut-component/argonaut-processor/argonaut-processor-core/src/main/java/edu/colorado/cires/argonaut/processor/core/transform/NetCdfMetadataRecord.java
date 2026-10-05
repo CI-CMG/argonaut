@@ -11,6 +11,7 @@ import edu.colorado.cires.argonaut.core.netcdf.synthprofile.v13.ArgoSyntheticPro
 import edu.colorado.cires.argonaut.core.netcdf.synthprofile.v13.ArgoSyntheticProfileV13Parameter;
 import edu.colorado.cires.argonaut.core.netcdf.synthprofile.v13.ArgoSyntheticProfileV13Reader;
 import edu.colorado.cires.argonaut.core.netcdf.trajectory.v31.ArgoTrajectoryV31;
+import edu.colorado.cires.argonaut.core.netcdf.trajectory.v31.impl.NetCdfArgoTrajectoryV31;
 import edu.colorado.cires.argonaut.core.util.CommonParameterValues;
 import edu.colorado.cires.argonaut.messaging.core.databind.ArgoFileType;
 import edu.colorado.cires.argonaut.messaging.core.databind.MetadataRecord;
@@ -22,6 +23,7 @@ import java.nio.file.Path;
 import java.time.Instant;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.function.TriFunction;
 
@@ -164,53 +166,51 @@ public final class NetCdfMetadataRecord {
 
   }
 
-  public static MetadataRecord fromV31Trajectory(String file, String dac, Path ncFile, Function<Path, ArgoTrajectoryV31> reader) throws Exception {
-    try (ArgoTrajectoryV31 trajectory = reader.apply(ncFile)) {
-      double minLat = Double.NaN;
-      double maxLat = Double.NaN;
+  public static MetadataRecord fromV31Trajectory(String file, String dac, ArgoTrajectoryV31 trajectory) {
+    double minLat = Double.NaN;
+    double maxLat = Double.NaN;
 
-      double minLon = Double.NaN;
-      double maxLon = Double.NaN;
+    double minLon = Double.NaN;
+    double maxLon = Double.NaN;
 
-      TriFunction<Double, Double, BiFunction<Double, Double, Double>, Double> compareLimits = (base, value, comparator) -> {
-        assert !Double.isNaN(value);
+    TriFunction<Double, Double, BiFunction<Double, Double, Double>, Double> compareLimits = (base, value, comparator) -> {
+      assert !Double.isNaN(value);
 
-        if (Double.isNaN(base)) {
-          return value;
-        }
-
-        return comparator.apply(base, value);
-      };
-
-      BiFunction<Double, Double, Double> compareMin = (base, value) -> compareLimits.apply(base, value, Math::min);
-      BiFunction<Double, Double, Double> compareMax = (base, value) -> compareLimits.apply(base, value, Math::max);
-
-      for (int i = 0; i < trajectory.getNMeasurements(); i++) {
-        double lat = trajectory.getLatitude(i);
-        double lon = trajectory.getLongitude(i);
-
-        minLat = compareMin.apply(minLat, lat);
-        maxLat = compareMax.apply(maxLat, lat);
-
-        minLon = compareMin.apply(minLon, lon);
-        maxLon = compareMax.apply(maxLon, lon);
+      if (Double.isNaN(base)) {
+        return value;
       }
 
-      return MetadataRecord.builder()
-        .withAction(Action.UPDATE)
-        .withFileType(ArgoFileType.TRAJECTORY)
-        .withFile(file)
-        .withDac(dac)
-        .withFloatId(trajectory.getPlatformNumber())
-        .withProfilerType(trajectory.getWmoInstrumentType())
-        .withInstitution(trajectory.getDataCenter())
-        .withDateUpdate(trajectory.getDateUpdate())
-        .withLatitudeMax(maxLat)
-        .withLatitudeMin(minLat)
-        .withLongitudeMin(minLon)
-        .withLongitudeMax(maxLon)
-        .build();
+      return comparator.apply(base, value);
+    };
+
+    BiFunction<Double, Double, Double> compareMin = (base, value) -> compareLimits.apply(base, value, Math::min);
+    BiFunction<Double, Double, Double> compareMax = (base, value) -> compareLimits.apply(base, value, Math::max);
+
+    for (int i = 0; i < trajectory.getNMeasurements(); i++) {
+      double lat = trajectory.getLatitude(i);
+      double lon = trajectory.getLongitude(i);
+
+      minLat = compareMin.apply(minLat, lat);
+      maxLat = compareMax.apply(maxLat, lat);
+
+      minLon = compareMin.apply(minLon, lon);
+      maxLon = compareMax.apply(maxLon, lon);
     }
+
+    return MetadataRecord.builder()
+      .withAction(Action.UPDATE)
+      .withFileType(ArgoFileType.TRAJECTORY)
+      .withFile(file)
+      .withDac(dac)
+      .withFloatId(trajectory.getPlatformNumber())
+      .withProfilerType(trajectory.getWmoInstrumentType())
+      .withInstitution(trajectory.getDataCenter())
+      .withDateUpdate(trajectory.getDateUpdate())
+      .withLatitudeMax(maxLat)
+      .withLatitudeMin(minLat)
+      .withLongitudeMin(minLon)
+      .withLongitudeMax(maxLon)
+      .build();
   }
 
   private NetCdfMetadataRecord() {

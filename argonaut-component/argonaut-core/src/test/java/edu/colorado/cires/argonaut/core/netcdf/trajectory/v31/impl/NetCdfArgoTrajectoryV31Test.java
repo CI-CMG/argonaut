@@ -16,7 +16,7 @@ class NetCdfArgoTrajectoryV31Test {
 
   static {
     try {
-      trajectory = new NetCdfArgoTrajectoryV31(Paths.get("src/test/resources/dac/aoml/5903712/5903712_Rtraj.nc"));
+      trajectory = NetCdfArgoTrajectoryV31.create(Paths.get("src/test/resources/dac/aoml/5903712/5903712_Rtraj.nc"));
     } catch (IOException e) {
       throw new RuntimeException("failed to open NetCDF file", e);
     }
@@ -30,6 +30,7 @@ class NetCdfArgoTrajectoryV31Test {
   private final int nMeasurements = trajectory.getNMeasurements();
   private final int testMeasurementN = nMeasurements / 2;
   private final int nCycles = trajectory.getNCycles();
+  private final int nParameters = trajectory.getNParameters();
   private final int testCycleN = nCycles / 2;
   private final int nHistory = trajectory.getNHistory();
 
@@ -91,7 +92,7 @@ class NetCdfArgoTrajectoryV31Test {
 
   @Test
   void getFormatVersion() {
-    assertNull(trajectory.getFormatVersion());
+    assertEquals("3.1", trajectory.getFormatVersion());
   }
 
   @Test
@@ -146,7 +147,7 @@ class NetCdfArgoTrajectoryV31Test {
 
   @Test
   void getTrajectoryParameter() {
-    assertAllNull(nMeasurements, trajectory::getTrajectoryParameter);
+    assertAllNull(nParameters, trajectory::getTrajectoryParameter);
   }
 
   @Test
