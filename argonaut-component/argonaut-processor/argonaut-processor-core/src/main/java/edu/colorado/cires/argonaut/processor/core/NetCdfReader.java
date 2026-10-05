@@ -1,5 +1,6 @@
 package edu.colorado.cires.argonaut.processor.core;
 
+import edu.colorado.cires.argonaut.core.netcdf.technical.v31.impl.NetCdfArgoTechnicalV31;
 import edu.colorado.cires.argonaut.core.netcdf.trajectory.v31.impl.NetCdfArgoTrajectoryV31;
 import edu.colorado.cires.argonaut.messaging.core.databind.MetadataRecord;
 import edu.colorado.cires.argonaut.messaging.core.databind.NcSubmissionMessage;
@@ -24,6 +25,11 @@ public class NetCdfReader implements FailableFunction<ReadFileRequest, MetadataR
       case TRAJECTORY -> {
         try (NetCdfArgoTrajectoryV31 trajectoryV31 = NetCdfArgoTrajectoryV31.create(input.ncFile())) {
           yield NetCdfMetadataRecord.fromV31Trajectory(input.file(), message.getDac(), trajectoryV31);
+        }
+      }
+      case TECHNICAL_DATA -> {
+        try (NetCdfArgoTechnicalV31 technicalV31 = NetCdfArgoTechnicalV31.create(input.ncFile())) {
+          yield NetCdfMetadataRecord.fromV31Technical(input.file(), message.getDac(), technicalV31);
         }
       }
       default -> throw new UnsupportedOperationException("Unsupported file type: " + message.getFileType());

@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import edu.colorado.cires.argonaut.core.netcdf.technical.v31.ArgoTechnicalV31;
 import edu.colorado.cires.argonaut.core.netcdf.trajectory.v31.ArgoTrajectoryV31;
 import edu.colorado.cires.argonaut.messaging.core.databind.ArgoFileType;
 import edu.colorado.cires.argonaut.messaging.core.databind.MetadataRecord;
@@ -51,6 +52,29 @@ class NetCdfMetadataRecordTest {
         .withLatitudeMin(0d)
         .withLongitudeMax(0d)
         .withLongitudeMin(-9d)
+        .build(),
+      actual
+    );
+  }
+
+  @Test
+  void fromV31Technical() {
+    ArgoTechnicalV31 traj = mock(ArgoTechnicalV31.class);
+    when(traj.getPlatformNumber()).thenReturn(FLOAT_ID);
+    when(traj.getDataCenter()).thenReturn(INSTITUTION);
+    when(traj.getDateUpdate()).thenReturn(DATE_UPDATE);
+
+    MetadataRecord actual = NetCdfMetadataRecord.fromV31Technical(TEST_FILE, TEST_DAC, traj);
+
+    assertEquals(
+      MetadataRecord.builder()
+        .withAction(Action.UPDATE)
+        .withFileType(ArgoFileType.TECHNICAL_DATA)
+        .withFile(TEST_FILE)
+        .withDac(TEST_DAC)
+        .withFloatId(FLOAT_ID)
+        .withInstitution(INSTITUTION)
+        .withDateUpdate(DATE_UPDATE)
         .build(),
       actual
     );

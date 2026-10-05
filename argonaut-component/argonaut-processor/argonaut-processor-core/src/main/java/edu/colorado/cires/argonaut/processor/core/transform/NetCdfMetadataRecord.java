@@ -10,8 +10,8 @@ import edu.colorado.cires.argonaut.core.netcdf.synthprofile.v13.ArgoSyntheticMul
 import edu.colorado.cires.argonaut.core.netcdf.synthprofile.v13.ArgoSyntheticProfileV13;
 import edu.colorado.cires.argonaut.core.netcdf.synthprofile.v13.ArgoSyntheticProfileV13Parameter;
 import edu.colorado.cires.argonaut.core.netcdf.synthprofile.v13.ArgoSyntheticProfileV13Reader;
+import edu.colorado.cires.argonaut.core.netcdf.technical.v31.ArgoTechnicalV31;
 import edu.colorado.cires.argonaut.core.netcdf.trajectory.v31.ArgoTrajectoryV31;
-import edu.colorado.cires.argonaut.core.netcdf.trajectory.v31.impl.NetCdfArgoTrajectoryV31;
 import edu.colorado.cires.argonaut.core.util.CommonParameterValues;
 import edu.colorado.cires.argonaut.messaging.core.databind.ArgoFileType;
 import edu.colorado.cires.argonaut.messaging.core.databind.MetadataRecord;
@@ -22,8 +22,6 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.time.Instant;
 import java.util.function.BiFunction;
-import java.util.function.Function;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.function.TriFunction;
 
@@ -215,5 +213,17 @@ public final class NetCdfMetadataRecord {
 
   private NetCdfMetadataRecord() {
 
+  }
+
+  public static MetadataRecord fromV31Technical(String file, String dac, ArgoTechnicalV31 technicalV31) {
+    return MetadataRecord.builder()
+      .withAction(Action.UPDATE)
+      .withFileType(ArgoFileType.TECHNICAL_DATA)
+      .withFile(file)
+      .withDac(dac)
+      .withFloatId(technicalV31.getPlatformNumber())
+      .withInstitution(technicalV31.getDataCenter())
+      .withDateUpdate(technicalV31.getDateUpdate())
+      .build();
   }
 }
