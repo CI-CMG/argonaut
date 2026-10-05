@@ -1,0 +1,107 @@
+package edu.colorado.cires.argonaut.standalone;
+
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.EntityTransaction;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.List;
+import java.util.stream.Stream;
+import org.apache.commons.io.FileUtils;
+
+public final class TestDataContext {
+
+  private TestDataContext() {
+
+  }
+
+  public static final Path processingDir = Paths.get("processing");
+  public static final Path workDir = Paths.get("work");
+  public static final Path submissionDir = Paths.get("submission");
+  public static final Path outputDir = Paths.get("output");
+  public static final Path processingDacDir = processingDir.resolve("dac");
+  public static final Path submissionDacDir = submissionDir.resolve("dac");
+
+  public static void clear(EntityManagerFactory entityManagerFactory, EntityManagerFactory auditEntityManagerFactory) throws IOException {
+    try (EntityManager em = entityManagerFactory.createEntityManager()) {
+      EntityTransaction tx = em.getTransaction();
+      tx.begin();
+      try {
+        em.createQuery("delete from ProfileParameterEntity").executeUpdate();
+        em.createQuery("delete from FileRemovedTimeEntity").executeUpdate();
+        em.createQuery("delete from MetadataSyntheticMergeEntity").executeUpdate();
+        em.createQuery("delete from ProfileMergeFileEntity").executeUpdate();
+        em.createQuery("delete from ProfileFileEntity").executeUpdate();
+        em.createQuery("delete from MetadataFileEntity").executeUpdate();
+        em.createQuery("delete from CycleEntity").executeUpdate();
+        em.createQuery("delete from FloatEntity").executeUpdate();
+        em.createQuery("delete from DacEntity").executeUpdate();
+        tx.commit();
+      } catch (Exception e) {
+        tx.rollback();
+        throw e;
+      }
+    }
+
+    try (EntityManager em = auditEntityManagerFactory.createEntityManager()) {
+      EntityTransaction tx = em.getTransaction();
+      tx.begin();
+      try {
+        em.createQuery("delete from AuditEntity ").executeUpdate();
+        tx.commit();
+      } catch (Exception e) {
+        tx.rollback();
+        throw e;
+      }
+    }
+
+    if (Files.exists(workDir)) {
+      try (Stream<Path> stream = Files.list(workDir)) {
+        stream.forEach(filedir -> {
+          FileUtils.deleteQuietly(filedir.toFile());
+        });
+      }
+    }
+
+    if (Files.exists(outputDir)) {
+      try (Stream<Path> stream = Files.list(outputDir)) {
+        stream.forEach(filedir -> {
+          FileUtils.deleteQuietly(filedir.toFile());
+        });
+      }
+    }
+
+    if (Files.exists(submissionDacDir)) {
+      List<Path> dacs;
+      try (Stream<Path> stream = Files.list(submissionDacDir)) {
+        dacs = stream.filter(Files::isDirectory).toList();
+      }
+      for (Path dac : dacs) {
+        Path submit = dac.resolve("submit");
+        if (Files.exists(submit)) {
+          try (Stream<Path> stream = Files.list(submit)) {
+            stream.forEach(filedir -> {
+              FileUtils.deleteQuietly(filedir.toFile());
+            });
+          }
+        }
+        Path processed = dac.resolve("processed");
+        Path processing = dac.resolve("processing");
+        FileUtils.deleteQuietly(processed.toFile());
+        FileUtils.deleteQuietly(processing.toFile());
+      }
+
+    }
+
+    if (Files.exists(processingDacDir)) {
+      try (Stream<Path> stream = Files.list(processingDacDir)) {
+        stream.forEach(filedir -> {
+          FileUtils.deleteQuietly(filedir.toFile());
+        });
+      }
+    }
+
+  }
+}

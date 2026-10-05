@@ -14,7 +14,6 @@ import edu.colorado.cires.argonaut.core.netcdf.profile.v31.ArgoProfileV31Reader;
 import edu.colorado.cires.argonaut.metadata.jpa.entity.ProfileFileEntity;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
-import jakarta.persistence.EntityTransaction;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -24,15 +23,10 @@ import java.nio.file.Paths;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Stream;
 import org.apache.camel.test.spring.junit5.CamelSpringTest;
-import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -64,117 +58,27 @@ public class LatestMergeTest {
   @Qualifier("auditEntityManagerFactory")
   private EntityManagerFactory auditEntityManagerFactory;
 
-  private static final Path processingDir = Paths.get("processing");
-  private static final Path workDir = Paths.get("work");
-  private static final Path submissionDir = Paths.get("submission");
-  private static final Path outputDir = Paths.get("output");
-
-  private static final Path processingDacDir = processingDir.resolve("dac");
-  private static final Path submissionDacDir = submissionDir.resolve("dac");
 
   @BeforeEach
-  public void setup() throws Exception {
-
-    try (EntityManager em = entityManagerFactory.createEntityManager()) {
-      EntityTransaction tx = em.getTransaction();
-      tx.begin();
-      try {
-        em.createQuery("delete from ProfileParameterEntity ").executeUpdate();
-        em.createQuery("delete from FileRemovedTimeEntity").executeUpdate();
-        em.createQuery("delete from MetadataSyntheticMergeEntity").executeUpdate();
-        em.createQuery("delete from ProfileMergeFileEntity").executeUpdate();
-        em.createQuery("delete from ProfileFileEntity").executeUpdate();
-        em.createQuery("delete from MetadataFileEntity").executeUpdate();
-        em.createQuery("delete from CycleEntity").executeUpdate();
-        em.createQuery("delete from FloatEntity").executeUpdate();
-        em.createQuery("delete from DacEntity").executeUpdate();
-        tx.commit();
-      } catch (Exception e) {
-        tx.rollback();
-        throw e;
-      }
-    }
-
-    try (EntityManager em = auditEntityManagerFactory.createEntityManager()) {
-      EntityTransaction tx = em.getTransaction();
-      tx.begin();
-      try {
-        em.createQuery("delete from AuditEntity ").executeUpdate();
-        tx.commit();
-      } catch (Exception e) {
-        tx.rollback();
-        throw e;
-      }
-    }
-
-    if (Files.exists(workDir)) {
-      try (Stream<Path> stream = Files.list(workDir)) {
-        stream.forEach(filedir -> {
-          FileUtils.deleteQuietly(filedir.toFile());
-        });
-      }
-    }
-
-    if (Files.exists(outputDir)) {
-      try (Stream<Path> stream = Files.list(outputDir)) {
-        stream.forEach(filedir -> {
-          FileUtils.deleteQuietly(filedir.toFile());
-        });
-      }
-    }
-
-    if (Files.exists(submissionDacDir)) {
-      List<Path> dacs;
-      try (Stream<Path> stream = Files.list(submissionDacDir)) {
-        dacs = stream.filter(Files::isDirectory).toList();
-      }
-      for (Path dac : dacs) {
-        Path submit = dac.resolve("submit");
-        if (Files.exists(submit)) {
-          try (Stream<Path> stream = Files.list(submit)) {
-            stream.forEach(filedir -> {
-              FileUtils.deleteQuietly(filedir.toFile());
-            });
-          }
-        }
-        Path processed = dac.resolve("processed");
-        Path processing = dac.resolve("processing");
-        FileUtils.deleteQuietly(processed.toFile());
-        FileUtils.deleteQuietly(processing.toFile());
-      }
-
-    }
-
-    if (Files.exists(processingDacDir)) {
-      try (Stream<Path> stream = Files.list(processingDacDir)) {
-        stream.forEach(filedir -> {
-          FileUtils.deleteQuietly(filedir.toFile());
-        });
-      }
-    }
-
-
-  }
-
   @AfterEach
-  public void cleanup() throws Exception {
-    setup();
+  public void setup() throws Exception {
+    TestDataContext.clear(entityManagerFactory, auditEntityManagerFactory);
   }
 
-  private static final Map<String, String> DAC_MAP;
-
-  static {
-    Map<String, String> map = new HashMap<>();
-    map.put("AO", "aoml");
-    map.put("IN", "incois");
-    map.put("CS", "csiro");
-    map.put("IF", "coriolis");
-    map.put("HZ", "csio");
-    map.put("JA", "jma");
-    map.put("BO", "bodc");
-    map.put("ME", "meds");
-    DAC_MAP = Collections.unmodifiableMap(map);
-  }
+//  private static final Map<String, String> DAC_MAP;
+//
+//  static {
+//    Map<String, String> map = new HashMap<>();
+//    map.put("AO", "aoml");
+//    map.put("IN", "incois");
+//    map.put("CS", "csiro");
+//    map.put("IF", "coriolis");
+//    map.put("HZ", "csio");
+//    map.put("JA", "jma");
+//    map.put("BO", "bodc");
+//    map.put("ME", "meds");
+//    DAC_MAP = Collections.unmodifiableMap(map);
+//  }
 
 //  @Test
 //  public void download() throws Exception {
@@ -210,24 +114,22 @@ public class LatestMergeTest {
   @Test
   public void testMerge() throws Exception {
 
-    Files.createDirectories(workDir.resolve("temp"));
-
+    Files.createDirectories(TestDataContext.workDir.resolve("temp"));
 
     List<Path> submissions = new ArrayList<>();
-    try(BufferedReader reader = Files.newBufferedReader(Paths.get("src/test/resources/latest/file_list.txt"), StandardCharsets.UTF_8)) {
+    try (BufferedReader reader = Files.newBufferedReader(Paths.get("src/test/resources/latest/file_list.txt"), StandardCharsets.UTF_8)) {
       String line;
       while ((line = reader.readLine()) != null) {
         submissions.add(Paths.get("src/test/resources/latest/" + line));
       }
     }
 
-
     // copy before moving to prevent state where file is picked up halfway
     for (Path file : submissions) {
-      Path tempFile = workDir.resolve("temp").resolve(file.getFileName());
+      Path tempFile = TestDataContext.workDir.resolve("temp").resolve(file.getFileName());
       Files.copy(file, tempFile);
       String dac = file.getName(5).toString();
-      Files.move(tempFile, submissionDacDir.resolve(dac).resolve("submit").resolve(file.getFileName()));
+      Files.move(tempFile, TestDataContext.submissionDacDir.resolve(dac).resolve("submit").resolve(file.getFileName()));
     }
 
     String[] fileNameHolder = new String[1];
@@ -259,9 +161,8 @@ public class LatestMergeTest {
 
     System.out.println("Merge completed. Verifying output...");
 
-    Path merged = outputDir.resolve("latest_data/" + fileNameHolder[0] + "_prof_0.nc");
+    Path merged = TestDataContext.outputDir.resolve("latest_data/" + fileNameHolder[0] + "_prof_0.nc");
     assertTrue(Files.exists(merged));
-
 
     modifiedAssertFilesEqual(Paths.get("src/test/resources/latest/latest_data/R20260925_prof_0.nc"), merged);
 
@@ -300,7 +201,8 @@ public class LatestMergeTest {
         assertEquals(expectedProfile.getDirection(), profile.getDirection());
         assertEquals(expectedProfile.getDataMode(), profile.getDataMode());
         if (q != 488) {
-          assertTrue(Math.abs(expectedProfile.getJulianDate().toEpochMilli() - profile.getJulianDate().toEpochMilli()) < 1000, "q=" + q + " expected=" + expectedProfile.getJulianDate() + " actual=" + profile.getJulianDate());
+          assertTrue(Math.abs(expectedProfile.getJulianDate().toEpochMilli() - profile.getJulianDate().toEpochMilli()) < 1000,
+              "q=" + q + " expected=" + expectedProfile.getJulianDate() + " actual=" + profile.getJulianDate());
         }
         assertEquals(expectedProfile.getJulianDateQc(), profile.getJulianDateQc());
 
@@ -342,12 +244,12 @@ public class LatestMergeTest {
               ArgoProfileV31Calibration expectedCalibration = expectedCalibrations.get(c);
               assertEquals(expectedCalibration.getDate(), calibration.getDate());
               assertEquals(expectedCalibration.getParameterName(), calibration.getParameterName());
-              assertEquals(expectedCalibration.getEquation(), calibration.getEquation(), "q=" + q + " expected=" + expectedCalibration.getEquation() + " actual=" + calibration.getEquation());
+              assertEquals(expectedCalibration.getEquation(), calibration.getEquation(),
+                  "q=" + q + " expected=" + expectedCalibration.getEquation() + " actual=" + calibration.getEquation());
               assertEquals(expectedCalibration.getCoefficient(), calibration.getCoefficient());
               assertEquals(expectedCalibration.getComment(), calibration.getComment());
             }
           }
-
 
           List<ArgoProfileV31Level> levels = profile.getParameter(parameterName).getLevels();
           List<ArgoProfileV31Level> expectedlevels = expectedProfile.getParameter(parameterName).getLevels();

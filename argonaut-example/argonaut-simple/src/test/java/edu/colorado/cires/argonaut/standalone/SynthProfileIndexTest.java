@@ -4,9 +4,7 @@ import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
-import jakarta.persistence.EntityTransaction;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -18,13 +16,11 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Stream;
 import java.util.zip.GZIPInputStream;
 import org.apache.camel.test.spring.junit5.CamelSpringTest;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
-import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -56,101 +52,12 @@ public class SynthProfileIndexTest {
   @Qualifier("auditEntityManagerFactory")
   private EntityManagerFactory auditEntityManagerFactory;
 
-  private static final Path processingDir = Paths.get("processing");
-  private static final Path workDir = Paths.get("work");
-  private static final Path submissionDir = Paths.get("submission");
-  private static final Path outputDir = Paths.get("output");
 
-  private static final Path processingDacDir = processingDir.resolve("dac");
-  private static final Path submissionDacDir = submissionDir.resolve("dac");
 
   @BeforeEach
-  public void setup() throws Exception {
-
-    try (EntityManager em = entityManagerFactory.createEntityManager()) {
-      EntityTransaction tx = em.getTransaction();
-      tx.begin();
-      try {
-        em.createQuery("delete from ProfileParameterEntity").executeUpdate();
-        em.createQuery("delete from FileRemovedTimeEntity").executeUpdate();
-        em.createQuery("delete from MetadataSyntheticMergeEntity").executeUpdate();
-        em.createQuery("delete from ProfileMergeFileEntity").executeUpdate();
-        em.createQuery("delete from ProfileFileEntity").executeUpdate();
-        em.createQuery("delete from MetadataFileEntity").executeUpdate();
-        em.createQuery("delete from CycleEntity").executeUpdate();
-        em.createQuery("delete from FloatEntity").executeUpdate();
-        em.createQuery("delete from DacEntity").executeUpdate();
-        tx.commit();
-      } catch (Exception e) {
-        tx.rollback();
-        throw e;
-      }
-    }
-
-    try (EntityManager em = auditEntityManagerFactory.createEntityManager()) {
-      EntityTransaction tx = em.getTransaction();
-      tx.begin();
-      try {
-        em.createQuery("delete from AuditEntity ").executeUpdate();
-        tx.commit();
-      } catch (Exception e) {
-        tx.rollback();
-        throw e;
-      }
-    }
-
-    if (Files.exists(workDir)) {
-      try (Stream<Path> stream = Files.list(workDir)) {
-        stream.forEach(filedir -> {
-          FileUtils.deleteQuietly(filedir.toFile());
-        });
-      }
-    }
-
-    if (Files.exists(outputDir)) {
-      try (Stream<Path> stream = Files.list(outputDir)) {
-        stream.forEach(filedir -> {
-          FileUtils.deleteQuietly(filedir.toFile());
-        });
-      }
-    }
-
-    if (Files.exists(submissionDacDir)) {
-      List<Path> dacs;
-      try (Stream<Path> stream = Files.list(submissionDacDir)) {
-        dacs = stream.filter(Files::isDirectory).toList();
-      }
-      for (Path dac : dacs) {
-        Path submit = dac.resolve("submit");
-        if (Files.exists(submit)) {
-          try (Stream<Path> stream = Files.list(submit)) {
-            stream.forEach(filedir -> {
-              FileUtils.deleteQuietly(filedir.toFile());
-            });
-          }
-        }
-        Path processed = dac.resolve("processed");
-        Path processing = dac.resolve("processing");
-        FileUtils.deleteQuietly(processed.toFile());
-        FileUtils.deleteQuietly(processing.toFile());
-      }
-
-    }
-
-    if (Files.exists(processingDacDir)) {
-      try (Stream<Path> stream = Files.list(processingDacDir)) {
-        stream.forEach(filedir -> {
-          FileUtils.deleteQuietly(filedir.toFile());
-        });
-      }
-    }
-
-
-  }
-
   @AfterEach
-  public void cleanup() throws Exception {
-    setup();
+  public void setup() throws Exception {
+    TestDataContext.clear(entityManagerFactory, auditEntityManagerFactory);
   }
 
   // Actual values from French GDAC
@@ -160,7 +67,7 @@ public class SynthProfileIndexTest {
   @Test
   public void testCreateIndex() throws Exception {
 
-    Files.createDirectories(workDir.resolve("temp"));
+    Files.createDirectories(TestDataContext.workDir.resolve("temp"));
 
     //TODO need to fix synth merge for first 2 examples
     List<Path> submissions = Arrays.asList(
@@ -177,10 +84,10 @@ public class SynthProfileIndexTest {
 
     // copy before moving to prevent state where file is picked up halfway
     for (Path file : submissions) {
-      Path tempFile = workDir.resolve("temp").resolve(file.getFileName());
+      Path tempFile = TestDataContext.workDir.resolve("temp").resolve(file.getFileName());
       Files.copy(file, tempFile);
       String dac = file.getName(4).toString();
-      Files.move(tempFile, submissionDacDir.resolve(dac).resolve("submit").resolve(file.getFileName()));
+      Files.move(tempFile, TestDataContext.submissionDacDir.resolve(dac).resolve("submit").resolve(file.getFileName()));
     }
 
     // note: using dummy value for date_update since this is generated
@@ -195,14 +102,14 @@ public class SynthProfileIndexTest {
 
 //      assertTrue(Files.exists(outputDir.resolve("dac/bodc/6901174/profiles/SD6901174_143.nc")));
 //      assertTrue(Files.exists(outputDir.resolve("dac/coriolis/6901486/profiles/SD6901486_037.nc")));
-      assertTrue(Files.exists(outputDir.resolve("dac/jma/2900460/profiles/SR2900460_069.nc")));
+      assertTrue(Files.exists(TestDataContext.outputDir.resolve("dac/jma/2900460/profiles/SR2900460_069.nc")));
 
     });
 
     await().pollInterval(Duration.ofSeconds(10)).atMost(Duration.ofMinutes(3)).untilAsserted(() -> {
 
-      Path textFile = outputDir.resolve("argo_synthetic-profile_index.txt");
-      Path gzFile = outputDir.resolve("argo_synthetic-profile_index.txt.gz");
+      Path textFile = TestDataContext.outputDir.resolve("argo_synthetic-profile_index.txt");
+      Path gzFile = TestDataContext.outputDir.resolve("argo_synthetic-profile_index.txt.gz");
 
       assertTrue(Files.exists(textFile));
       assertTrue(Files.exists(gzFile));

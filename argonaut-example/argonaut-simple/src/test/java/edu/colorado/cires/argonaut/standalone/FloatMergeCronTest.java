@@ -7,19 +7,13 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import edu.colorado.cires.argonaut.metadata.jpa.entity.ProfileFileEntity;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
-import jakarta.persistence.EntityTransaction;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Duration;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Stream;
 import org.apache.camel.test.spring.junit5.CamelSpringTest;
-import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -47,97 +41,16 @@ public class FloatMergeCronTest {
   @Qualifier("entityManagerFactory")
   private EntityManagerFactory entityManagerFactory;
 
-  private static final Path processingDir = Paths.get("processing");
-  private static final Path workDir = Paths.get("work");
-  private static final Path submissionDir = Paths.get("submission");
-  private static final Path outputDir = Paths.get("output");
+  @Autowired
+  @Qualifier("auditEntityManagerFactory")
+  private EntityManagerFactory auditEntityManagerFactory;
 
-
-  private static final Path medsProcessingDir = processingDir.resolve("dac/meds");
-  private static final Path submissionMedsDir = submissionDir.resolve("dac/meds");
-  private static final Path submitDir = submissionDir.resolve("dac/meds/submit");
-
-  private static final Path submissionProcessingDir = submissionMedsDir.resolve("processing");
-  private static final Path submissionProcessedDir = submissionMedsDir.resolve("processed");
-  private static final Instant timestamp = LocalDateTime.of(2026, 2, 20, 1, 2, 3).atZone(ZoneId.of("UTC")).toInstant();
-
+  private static final Path submitDir = TestDataContext.submissionDir.resolve("dac/meds/submit");
 
   @BeforeEach
-  public void setup() throws Exception {
-
-    try (EntityManager em = entityManagerFactory.createEntityManager()) {
-      EntityTransaction tx = em.getTransaction();
-      tx.begin();
-      try {
-        em.createQuery("delete from ProfileParameterEntity ").executeUpdate();
-        em.createQuery("delete from FileRemovedTimeEntity").executeUpdate();
-        em.createQuery("delete from MetadataSyntheticMergeEntity").executeUpdate();
-        em.createQuery("delete from ProfileMergeFileEntity").executeUpdate();
-        em.createQuery("delete from ProfileFileEntity").executeUpdate();
-        em.createQuery("delete from MetadataFileEntity").executeUpdate();
-        em.createQuery("delete from CycleEntity").executeUpdate();
-        em.createQuery("delete from FloatEntity").executeUpdate();
-        em.createQuery("delete from DacEntity").executeUpdate();
-        tx.commit();
-      } catch (Exception e) {
-        tx.rollback();
-        throw e;
-      }
-    }
-
-    if (Files.exists(workDir)) {
-      try (Stream<Path> stream = Files.list(workDir)) {
-        stream.forEach(filedir -> {
-          FileUtils.deleteQuietly(filedir.toFile());
-        });
-      }
-    }
-
-    if (Files.exists(outputDir)) {
-      try (Stream<Path> stream = Files.list(outputDir)) {
-        stream.forEach(filedir -> {
-          FileUtils.deleteQuietly(filedir.toFile());
-        });
-      }
-    }
-
-    if (Files.exists(submitDir)) {
-      try (Stream<Path> stream = Files.list(submitDir)) {
-        stream.forEach(filedir -> {
-          FileUtils.deleteQuietly(filedir.toFile());
-        });
-      }
-    }
-
-    if (Files.exists(submissionProcessingDir)) {
-      try (Stream<Path> stream = Files.list(submissionProcessingDir)) {
-        stream.forEach(filedir -> {
-          FileUtils.deleteQuietly(filedir.toFile());
-        });
-      }
-    }
-
-    if (Files.exists(submissionProcessedDir)) {
-      try (Stream<Path> stream = Files.list(submissionProcessedDir)) {
-        stream.forEach(filedir -> {
-          FileUtils.deleteQuietly(filedir.toFile());
-        });
-      }
-    }
-
-    if (Files.exists(medsProcessingDir)) {
-      try (Stream<Path> stream = Files.list(medsProcessingDir)) {
-        stream.forEach(filedir -> {
-          FileUtils.deleteQuietly(filedir.toFile());
-        });
-      }
-    }
-
-  }
-
   @AfterEach
-  public void cleanup() throws Exception {
-    setup();
+  public void setup() throws Exception {
+    TestDataContext.clear(entityManagerFactory, auditEntityManagerFactory);
   }
 
   @Test
@@ -230,7 +143,7 @@ public class FloatMergeCronTest {
 
     // copy before moving to prevent state where file is picked up halfway
     for (String fileName : fileNames) {
-      Path copyFile = submissionDir.resolve(fileName);
+      Path copyFile = TestDataContext.submissionDir.resolve(fileName);
       Path submittedFile = submitDir.resolve(fileName);
       Files.copy(Paths.get("src/test/resources/meds/4902704/profiles").resolve(fileName), copyFile);
       Files.move(copyFile, submittedFile);
@@ -248,9 +161,9 @@ public class FloatMergeCronTest {
       });
     });
 
-    assertTrue(Files.exists(outputDir.resolve("dac/meds/4902704/4902704_prof.nc")));
+    assertTrue(Files.exists(TestDataContext.outputDir.resolve("dac/meds/4902704/4902704_prof.nc")));
 
-    fileNames.stream().map(fileName -> outputDir.resolve("dac/meds/4902704/profiles/").resolve(fileName)).forEach(path -> {
+    fileNames.stream().map(fileName -> TestDataContext.outputDir.resolve("dac/meds/4902704/profiles/").resolve(fileName)).forEach(path -> {
       assertTrue(Files.exists(path));
     });
   }

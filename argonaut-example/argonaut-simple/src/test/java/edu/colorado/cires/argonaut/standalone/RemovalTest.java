@@ -23,9 +23,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import org.apache.camel.test.spring.junit5.CamelSpringTest;
-import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -57,107 +55,16 @@ public class RemovalTest {
   @Qualifier("auditEntityManagerFactory")
   private EntityManagerFactory auditEntityManagerFactory;
 
-  private static final Path processingDir = Paths.get("processing");
-  private static final Path workDir = Paths.get("work");
-  private static final Path submissionDir = Paths.get("submission");
-  private static final Path outputDir = Paths.get("output");
-
-  private static final Path processingDacDir = processingDir.resolve("dac");
-  private static final Path submissionDacDir = submissionDir.resolve("dac");
-
   @BeforeEach
-  public void setup() throws Exception {
-
-    try (EntityManager em = entityManagerFactory.createEntityManager()) {
-      EntityTransaction tx = em.getTransaction();
-      tx.begin();
-      try {
-        em.createQuery("delete from ProfileParameterEntity ").executeUpdate();
-        em.createQuery("delete from FileRemovedTimeEntity").executeUpdate();
-        em.createQuery("delete from MetadataSyntheticMergeEntity").executeUpdate();
-        em.createQuery("delete from ProfileMergeFileEntity").executeUpdate();
-        em.createQuery("delete from ProfileFileEntity").executeUpdate();
-        em.createQuery("delete from MetadataFileEntity").executeUpdate();
-        em.createQuery("delete from CycleEntity").executeUpdate();
-        em.createQuery("delete from FloatEntity").executeUpdate();
-        em.createQuery("delete from DacEntity").executeUpdate();
-        tx.commit();
-      } catch (Exception e) {
-        tx.rollback();
-        throw e;
-      }
-    }
-
-    try (EntityManager em = auditEntityManagerFactory.createEntityManager()) {
-      EntityTransaction tx = em.getTransaction();
-      tx.begin();
-      try {
-        em.createQuery("delete from AuditEntity ").executeUpdate();
-        tx.commit();
-      } catch (Exception e) {
-        tx.rollback();
-        throw e;
-      }
-    }
-
-    if (Files.exists(workDir)) {
-      try (Stream<Path> stream = Files.list(workDir)) {
-        stream.forEach(filedir -> {
-          FileUtils.deleteQuietly(filedir.toFile());
-        });
-      }
-    }
-
-    if (Files.exists(outputDir)) {
-      try (Stream<Path> stream = Files.list(outputDir)) {
-        stream.forEach(filedir -> {
-          FileUtils.deleteQuietly(filedir.toFile());
-        });
-      }
-    }
-
-    if (Files.exists(submissionDacDir)) {
-      List<Path> dacs;
-      try (Stream<Path> stream = Files.list(submissionDacDir)) {
-        dacs = stream.filter(Files::isDirectory).toList();
-      }
-      for (Path dac : dacs) {
-        Path submit = dac.resolve("submit");
-        if (Files.exists(submit)) {
-          try (Stream<Path> stream = Files.list(submit)) {
-            stream.forEach(filedir -> {
-              FileUtils.deleteQuietly(filedir.toFile());
-            });
-          }
-        }
-        Path processed = dac.resolve("processed");
-        Path processing = dac.resolve("processing");
-        FileUtils.deleteQuietly(processed.toFile());
-        FileUtils.deleteQuietly(processing.toFile());
-      }
-
-    }
-
-    if (Files.exists(processingDacDir)) {
-      try (Stream<Path> stream = Files.list(processingDacDir)) {
-        stream.forEach(filedir -> {
-          FileUtils.deleteQuietly(filedir.toFile());
-        });
-      }
-    }
-
-
-  }
-
   @AfterEach
-  public void cleanup() throws Exception {
-    setup();
+  public void setup() throws Exception {
+    TestDataContext.clear(entityManagerFactory, auditEntityManagerFactory);
   }
 
   @Test
   public void testValidRemoval() throws Exception {
 
-    Files.createDirectories(workDir.resolve("temp"));
+    Files.createDirectories(TestDataContext.workDir.resolve("temp"));
 
     List<Path> toBeRemoved = Arrays.asList(
         Paths.get("src/test/resources/dac/coriolis/6903062/profiles/D6903062_307.nc"),
@@ -174,10 +81,10 @@ public class RemovalTest {
 
     // copy before moving to prevent state where file is picked up halfway
     for (Path file : submissions) {
-      Path tempFile = workDir.resolve("temp").resolve(file.getFileName());
+      Path tempFile = TestDataContext.workDir.resolve("temp").resolve(file.getFileName());
       Files.copy(file, tempFile);
       String dac = file.getName(4).toString();
-      Files.move(tempFile, submissionDacDir.resolve(dac).resolve("submit").resolve(file.getFileName()));
+      Files.move(tempFile, TestDataContext.submissionDacDir.resolve(dac).resolve("submit").resolve(file.getFileName()));
     }
 
     await().pollInterval(Duration.ofSeconds(10)).atMost(Duration.ofMinutes(4)).untilAsserted(() -> {
@@ -192,7 +99,7 @@ public class RemovalTest {
     });
 
     submissions.stream()
-        .map(path -> outputDir.resolve("dac").resolve(path.subpath(4, 8)))
+        .map(path -> TestDataContext.outputDir.resolve("dac").resolve(path.subpath(4, 8)))
         .forEach(path -> assertTrue(Files.exists(path)));
 
     List<Path> removalFiles = Arrays.asList(
@@ -201,10 +108,10 @@ public class RemovalTest {
     );
     // copy before moving to prevent state where file is picked up halfway
     for (Path file : removalFiles) {
-      Path tempFile = workDir.resolve("temp").resolve(file.getFileName());
+      Path tempFile = TestDataContext.workDir.resolve("temp").resolve(file.getFileName());
       Files.copy(file, tempFile);
       String dac = file.getFileName().toString().split("_")[0];
-      Files.move(tempFile, submissionDacDir.resolve(dac).resolve("submit").resolve(file.getFileName()));
+      Files.move(tempFile, TestDataContext.submissionDacDir.resolve(dac).resolve("submit").resolve(file.getFileName()));
     }
 
     await().pollInterval(Duration.ofSeconds(10)).atMost(Duration.ofMinutes(4)).untilAsserted(() -> {
@@ -223,12 +130,12 @@ public class RemovalTest {
         .forEach(path -> {
           boolean removed = toBeRemoved.contains(path);
           String dac = path.getName(4).toString();
-          assertEquals(!removed, Files.exists(outputDir.resolve("dac").resolve(path.subpath(4, 8))));
-          assertEquals(removed, Files.exists(outputDir.resolve("etc").resolve("removed").resolve(dac).resolve(path.getFileName())));
+          assertEquals(!removed, Files.exists(TestDataContext.outputDir.resolve("dac").resolve(path.subpath(4, 8))));
+          assertEquals(removed, Files.exists(TestDataContext.outputDir.resolve("etc").resolve("removed").resolve(dac).resolve(path.getFileName())));
         });
 
-    assertFalse(Files.exists(submissionDir.resolve("dac/aoml/processed/2026-02-20T01:02:03Z/reject/aoml_removal.txt")));
-    assertTrue(Files.exists(submissionDir.resolve("dac/aoml/processed/2026-02-20T01:02:03Z/aoml_removal.txt")));
+    assertFalse(Files.exists(TestDataContext.submissionDir.resolve("dac/aoml/processed/2026-02-20T01:02:03Z/reject/aoml_removal.txt")));
+    assertTrue(Files.exists(TestDataContext.submissionDir.resolve("dac/aoml/processed/2026-02-20T01:02:03Z/aoml_removal.txt")));
 
     // artificially set delete time further in the past to trigger removal
     try (EntityManager em = entityManagerFactory.createEntityManager()) {
@@ -252,8 +159,8 @@ public class RemovalTest {
           .forEach(path -> {
             boolean removed = toBeRemoved.contains(path);
             String dac = path.getName(4).toString();
-            assertEquals(!removed, Files.exists(outputDir.resolve("dac").resolve(path.subpath(4, 8))));
-            assertFalse(Files.exists(outputDir.resolve("etc").resolve("removed").resolve(dac).resolve(path.getFileName())));
+            assertEquals(!removed, Files.exists(TestDataContext.outputDir.resolve("dac").resolve(path.subpath(4, 8))));
+            assertFalse(Files.exists(TestDataContext.outputDir.resolve("etc").resolve("removed").resolve(dac).resolve(path.getFileName())));
           });
     });
 
@@ -263,7 +170,7 @@ public class RemovalTest {
   @Test
   public void testInvalidRemoval() throws Exception {
 
-    Files.createDirectories(workDir.resolve("temp"));
+    Files.createDirectories(TestDataContext.workDir.resolve("temp"));
 
     List<Path> submissions = Arrays.asList(
         Paths.get("src/test/resources/dac/coriolis/6903062/profiles/D6903062_307.nc"),
@@ -276,10 +183,10 @@ public class RemovalTest {
 
     // copy before moving to prevent state where file is picked up halfway
     for (Path file : submissions) {
-      Path tempFile = workDir.resolve("temp").resolve(file.getFileName());
+      Path tempFile = TestDataContext.workDir.resolve("temp").resolve(file.getFileName());
       Files.copy(file, tempFile);
       String dac = file.getName(4).toString();
-      Files.move(tempFile, submissionDacDir.resolve(dac).resolve("submit").resolve(file.getFileName()));
+      Files.move(tempFile, TestDataContext.submissionDacDir.resolve(dac).resolve("submit").resolve(file.getFileName()));
     }
 
     await().pollInterval(Duration.ofSeconds(10)).atMost(Duration.ofMinutes(4)).untilAsserted(() -> {
@@ -294,7 +201,7 @@ public class RemovalTest {
     });
 
     submissions.stream()
-        .map(path -> outputDir.resolve("dac").resolve(path.subpath(4, 8)))
+        .map(path -> TestDataContext.outputDir.resolve("dac").resolve(path.subpath(4, 8)))
         .forEach(path -> assertTrue(Files.exists(path)));
 
 
@@ -303,9 +210,9 @@ public class RemovalTest {
     Path removalFile = Paths.get("src/test/resources/coriolis_removal.txt");
 
     // copy before moving to prevent state where file is picked up halfway
-    Path tempFile = workDir.resolve("temp").resolve(removalFile.getFileName());
+    Path tempFile = TestDataContext.workDir.resolve("temp").resolve(removalFile.getFileName());
     Files.copy(removalFile, tempFile);
-    Files.move(tempFile, submissionDacDir.resolve("aoml").resolve("submit").resolve(removalFile.getFileName()));
+    Files.move(tempFile, TestDataContext.submissionDacDir.resolve("aoml").resolve("submit").resolve(removalFile.getFileName()));
 
 
     await().pollInterval(Duration.ofSeconds(10)).atMost(Duration.ofMinutes(4)).untilAsserted(() -> {
@@ -322,8 +229,8 @@ public class RemovalTest {
     submissions
         .forEach(path -> {
           String dac = path.getName(4).toString();
-          assertTrue(Files.exists(outputDir.resolve("dac").resolve(path.subpath(4, 8))));
-          assertFalse(Files.exists(outputDir.resolve("etc").resolve("removed").resolve(dac).resolve(path.getFileName())));
+          assertTrue(Files.exists(TestDataContext.outputDir.resolve("dac").resolve(path.subpath(4, 8))));
+          assertFalse(Files.exists(TestDataContext.outputDir.resolve("etc").resolve("removed").resolve(dac).resolve(path.getFileName())));
         });
 
     try (EntityManager em = auditEntityManagerFactory.createEntityManager()) {
@@ -332,8 +239,8 @@ public class RemovalTest {
       assertEquals("file name does not start with DAC identifier: 'coriolis_removal.txt', aoml", audits.get(0).getStackTrace());
     }
 
-    assertTrue(Files.exists(submissionDir.resolve("dac/aoml/processed/2026-02-20T01:02:03Z/reject/coriolis_removal.txt")));
-    assertFalse(Files.exists(submissionDir.resolve("dac/aoml/processed/2026-02-20T01:02:03Z/coriolis_removal.txt")));
+    assertTrue(Files.exists(TestDataContext.submissionDir.resolve("dac/aoml/processed/2026-02-20T01:02:03Z/reject/coriolis_removal.txt")));
+    assertFalse(Files.exists(TestDataContext.submissionDir.resolve("dac/aoml/processed/2026-02-20T01:02:03Z/coriolis_removal.txt")));
 
 
   }

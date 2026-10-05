@@ -1,21 +1,12 @@
 package edu.colorado.cires.argonaut.standalone;
 
-import static edu.colorado.cires.argonaut.core.util.NetCdfWriteUtils.REFERENCE_DATE;
 import static org.awaitility.Awaitility.await;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import edu.colorado.cires.argonaut.core.netcdf.profile.v31.ArgoProfileV31;
-import edu.colorado.cires.argonaut.core.netcdf.profile.v31.ArgoProfileV31Calibration;
-import edu.colorado.cires.argonaut.core.netcdf.profile.v31.ArgoProfileV31Level;
-import edu.colorado.cires.argonaut.core.netcdf.profile.v31.ArgoProfileV31Reader;
 import edu.colorado.cires.argonaut.metadata.jpa.entity.ProfileFileEntity;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
-import jakarta.persistence.EntityTransaction;
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -23,14 +14,11 @@ import java.time.Duration;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.stream.Stream;
 import org.apache.camel.test.spring.junit5.CamelSpringTest;
-import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -58,88 +46,19 @@ public class GeoMergeCronTest {
   @Qualifier("entityManagerFactory")
   private EntityManagerFactory entityManagerFactory;
 
-  private static final Path processingDir = Paths.get("processing");
-  private static final Path workDir = Paths.get("work");
-  private static final Path submissionDir = Paths.get("submission");
-  private static final Path outputDir = Paths.get("output");
-
-  private static final Path processingDacDir = processingDir.resolve("dac");
-  private static final Path submissionDacDir = submissionDir.resolve("dac");
+  @Autowired
+  @Qualifier("auditEntityManagerFactory")
+  private EntityManagerFactory auditEntityManagerFactory;
 
   @BeforeEach
-  public void setup() throws Exception {
-
-    try (EntityManager em = entityManagerFactory.createEntityManager()) {
-      EntityTransaction tx = em.getTransaction();
-      tx.begin();
-      try {
-        em.createQuery("delete from ProfileParameterEntity ").executeUpdate();
-        em.createQuery("delete from FileRemovedTimeEntity").executeUpdate();
-        em.createQuery("delete from MetadataSyntheticMergeEntity").executeUpdate();
-        em.createQuery("delete from ProfileMergeFileEntity").executeUpdate();
-        em.createQuery("delete from ProfileFileEntity").executeUpdate();
-        em.createQuery("delete from MetadataFileEntity").executeUpdate();
-        em.createQuery("delete from CycleEntity").executeUpdate();
-        em.createQuery("delete from FloatEntity").executeUpdate();
-        em.createQuery("delete from DacEntity").executeUpdate();
-        tx.commit();
-      } catch (Exception e) {
-        tx.rollback();
-        throw e;
-      }
-    }
-
-    if (Files.exists(workDir)) {
-      try (Stream<Path> stream = Files.list(workDir)) {
-        stream.forEach(filedir -> {
-          FileUtils.deleteQuietly(filedir.toFile());
-        });
-      }
-    }
-
-    if (Files.exists(outputDir)) {
-      try (Stream<Path> stream = Files.list(outputDir)) {
-        stream.forEach(filedir -> {
-          FileUtils.deleteQuietly(filedir.toFile());
-        });
-      }
-    }
-
-    if (Files.exists(submissionDacDir)) {
-      List<Path> dacs;
-      try (Stream<Path> stream = Files.list(submissionDacDir)) {
-        dacs = stream.filter(Files::isDirectory).toList();
-      }
-      for (Path dac : dacs) {
-        Path submit = dac.resolve("submit");
-        if (Files.exists(submit)) {
-          try (Stream<Path> stream = Files.list(submit)) {
-            stream.forEach(filedir -> {
-              FileUtils.deleteQuietly(filedir.toFile());
-            });
-          }
-        }
-      }
-
-    }
-
-    if (Files.exists(processingDacDir)) {
-      try (Stream<Path> stream = Files.list(processingDacDir)) {
-        stream.forEach(filedir -> {
-          FileUtils.deleteQuietly(filedir.toFile());
-        });
-      }
-    }
-
-
-  }
-
   @AfterEach
-  public void cleanup() throws Exception {
-    setup();
+  public void setup() throws Exception {
+    TestDataContext.clear(entityManagerFactory, auditEntityManagerFactory);
   }
 
-  private record Submission (String dac, String floatId, String direction, String cycle) {}
+  private record Submission(String dac, String floatId, String direction, String cycle) {
+
+  }
 
 
   private static final Map<String, String> DAC_MAP;
@@ -161,94 +80,95 @@ public class GeoMergeCronTest {
   public void testSubmitAndCreateMultiProf() throws Exception {
 
     List<Submission> submissions = Arrays.asList(
-        new Submission("IN", "2902200",	"A",	"251"),
-        new Submission("AO", "7900664",	"A",	"315"),
-        new Submission("AO", "5902500",	"A",	"226"),
-        new Submission("AO", "1902216",	"A",	"226"),
-        new Submission("AO", "5906002",	"A",	"148"),
-        new Submission("CS", "5905172",	"A",	"232"),
-        new Submission("AO", "1902037",	"A",	"148"),
-        new Submission("CS", "7900917",	"A",	"069"),
-        new Submission("IF", "6901982",	"A",	"296"),
-        new Submission("AO", "1902202",	"A",	"153"),
-        new Submission("AO", "4903028",	"A",	"153"),
-        new Submission("IF", "6904069",	"A",	"069"),
-        new Submission("AO", "5905770",	"A",	"157"),
-        new Submission("IF", "7900513",	"A",	"149"),
-        new Submission("IN", "2902270",	"A",	"144"),
-        new Submission("AO", "1902192",	"A",	"173"),
-        new Submission("IF", "6903151",	"A",	"005"),
-        new Submission("AO", "5906142",	"A",	"092"),
-        new Submission("IN", "2902219",	"A",	"220"),
-        new Submission("AO", "5904722",	"A",	"248"),
-        new Submission("HZ", "2902766",	"A",	"109"),
-        new Submission("IN", "2902264",	"A",	"258"),
-        new Submission("AO", "1902201",	"A",	"166"),
-        new Submission("AO", "3902280",	"A",	"039"),
-        new Submission("AO", "5906032",	"A",	"134"),
-        new Submission("AO", "5904813",	"A",	"228"),
-        new Submission("AO", "5906290",	"A",	"087"),
-        new Submission("AO", "5906036",	"A",	"139"),
-        new Submission("IF", "6903058",	"A",	"307"),
-        new Submission("IF", "6903062",	"A",	"307"),
-        new Submission("IF", "6903063",	"A",	"307"),
-        new Submission("CS", "7900904",	"A",	"224"),
-        new Submission("IF", "6903008",	"A",	"307"),
-        new Submission("IN", "2902297",	"A",	"105"),
-        new Submission("IF", "6903046",	"A",	"307"),
-        new Submission("AO", "5904831",	"A",	"226"),
-        new Submission("IN", "2902290",	"A",	"125"),
-        new Submission("IN", "2902303",	"A",	"104"),
-        new Submission("CS", "5905170",	"A",	"238"),
-        new Submission("AO", "3901829",	"A",	"195"),
-        new Submission("IN", "2902188",	"A",	"268"),
-        new Submission("HZ", "2902774",	"A",	"112"),
-        new Submission("HZ", "2902778",	"A",	"111"),
-        new Submission("JA", "1902335",	"A",	"129"),
-        new Submission("IF", "3902011",	"A",	"164"),
-        new Submission("AO", "1902028",	"A",	"239"),
-        new Submission("IF", "6903045",	"A",	"076"),
-        new Submission("CS", "5905498",	"A",	"030"),
-        new Submission("AO", "2903142",	"A",	"007"),
-        new Submission("IF", "7900514",	"A",	"149"),
-        new Submission("IF", "7900576",	"A",	"075"),
-        new Submission("AO", "1901701",	"A",	"336"),
-        new Submission("HZ", "2902775",	"A",	"148"),
-        new Submission("CS", "5905472",	"A",	"090"),
-        new Submission("CS", "5905531",	"A",	"018"),
-        new Submission("CS", "5905212",	"A",	"189"),
-        new Submission("CS", "5905177",	"A",	"231"),
-        new Submission("JA", "1902334",	"A",	"112"),
-        new Submission("AO", "5902521",	"D",	"168"),
-        new Submission("CS", "5905532",	"A",	"005"),
-        new Submission("BO", "1901918",	"A",	"022"),
-        new Submission("AO", "5905088",	"A",	"215"),
-        new Submission("AO", "1902264",	"A",	"090"),
-        new Submission("IN", "2902198",	"A",	"251"),
-        new Submission("AO", "5906147",	"A",	"088"),
+        new Submission("IN", "2902200", "A", "251"),
+        new Submission("AO", "7900664", "A", "315"),
+        new Submission("AO", "5902500", "A", "226"),
+        new Submission("AO", "1902216", "A", "226"),
+        new Submission("AO", "5906002", "A", "148"),
+        new Submission("CS", "5905172", "A", "232"),
+        new Submission("AO", "1902037", "A", "148"),
+        new Submission("CS", "7900917", "A", "069"),
+        new Submission("IF", "6901982", "A", "296"),
+        new Submission("AO", "1902202", "A", "153"),
+        new Submission("AO", "4903028", "A", "153"),
+        new Submission("IF", "6904069", "A", "069"),
+        new Submission("AO", "5905770", "A", "157"),
+        new Submission("IF", "7900513", "A", "149"),
+        new Submission("IN", "2902270", "A", "144"),
+        new Submission("AO", "1902192", "A", "173"),
+        new Submission("IF", "6903151", "A", "005"),
+        new Submission("AO", "5906142", "A", "092"),
+        new Submission("IN", "2902219", "A", "220"),
+        new Submission("AO", "5904722", "A", "248"),
+        new Submission("HZ", "2902766", "A", "109"),
+        new Submission("IN", "2902264", "A", "258"),
+        new Submission("AO", "1902201", "A", "166"),
+        new Submission("AO", "3902280", "A", "039"),
+        new Submission("AO", "5906032", "A", "134"),
+        new Submission("AO", "5904813", "A", "228"),
+        new Submission("AO", "5906290", "A", "087"),
+        new Submission("AO", "5906036", "A", "139"),
+        new Submission("IF", "6903058", "A", "307"),
+        new Submission("IF", "6903062", "A", "307"),
+        new Submission("IF", "6903063", "A", "307"),
+        new Submission("CS", "7900904", "A", "224"),
+        new Submission("IF", "6903008", "A", "307"),
+        new Submission("IN", "2902297", "A", "105"),
+        new Submission("IF", "6903046", "A", "307"),
+        new Submission("AO", "5904831", "A", "226"),
+        new Submission("IN", "2902290", "A", "125"),
+        new Submission("IN", "2902303", "A", "104"),
+        new Submission("CS", "5905170", "A", "238"),
+        new Submission("AO", "3901829", "A", "195"),
+        new Submission("IN", "2902188", "A", "268"),
+        new Submission("HZ", "2902774", "A", "112"),
+        new Submission("HZ", "2902778", "A", "111"),
+        new Submission("JA", "1902335", "A", "129"),
+        new Submission("IF", "3902011", "A", "164"),
+        new Submission("AO", "1902028", "A", "239"),
+        new Submission("IF", "6903045", "A", "076"),
+        new Submission("CS", "5905498", "A", "030"),
+        new Submission("AO", "2903142", "A", "007"),
+        new Submission("IF", "7900514", "A", "149"),
+        new Submission("IF", "7900576", "A", "075"),
+        new Submission("AO", "1901701", "A", "336"),
+        new Submission("HZ", "2902775", "A", "148"),
+        new Submission("CS", "5905472", "A", "090"),
+        new Submission("CS", "5905531", "A", "018"),
+        new Submission("CS", "5905212", "A", "189"),
+        new Submission("CS", "5905177", "A", "231"),
+        new Submission("JA", "1902334", "A", "112"),
+        new Submission("AO", "5902521", "D", "168"),
+        new Submission("CS", "5905532", "A", "005"),
+        new Submission("BO", "1901918", "A", "022"),
+        new Submission("AO", "5905088", "A", "215"),
+        new Submission("AO", "1902264", "A", "090"),
+        new Submission("IN", "2902198", "A", "251"),
+        new Submission("AO", "5906147", "A", "088"),
 
         // should not be in merged file
-        new Submission("AO", "5906287",	"A",	"086"),
-        new Submission("IF", "6903271",	"A",	"383")
+        new Submission("AO", "5906287", "A", "086"),
+        new Submission("IF", "6903271", "A", "383")
     );
 
     Collections.shuffle(submissions);
 
-    Files.createDirectories(workDir.resolve("temp"));
+    Files.createDirectories(TestDataContext.workDir.resolve("temp"));
 
     Set<Path> submittedFiles = new TreeSet<>();
 
     // copy before moving to prevent state where file is picked up halfway
     for (Submission submission : submissions) {
-      Path file1 = Paths.get("src/test/resources/dac").resolve(DAC_MAP.get(submission.dac())).resolve(submission.floatId()).resolve("profiles").resolve("R" + submission.floatId() + "_" + submission.cycle() + (submission.direction().equals("D") ? "D" : "") + ".nc");
-      Path file2 = Paths.get("src/test/resources/dac").resolve(DAC_MAP.get(submission.dac())).resolve(submission.floatId()).resolve("profiles").resolve("D" + submission.floatId() + "_" + submission.cycle() + (submission.direction().equals("D") ? "D" : "") + ".nc");
+      Path file1 = Paths.get("src/test/resources/dac").resolve(DAC_MAP.get(submission.dac())).resolve(submission.floatId()).resolve("profiles")
+          .resolve("R" + submission.floatId() + "_" + submission.cycle() + (submission.direction().equals("D") ? "D" : "") + ".nc");
+      Path file2 = Paths.get("src/test/resources/dac").resolve(DAC_MAP.get(submission.dac())).resolve(submission.floatId()).resolve("profiles")
+          .resolve("D" + submission.floatId() + "_" + submission.cycle() + (submission.direction().equals("D") ? "D" : "") + ".nc");
       Path file = Files.exists(file1) ? file1 : file2;
-      Path tempFile = workDir.resolve("temp").resolve(file.getFileName());
+      Path tempFile = TestDataContext.workDir.resolve("temp").resolve(file.getFileName());
       Files.copy(file, tempFile);
-      Files.move(tempFile, submissionDacDir.resolve(DAC_MAP.get(submission.dac())).resolve("submit").resolve(file.getFileName()));
+      Files.move(tempFile, TestDataContext.submissionDacDir.resolve(DAC_MAP.get(submission.dac())).resolve("submit").resolve(file.getFileName()));
       submittedFiles.add(Paths.get(DAC_MAP.get(submission.dac())).resolve(submission.floatId()).resolve("profiles").resolve(file.getFileName()));
     }
-
 
     await().pollInterval(Duration.ofSeconds(10)).atMost(Duration.ofMinutes(4)).untilAsserted(() -> {
 
@@ -261,20 +181,17 @@ public class GeoMergeCronTest {
       });
     });
 
-    Path merged = outputDir.resolve("geo/indian_ocean/2023/01/20230109_prof.nc");
+    Path merged = TestDataContext.outputDir.resolve("geo/indian_ocean/2023/01/20230109_prof.nc");
     assertTrue(Files.exists(merged));
 
-    submittedFiles.stream().map(file -> outputDir.resolve("dac").resolve(file)).forEach(path -> {
+    submittedFiles.stream().map(file -> TestDataContext.outputDir.resolve("dac").resolve(file)).forEach(path -> {
       assertTrue(Files.exists(path));
     });
 
     NetCdfTestUtils.assertFilesEqual(Paths.get("src/test/resources/geo/indian_ocean/2023/01/20230109_prof.nc"), merged);
 
 
-
-
   }
-
 
 
 }
