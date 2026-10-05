@@ -20,18 +20,18 @@ public class SubmissionReportAuditPostProcessor implements SubmissionReportProce
     this.nowSupplier = nowSupplier;
   }
 
-  protected void doWithReport(SubmissionReportSet submissionReportSet) {
-
+  protected SubmissionReportSet addToReport(SubmissionReportSet submissionReportSet) {
+    return submissionReportSet;
   }
 
   @Override
   public SubmissionReportSet generateReport(SubmissionReportSet submissionReportSet) {
-    doWithReport(submissionReportSet);
+    SubmissionReportSet filtered = addToReport(submissionReportSet);
     Instant now = nowSupplier.get();
-    submissionReportSet.getEvents()
+    filtered.getEvents()
         .stream()
         .map(am -> AuditMessage.builder(am).withTimestamp(now).build())
         .forEach(auditStore::markSubmissionReported);
-    return submissionReportSet;
+    return filtered;
   }
 }

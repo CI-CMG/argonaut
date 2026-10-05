@@ -65,7 +65,7 @@ public class HtmlSubmissionReportGenerator implements SubmissionReportProcessor 
   private static String buildSuccessTableRow(History history) {
     return "<tr>"
         + String.format("<td style=\"border: 1px solid black; border-collapse: collapse; padding: 5px; text-align: left;\">%s</td>",
-        history.getFileName())
+        history.getAuditMessage().getFileName())
         + String.format("<td style=\"border: 1px solid black; border-collapse: collapse; padding: 5px; text-align: left;\">%s</td>",
         history.getStartTime().toString())
         + String.format("<td style=\"border: 1px solid black; border-collapse: collapse; padding: 5px; text-align: left;\">%s</td>",
@@ -78,7 +78,7 @@ public class HtmlSubmissionReportGenerator implements SubmissionReportProcessor 
   private static String buildFailureTableRow(History history) {
     return "<tr>"
         + String.format("<td style=\"border: 1px solid black; border-collapse: collapse; padding: 5px; text-align: left;\">%s</td>",
-        history.getFileName())
+        history.getAuditMessage().getFileName())
         + String.format("<td style=\"border: 1px solid black; border-collapse: collapse; padding: 5px; text-align: left;\">%s</td>",
         history.getStartTime().toString())
         + String.format("<td style=\"border: 1px solid black; border-collapse: collapse; padding: 5px; text-align: left;\">%s</td>",
@@ -116,24 +116,24 @@ public class HtmlSubmissionReportGenerator implements SubmissionReportProcessor 
 
   private static class History {
 
-    private final String fileName;
     private final List<String> events;
     private final boolean success;
     private final Instant startTime;
     private final Instant endTime;
     private final String details;
+    private final AuditMessage auditMessage;
 
-    private History(String fileName, List<String> events, boolean success, Instant startTime, Instant endTime, String details) {
-      this.fileName = fileName;
+    private History(AuditMessage auditMessage, List<String> events, boolean success, Instant startTime, Instant endTime, String details) {
       this.events = events;
       this.success = success;
       this.startTime = startTime;
       this.endTime = endTime;
       this.details = details;
+      this.auditMessage = auditMessage;
     }
 
-    public String getFileName() {
-      return fileName;
+    public AuditMessage getAuditMessage() {
+      return auditMessage;
     }
 
     public List<String> getEvents() {
@@ -159,14 +159,14 @@ public class HtmlSubmissionReportGenerator implements SubmissionReportProcessor 
 
   private Optional<History> summary(AuditMessage auditMessage) {
     List<AuditMessage> history = auditStore.getHistoryForTraceId(auditMessage.getTraceId());
-
+    Set<EventType> eventTypes = history.stream().map(AuditMessage::getEventType).collect(Collectors.toSet());
+    boolean error = eventTypes.contains(EventType.ERROR);
     Set<AuditEventProcessor> events = new LinkedHashSet<>(history.stream().map(AuditMessage::getProcessor).collect(Collectors.toList()));
-    if (events.contains(AuditEventProcessor.SUBMISSION_COMPLETE) || events.contains(AuditEventProcessor.REMOVAL_COMPLETE)) {
-      Set<EventType> eventTypes = history.stream().map(AuditMessage::getEventType).collect(Collectors.toSet());
+    if (error || events.contains(AuditEventProcessor.SUBMISSION_COMPLETE) || events.contains(AuditEventProcessor.REMOVAL_COMPLETE)) {
       return Optional.of(new History(
-          auditMessage.getFileName(),
+          auditMessage,
           events.stream().map(AuditEventProcessor::toString).toList(),
-          !eventTypes.contains(EventType.ERROR),
+          !error,
           history.getFirst().getTimestamp(),
           history.getLast().getTimestamp(),
           history.stream().filter(am -> am.getEventType() == EventType.ERROR).findFirst().map(AuditMessage::getStackTrace).orElse("")
@@ -206,7 +206,10 @@ public class HtmlSubmissionReportGenerator implements SubmissionReportProcessor 
         .replaceAll("_TIME_", Matcher.quoteReplacement(time))
         .replaceAll("_ENV_", Matcher.quoteReplacement(environment));
 
-    return SubmissionReportSet.builder(submissionReportSet).withReport(report).build();
+    return SubmissionReportSet.builder(submissionReportSet)
+        .withEvents(histories.stream().map(History::getAuditMessage).toList())
+        .withReport(report)
+        .build();
 
   }
 }

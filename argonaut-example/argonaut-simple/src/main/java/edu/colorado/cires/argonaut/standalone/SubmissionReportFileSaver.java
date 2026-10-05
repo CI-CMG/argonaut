@@ -17,7 +17,7 @@ public class SubmissionReportFileSaver extends SubmissionReportAuditPostProcesso
   }
 
   @Override
-  protected void doWithReport(SubmissionReportSet submissionReportSet) {
+  protected SubmissionReportSet addToReport(SubmissionReportSet submissionReportSet) {
 
     String path = submissionFileStore.appendToPath(
         submissionFileStore.getRoot(),
@@ -30,6 +30,7 @@ public class SubmissionReportFileSaver extends SubmissionReportAuditPostProcesso
     } catch (IOException e) {
       throw new RuntimeException("Unable to save report " + path, e);
     }
+    return submissionReportSet;
   }
 
 }
