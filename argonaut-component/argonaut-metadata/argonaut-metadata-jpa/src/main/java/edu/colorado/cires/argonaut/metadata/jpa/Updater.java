@@ -12,6 +12,7 @@ import edu.colorado.cires.argonaut.metadata.jpa.entity.MetadataFileEntity;
 import edu.colorado.cires.argonaut.metadata.jpa.entity.ProfileFileEntity;
 import edu.colorado.cires.argonaut.metadata.jpa.entity.ProfileMergeFileEntity;
 import edu.colorado.cires.argonaut.metadata.jpa.entity.ProfileParameterEntity;
+import edu.colorado.cires.argonaut.metadata.jpa.entity.TrajectoryEntity;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.EntityTransaction;
@@ -362,9 +363,53 @@ class Updater {
       case PROFILE_MULTI_CYCLE:
         createOrUpdateProfileMergeFile(record);
         break;
+      case TRAJECTORY:
+        createOrUpdateTrajectory(record);
+        break;
       default:
         throw new UnsupportedOperationException("Unsupported file type: " + record.getFileType());
     }
 
+  }
+
+  private void createOrUpdateTrajectory(MetadataRecord record) {
+    String floatId = getFloatId(record);
+    String file = Objects.requireNonNull(record.getFile());
+    try (EntityManager em = entityManagerFactory.createEntityManager()) {
+      EntityTransaction tx = em.getTransaction();
+      tx.begin();
+      try {
+        FloatEntity floatEntity = em.find(FloatEntity.class, floatId);
+        TrajectoryEntity entity = em.find(TrajectoryEntity.class, file);
+        boolean add = (entity == null);
+
+        if (add) {
+          entity = new TrajectoryEntity();
+          entity.setFile(file);
+          entity.setFloatId(floatEntity);
+        }
+
+        entity.setProfilerType(record.getProfilerType());
+        entity.setInstitution(record.getInstitution());
+        entity.setDateUpdate(record.getDateUpdate() == null ? null : record.getDateUpdate().atOffset(ZoneOffset.UTC).toZonedDateTime());
+
+        entity.setLatitudeMin(record.getLatitudeMin());
+        entity.setLatitudeMax(record.getLatitudeMax());
+
+        entity.setLongitudeMin(record.getLongitudeMin());
+        entity.setLongitudeMax(record.getLongitudeMax());
+
+        entity.setLastUpdatedTime(record.getActionTimestamp().atOffset(ZoneOffset.UTC).toZonedDateTime());
+        entity.setFileStatus(ACTIVE.toString());
+
+        if (add) {
+          em.persist(entity);
+        }
+        tx.commit();
+      } catch (Exception e) {
+        tx.rollback();
+        throw e;
+      }
+    }
   }
 }

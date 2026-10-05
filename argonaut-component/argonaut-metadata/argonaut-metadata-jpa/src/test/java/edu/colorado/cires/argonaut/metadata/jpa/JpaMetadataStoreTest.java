@@ -1,9 +1,12 @@
 package edu.colorado.cires.argonaut.metadata.jpa;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import edu.colorado.cires.argonaut.messaging.core.databind.ArgoFileType;
@@ -32,10 +35,19 @@ import java.time.Instant;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.UUID;
+import java.util.function.BiConsumer;
+import java.util.function.Function;
+import java.util.function.Supplier;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Named;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 public class JpaMetadataStoreTest {
 
@@ -66,6 +78,7 @@ public class JpaMetadataStoreTest {
         em.createQuery("delete from ProfileFileEntity").executeUpdate();
         em.createQuery("delete from MetadataFileEntity").executeUpdate();
         em.createQuery("delete from CycleEntity").executeUpdate();
+        em.createQuery("delete from TrajectoryEntity ").executeUpdate();
         em.createQuery("delete from FloatEntity").executeUpdate();
         em.createQuery("delete from DacEntity").executeUpdate();
         tx.commit();
@@ -76,6 +89,96 @@ public class JpaMetadataStoreTest {
     }
   }
 
+  private static List<Named<MetadataRecord>> trajectoryTestCases() {
+    Random random = new Random();
+    RandomStringUtils randomStringUtils = RandomStringUtils.insecure();
+
+    Function<Integer, String> randomString = randomStringUtils::nextAlphanumeric;
+    Supplier<Double> randomDouble = random::nextDouble;
+
+    Supplier<MetadataRecord> getMetadataRecord = () -> MetadataRecord.builder()
+      .withAction(Action.UPDATE)
+      .withFileType(ArgoFileType.TRAJECTORY)
+      .withFile(randomString.apply(90) + "_Rtraj.nc")
+      .withDac(randomString.apply(10))
+      .withFloatId(randomString.apply(9))
+      .withProfilerType(randomString.apply(4))
+      .withInstitution(randomString.apply(2))
+      .withDateUpdate(Instant.now())
+      .withLatitudeMax(randomDouble.get())
+      .withLatitudeMin(randomDouble.get())
+      .withLongitudeMin(randomDouble.get())
+      .withLongitudeMax(randomDouble.get())
+      .withActionTimestamp(Instant.now())
+      .build();
+
+    return List.of(
+      Named.of("standard", getMetadataRecord.get()),
+      Named.of("null 'dateUpdate'", MetadataRecord.builder(getMetadataRecord.get())
+        .withDateUpdate(null)
+        .build())
+    );
+  }
+
+  @ParameterizedTest
+  @MethodSource("trajectoryTestCases")
+  public void testTrajectoryCRUD(MetadataRecord input) {
+    Function<String, MetadataRecord> getMetadataRecord = (file) -> datastore.findByFile(file)
+      .orElseThrow(AssertionError::new);
+
+    // should be a no-op for files which do not exist
+    assertDoesNotThrow(() -> datastore.updateIndex(MetadataRecord.builder(input)
+      .withAction(Action.DELETE_REMOVED_FILE)
+      .build()));
+    assertDoesNotThrow(() -> datastore.updateIndex(MetadataRecord.builder(input)
+        .withAction(Action.REMOVE)
+      .build()));
+
+    datastore.updateIndex(input);
+
+    MetadataRecord result = getMetadataRecord.apply(input.getFile());
+
+    BiConsumer<MetadataRecord, MetadataRecord> assertTrajectory = (expected, actual) -> assertThat(actual)
+      .usingRecursiveComparison()
+      .ignoringFields("action", "actionTimestamp")
+      .isEqualTo(expected);
+
+    assertTrajectory.accept(input, result);
+
+    MetadataRecord updated = MetadataRecord.builder(input)
+      .withAction(Action.UPDATE)
+      .withActionTimestamp(Instant.now())
+      .withLongitudeMax(input.getLongitudeMax() + 1)
+      .build();
+
+    datastore.updateIndex(updated);
+
+    result = getMetadataRecord.apply(input.getFile());
+    assertTrajectory.accept(updated, result);
+
+    MetadataRecord removed = MetadataRecord.builder(updated)
+      .withAction(Action.REMOVE)
+      .build();
+
+    datastore.updateIndex(removed);
+
+    assertThrows(AssertionError.class, () -> getMetadataRecord.apply(removed.getFile()));
+
+    Function<String, MetadataRecord> getRemovedFile = (file) -> datastore.findByFile(file, true)
+      .orElseThrow(AssertionError::new);
+
+    result = getRemovedFile.apply(removed.getFile());
+    assertTrajectory.accept(removed, result);
+
+    MetadataRecord deleted = MetadataRecord.builder(removed)
+      .withAction(Action.DELETE_REMOVED_FILE)
+      .build();
+
+    datastore.updateIndex(deleted);
+
+    result = getRemovedFile.apply(deleted.getFile());
+    assertTrajectory.accept(deleted, result);
+  }
 
   @Test
   public void testInsertUpdateFindProfileByIdAndDac() throws Exception {

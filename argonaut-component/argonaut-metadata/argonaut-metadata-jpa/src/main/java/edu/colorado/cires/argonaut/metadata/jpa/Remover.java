@@ -7,6 +7,7 @@ import edu.colorado.cires.argonaut.metadata.jpa.entity.FileRemovedTimeEntity;
 import edu.colorado.cires.argonaut.metadata.jpa.entity.MetadataFileEntity;
 import edu.colorado.cires.argonaut.metadata.jpa.entity.ProfileFileEntity;
 import edu.colorado.cires.argonaut.metadata.jpa.entity.ProfileMergeFileEntity;
+import edu.colorado.cires.argonaut.metadata.jpa.entity.TrajectoryEntity;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.EntityTransaction;
@@ -67,6 +68,14 @@ class Remover {
     }
   }
 
+  private static void removeTrajectory(EntityManager em, MetadataRecord record) {
+    TrajectoryEntity existing = em.find(TrajectoryEntity.class, record.getFile(), LockModeType.OPTIMISTIC);
+    if (existing != null) {
+      existing.setFileStatus(FileStatus.REMOVED.name());
+      existing.setLastUpdatedTime(record.getActionTimestamp().atOffset(ZoneOffset.UTC).toZonedDateTime());
+    }
+  }
+
   private static void removeMultiProfileMerge(EntityManager em, MetadataRecord record) {
     ProfileMergeFileEntity existing = em.find(ProfileMergeFileEntity.class, record.getFile(), LockModeType.OPTIMISTIC);
     if (existing != null) {
@@ -85,6 +94,9 @@ class Remover {
         break;
       case METADATA:
         removeMetadata(em, record);
+        break;
+      case TRAJECTORY:
+        removeTrajectory(em, record);
         break;
       case PROFILE_MULTI_CYCLE:
         removeMultiProfileMerge(em, record);
@@ -150,11 +162,22 @@ class Remover {
       case PROFILE_BIOCHEMICAL:
         deleteProfile(em, record);
         break;
+      case TRAJECTORY:
+        deleteTrajectory(em, record);
+        break;
       case METADATA:
         deleteMetadata(em, record);
         break;
       default:
         throw new UnsupportedOperationException("Unsupported file type: " + record.getFileType());
+    }
+  }
+
+  private static void deleteTrajectory(EntityManager em, MetadataRecord record) {
+    TrajectoryEntity existing = em.find(TrajectoryEntity.class, record.getFile(),
+      LockModeType.OPTIMISTIC);
+    if (existing != null) {
+      existing.setLastUpdatedTime(record.getActionTimestamp().atOffset(ZoneOffset.UTC).toZonedDateTime());
     }
   }
 

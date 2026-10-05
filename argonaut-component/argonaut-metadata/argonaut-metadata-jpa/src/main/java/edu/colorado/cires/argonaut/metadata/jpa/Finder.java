@@ -26,6 +26,7 @@ import edu.colorado.cires.argonaut.metadata.jpa.entity.FloatEntity;
 import edu.colorado.cires.argonaut.metadata.jpa.entity.MetadataFileEntity;
 import edu.colorado.cires.argonaut.metadata.jpa.entity.ProfileFileEntity;
 import edu.colorado.cires.argonaut.metadata.jpa.entity.ProfileParameterEntity;
+import edu.colorado.cires.argonaut.metadata.jpa.entity.TrajectoryEntity;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import java.time.Instant;
@@ -139,6 +140,34 @@ class Finder {
             .withProfileMode(ProfileMode.fromCharacter(result.getDataMode()))
             .withActionTimestamp(result.getLastUpdatedTime().toInstant())
             .build());
+      }
+    } else if (file.endsWith("traj.nc")) {
+      try (EntityManager em = entityManagerFactory.createEntityManager()) {
+        TrajectoryEntity result;
+        if (includeRemoved) {
+          result = em.find(TrajectoryEntity.class, file);
+        } else {
+          result = em.createQuery("select t from TrajectoryEntity t where t.file = :file and t.fileStatus = 'ACTIVE'", TrajectoryEntity.class)
+            .setParameter("file", file)
+            .getSingleResultOrNull();
+
+          if (result == null) {
+            return Optional.empty();
+          }
+        }
+        return Optional.of(MetadataRecord.builder()
+            .withFileType(ArgoFileType.TRAJECTORY)
+            .withFile(result.getFile())
+            .withDac(result.getFloatId().getDac().getDac())
+            .withFloatId(result.getFloatId().getFloatId())
+            .withProfilerType(result.getProfilerType())
+            .withInstitution(result.getInstitution())
+            .withDateUpdate(result.getDateUpdate() == null ? null : result.getDateUpdate().toInstant())
+            .withLatitudeMax(result.getLatitudeMax())
+            .withLatitudeMin(result.getLatitudeMin())
+            .withLongitudeMax(result.getLongitudeMax())
+            .withLongitudeMin(result.getLongitudeMin())
+          .build());
       }
     }
     return Optional.empty();
