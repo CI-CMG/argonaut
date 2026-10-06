@@ -196,7 +196,7 @@ public abstract class BaseIndexProcessor implements IndexProcessor {
       ) {
         writeHeader(printer);
         writeColumnHeadersInternal(printer);
-        MetadataRecordPage page = queryPage(metadataStore, DefaultIndexPageRequest.builder().withPageSize(pageSize).build());
+        MetadataRecordPage page = queryPage(metadataStore, DefaultIndexPageRequest.builder().withPageNumber(1).withPageSize(pageSize).build());
         writePage(printer, page);
         Optional<IndexPageRequest> maybeNextPage = page.getNextPage();
         while (maybeNextPage.isPresent()) {

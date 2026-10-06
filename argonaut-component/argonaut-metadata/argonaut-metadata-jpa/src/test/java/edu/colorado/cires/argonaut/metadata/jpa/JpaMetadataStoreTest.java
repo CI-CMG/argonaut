@@ -14,6 +14,7 @@ import edu.colorado.cires.argonaut.messaging.core.databind.ArgoOcean;
 import edu.colorado.cires.argonaut.messaging.core.databind.GeoMergeInfo;
 import edu.colorado.cires.argonaut.messaging.core.databind.MetadataRecord;
 import edu.colorado.cires.argonaut.messaging.core.databind.MetadataRecord.Action;
+import edu.colorado.cires.argonaut.messaging.core.databind.MetadataRecord.Builder;
 import edu.colorado.cires.argonaut.messaging.core.databind.MetadataRecord.FileStatus;
 import edu.colorado.cires.argonaut.messaging.core.databind.ProfileMode;
 import edu.colorado.cires.argonaut.messaging.core.databind.ProfileOperation;
@@ -22,6 +23,7 @@ import edu.colorado.cires.argonaut.metadata.core.DefaultMetadataRecordPage;
 import edu.colorado.cires.argonaut.metadata.core.DefaultRecentProfileSearch;
 import edu.colorado.cires.argonaut.metadata.core.DefaultRemovedFileSearch;
 import edu.colorado.cires.argonaut.metadata.core.GeoMergePage;
+import edu.colorado.cires.argonaut.metadata.core.IndexPageRequest;
 import edu.colorado.cires.argonaut.metadata.core.MetadataRecordPage;
 import edu.colorado.cires.argonaut.metadata.core.ProfilePage;
 import edu.colorado.cires.argonaut.metadata.core.RemovedFilePage;
@@ -32,11 +34,14 @@ import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.EntityTransaction;
 import jakarta.persistence.Persistence;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Random;
 import java.util.UUID;
 import java.util.function.BiConsumer;
@@ -190,6 +195,31 @@ public class JpaMetadataStoreTest {
 
     result = getRemovedFile.apply(deleted.getFile());
     assertTrajectory.accept(deleted, result);
+  }
+
+  @Test
+  public void testTechnicalFilePage() {
+    List<MetadataRecord> expected = metadataTestCases().stream()
+      .map(Named::getPayload)
+      .filter(Objects::nonNull)
+      .peek(datastore::updateIndex)
+      .filter(metadataRecord -> ArgoFileType.TECHNICAL_DATA.equals(metadataRecord.getFileType()))
+      .sorted(Comparator.comparing(MetadataRecord::getFile))
+      .toList();
+
+    Function<Integer, DefaultIndexPageRequest> getPageRequest = (page) -> DefaultIndexPageRequest.builder()
+        .withPageNumber(page)
+        .withPageSize(1)
+        .build();
+
+    List<MetadataRecord> actual = new ArrayList<>(2);
+    actual.addAll(datastore.getTechnicalIndexPage(getPageRequest.apply(1)).getPage());
+    actual.addAll(datastore.getTechnicalIndexPage(getPageRequest.apply(2)).getPage());
+
+    assertThat(actual)
+      .usingRecursiveComparison()
+      .ignoringFields("action", "actionTimestamp")
+      .isEqualTo(expected);
   }
 
   @Test

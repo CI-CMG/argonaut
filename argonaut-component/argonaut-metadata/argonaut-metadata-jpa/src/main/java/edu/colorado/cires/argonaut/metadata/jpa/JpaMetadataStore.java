@@ -117,4 +117,9 @@ public class JpaMetadataStore implements MetadataStore {
     return finder.getSyntheticProfileIndexPage(pageRequest);
   }
 
+  @Override
+  public MetadataRecordPage getTechnicalIndexPage(IndexPageRequest indexPageRequest) {
+    return finder.getTechnicalIndexPage(indexPageRequest);
+  }
+
 }

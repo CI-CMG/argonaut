@@ -241,6 +241,11 @@
       <bean ref="synthProfileIndexProcessor" method="generateIndex"/>
     </route>
 
+    <route id="tech-index-cron">
+      <from uri="cron:tech-index?schedule={{tech-index.cron}}"/>
+      <bean ref="techIndexProcessor" method="generateIndex"/>
+    </route>
+
   </routeContext>
 
 </beans>

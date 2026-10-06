@@ -42,6 +42,7 @@ import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
 
 class Finder {
 
@@ -185,14 +186,7 @@ class Finder {
           }
         }
 
-        return Optional.of(MetadataRecord.builder()
-            .withFileType(ArgoFileType.TECHNICAL_DATA)
-            .withFile(result.getFile())
-            .withDac(result.getFloatId().getDac().getDac())
-            .withFloatId(result.getFloatId().getFloatId())
-            .withInstitution(result.getInstitution())
-            .withDateUpdate(result.getDateUpdate() == null ? null : result.getDateUpdate().toInstant())
-          .build());
+        return Optional.of(fromTechnicalEntity(result));
       }
     }
     return Optional.empty();
@@ -604,26 +598,31 @@ class Finder {
 
 
 
-      return createMetadataRecordPage(count, pageResults, pageRequest);
+      return createMetadataRecordPage(count, pageResults, Finder::fromProfileEntity, pageRequest);
     }
   }
 
-  private static DefaultMetadataRecordPage createMetadataRecordPage(long count, List<ProfileFileEntity> pageResults, IndexPageRequest pageRequest) {
+  private static MetadataRecord fromProfileEntity(ProfileFileEntity profile) {
+    return MetadataRecord.builder()
+      .withFile(profile.getFile())
+      .withDate(profile.getDate() == null ? null : profile.getDate().toInstant())
+      .withLatitude(profile.getLatitude())
+      .withLongitude(profile.getLongitude())
+      .withOcean(profile.getOcean() == null ? null : ArgoOcean.fromCode(profile.getOcean()))
+      .withProfilerType(profile.getProfilerType())
+      .withInstitution(profile.getInstitution())
+      .withParameters(profile.getParameters().stream().sorted(Comparator.comparingInt(ProfileParameterEntity::getParameterIndex)).map(ProfileParameterEntity::getParameterName).toList())
+      .withParameterDataMode(profile.getParameterDataMode())
+      .withDateUpdate(profile.getDateUpdate() == null ? null : profile.getDateUpdate().toInstant())
+      .build();
+  }
+
+  private static <T> DefaultMetadataRecordPage createMetadataRecordPage(long count, List<T> pageResults, Function<T, MetadataRecord> transform, IndexPageRequest pageRequest) {
     return DefaultMetadataRecordPage.builder()
         .withTotalRecords(count)
         .withIndexPageRequest(DefaultIndexPageRequest.builder(pageRequest).build())
-        .withPage(pageResults.stream().map(profile -> MetadataRecord.builder()
-                .withFile(profile.getFile())
-                .withDate(profile.getDate() == null ? null : profile.getDate().toInstant())
-                .withLatitude(profile.getLatitude())
-                .withLongitude(profile.getLongitude())
-                .withOcean(profile.getOcean() == null ? null : ArgoOcean.fromCode(profile.getOcean()))
-                .withProfilerType(profile.getProfilerType())
-                .withInstitution(profile.getInstitution())
-                .withParameters(profile.getParameters().stream().sorted(Comparator.comparingInt(ProfileParameterEntity::getParameterIndex)).map(ProfileParameterEntity::getParameterName).toList())
-                .withParameterDataMode(profile.getParameterDataMode())
-                .withDateUpdate(profile.getDateUpdate() == null ? null : profile.getDateUpdate().toInstant())
-                .build())
+        .withPage(pageResults.stream()
+            .map(transform)
             .toList())
         .build();
   }
@@ -649,11 +648,40 @@ class Finder {
           .setFirstResult((pageRequest.getPageNumber() - 1) * pageRequest.getPageSize())
           .getResultList();
 
-      return createMetadataRecordPage(count, pageResults, pageRequest);
+      return createMetadataRecordPage(count, pageResults, Finder::fromProfileEntity, pageRequest);
     }
   }
 
 
+  MetadataRecordPage getTechnicalIndexPage(IndexPageRequest indexPageRequest) {
+    try (EntityManager em = entityManagerFactory.createEntityManager()) {
+      long count = em.createQuery("""
+      SELECT COUNT(t.file) FROM TechnicalFileEntity t
+      WHERE t.fileStatus = 'ACTIVE'
+      """, Long.class)
+        .getSingleResult();
 
+      List<TechnicalFileEntity> pageResults = em.createQuery("""
+      SELECT t FROM TechnicalFileEntity t
+      WHERE t.fileStatus = 'ACTIVE'
+      ORDER BY t.file
+      """, TechnicalFileEntity.class)
+        .setMaxResults(indexPageRequest.getPageSize())
+        .setFirstResult((indexPageRequest.getPageNumber() - 1) * indexPageRequest.getPageSize())
+        .getResultList();
 
+      return createMetadataRecordPage(count, pageResults, Finder::fromTechnicalEntity, indexPageRequest);
+    }
+  }
+
+  private static MetadataRecord fromTechnicalEntity(TechnicalFileEntity technicalFile) {
+    return MetadataRecord.builder()
+      .withFileType(ArgoFileType.TECHNICAL_DATA)
+      .withFile(technicalFile.getFile())
+      .withDac(technicalFile.getFloatId().getDac().getDac())
+      .withFloatId(technicalFile.getFloatId().getFloatId())
+      .withInstitution(technicalFile.getInstitution())
+      .withDateUpdate(technicalFile.getDateUpdate() == null ? null : technicalFile.getDateUpdate().toInstant())
+      .build();
+  }
 }
