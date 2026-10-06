@@ -12,6 +12,7 @@ import edu.colorado.cires.argonaut.metadata.jpa.entity.MetadataFileEntity;
 import edu.colorado.cires.argonaut.metadata.jpa.entity.ProfileFileEntity;
 import edu.colorado.cires.argonaut.metadata.jpa.entity.ProfileMergeFileEntity;
 import edu.colorado.cires.argonaut.metadata.jpa.entity.ProfileParameterEntity;
+import edu.colorado.cires.argonaut.metadata.jpa.entity.TechnicalFileEntity;
 import edu.colorado.cires.argonaut.metadata.jpa.entity.TrajectoryFileEntity;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
@@ -366,10 +367,47 @@ class Updater {
       case TRAJECTORY:
         createOrUpdateTrajectory(record);
         break;
+      case TECHNICAL_DATA:
+        createOrUpdateTechnical(record);
+        break;
       default:
         throw new UnsupportedOperationException("Unsupported file type: " + record.getFileType());
     }
 
+  }
+
+  private void createOrUpdateTechnical(MetadataRecord record) {
+    String floatId = getFloatId(record);
+    String file = Objects.requireNonNull(record.getFile());
+    try (EntityManager em = entityManagerFactory.createEntityManager()) {
+      EntityTransaction tx = em.getTransaction();
+      tx.begin();
+      try {
+        FloatEntity floatEntity = em.find(FloatEntity.class, floatId);
+        TechnicalFileEntity entity = em.find(TechnicalFileEntity.class, file);
+        boolean add = (entity == null);
+
+        if (add) {
+          entity = new TechnicalFileEntity();
+          entity.setFile(file);
+          entity.setFloatId(floatEntity);
+        }
+
+        entity.setInstitution(record.getInstitution());
+        entity.setDateUpdate(record.getDateUpdate() == null ? null : record.getDateUpdate().atOffset(ZoneOffset.UTC).toZonedDateTime());
+
+        entity.setLastUpdatedTime(record.getActionTimestamp().atOffset(ZoneOffset.UTC).toZonedDateTime());
+        entity.setFileStatus(ACTIVE.toString());
+
+        if (add) {
+          em.persist(entity);
+        }
+        tx.commit();
+      } catch (Exception e) {
+        tx.rollback();
+        throw e;
+      }
+    }
   }
 
   private void createOrUpdateTrajectory(MetadataRecord record) {

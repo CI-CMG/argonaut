@@ -78,6 +78,7 @@ public class JpaMetadataStoreTest {
         em.createQuery("delete from ProfileFileEntity").executeUpdate();
         em.createQuery("delete from MetadataFileEntity").executeUpdate();
         em.createQuery("delete from CycleEntity").executeUpdate();
+        em.createQuery("delete from TechnicalFileEntity").executeUpdate();
         em.createQuery("delete from TrajectoryFileEntity ").executeUpdate();
         em.createQuery("delete from FloatEntity").executeUpdate();
         em.createQuery("delete from DacEntity").executeUpdate();
@@ -89,40 +90,52 @@ public class JpaMetadataStoreTest {
     }
   }
 
-  private static List<Named<MetadataRecord>> trajectoryTestCases() {
+  private static List<Named<MetadataRecord>> metadataTestCases() {
     Random random = new Random();
     RandomStringUtils randomStringUtils = RandomStringUtils.insecure();
 
     Function<Integer, String> randomString = randomStringUtils::nextAlphanumeric;
     Supplier<Double> randomDouble = random::nextDouble;
 
-    Supplier<MetadataRecord> getMetadataRecord = () -> MetadataRecord.builder()
+    Supplier<MetadataRecord> createBaseRecord = () -> MetadataRecord.builder()
       .withAction(Action.UPDATE)
-      .withFileType(ArgoFileType.TRAJECTORY)
-      .withFile(randomString.apply(90) + "_Rtraj.nc")
       .withDac(randomString.apply(10))
       .withFloatId(randomString.apply(9))
-      .withProfilerType(randomString.apply(4))
       .withInstitution(randomString.apply(2))
       .withDateUpdate(Instant.now())
+      .withActionTimestamp(Instant.now())
+      .build();
+
+    Supplier<MetadataRecord> createTrajectoryRecord = () -> MetadataRecord.builder(createBaseRecord.get())
+      .withFileType(ArgoFileType.TRAJECTORY)
+      .withFile(randomString.apply(90) + "_Rtraj.nc")
+      .withProfilerType(randomString.apply(4))
       .withLatitudeMax(randomDouble.get())
       .withLatitudeMin(randomDouble.get())
       .withLongitudeMin(randomDouble.get())
       .withLongitudeMax(randomDouble.get())
-      .withActionTimestamp(Instant.now())
+      .build();
+
+    Supplier<MetadataRecord> createTechnicalRecord = () -> MetadataRecord.builder(createBaseRecord.get())
+      .withFileType(ArgoFileType.TECHNICAL_DATA)
+      .withFile(randomString.apply(9) + "_tech.nc")
       .build();
 
     return List.of(
-      Named.of("standard", getMetadataRecord.get()),
-      Named.of("null 'dateUpdate'", MetadataRecord.builder(getMetadataRecord.get())
+      Named.of("trajectory - standard", createTrajectoryRecord.get()),
+      Named.of("trajectory - null 'dateUpdate'", MetadataRecord.builder(createTrajectoryRecord.get())
         .withDateUpdate(null)
+        .build()),
+      Named.of("technical - standard", createTechnicalRecord.get()),
+      Named.of("technical - null 'dateUpdate'", MetadataRecord.builder(createTechnicalRecord.get())
+          .withDateUpdate(null)
         .build())
     );
   }
 
   @ParameterizedTest
-  @MethodSource("trajectoryTestCases")
-  public void testTrajectoryCRUD(MetadataRecord input) {
+  @MethodSource("metadataTestCases")
+  public void testCRUD(MetadataRecord input) {
     Function<String, MetadataRecord> getMetadataRecord = (file) -> datastore.findByFile(file)
       .orElseThrow(AssertionError::new);
 
@@ -148,7 +161,6 @@ public class JpaMetadataStoreTest {
     MetadataRecord updated = MetadataRecord.builder(input)
       .withAction(Action.UPDATE)
       .withActionTimestamp(Instant.now())
-      .withLongitudeMax(input.getLongitudeMax() + 1)
       .build();
 
     datastore.updateIndex(updated);

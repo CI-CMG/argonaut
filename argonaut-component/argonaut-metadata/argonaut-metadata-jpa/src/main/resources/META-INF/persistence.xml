@@ -16,6 +16,7 @@
     <class>edu.colorado.cires.argonaut.metadata.jpa.entity.FileRemovedTimeEntity</class>
     <class>edu.colorado.cires.argonaut.metadata.jpa.entity.ProfileParameterEntity</class>
     <class>edu.colorado.cires.argonaut.metadata.jpa.entity.TrajectoryFileEntity</class>
+    <class>edu.colorado.cires.argonaut.metadata.jpa.entity.TechnicalFileEntity</class>
     <exclude-unlisted-classes>true</exclude-unlisted-classes>
     <properties>
       <property name="jakarta.persistence.jdbc.url" value=""/>

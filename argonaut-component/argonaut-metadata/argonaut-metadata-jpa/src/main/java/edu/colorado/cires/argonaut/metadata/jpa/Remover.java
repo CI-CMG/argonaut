@@ -7,6 +7,7 @@ import edu.colorado.cires.argonaut.metadata.jpa.entity.FileRemovedTimeEntity;
 import edu.colorado.cires.argonaut.metadata.jpa.entity.MetadataFileEntity;
 import edu.colorado.cires.argonaut.metadata.jpa.entity.ProfileFileEntity;
 import edu.colorado.cires.argonaut.metadata.jpa.entity.ProfileMergeFileEntity;
+import edu.colorado.cires.argonaut.metadata.jpa.entity.TechnicalFileEntity;
 import edu.colorado.cires.argonaut.metadata.jpa.entity.TrajectoryFileEntity;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
@@ -76,6 +77,14 @@ class Remover {
     }
   }
 
+  private static void removeTechnical(EntityManager em, MetadataRecord record) {
+    TechnicalFileEntity existing = em.find(TechnicalFileEntity.class, record.getFile(), LockModeType.OPTIMISTIC);
+    if (existing != null) {
+      existing.setFileStatus(FileStatus.REMOVED.name());
+      existing.setLastUpdatedTime(record.getActionTimestamp().atOffset(ZoneOffset.UTC).toZonedDateTime());
+    }
+  }
+
   private static void removeMultiProfileMerge(EntityManager em, MetadataRecord record) {
     ProfileMergeFileEntity existing = em.find(ProfileMergeFileEntity.class, record.getFile(), LockModeType.OPTIMISTIC);
     if (existing != null) {
@@ -97,6 +106,9 @@ class Remover {
         break;
       case TRAJECTORY:
         removeTrajectory(em, record);
+        break;
+      case TECHNICAL_DATA:
+        removeTechnical(em, record);
         break;
       case PROFILE_MULTI_CYCLE:
         removeMultiProfileMerge(em, record);
@@ -165,11 +177,21 @@ class Remover {
       case TRAJECTORY:
         deleteTrajectory(em, record);
         break;
+      case TECHNICAL_DATA:
+        deleteTechnical(em, record);
+        break;
       case METADATA:
         deleteMetadata(em, record);
         break;
       default:
         throw new UnsupportedOperationException("Unsupported file type: " + record.getFileType());
+    }
+  }
+
+  private static void deleteTechnical(EntityManager em, MetadataRecord record) {
+    TechnicalFileEntity existing = em.find(TechnicalFileEntity.class, record.getFile(), LockModeType.OPTIMISTIC);
+    if (existing != null) {
+      existing.setLastUpdatedTime(record.getActionTimestamp().atOffset(ZoneOffset.UTC).toZonedDateTime());
     }
   }
 

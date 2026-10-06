@@ -26,6 +26,7 @@ import edu.colorado.cires.argonaut.metadata.jpa.entity.FloatEntity;
 import edu.colorado.cires.argonaut.metadata.jpa.entity.MetadataFileEntity;
 import edu.colorado.cires.argonaut.metadata.jpa.entity.ProfileFileEntity;
 import edu.colorado.cires.argonaut.metadata.jpa.entity.ProfileParameterEntity;
+import edu.colorado.cires.argonaut.metadata.jpa.entity.TechnicalFileEntity;
 import edu.colorado.cires.argonaut.metadata.jpa.entity.TrajectoryFileEntity;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
@@ -167,6 +168,30 @@ class Finder {
             .withLatitudeMin(result.getLatitudeMin())
             .withLongitudeMax(result.getLongitudeMax())
             .withLongitudeMin(result.getLongitudeMin())
+          .build());
+      }
+    } else if (file.endsWith("tech.nc")) {
+      try (EntityManager em = entityManagerFactory.createEntityManager()) {
+        TechnicalFileEntity result;
+        if (includeRemoved) {
+          result = em.find(TechnicalFileEntity.class, file);
+        } else {
+          result = em.createQuery("select t from TechnicalFileEntity t where t.file = :file and t.fileStatus = 'ACTIVE'", TechnicalFileEntity.class)
+            .setParameter("file", file)
+            .getSingleResultOrNull();
+
+          if (result == null) {
+            return Optional.empty();
+          }
+        }
+
+        return Optional.of(MetadataRecord.builder()
+            .withFileType(ArgoFileType.TECHNICAL_DATA)
+            .withFile(result.getFile())
+            .withDac(result.getFloatId().getDac().getDac())
+            .withFloatId(result.getFloatId().getFloatId())
+            .withInstitution(result.getInstitution())
+            .withDateUpdate(result.getDateUpdate() == null ? null : result.getDateUpdate().toInstant())
           .build());
       }
     }
