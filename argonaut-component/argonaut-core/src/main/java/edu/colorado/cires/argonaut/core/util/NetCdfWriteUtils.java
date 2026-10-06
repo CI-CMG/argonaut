@@ -58,7 +58,7 @@ public final class NetCdfWriteUtils {
       vb.addAttribute(new Attribute("C_format", attributes.getCFormat()));
     }
     if (attributes.getFortranFormat() != null) {
-      vb.addAttribute(new Attribute("C_format", attributes.getFortranFormat()));
+      vb.addAttribute(new Attribute("FORTRAN_format", attributes.getFortranFormat()));
     }
     if (attributes.getResolution() != null) {
       vb.addAttribute(new Attribute("resolution", attributes.getResolution()));
