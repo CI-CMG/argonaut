@@ -75,7 +75,7 @@
     <repository>
       <id>unidata-all</id>
       <name>Unidata All</name>
-      <url>https://artifacts.unidata.ucar.edu/repository/unidata-all/</url>
+      <url>https://artifacts.unidata.ucar.edu/releases</url>
     </repository>
     <repository>
       <id>osgeo</id>

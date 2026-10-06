@@ -1,11 +1,10 @@
 package edu.colorado.cires.argonaut.audit.jpa;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import edu.colorado.cires.argonaut.audit.core.DefaultSubmissionPage;
 import edu.colorado.cires.argonaut.audit.core.DefaultSubmissionReportSearch;
 import edu.colorado.cires.argonaut.audit.core.SubmissionPage;
-import edu.colorado.cires.argonaut.audit.core.SubmissionReportSearch;
 import edu.colorado.cires.argonaut.messaging.core.databind.AuditEventProcessor;
 import edu.colorado.cires.argonaut.messaging.core.databind.AuditMessage;
 import edu.colorado.cires.argonaut.messaging.core.databind.AuditMessage.EventType;
@@ -67,7 +66,7 @@ public class JpaAuditStoreTest {
         .withTimestamp(Instant.parse("2026-10-05T12:00:00Z"))
         .withEventType(EventType.INFO)
         .withProcessor(AuditEventProcessor.FILE_RECEIVED)
-        .withMessage("file received")
+        .withMessage("triggered file update")
         .withStackTrace(null)
         .withFileName("D1234_001.nc")
         .build());
@@ -88,17 +87,6 @@ public class JpaAuditStoreTest {
         .withDac("aoml")
         .withTimestamp(Instant.parse("2026-10-05T12:00:02Z"))
         .withEventType(EventType.INFO)
-        .withProcessor(AuditEventProcessor.INDEXING)
-        .withMessage("index")
-        .withStackTrace(null)
-        .withFileName("D1234_001.nc")
-        .build());
-
-    auditStore.recordEvent(AuditMessage.builder()
-        .withTraceId(traceId1)
-        .withDac("aoml")
-        .withTimestamp(Instant.parse("2026-10-05T12:00:03Z"))
-        .withEventType(EventType.INFO)
         .withProcessor(AuditEventProcessor.FILE_STORE)
         .withMessage("stored")
         .withStackTrace(null)
@@ -108,10 +96,10 @@ public class JpaAuditStoreTest {
     auditStore.recordEvent(AuditMessage.builder()
         .withTraceId(traceId1)
         .withDac("aoml")
-        .withTimestamp(Instant.parse("2026-10-05T12:00:04Z"))
+        .withTimestamp(Instant.parse("2026-10-05T12:00:03Z"))
         .withEventType(EventType.INFO)
-        .withProcessor(AuditEventProcessor.SUBMISSION_COMPLETE)
-        .withMessage("complete")
+        .withProcessor(AuditEventProcessor.INDEXING)
+        .withMessage("updated index")
         .withStackTrace(null)
         .withFileName("D1234_001.nc")
         .build());
@@ -122,7 +110,7 @@ public class JpaAuditStoreTest {
         .withTimestamp(Instant.parse("2026-10-05T12:00:05Z"))
         .withEventType(EventType.INFO)
         .withProcessor(AuditEventProcessor.FILE_RECEIVED)
-        .withMessage("file received")
+        .withMessage("triggered file removal")
         .withStackTrace(null)
         .withFileName("D5678_001.nc")
         .build());
@@ -143,17 +131,6 @@ public class JpaAuditStoreTest {
         .withDac("aoml")
         .withTimestamp(Instant.parse("2026-10-05T12:00:07Z"))
         .withEventType(EventType.INFO)
-        .withProcessor(AuditEventProcessor.INDEXING)
-        .withMessage("index")
-        .withStackTrace(null)
-        .withFileName("D5678_001.nc")
-        .build());
-
-    auditStore.recordEvent(AuditMessage.builder()
-        .withTraceId(traceId2)
-        .withDac("aoml")
-        .withTimestamp(Instant.parse("2026-10-05T12:00:08Z"))
-        .withEventType(EventType.INFO)
         .withProcessor(AuditEventProcessor.FILE_STORE)
         .withMessage("stored")
         .withStackTrace(null)
@@ -163,10 +140,10 @@ public class JpaAuditStoreTest {
     auditStore.recordEvent(AuditMessage.builder()
         .withTraceId(traceId2)
         .withDac("aoml")
-        .withTimestamp(Instant.parse("2026-10-05T12:00:09Z"))
+        .withTimestamp(Instant.parse("2026-10-05T12:00:08Z"))
         .withEventType(EventType.INFO)
-        .withProcessor(AuditEventProcessor.REMOVAL_COMPLETE)
-        .withMessage("complete")
+        .withProcessor(AuditEventProcessor.INDEXING)
+        .withMessage("updated index")
         .withStackTrace(null)
         .withFileName("D5678_001.nc")
         .build());
@@ -177,7 +154,7 @@ public class JpaAuditStoreTest {
         .withTimestamp(Instant.parse("2026-10-05T12:00:10Z"))
         .withEventType(EventType.INFO)
         .withProcessor(AuditEventProcessor.FILE_RECEIVED)
-        .withMessage("file received")
+        .withMessage("triggered file update")
         .withStackTrace(null)
         .withFileName("D999_001.nc")
         .build());
@@ -199,7 +176,7 @@ public class JpaAuditStoreTest {
         .withTimestamp(Instant.parse("2026-10-05T12:00:11Z"))
         .withEventType(EventType.INFO)
         .withProcessor(AuditEventProcessor.FILE_RECEIVED)
-        .withMessage("file received")
+        .withMessage("triggered file update")
         .withStackTrace(null)
         .withFileName("D111_001.nc")
         .build());
@@ -211,7 +188,6 @@ public class JpaAuditStoreTest {
         .withEventType(EventType.INFO)
         .withProcessor(AuditEventProcessor.VALIDATION)
         .withMessage("validate")
-        .withStackTrace("Validation Failure")
         .withFileName("D111_001.nc")
         .build());
 
@@ -221,7 +197,7 @@ public class JpaAuditStoreTest {
         .withTimestamp(Instant.parse("2026-10-05T12:00:11Z"))
         .withEventType(EventType.INFO)
         .withProcessor(AuditEventProcessor.FILE_RECEIVED)
-        .withMessage("file received")
+        .withMessage("triggered file update")
         .withStackTrace(null)
         .withFileName("D222_001.nc")
         .build());
@@ -232,7 +208,7 @@ public class JpaAuditStoreTest {
         .withTimestamp(Instant.parse("2026-10-06T00:00:00Z"))
         .withEventType(EventType.INFO)
         .withProcessor(AuditEventProcessor.FILE_RECEIVED)
-        .withMessage("file received")
+        .withMessage("triggered file update")
         .withStackTrace(null)
         .withFileName("D333_001.nc")
         .build());
@@ -258,7 +234,7 @@ public class JpaAuditStoreTest {
                 .withTimestamp(Instant.parse("2026-10-05T12:00:00Z"))
                 .withEventType(EventType.INFO)
                 .withProcessor(AuditEventProcessor.FILE_RECEIVED)
-                .withMessage("file received")
+                .withMessage("triggered file update")
                 .withStackTrace(null)
                 .withFileName("D1234_001.nc")
                 .build(),
@@ -269,7 +245,7 @@ public class JpaAuditStoreTest {
                 .withTimestamp(Instant.parse("2026-10-05T12:00:05Z"))
                 .withEventType(EventType.INFO)
                 .withProcessor(AuditEventProcessor.FILE_RECEIVED)
-                .withMessage("file received")
+                .withMessage("triggered file removal")
                 .withStackTrace(null)
                 .withFileName("D5678_001.nc")
                 .build()
@@ -294,7 +270,7 @@ public class JpaAuditStoreTest {
                 .withTimestamp(Instant.parse("2026-10-05T12:00:10Z"))
                 .withEventType(EventType.INFO)
                 .withProcessor(AuditEventProcessor.FILE_RECEIVED)
-                .withMessage("file received")
+                .withMessage("triggered file update")
                 .withStackTrace(null)
                 .withFileName("D999_001.nc")
                 .build(),
@@ -305,7 +281,7 @@ public class JpaAuditStoreTest {
                 .withTimestamp(Instant.parse("2026-10-05T12:00:11Z"))
                 .withEventType(EventType.INFO)
                 .withProcessor(AuditEventProcessor.FILE_RECEIVED)
-                .withMessage("file received")
+                .withMessage("triggered file update")
                 .withStackTrace(null)
                 .withFileName("D111_001.nc")
                 .build()
@@ -322,7 +298,7 @@ public class JpaAuditStoreTest {
             .withTimestamp(Instant.parse("2026-10-05T12:00:00Z"))
             .withEventType(EventType.INFO)
             .withProcessor(AuditEventProcessor.FILE_RECEIVED)
-            .withMessage("file received")
+            .withMessage("triggered file update")
             .withStackTrace(null)
             .withFileName("D1234_001.nc")
             .build(),
@@ -343,8 +319,8 @@ public class JpaAuditStoreTest {
             .withDac("aoml")
             .withTimestamp(Instant.parse("2026-10-05T12:00:02Z"))
             .withEventType(EventType.INFO)
-            .withProcessor(AuditEventProcessor.INDEXING)
-            .withMessage("index")
+            .withProcessor(AuditEventProcessor.FILE_STORE)
+            .withMessage("stored")
             .withStackTrace(null)
             .withFileName("D1234_001.nc")
             .build(),
@@ -354,23 +330,11 @@ public class JpaAuditStoreTest {
             .withDac("aoml")
             .withTimestamp(Instant.parse("2026-10-05T12:00:03Z"))
             .withEventType(EventType.INFO)
-            .withProcessor(AuditEventProcessor.FILE_STORE)
-            .withMessage("stored")
-            .withStackTrace(null)
-            .withFileName("D1234_001.nc")
-            .build(),
-        AuditMessage.builder()
-            .withTraceId(traceId1)
-            .withEventId(history1.get(4).getEventId())
-            .withDac("aoml")
-            .withTimestamp(Instant.parse("2026-10-05T12:00:04Z"))
-            .withEventType(EventType.INFO)
-            .withProcessor(AuditEventProcessor.SUBMISSION_COMPLETE)
-            .withMessage("complete")
+            .withProcessor(AuditEventProcessor.INDEXING)
+            .withMessage("updated index")
             .withStackTrace(null)
             .withFileName("D1234_001.nc")
             .build()
-
     ), history1);
 
     List<AuditMessage> history2 = auditStore.getHistoryForTraceId(traceId2);
@@ -383,7 +347,7 @@ public class JpaAuditStoreTest {
             .withTimestamp(Instant.parse("2026-10-05T12:00:05Z"))
             .withEventType(EventType.INFO)
             .withProcessor(AuditEventProcessor.FILE_RECEIVED)
-            .withMessage("file received")
+            .withMessage("triggered file removal")
             .withStackTrace(null)
             .withFileName("D5678_001.nc")
             .build(),
@@ -404,8 +368,8 @@ public class JpaAuditStoreTest {
             .withDac("aoml")
             .withTimestamp(Instant.parse("2026-10-05T12:00:07Z"))
             .withEventType(EventType.INFO)
-            .withProcessor(AuditEventProcessor.INDEXING)
-            .withMessage("index")
+            .withProcessor(AuditEventProcessor.FILE_STORE)
+            .withMessage("stored")
             .withStackTrace(null)
             .withFileName("D5678_001.nc")
             .build(),
@@ -415,19 +379,8 @@ public class JpaAuditStoreTest {
             .withDac("aoml")
             .withTimestamp(Instant.parse("2026-10-05T12:00:08Z"))
             .withEventType(EventType.INFO)
-            .withProcessor(AuditEventProcessor.FILE_STORE)
-            .withMessage("stored")
-            .withStackTrace(null)
-            .withFileName("D5678_001.nc")
-            .build(),
-        AuditMessage.builder()
-            .withTraceId(traceId2)
-            .withEventId(history2.get(4).getEventId())
-            .withDac("aoml")
-            .withTimestamp(Instant.parse("2026-10-05T12:00:09Z"))
-            .withEventType(EventType.INFO)
-            .withProcessor(AuditEventProcessor.REMOVAL_COMPLETE)
-            .withMessage("complete")
+            .withProcessor(AuditEventProcessor.INDEXING)
+            .withMessage("updated index")
             .withStackTrace(null)
             .withFileName("D5678_001.nc")
             .build()
@@ -443,7 +396,7 @@ public class JpaAuditStoreTest {
             .withTimestamp(Instant.parse("2026-10-05T12:00:10Z"))
             .withEventType(EventType.INFO)
             .withProcessor(AuditEventProcessor.FILE_RECEIVED)
-            .withMessage("file received")
+            .withMessage("triggered file update")
             .withStackTrace(null)
             .withFileName("D999_001.nc")
             .build(),
@@ -470,7 +423,7 @@ public class JpaAuditStoreTest {
             .withTimestamp(Instant.parse("2026-10-05T12:00:11Z"))
             .withEventType(EventType.INFO)
             .withProcessor(AuditEventProcessor.FILE_RECEIVED)
-            .withMessage("file received")
+            .withMessage("triggered file update")
             .withStackTrace(null)
             .withFileName("D111_001.nc")
             .build(),
@@ -482,7 +435,7 @@ public class JpaAuditStoreTest {
             .withEventType(EventType.INFO)
             .withProcessor(AuditEventProcessor.VALIDATION)
             .withMessage("validate")
-            .withStackTrace("Validation Failure")
+            .withStackTrace(null)
             .withFileName("D111_001.nc")
             .build()
     ), history4);
@@ -504,7 +457,7 @@ public class JpaAuditStoreTest {
                 .withTimestamp(Instant.parse("2026-10-05T12:00:11Z"))
                 .withEventType(EventType.INFO)
                 .withProcessor(AuditEventProcessor.FILE_RECEIVED)
-                .withMessage("file received")
+                .withMessage("triggered file update")
                 .withStackTrace(null)
                 .withFileName("D111_001.nc")
                 .build()

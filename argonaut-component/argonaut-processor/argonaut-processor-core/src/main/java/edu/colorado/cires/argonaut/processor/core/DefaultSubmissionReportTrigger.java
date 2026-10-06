@@ -79,9 +79,11 @@ public class DefaultSubmissionReportTrigger implements SubmissionReportTrigger {
   }
 
   private void sendMessage(SubmissionPage page) {
-    messageSender.sendJson(reportGenerationQueue, jsonMapper.writeValueAsString(SubmissionReportSet.builder()
-        .withDac(page.getDac())
-        .withEvents(page.getPage())
-        .build()));
+    if (!page.getPage().isEmpty()) {
+      messageSender.sendJson(reportGenerationQueue, jsonMapper.writeValueAsString(SubmissionReportSet.builder()
+          .withDac(page.getDac())
+          .withEvents(page.getPage())
+          .build()));
+    }
   }
 }

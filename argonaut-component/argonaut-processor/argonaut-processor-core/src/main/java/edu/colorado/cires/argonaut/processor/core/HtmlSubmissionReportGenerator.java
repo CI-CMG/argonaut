@@ -6,10 +6,8 @@ import edu.colorado.cires.argonaut.messaging.core.databind.AuditMessage;
 import edu.colorado.cires.argonaut.messaging.core.databind.AuditMessage.EventType;
 import edu.colorado.cires.argonaut.messaging.core.databind.SubmissionReportSet;
 import java.time.Instant;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.stream.Collectors;
@@ -44,7 +42,7 @@ public class HtmlSubmissionReportGenerator implements SubmissionReportProcessor 
           + "<th style=\"border: 1px solid black; border-collapse: collapse; padding: 5px;\">File Name</th>"
           + "<th style=\"border: 1px solid black; border-collapse: collapse; padding: 5px;\">Start Time</th>"
           + "<th style=\"border: 1px solid black; border-collapse: collapse; padding: 5px;\">End Time</th>"
-          + "<th style=\"border: 1px solid black; border-collapse: collapse; padding: 5px;\">Events</th>"
+          + "<th style=\"border: 1px solid black; border-collapse: collapse; padding: 5px;\">Result</th>"
           + "<th style=\"border: 1px solid black; border-collapse: collapse; padding: 5px;\">Error</th>"
           + "</tr>"
           + "_ROWS_"
@@ -57,7 +55,7 @@ public class HtmlSubmissionReportGenerator implements SubmissionReportProcessor 
           + "<th style=\"border: 1px solid black; border-collapse: collapse; padding: 5px;\">File Name</th>"
           + "<th style=\"border: 1px solid black; border-collapse: collapse; padding: 5px;\">Start Time</th>"
           + "<th style=\"border: 1px solid black; border-collapse: collapse; padding: 5px;\">End Time</th>"
-          + "<th style=\"border: 1px solid black; border-collapse: collapse; padding: 5px;\">Events</th>"
+          + "<th style=\"border: 1px solid black; border-collapse: collapse; padding: 5px;\">Result</th>"
           + "</tr>"
           + "_ROWS_"
           + "</table>";
@@ -71,7 +69,7 @@ public class HtmlSubmissionReportGenerator implements SubmissionReportProcessor 
         + String.format("<td style=\"border: 1px solid black; border-collapse: collapse; padding: 5px; text-align: left;\">%s</td>",
         history.getEndTime().toString())
         + String.format("<td style=\"border: 1px solid black; border-collapse: collapse; padding: 5px; text-align: left;\">%s</td>",
-        String.join(" ", history.getEvents()))
+        history.getOutcome().toString())
         + "</tr>";
   }
 
@@ -84,7 +82,7 @@ public class HtmlSubmissionReportGenerator implements SubmissionReportProcessor 
         + String.format("<td style=\"border: 1px solid black; border-collapse: collapse; padding: 5px; text-align: left;\">%s</td>",
         history.getEndTime().toString())
         + String.format("<td style=\"border: 1px solid black; border-collapse: collapse; padding: 5px; text-align: left;\">%s</td>",
-        String.join(" ", history.getEvents()))
+        history.getOutcome().toString())
         + String.format("<td style=\"border: 1px solid black; border-collapse: collapse; padding: 5px; text-align: left;\">%s</td>",
         valueOrEmpty(history.getDetails()))
         + "</tr>";
@@ -114,18 +112,23 @@ public class HtmlSubmissionReportGenerator implements SubmissionReportProcessor 
     this.environment = environment;
   }
 
+  private enum Outcome {
+    SUBMISSION_SUCCESS,
+    SUBMISSION_FAILURE,
+    REMOVAL_SUCCESS,
+    REMOVAL_FAILURE
+  }
+
   private static class History {
 
-    private final List<String> events;
-    private final boolean success;
+    private final Outcome outcome;
     private final Instant startTime;
     private final Instant endTime;
     private final String details;
     private final AuditMessage auditMessage;
 
-    private History(AuditMessage auditMessage, List<String> events, boolean success, Instant startTime, Instant endTime, String details) {
-      this.events = events;
-      this.success = success;
+    private History(AuditMessage auditMessage, Outcome outcome, Instant startTime, Instant endTime, String details) {
+      this.outcome = outcome;
       this.startTime = startTime;
       this.endTime = endTime;
       this.details = details;
@@ -136,12 +139,12 @@ public class HtmlSubmissionReportGenerator implements SubmissionReportProcessor 
       return auditMessage;
     }
 
-    public List<String> getEvents() {
-      return events;
+    public Outcome getOutcome() {
+      return outcome;
     }
 
     public boolean isSuccess() {
-      return success;
+      return outcome == Outcome.SUBMISSION_SUCCESS || outcome == Outcome.REMOVAL_SUCCESS;
     }
 
     public Instant getStartTime() {
@@ -157,54 +160,63 @@ public class HtmlSubmissionReportGenerator implements SubmissionReportProcessor 
     }
   }
 
+  private static Optional<Outcome> resolveOutcome(List<AuditMessage> history) {
+    final boolean submit = history.stream().anyMatch(am -> am.getProcessor() == AuditEventProcessor.FILE_RECEIVED && am.getMessage().equals("triggered file update"));
+
+    if (history.stream().anyMatch(am -> am.getEventType() == EventType.ERROR)) {
+      return submit ? Optional.of(Outcome.SUBMISSION_FAILURE) : Optional.of(Outcome.REMOVAL_FAILURE);
+    }
+
+    return history.stream()
+        .filter(am -> am.getProcessor() == AuditEventProcessor.INDEXING && am.getMessage().equals("updated index"))
+        .findFirst().map(am -> submit ? Outcome.SUBMISSION_SUCCESS : Outcome.REMOVAL_SUCCESS);
+  }
+
   private Optional<History> summary(AuditMessage auditMessage) {
     List<AuditMessage> history = auditStore.getHistoryForTraceId(auditMessage.getTraceId());
-    Set<EventType> eventTypes = history.stream().map(AuditMessage::getEventType).collect(Collectors.toSet());
-    boolean error = eventTypes.contains(EventType.ERROR);
-    Set<AuditEventProcessor> events = new LinkedHashSet<>(history.stream().map(AuditMessage::getProcessor).collect(Collectors.toList()));
-    if (error || events.contains(AuditEventProcessor.SUBMISSION_COMPLETE) || events.contains(AuditEventProcessor.REMOVAL_COMPLETE)) {
-      return Optional.of(new History(
-          auditMessage,
-          events.stream().map(AuditEventProcessor::toString).toList(),
-          !error,
-          history.getFirst().getTimestamp(),
-          history.getLast().getTimestamp(),
-          history.stream().filter(am -> am.getEventType() == EventType.ERROR).findFirst().map(AuditMessage::getStackTrace).orElse("")
-      ));
-    }
-    return Optional.empty();
-
+    return resolveOutcome(history).map(outcome -> new History(
+        auditMessage,
+        outcome,
+        history.getFirst().getTimestamp(),
+        history.getLast().getTimestamp(),
+        history.stream().filter(am -> am.getEventType() == EventType.ERROR).findFirst().map(AuditMessage::getStackTrace).orElse("")
+    ));
   }
 
   @Override
   public SubmissionReportSet generateReport(SubmissionReportSet submissionReportSet) {
     List<History> histories = submissionReportSet.getEvents().stream().map(this::summary).filter(Optional::isPresent).map(Optional::get).toList();
 
-    String success = histories.stream()
-        .filter(History::isSuccess)
-        .map(HtmlSubmissionReportGenerator::buildSuccessTableRow)
-        .collect(Collectors.joining(""));
+    String report = "";
+    if (!histories.isEmpty()) {
+      String success = histories.stream()
+          .filter(History::isSuccess)
+          .map(HtmlSubmissionReportGenerator::buildSuccessTableRow)
+          .collect(Collectors.joining(""));
 
-    String failure = histories.stream()
-        .filter(h -> !h.isSuccess())
-        .map(HtmlSubmissionReportGenerator::buildFailureTableRow)
-        .collect(Collectors.joining(""));
+      String failure = histories.stream()
+          .filter(h -> !h.isSuccess())
+          .map(HtmlSubmissionReportGenerator::buildFailureTableRow)
+          .collect(Collectors.joining(""));
 
-    String successTable = SUCCESS_TABLE_TEMPLATE.replaceAll("_ROWS_", Matcher.quoteReplacement(success));
-    String failureTable = FAILURE_TABLE_TEMPLATE.replaceAll("_ROWS_", Matcher.quoteReplacement(failure));
+      String successTable = SUCCESS_TABLE_TEMPLATE.replaceAll("_ROWS_", Matcher.quoteReplacement(success));
+      String failureTable = FAILURE_TABLE_TEMPLATE.replaceAll("_ROWS_", Matcher.quoteReplacement(failure));
 
-    String time = nowSupplier.get().toString();
+      String time = nowSupplier.get().toString();
 
-    String body = BODY_TEMPLATE
-        .replaceAll("_FAILURE_", Matcher.quoteReplacement(failureTable))
-        .replaceAll("_SUCCESS_", Matcher.quoteReplacement(successTable))
-        .replaceAll("_TIME_", Matcher.quoteReplacement(time))
-        .replaceAll("_ENV_", Matcher.quoteReplacement(environment));
+      String body = BODY_TEMPLATE
+          .replaceAll("_FAILURE_", Matcher.quoteReplacement(failureTable))
+          .replaceAll("_SUCCESS_", Matcher.quoteReplacement(successTable))
+          .replaceAll("_TIME_", Matcher.quoteReplacement(time))
+          .replaceAll("_ENV_", Matcher.quoteReplacement(environment));
 
-    String report = TEMPLATE
-        .replaceAll("_BODY_", Matcher.quoteReplacement(body))
-        .replaceAll("_TIME_", Matcher.quoteReplacement(time))
-        .replaceAll("_ENV_", Matcher.quoteReplacement(environment));
+      report = TEMPLATE
+          .replaceAll("_BODY_", Matcher.quoteReplacement(body))
+          .replaceAll("_TIME_", Matcher.quoteReplacement(time))
+          .replaceAll("_ENV_", Matcher.quoteReplacement(environment));
+    }
+
+
 
     return SubmissionReportSet.builder(submissionReportSet)
         .withEvents(histories.stream().map(History::getAuditMessage).toList())

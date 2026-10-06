@@ -1,6 +1,6 @@
 package edu.colorado.cires.argonaut.processor.core;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -16,7 +16,6 @@ import java.nio.file.Paths;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.UUID;
-import java.util.function.Supplier;
 import org.junit.jupiter.api.Test;
 
 public class SubmissionReportAuditPostProcessorTest {
@@ -50,7 +49,7 @@ public class SubmissionReportAuditPostProcessorTest {
                 .withTimestamp(timeStamp)
                 .withEventType(EventType.INFO)
                 .withProcessor(AuditEventProcessor.FILE_RECEIVED)
-                .withMessage("file received")
+                .withMessage("triggered file update")
                 .withStackTrace(null)
                 .withFileName("D1234_001.nc")
                 .build(),
@@ -61,7 +60,7 @@ public class SubmissionReportAuditPostProcessorTest {
                 .withTimestamp(timeStamp)
                 .withEventType(EventType.INFO)
                 .withProcessor(AuditEventProcessor.FILE_RECEIVED)
-                .withMessage("file received")
+                .withMessage("triggered file removal")
                 .withStackTrace(null)
                 .withFileName("D5678_001.nc")
                 .build(),
@@ -72,7 +71,7 @@ public class SubmissionReportAuditPostProcessorTest {
                 .withTimestamp(timeStamp)
                 .withEventType(EventType.INFO)
                 .withProcessor(AuditEventProcessor.FILE_RECEIVED)
-                .withMessage("file received")
+                .withMessage("triggered file update")
                 .withStackTrace(null)
                 .withFileName("D999_001.nc")
                 .build()

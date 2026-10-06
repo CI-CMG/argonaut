@@ -39,6 +39,7 @@ public class DefaultRemovalFileMessageSplitterTest {
     Files.createDirectories(removalTxt.getParent());
     Files.copy(Paths.get("src/test/resources/aoml_removal.txt"), removalTxt);
 
+    AuditSender auditSender = mock(AuditSender.class);
     MessageSender messageSender = mock(MessageSender.class);
     String fileMoveQueue = "fileMoveQueue";
     JsonMapper jsonMapper = ArgonautJsonMapperFactory.getJsonMapper();
@@ -49,6 +50,8 @@ public class DefaultRemovalFileMessageSplitterTest {
     processor.setMessageSender(messageSender);
     processor.setFileMoveQueue(fileMoveQueue);
     processor.setJsonMapper(jsonMapper);
+    processor.setAuditSender(auditSender);
+    processor.setTraceIdGenerator(() -> traceId);
 
 
     NcSubmissionMessage message = NcSubmissionMessage.builder()
@@ -57,13 +60,13 @@ public class DefaultRemovalFileMessageSplitterTest {
         .withFileType(ArgoFileType.REMOVAL_TXT)
         .withDac("aoml")
         .withTimestamp(now)
-        .withTraceId(traceId)
+        .withTraceId(UUID.randomUUID())
         .build();
 
     processor.splitRemovalFileMessages(message);
 
 
-    verify(messageSender).sendJson(eq(fileMoveQueue), eq(jsonMapper.writeValueAsString(NcSubmissionMessage.builder()
+    NcSubmissionMessage expected = NcSubmissionMessage.builder()
         .withOperation(Operation.REMOVE)
         .withFileName("1234_tech.nc")
         .withFileType(ArgoFileType.TECHNICAL_DATA)
@@ -71,8 +74,11 @@ public class DefaultRemovalFileMessageSplitterTest {
         .withTimestamp(now)
         .withTraceId(traceId)
         .withFloatId("1234")
-        .build())));
-    verify(messageSender).sendJson(eq(fileMoveQueue), eq(jsonMapper.writeValueAsString(NcSubmissionMessage.builder()
+        .build();
+    verify(messageSender).sendJson(eq(fileMoveQueue), eq(jsonMapper.writeValueAsString(expected)));
+    verify(auditSender).removalStarted(eq(expected));
+
+    expected = NcSubmissionMessage.builder()
         .withOperation(Operation.REMOVE)
         .withFileName("R1234_001.nc")
         .withFileType(ArgoFileType.PROFILE_CORE)
@@ -80,8 +86,11 @@ public class DefaultRemovalFileMessageSplitterTest {
         .withTimestamp(now)
         .withTraceId(traceId)
         .withFloatId("1234")
-        .build())));
-    verify(messageSender).sendJson(eq(fileMoveQueue), eq(jsonMapper.writeValueAsString(NcSubmissionMessage.builder()
+        .build();
+    verify(messageSender).sendJson(eq(fileMoveQueue), eq(jsonMapper.writeValueAsString(expected)));
+    verify(auditSender).removalStarted(eq(expected));
+
+    expected = NcSubmissionMessage.builder()
         .withOperation(Operation.REMOVE)
         .withFileName("BR1234_001.nc")
         .withFileType(ArgoFileType.PROFILE_BIOCHEMICAL)
@@ -89,8 +98,11 @@ public class DefaultRemovalFileMessageSplitterTest {
         .withTimestamp(now)
         .withTraceId(traceId)
         .withFloatId("1234")
-        .build())));
-    verify(messageSender).sendJson(eq(fileMoveQueue), eq(jsonMapper.writeValueAsString(NcSubmissionMessage.builder()
+        .build();
+    verify(messageSender).sendJson(eq(fileMoveQueue), eq(jsonMapper.writeValueAsString(expected)));
+    verify(auditSender).removalStarted(eq(expected));
+
+    expected = NcSubmissionMessage.builder()
         .withOperation(Operation.REMOVE)
         .withFileName("1234_Rtraj.nc")
         .withFileType(ArgoFileType.TRAJECTORY)
@@ -98,8 +110,11 @@ public class DefaultRemovalFileMessageSplitterTest {
         .withTimestamp(now)
         .withTraceId(traceId)
         .withFloatId("1234")
-        .build())));
-    verify(messageSender).sendJson(eq(fileMoveQueue), eq(jsonMapper.writeValueAsString(NcSubmissionMessage.builder()
+        .build();
+    verify(messageSender).sendJson(eq(fileMoveQueue), eq(jsonMapper.writeValueAsString(expected)));
+    verify(auditSender).removalStarted(eq(expected));
+
+    expected = NcSubmissionMessage.builder()
         .withOperation(Operation.REMOVE)
         .withFileName("1234_meta.nc")
         .withFileType(ArgoFileType.METADATA)
@@ -107,7 +122,9 @@ public class DefaultRemovalFileMessageSplitterTest {
         .withTimestamp(now)
         .withTraceId(traceId)
         .withFloatId("1234")
-        .build())));
+        .build();
+    verify(messageSender).sendJson(eq(fileMoveQueue), eq(jsonMapper.writeValueAsString(expected)));
+    verify(auditSender).removalStarted(eq(expected));
 
   }
 }

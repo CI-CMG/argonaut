@@ -10,6 +10,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.util.UUID;
+import java.util.function.Supplier;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,6 +25,8 @@ public class DefaultRemovalFileMessageSplitter implements RemovalFileMessageSpli
   private String fileMoveQueue;
   private FileStore processingFileStore;
   private JsonMapper jsonMapper;
+  private AuditSender auditSender;
+  private Supplier<UUID> traceIdGenerator = UUID::randomUUID;
 
   public void setJsonMapper(JsonMapper jsonMapper) {
     this.jsonMapper = jsonMapper;
@@ -38,6 +42,14 @@ public class DefaultRemovalFileMessageSplitter implements RemovalFileMessageSpli
 
   public void setProcessingFileStore(FileStore processingFileStore) {
     this.processingFileStore = processingFileStore;
+  }
+
+  public void setAuditSender(AuditSender auditSender) {
+    this.auditSender = auditSender;
+  }
+
+  public void setTraceIdGenerator(Supplier<UUID> traceIdGenerator) {
+    this.traceIdGenerator = traceIdGenerator;
   }
 
   @Override
@@ -61,12 +73,13 @@ public class DefaultRemovalFileMessageSplitter implements RemovalFileMessageSpli
               .withFileType(fileTypeDetails.getType())
               .withDac(parent.getDac())
               .withTimestamp(parent.getTimestamp())
-              .withTraceId(parent.getTraceId())
+              .withTraceId(traceIdGenerator.get())  //override parent in order to track each removal
               .withFloatId(floatDir)
               .build();
 
           LOGGER.info("Notifying file removal {} : {}", message.getDac(), message.getFileName());
 
+          auditSender.removalStarted(message);
           messageSender.sendJson(fileMoveQueue, jsonMapper.writeValueAsString(message));
 
         }

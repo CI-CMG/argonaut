@@ -14,6 +14,7 @@ public class SubmissionRoutingProcessor {
   private JsonMapper jsonMapper;
   private String submitDataQueue;
   private String submitRemovalQueue;
+  private AuditSender auditSender;
 
   public void setSubmissionProcessor(SubmissionProcessor submissionProcessor) {
     this.submissionProcessor = submissionProcessor;
@@ -39,23 +40,36 @@ public class SubmissionRoutingProcessor {
     this.submitRemovalQueue = submitRemovalQueue;
   }
 
+  public void setAuditSender(AuditSender auditSender) {
+    this.auditSender = auditSender;
+  }
+
   public void choice(DacSubmittedFileMessage message) {
     if (message.getPath().endsWith(".tar.gz")) {
       List<NcSubmissionMessage> submissionMessages = tarballSubmissionProcessor.untarAndMoveToProcessing(message);
       for (NcSubmissionMessage submissionMessage : submissionMessages) {
         if (submissionMessage.getFileName().endsWith("_removal.txt")) {
-          messageSender.sendJson(submitRemovalQueue, jsonMapper.writeValueAsString(submissionMessage));
+          submitRemoval(submissionMessage);
         } else {
-          messageSender.sendJson(submitDataQueue, jsonMapper.writeValueAsString(submissionMessage));
+          submitUpdate(submissionMessage);
         }
       }
     } else if (message.getPath().endsWith("_removal.txt")) {
-      submissionProcessor.moveToProcessing(message).ifPresent(submissionMessage -> messageSender.sendJson(submitRemovalQueue, jsonMapper.writeValueAsString(submissionMessage)));
+      submissionProcessor.moveToProcessing(message).ifPresent(this::submitRemoval);
     } else if (message.getPath().endsWith(".nc")) {
-      submissionProcessor.moveToProcessing(message).ifPresent(submissionMessage -> messageSender.sendJson(submitDataQueue, jsonMapper.writeValueAsString(submissionMessage)));
+      submissionProcessor.moveToProcessing(message).ifPresent(this::submitUpdate);
     } else {
       throw new UnsupportedOperationException("Unsupported file type: " + message.getPath());
     }
+  }
+
+  private void submitRemoval(NcSubmissionMessage submissionMessage) {
+    messageSender.sendJson(submitRemovalQueue, jsonMapper.writeValueAsString(submissionMessage));
+  }
+
+  private void submitUpdate(NcSubmissionMessage submissionMessage) {
+    auditSender.updateStarted(submissionMessage);
+    messageSender.sendJson(submitDataQueue, jsonMapper.writeValueAsString(submissionMessage));
   }
 
 }

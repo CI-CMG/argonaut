@@ -70,6 +70,7 @@
     <property name="submitRemovalQueue" value="seda:validate-removal"/>
     <property name="tarballSubmissionProcessor" ref="tarballSubmissionProcessor"/>
     <property name="submissionProcessor" ref="submissionProcessor"/>
+    <property name="auditSender" ref="auditSender"/>
   </bean>
 
   <bean id="validationProcessor" class="edu.colorado.cires.argonaut.processor.core.DefaultValidationProcessor">
@@ -102,6 +103,7 @@
     <property name="messageSender" ref="messageSender"/>
     <property name="fileMoveQueue" value="seda:file-output"/>
     <property name="processingFileStore" ref="processingFileStore"/>
+    <property name="auditSender" ref="auditSender"/>
   </bean>
 
   <bean id="fileMoveProcessor" class="edu.colorado.cires.argonaut.processor.core.DefaultFileMoveProcessor">
@@ -322,7 +324,7 @@
   </bean>
   
   <bean id="submissionReportFileSaver" class="edu.colorado.cires.argonaut.standalone.SubmissionReportFileSaver">
-    <property name="submissionFileStore" ref="submissionFileStore"/>
+    <property name="outputFileStore" ref="outputFileStore"/>
     <property name="auditStore" ref="auditStore"/>
   </bean>
 

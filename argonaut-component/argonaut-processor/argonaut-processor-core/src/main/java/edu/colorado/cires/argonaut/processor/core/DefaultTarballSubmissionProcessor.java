@@ -10,6 +10,8 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
@@ -21,6 +23,7 @@ public class DefaultTarballSubmissionProcessor implements TarballSubmissionProce
   private FileStore submissionFileStore;
   private FileStore processingFileStore;
   private Path localTempDir;
+  private Supplier<UUID> traceIdGenerator = UUID::randomUUID;
 
   public void setSubmissionFileStore(FileStore submissionFileStore) {
     this.submissionFileStore = submissionFileStore;
@@ -28,6 +31,10 @@ public class DefaultTarballSubmissionProcessor implements TarballSubmissionProce
 
   public void setProcessingFileStore(FileStore processingFileStore) {
     this.processingFileStore = processingFileStore;
+  }
+
+  public void setTraceIdGenerator(Supplier<UUID> traceIdGenerator) {
+    this.traceIdGenerator = traceIdGenerator;
   }
 
   public void setLocalTempDir(Path localTempDir) {
@@ -118,7 +125,7 @@ public class DefaultTarballSubmissionProcessor implements TarballSubmissionProce
     for (NcSubmissionMessage ncSubmissionMessage : output) {
       NcSubmissionMessage finalNcSubmissionMessage = NcSubmissionMessage.builder(ncSubmissionMessage)
           .withNumberOfFilesInSubmission(output.size())
-          .withTraceId(submittedFile.getTraceId())
+          .withTraceId(traceIdGenerator.get()) // override parent traceID to track individual files
           .build();
       result.add(finalNcSubmissionMessage);
     }

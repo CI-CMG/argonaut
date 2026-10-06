@@ -4,6 +4,7 @@ package edu.colorado.cires.argonaut.processor.core;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import edu.colorado.cires.argonaut.messaging.core.databind.ArgoFileType;
@@ -24,6 +25,7 @@ public class SubmissionRoutingProcessorTest {
   @Test
   public void testRemoval() {
 
+    AuditSender auditSender = mock(AuditSender.class);
     MessageSender messageSender = mock(MessageSender.class);
     TarballSubmissionProcessor tarballSubmissionProcessor = mock(TarballSubmissionProcessor.class);
     SubmissionProcessor submissionProcessor = mock(SubmissionProcessor.class);
@@ -59,16 +61,19 @@ public class SubmissionRoutingProcessorTest {
     processor.setJsonMapper(jsonMapper);
     processor.setSubmitDataQueue(submitDataQueue);
     processor.setSubmitRemovalQueue(submitRemovalQueue);
+    processor.setAuditSender(auditSender);
 
     processor.choice(message);
 
     verify(messageSender).sendJson(eq(submitRemovalQueue), eq(jsonMapper.writeValueAsString(resultMessage)));
+    verifyNoInteractions(auditSender);
 
   }
 
   @Test
   public void testTarGzRemoval() {
 
+    AuditSender auditSender = mock(AuditSender.class);
     MessageSender messageSender = mock(MessageSender.class);
     TarballSubmissionProcessor tarballSubmissionProcessor = mock(TarballSubmissionProcessor.class);
     SubmissionProcessor submissionProcessor = mock(SubmissionProcessor.class);
@@ -113,11 +118,13 @@ public class SubmissionRoutingProcessorTest {
     processor.setJsonMapper(jsonMapper);
     processor.setSubmitDataQueue(submitDataQueue);
     processor.setSubmitRemovalQueue(submitRemovalQueue);
+    processor.setAuditSender(auditSender);
 
     processor.choice(message);
 
     verify(messageSender).sendJson(eq(submitRemovalQueue), eq(jsonMapper.writeValueAsString(resultMessage)));
     verify(messageSender).sendJson(eq(submitDataQueue), eq(jsonMapper.writeValueAsString(resultMessage2)));
+    verify(auditSender).updateStarted(eq(resultMessage2));
 
   }
 

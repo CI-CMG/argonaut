@@ -43,6 +43,34 @@ public class AuditSender {
             .build()));
   }
 
+  public void removalStarted(NcSubmissionMessage message) {
+    messageSender.sendJson(
+        auditQueue,
+        jsonMapper.writeValueAsString(AuditMessage.builder()
+            .withDac(message.getDac())
+            .withEventType(EventType.INFO)
+            .withFileName(message.getFileName())
+            .withMessage("triggered file removal")
+            .withProcessor(AuditEventProcessor.FILE_RECEIVED)
+            .withTimestamp(Instant.now())
+            .withTraceId(message.getTraceId())
+            .build()));
+  }
+
+  public void updateStarted(NcSubmissionMessage message) {
+    messageSender.sendJson(
+        auditQueue,
+        jsonMapper.writeValueAsString(AuditMessage.builder()
+            .withDac(message.getDac())
+            .withEventType(EventType.INFO)
+            .withFileName(message.getFileName())
+            .withMessage("triggered file update")
+            .withProcessor(AuditEventProcessor.FILE_RECEIVED)
+            .withTimestamp(Instant.now())
+            .withTraceId(message.getTraceId())
+            .build()));
+  }
+
   public void validationStarted(NcSubmissionMessage message) {
     messageSender.sendJson(
         auditQueue,

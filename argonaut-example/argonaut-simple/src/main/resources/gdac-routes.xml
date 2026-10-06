@@ -215,7 +215,7 @@
 
     <route id="submission-report">
       <from uri="seda:submission-report?concurrentConsumers=5"/>
-      <bean ref="deserializationProcessor" method="deserialize(${body}, edu.colorado.cires.argonaut.messaging.core.databind.SubmissionReportSet"/>
+      <bean ref="deserializationProcessor" method="deserialize(${body}, edu.colorado.cires.argonaut.messaging.core.databind.SubmissionReportSet)"/>
       <bean ref="submissionReportGenerator" method="generateReport"/>
       <bean ref="submissionReportFileSaver" method="generateReport"/>
     </route>

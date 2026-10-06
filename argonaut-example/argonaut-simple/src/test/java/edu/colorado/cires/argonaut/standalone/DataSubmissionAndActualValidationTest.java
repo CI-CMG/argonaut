@@ -2,6 +2,7 @@ package edu.colorado.cires.argonaut.standalone;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import edu.colorado.cires.argonaut.messaging.core.databind.ArgoFileType;
@@ -263,7 +264,7 @@ public class DataSubmissionAndActualValidationTest {
           .withFileType(type)
           .withDac("aoml")
           .withFileName(name)
-          .withTraceId(StaticTraceIdGenerator.TRACE_ID)
+          .withTraceId(null) // null out generated traceId for test comparison
           .withTimestamp(timestamp)
           .withFloatId(floatDir.getFileName().toString())
           .withNumberOfFilesInSubmission(102)
@@ -277,7 +278,8 @@ public class DataSubmissionAndActualValidationTest {
     for (Exchange exchange : validationSuccess.getExchanges()) {
       String json = exchange.getIn().getBody(String.class);
       NcSubmissionMessage ncSubmissionMessage = jsonMapper.readValue(json, NcSubmissionMessage.class);
-      receivedMessages.add(ncSubmissionMessage);
+      assertNotNull(ncSubmissionMessage.getTraceId());
+      receivedMessages.add(NcSubmissionMessage.builder(ncSubmissionMessage).withTraceId(null).build()); // null out generated traceId for test comparison
     }
 
     assertEquals(expectedFiles, processedFiles);
@@ -329,7 +331,7 @@ public class DataSubmissionAndActualValidationTest {
 
       NcSubmissionMessage expectedMessage = NcSubmissionMessage.builder()
           .withFileType(ArgoFileType.PROFILE_CORE)
-          .withTraceId(StaticTraceIdGenerator.TRACE_ID)
+          .withTraceId(null) // null out generated traceId for test comparison
           .withDac("aoml")
           .withFileName(name)
           .withTimestamp(timestamp)
@@ -350,14 +352,16 @@ public class DataSubmissionAndActualValidationTest {
     for (Exchange exchange : validationSuccess.getExchanges()) {
       String json = exchange.getIn().getBody(String.class);
       NcSubmissionMessage ncSubmissionMessage = jsonMapper.readValue(json, NcSubmissionMessage.class);
-      receivedValidMessages.add(ncSubmissionMessage);
+      assertNotNull(ncSubmissionMessage.getTraceId());
+      receivedValidMessages.add(NcSubmissionMessage.builder(ncSubmissionMessage).withTraceId(null).build()); // null out generated traceId for test comparison
     }
 
     List<NcSubmissionMessage> receivedFailedMessages = new ArrayList<>(1);
     for (Exchange exchange : validationFailure.getExchanges()) {
       String json = exchange.getIn().getBody(String.class);
       NcSubmissionMessage ncSubmissionMessage = jsonMapper.readValue(json, NcSubmissionMessage.class);
-      receivedFailedMessages.add(ncSubmissionMessage);
+      assertNotNull(ncSubmissionMessage.getTraceId());
+      receivedFailedMessages.add(NcSubmissionMessage.builder(ncSubmissionMessage).withTraceId(null).build()); // null out generated traceId for test comparison
     }
 
     assertEquals(expectedFiles, processedFiles);
