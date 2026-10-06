@@ -7,7 +7,7 @@ import edu.colorado.cires.argonaut.metadata.jpa.entity.FileRemovedTimeEntity;
 import edu.colorado.cires.argonaut.metadata.jpa.entity.MetadataFileEntity;
 import edu.colorado.cires.argonaut.metadata.jpa.entity.ProfileFileEntity;
 import edu.colorado.cires.argonaut.metadata.jpa.entity.ProfileMergeFileEntity;
-import edu.colorado.cires.argonaut.metadata.jpa.entity.TrajectoryEntity;
+import edu.colorado.cires.argonaut.metadata.jpa.entity.TrajectoryFileEntity;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.EntityTransaction;
@@ -69,7 +69,7 @@ class Remover {
   }
 
   private static void removeTrajectory(EntityManager em, MetadataRecord record) {
-    TrajectoryEntity existing = em.find(TrajectoryEntity.class, record.getFile(), LockModeType.OPTIMISTIC);
+    TrajectoryFileEntity existing = em.find(TrajectoryFileEntity.class, record.getFile(), LockModeType.OPTIMISTIC);
     if (existing != null) {
       existing.setFileStatus(FileStatus.REMOVED.name());
       existing.setLastUpdatedTime(record.getActionTimestamp().atOffset(ZoneOffset.UTC).toZonedDateTime());
@@ -174,7 +174,7 @@ class Remover {
   }
 
   private static void deleteTrajectory(EntityManager em, MetadataRecord record) {
-    TrajectoryEntity existing = em.find(TrajectoryEntity.class, record.getFile(),
+    TrajectoryFileEntity existing = em.find(TrajectoryFileEntity.class, record.getFile(),
       LockModeType.OPTIMISTIC);
     if (existing != null) {
       existing.setLastUpdatedTime(record.getActionTimestamp().atOffset(ZoneOffset.UTC).toZonedDateTime());

@@ -26,7 +26,7 @@ import edu.colorado.cires.argonaut.metadata.jpa.entity.FloatEntity;
 import edu.colorado.cires.argonaut.metadata.jpa.entity.MetadataFileEntity;
 import edu.colorado.cires.argonaut.metadata.jpa.entity.ProfileFileEntity;
 import edu.colorado.cires.argonaut.metadata.jpa.entity.ProfileParameterEntity;
-import edu.colorado.cires.argonaut.metadata.jpa.entity.TrajectoryEntity;
+import edu.colorado.cires.argonaut.metadata.jpa.entity.TrajectoryFileEntity;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import java.time.Instant;
@@ -143,11 +143,11 @@ class Finder {
       }
     } else if (file.endsWith("traj.nc")) {
       try (EntityManager em = entityManagerFactory.createEntityManager()) {
-        TrajectoryEntity result;
+        TrajectoryFileEntity result;
         if (includeRemoved) {
-          result = em.find(TrajectoryEntity.class, file);
+          result = em.find(TrajectoryFileEntity.class, file);
         } else {
-          result = em.createQuery("select t from TrajectoryEntity t where t.file = :file and t.fileStatus = 'ACTIVE'", TrajectoryEntity.class)
+          result = em.createQuery("select t from TrajectoryFileEntity t where t.file = :file and t.fileStatus = 'ACTIVE'", TrajectoryFileEntity.class)
             .setParameter("file", file)
             .getSingleResultOrNull();
 

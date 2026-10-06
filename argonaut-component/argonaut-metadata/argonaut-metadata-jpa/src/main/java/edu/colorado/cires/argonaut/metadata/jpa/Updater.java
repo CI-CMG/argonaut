@@ -12,7 +12,7 @@ import edu.colorado.cires.argonaut.metadata.jpa.entity.MetadataFileEntity;
 import edu.colorado.cires.argonaut.metadata.jpa.entity.ProfileFileEntity;
 import edu.colorado.cires.argonaut.metadata.jpa.entity.ProfileMergeFileEntity;
 import edu.colorado.cires.argonaut.metadata.jpa.entity.ProfileParameterEntity;
-import edu.colorado.cires.argonaut.metadata.jpa.entity.TrajectoryEntity;
+import edu.colorado.cires.argonaut.metadata.jpa.entity.TrajectoryFileEntity;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.EntityTransaction;
@@ -380,11 +380,11 @@ class Updater {
       tx.begin();
       try {
         FloatEntity floatEntity = em.find(FloatEntity.class, floatId);
-        TrajectoryEntity entity = em.find(TrajectoryEntity.class, file);
+        TrajectoryFileEntity entity = em.find(TrajectoryFileEntity.class, file);
         boolean add = (entity == null);
 
         if (add) {
-          entity = new TrajectoryEntity();
+          entity = new TrajectoryFileEntity();
           entity.setFile(file);
           entity.setFloatId(floatEntity);
         }

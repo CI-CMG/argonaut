@@ -12,7 +12,7 @@ import java.time.ZonedDateTime;
 
 @Entity
 @Table(name = "trajectory")
-public class TrajectoryEntity {
+public class TrajectoryFileEntity {
 
   @Id
   @Column(name = "file", nullable = false, length = 100)

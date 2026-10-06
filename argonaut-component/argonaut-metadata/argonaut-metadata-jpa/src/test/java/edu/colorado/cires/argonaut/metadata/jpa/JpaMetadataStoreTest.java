@@ -78,7 +78,7 @@ public class JpaMetadataStoreTest {
         em.createQuery("delete from ProfileFileEntity").executeUpdate();
         em.createQuery("delete from MetadataFileEntity").executeUpdate();
         em.createQuery("delete from CycleEntity").executeUpdate();
-        em.createQuery("delete from TrajectoryEntity ").executeUpdate();
+        em.createQuery("delete from TrajectoryFileEntity ").executeUpdate();
         em.createQuery("delete from FloatEntity").executeUpdate();
         em.createQuery("delete from DacEntity").executeUpdate();
         tx.commit();
