@@ -1,6 +1,7 @@
 package edu.colorado.cires.argonaut.core.netcdf.trajectory.v31;
 
 import java.time.Instant;
+import org.jspecify.annotations.Nullable;
 
 public interface ArgoTrajectoryV31 {
 
@@ -104,9 +105,11 @@ public interface ArgoTrajectoryV31 {
   String getJuldAdjustedQc(Integer nMeasurement);
 
   // Latitude of each location
+  @Nullable
   Double getLatitude(Integer nMeasurement);
 
   // Longitude of each location
+  @Nullable
   Double getLongitude(Integer nMeasurement);
 
   // Estimated accuracy in latitude and longitude

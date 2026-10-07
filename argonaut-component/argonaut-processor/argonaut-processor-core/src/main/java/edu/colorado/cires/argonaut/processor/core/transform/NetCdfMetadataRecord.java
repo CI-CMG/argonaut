@@ -24,6 +24,7 @@ import java.time.Instant;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.function.TriFunction;
+import org.jspecify.annotations.NonNull;
 
 public final class NetCdfMetadataRecord {
 
@@ -181,22 +182,27 @@ public final class NetCdfMetadataRecord {
       return comparator.apply(base, value);
     };
 
-    BiFunction<Double, Double, Double> compareMin = (base, value) -> compareLimits.apply(base, value, Math::min);
-    BiFunction<Double, Double, Double> compareMax = (base, value) -> compareLimits.apply(base, value, Math::max);
+    BiFunction<@NonNull Double, @NonNull Double, Double> compareMin = (base, value) -> compareLimits.apply(base, value, Math::min);
+    BiFunction<@NonNull Double, @NonNull Double, Double> compareMax = (base, value) -> compareLimits.apply(base, value, Math::max);
 
     for (int i = 0; i < trajectory.getNMeasurements(); i++) {
-      double lat = trajectory.getLatitude(i);
-      double lon = trajectory.getLongitude(i);
+      Double lat = trajectory.getLatitude(i);
+      Double lon = trajectory.getLongitude(i);
 
-      minLat = compareMin.apply(minLat, lat);
-      maxLat = compareMax.apply(maxLat, lat);
+      if (lat != null) {
+        minLat = compareMin.apply(minLat, lat);
+        maxLat = compareMax.apply(maxLat, lat);
+      }
 
-      minLon = compareMin.apply(minLon, lon);
-      maxLon = compareMax.apply(maxLon, lon);
+      if (lon != null) {
+        minLon = compareMin.apply(minLon, lon);
+        maxLon = compareMax.apply(maxLon, lon);
+      }
     }
 
     return MetadataRecord.builder()
       .withAction(Action.UPDATE)
+      .withActionTimestamp(Instant.now())
       .withFileType(ArgoFileType.TRAJECTORY)
       .withFile(file)
       .withDac(dac)
@@ -218,6 +224,7 @@ public final class NetCdfMetadataRecord {
   public static MetadataRecord fromV31Technical(String file, String dac, ArgoTechnicalV31 technicalV31) {
     return MetadataRecord.builder()
       .withAction(Action.UPDATE)
+      .withActionTimestamp(Instant.now())
       .withFileType(ArgoFileType.TECHNICAL_DATA)
       .withFile(file)
       .withDac(dac)
