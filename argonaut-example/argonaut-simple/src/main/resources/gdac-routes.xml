@@ -246,6 +246,11 @@
       <bean ref="techIndexProcessor" method="generateIndex"/>
     </route>
 
+    <route id="traj-index-cron">
+      <from uri="cron:traj-index?schedule={{traj-index.cron}}"/>
+      <bean ref="trajIndexProcessor" method="generateIndex"/>
+    </route>
+
   </routeContext>
 
 </beans>

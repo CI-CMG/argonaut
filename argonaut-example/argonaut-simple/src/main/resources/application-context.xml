@@ -317,6 +317,15 @@
     <property name="accessPathDocumentation" ref="accessPathsMap"/>
   </bean>
 
+  <bean id="trajIndexProcessor" class="edu.colorado.cires.argonaut.processor.core.TrajectoryIndexProcessor">
+    <property name="outputFileStore" ref="outputFileStore"/>
+    <property name="localTempDir" value="${work-directory}"/>
+    <property name="metadataStore" ref="metadataStore"/>
+    <property name="pageSize" value="${traj-index.page-size}"/>
+    <property name="gdacNode" value="${gdac-institution}"/>
+    <property name="accessPathDocumentation" ref="accessPathsMap"/>
+  </bean>
+
   <bean id="submissionReportTrigger" class="edu.colorado.cires.argonaut.processor.core.DefaultSubmissionReportTrigger">
     <property name="messageSender" ref="messageSender"/>
     <property name="reportGenerationQueue" value="seda:submission-report"/>

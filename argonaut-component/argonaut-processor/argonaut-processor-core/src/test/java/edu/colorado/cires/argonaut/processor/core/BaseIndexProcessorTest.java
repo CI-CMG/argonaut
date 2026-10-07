@@ -19,6 +19,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -33,19 +35,24 @@ import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.IntStream;
 import java.util.zip.GZIPInputStream;
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Named;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.stubbing.OngoingStubbing;
 
-class TechnicalIndexProcessorTest {
+class BaseIndexProcessorTest {
 
   private static final Random RANDOM = new Random();
   private static final Supplier<Integer> RANDOM_POSITIVE_INT = () -> RANDOM.nextInt(1, 100);
+  private static final Supplier<Double> RANDOM_LATITUDE = () -> RANDOM.nextDouble(-90, 90);
+  private static final Supplier<Double> RANDOM_LONGITUDE = () -> RANDOM.nextDouble(-180, 180);
   private static final Supplier<String> RANDOM_STRING = () -> UUID.randomUUID().toString();
   private static final Path tempDir = Paths.get("target/test-temp");
   private static final Path outputDir = Paths.get("target/test-output");
@@ -65,11 +72,68 @@ class TechnicalIndexProcessorTest {
     FileUtils.deleteQuietly(outputDir.toFile());
   }
 
-  @Test
-  void queryPage() throws IOException {
-    String title = "Technical directory file of the Argo Global Data Assembly Center";
-    String description = "The directory file describes all technical files of the argo ARGO GDAC data store.";
-    String fileNameBase = "ar_index_global_tech";
+  record TestCase(
+    String title,
+    String description,
+    String fileNameBase,
+    Supplier<BaseIndexProcessor> factory,
+    Function<MetadataStore, OngoingStubbing<MetadataRecordPage>> datastoreStub,
+    String expectedHeaders,
+    Function<MetadataRecord, String> toExpectedString
+  ) {}
+
+  private static List<Named<TestCase>> testCases() {
+    Function<Instant, String> formatDate = instant -> {
+      LocalDateTime dateUpdate = LocalDateTime.ofInstant(instant, ZoneId.of("UTC"));
+      return "%d%02d%02d%02d%02d%02d".formatted(
+        dateUpdate.getYear(),
+        dateUpdate.getMonthValue(),
+        dateUpdate.getDayOfMonth(),
+        dateUpdate.getHour(),
+        dateUpdate.getMinute(),
+        dateUpdate.getSecond()
+      );
+    };
+
+    Function<Double, String> formatDouble = value -> BigDecimal.valueOf(value).setScale(3, RoundingMode.DOWN).toString();
+
+    return List.of(
+      Named.of("technical", new TestCase(
+        "Technical directory file of the Argo Global Data Assembly Center",
+        "The directory file describes all technical files of the argo ARGO GDAC data store.",
+        "ar_index_global_tech",
+        TechnicalIndexProcessor::new,
+        metadataStore -> when(metadataStore.getTechnicalIndexPage(any())),
+        "file,institution,date_update",
+        metadataRecord -> "%s,%s,%s".formatted(metadataRecord.getFile(), metadataRecord.getInstitution(), formatDate.apply(metadataRecord.getDateUpdate()))
+      )),
+      Named.of("trajectory", new TestCase(
+        "Trajectory directory file of the Argo Global Data Assembly Center",
+        "The directory file describes all trajectory files of the ARGO GDAC data store.",
+        "ar_index_global_traj",
+        TrajectoryIndexProcessor::new,
+        metadataStore -> when(metadataStore.getTrajectoryIndexPage(any())),
+        "file,latitude_max,latitude_min,longitude_max,longitude_min,profiler_type,institution,date_update",
+        metadataRecord -> "%s,%s,%s,%s,%s,%s,%s,%s".formatted(
+          metadataRecord.getFile(),
+          formatDouble.apply(metadataRecord.getLatitudeMax()),
+          formatDouble.apply(metadataRecord.getLatitudeMin()),
+          formatDouble.apply(metadataRecord.getLongitudeMax()),
+          formatDouble.apply(metadataRecord.getLongitudeMin()),
+          metadataRecord.getProfilerType(),
+          metadataRecord.getInstitution(),
+          formatDate.apply(metadataRecord.getDateUpdate())
+        )
+      ))
+    );
+  }
+
+  @ParameterizedTest
+  @MethodSource("testCases")
+  void queryPage(TestCase testCase) throws IOException {
+    String title = testCase.title();
+    String description = testCase.description();
+    String fileNameBase = testCase.fileNameBase();
     String project = RANDOM_STRING.get();
     String formatVersion = RANDOM_STRING.get();
     String gdacNode = RANDOM_STRING.get();
@@ -79,7 +143,7 @@ class TechnicalIndexProcessorTest {
     List<MetadataRecord> expectedRecords = new ArrayList<>(nPages * pageSize);
 
     MetadataStore metadataStore = mock(MetadataStore.class);
-    OngoingStubbing<MetadataRecordPage> when = when(metadataStore.getTechnicalIndexPage(any()));
+    OngoingStubbing<MetadataRecordPage> when = testCase.datastoreStub.apply(metadataStore);
     for (int i = 0; i < nPages; i++) {
       int finalI = i;
 
@@ -91,11 +155,20 @@ class TechnicalIndexProcessorTest {
       when = when.thenAnswer(inv -> {
         MetadataRecordPage page = mock(MetadataRecordPage.class);
         when(page.getPage()).thenReturn(IntStream.range(0, pageSize).boxed()
-          .map(ignored -> MetadataRecord.builder()
-            .withFile(RANDOM_STRING.get())
-            .withInstitution(RANDOM_STRING.get())
-            .withDateUpdate(Instant.now())
-            .build())
+          .map(ii -> {
+            double latitudeMax = RANDOM_LATITUDE.get();
+            double longitudeMax = RANDOM_LONGITUDE.get();
+            return MetadataRecord.builder()
+              .withFile(RANDOM_STRING.get())
+              .withInstitution(RANDOM_STRING.get())
+              .withDateUpdate(Instant.now().plusSeconds(ii))
+              .withLatitudeMax(latitudeMax)
+              .withLatitudeMin(latitudeMax - 1)
+              .withLongitudeMax(longitudeMax)
+              .withLongitudeMin(longitudeMax - 1)
+              .withProfilerType(RANDOM_STRING.get())
+              .build();
+          })
           .toList());
         when(page.getPageNumber()).thenReturn(finalI + 1);
         when(page.getPageSize()).thenReturn(pageSize);
@@ -133,16 +206,16 @@ class TechnicalIndexProcessorTest {
     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
     doAnswer(inv -> outputStream).when(fileStore).getOutputStream(anyString());
 
-    TechnicalIndexProcessor technicalIndexProcessor = new TechnicalIndexProcessor();
-    technicalIndexProcessor.setPageSize(1);
-    technicalIndexProcessor.setFormatVersion(formatVersion);
-    technicalIndexProcessor.setGdacNode(gdacNode);
-    technicalIndexProcessor.setProject(project);
-    technicalIndexProcessor.setLocalTempDir(tempDir);
-    technicalIndexProcessor.setMetadataStore(metadataStore);
-    technicalIndexProcessor.setOutputFileStore(fileStore);
+    BaseIndexProcessor indexProcessor = testCase.factory().get();
+    indexProcessor.setPageSize(1);
+    indexProcessor.setFormatVersion(formatVersion);
+    indexProcessor.setGdacNode(gdacNode);
+    indexProcessor.setProject(project);
+    indexProcessor.setLocalTempDir(tempDir);
+    indexProcessor.setMetadataStore(metadataStore);
+    indexProcessor.setOutputFileStore(fileStore);
 
-    technicalIndexProcessor.generateIndex();
+    indexProcessor.generateIndex();
 
     Consumer<byte[]> assertCSVContent = bytes -> {
       try (
@@ -168,23 +241,12 @@ class TechnicalIndexProcessorTest {
         assertEquals("# GDAC node : %s".formatted(gdacNode), lines.get(5));
 
         String columnHeaders = lines.get(6);
-        assertEquals("file,institution,date_update", columnHeaders);
+        assertEquals(testCase.expectedHeaders(), columnHeaders);
         List<String> dataRows = lines.subList(7, lines.size());
         assertEquals(expectedRecords.size(), dataRows.size());
 
         for (int i = 0; i < expectedRecords.size(); i++) {
-          MetadataRecord metadataRecord = expectedRecords.get(i);
-
-          LocalDateTime dateUpdate = LocalDateTime.ofInstant(metadataRecord.getDateUpdate(), ZoneId.of("UTC"));
-          String formattedDate = "%d%02d%02d%02d%02d%02d".formatted(
-            dateUpdate.getYear(),
-            dateUpdate.getMonthValue(),
-            dateUpdate.getDayOfMonth(),
-            dateUpdate.getHour(),
-            dateUpdate.getMinute(),
-            dateUpdate.getSecond()
-          );
-          assertEquals("%s,%s,%s".formatted(metadataRecord.getFile(), metadataRecord.getInstitution(), formattedDate), dataRows.get(i));
+          assertEquals(testCase.toExpectedString().apply(expectedRecords.get(i)), dataRows.get(i));
         }
       } catch (IOException e) {
         throw new RuntimeException(e);

@@ -157,19 +157,7 @@ class Finder {
             return Optional.empty();
           }
         }
-        return Optional.of(MetadataRecord.builder()
-            .withFileType(ArgoFileType.TRAJECTORY)
-            .withFile(result.getFile())
-            .withDac(result.getFloatId().getDac().getDac())
-            .withFloatId(result.getFloatId().getFloatId())
-            .withProfilerType(result.getProfilerType())
-            .withInstitution(result.getInstitution())
-            .withDateUpdate(result.getDateUpdate() == null ? null : result.getDateUpdate().toInstant())
-            .withLatitudeMax(result.getLatitudeMax())
-            .withLatitudeMin(result.getLatitudeMin())
-            .withLongitudeMax(result.getLongitudeMax())
-            .withLongitudeMin(result.getLongitudeMin())
-          .build());
+        return Optional.of(fromTrajectoryEntity(result));
       }
     } else if (file.endsWith("tech.nc")) {
       try (EntityManager em = entityManagerFactory.createEntityManager()) {
@@ -682,6 +670,43 @@ class Finder {
       .withFloatId(technicalFile.getFloatId().getFloatId())
       .withInstitution(technicalFile.getInstitution())
       .withDateUpdate(technicalFile.getDateUpdate() == null ? null : technicalFile.getDateUpdate().toInstant())
+      .build();
+  }
+
+  MetadataRecordPage getTrajectoryIndexPage(IndexPageRequest indexPageRequest) {
+    try (EntityManager em = entityManagerFactory.createEntityManager()) {
+      long count = em.createQuery("""
+      SELECT COUNT(t.file) FROM TrajectoryFileEntity t
+      WHERE t.fileStatus = 'ACTIVE'
+      """, Long.class)
+        .getSingleResult();
+
+      List<TrajectoryFileEntity> pageResults = em.createQuery("""
+      SELECT t FROM TrajectoryFileEntity t
+      WHERE t.fileStatus = 'ACTIVE'
+      ORDER BY t.file
+      """, TrajectoryFileEntity.class)
+        .setMaxResults(indexPageRequest.getPageSize())
+        .setFirstResult((indexPageRequest.getPageNumber() - 1) * indexPageRequest.getPageSize())
+        .getResultList();
+
+      return createMetadataRecordPage(count, pageResults, Finder::fromTrajectoryEntity, indexPageRequest);
+    }
+  }
+
+  private static MetadataRecord fromTrajectoryEntity(TrajectoryFileEntity trajectoryFile) {
+    return MetadataRecord.builder()
+      .withFileType(ArgoFileType.TRAJECTORY)
+      .withFile(trajectoryFile.getFile())
+      .withDac(trajectoryFile.getFloatId().getDac().getDac())
+      .withFloatId(trajectoryFile.getFloatId().getFloatId())
+      .withProfilerType(trajectoryFile.getProfilerType())
+      .withInstitution(trajectoryFile.getInstitution())
+      .withDateUpdate(trajectoryFile.getDateUpdate() == null ? null : trajectoryFile.getDateUpdate().toInstant())
+      .withLatitudeMax(trajectoryFile.getLatitudeMax())
+      .withLatitudeMin(trajectoryFile.getLatitudeMin())
+      .withLongitudeMax(trajectoryFile.getLongitudeMax())
+      .withLongitudeMin(trajectoryFile.getLongitudeMin())
       .build();
   }
 }

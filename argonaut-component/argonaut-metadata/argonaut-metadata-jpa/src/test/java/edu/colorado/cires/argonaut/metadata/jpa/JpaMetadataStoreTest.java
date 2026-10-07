@@ -47,12 +47,14 @@ import java.util.UUID;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.stream.IntStream;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Named;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 public class JpaMetadataStoreTest {
 
@@ -197,13 +199,14 @@ public class JpaMetadataStoreTest {
     assertTrajectory.accept(deleted, result);
   }
 
-  @Test
-  public void testTechnicalFilePage() {
+  @ParameterizedTest
+  @ValueSource(strings = {"TECHNICAL_DATA", "TRAJECTORY"})
+  public void testGetFilePage(String fileType) {
     List<MetadataRecord> expected = metadataTestCases().stream()
       .map(Named::getPayload)
       .filter(Objects::nonNull)
       .peek(datastore::updateIndex)
-      .filter(metadataRecord -> ArgoFileType.TECHNICAL_DATA.equals(metadataRecord.getFileType()))
+      .filter(metadataRecord -> ArgoFileType.valueOf(fileType).equals(metadataRecord.getFileType()))
       .sorted(Comparator.comparing(MetadataRecord::getFile))
       .toList();
 
@@ -212,9 +215,17 @@ public class JpaMetadataStoreTest {
         .withPageSize(1)
         .build();
 
-    List<MetadataRecord> actual = new ArrayList<>(2);
-    actual.addAll(datastore.getTechnicalIndexPage(getPageRequest.apply(1)).getPage());
-    actual.addAll(datastore.getTechnicalIndexPage(getPageRequest.apply(2)).getPage());
+    Function<IndexPageRequest, MetadataRecordPage> queryFn = request -> switch (fileType) {
+      case "TECHNICAL_DATA" -> datastore.getTechnicalIndexPage(request);
+      case "TRAJECTORY" -> datastore.getTrajectoryIndexPage(request);
+      default -> throw new IllegalArgumentException("Unsupported file type: " + fileType);
+    };
+
+    List<MetadataRecord> actual = IntStream.range(0, expected.size()).boxed()
+        .map(i -> queryFn.apply(getPageRequest.apply(i + 1)))
+        .map(MetadataRecordPage::getPage)
+        .flatMap(List::stream)
+        .toList();
 
     assertThat(actual)
       .usingRecursiveComparison()
