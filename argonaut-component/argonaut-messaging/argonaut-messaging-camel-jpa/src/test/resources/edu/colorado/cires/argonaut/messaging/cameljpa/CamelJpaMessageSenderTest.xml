@@ -1,0 +1,129 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="
+       http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://camel.apache.org/schema/spring
+       http://camel.apache.org/schema/spring/camel-spring.xsd">
+
+
+  <bean id="q1EntityManagerFactory" class="org.springframework.orm.jpa.LocalEntityManagerFactoryBean">
+    <constructor-arg value="argonaut-messaging"/>
+    <property name="jpaPropertyMap">
+      <map>
+        <entry key="jakarta.persistence.jdbc.driver" value="org.h2.Driver"/>
+        <entry key="jakarta.persistence.jdbc.url" value="jdbc:h2:./target/q1"/>
+        <entry key="jakarta.persistence.jdbc.user" value="sa"/>
+        <entry key="jakarta.persistence.jdbc.password" value=""/>
+        <entry key="hibernate.hbm2ddl.auto" value="update"/>
+      </map>
+    </property>
+  </bean>
+
+  <bean id="q1PlatformTransactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">
+    <constructor-arg ref="q1EntityManagerFactory"/>
+  </bean>
+
+  <bean id="q1TransactionStrategy" class="org.apache.camel.component.jpa.DefaultTransactionStrategy">
+    <constructor-arg>
+      <null/>
+    </constructor-arg>
+    <constructor-arg ref="q1EntityManagerFactory"/>
+    <property name="transactionManager" ref="q1PlatformTransactionManager"/>
+  </bean>
+
+  <bean id="q1TransactionTemplate" class=" org.springframework.transaction.support.TransactionTemplate">
+    <constructor-arg ref="q1PlatformTransactionManager"/>
+  </bean>
+
+
+  <bean id="q2EntityManagerFactory" class="org.springframework.orm.jpa.LocalEntityManagerFactoryBean">
+    <constructor-arg value="argonaut-messaging"/>
+    <property name="jpaPropertyMap">
+      <map>
+        <entry key="jakarta.persistence.jdbc.driver" value="org.h2.Driver"/>
+        <entry key="jakarta.persistence.jdbc.url" value="jdbc:h2:./target/q2"/>
+        <entry key="jakarta.persistence.jdbc.user" value="sa"/>
+        <entry key="jakarta.persistence.jdbc.password" value=""/>
+        <entry key="hibernate.hbm2ddl.auto" value="update"/>
+      </map>
+    </property>
+  </bean>
+
+  <bean id="q2PlatformTransactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">
+    <constructor-arg ref="q2EntityManagerFactory"/>
+  </bean>
+
+  <bean id="q2TransactionStrategy" class="org.apache.camel.component.jpa.DefaultTransactionStrategy">
+    <constructor-arg>
+      <null/>
+    </constructor-arg>
+    <constructor-arg ref="q2EntityManagerFactory"/>
+    <property name="transactionManager" ref="q2PlatformTransactionManager"/>
+  </bean>
+
+  <bean id="q2TransactionTemplate" class=" org.springframework.transaction.support.TransactionTemplate">
+    <constructor-arg ref="q2PlatformTransactionManager"/>
+  </bean>
+
+
+  <bean id="jsonMessageTranslator" class="edu.colorado.cires.argonaut.messaging.cameljpa.DefaultCamelJpaMessageTranslator"/>
+
+
+  <bean id="one" class="edu.colorado.cires.argonaut.messaging.cameljpa.CamelJpaParameterFactory" factory-method="queueParameter">
+    <constructor-arg value="one"/>
+  </bean>
+
+  <bean id="two" class="edu.colorado.cires.argonaut.messaging.cameljpa.CamelJpaParameterFactory" factory-method="queueParameter">
+    <constructor-arg value="two"/>
+  </bean>
+
+  <bean id="sender1" class="edu.colorado.cires.argonaut.messaging.cameljpa.CamelJpaMessageSender">
+    <property name="entityManagerFactoryId" value="q1EntityManagerFactory"/>
+    <property name="messageTranslator" ref="jsonMessageTranslator"/>
+    <property name="producerTemplateId" value="producerTemplate"/>
+    <property name="transactionStrategyId" value="q1TransactionStrategy"/>
+  </bean>
+
+  <bean id="sender2" class="edu.colorado.cires.argonaut.messaging.cameljpa.CamelJpaMessageSender">
+    <property name="entityManagerFactoryId" value="q2EntityManagerFactory"/>
+    <property name="messageTranslator" ref="jsonMessageTranslator"/>
+    <property name="producerTemplateId" value="producerTemplate"/>
+    <property name="transactionStrategyId" value="q2TransactionStrategy"/>
+  </bean>
+
+  <camelContext id="argonaut-camel" xmlns="http://camel.apache.org/schema/spring">
+    <template id="producerTemplate"/>
+
+    <route id="q1-1">
+      <from
+        uri="jpa:edu.colorado.cires.argonaut.messaging.cameljpa.JsonMessageEntity?maximumResults=10&amp;parameters=#one&amp;namedQuery=dequeue&amp;entityManagerFactory=#q1EntityManagerFactory&amp;transactionStrategy=#q1TransactionStrategy"/>
+      <bean ref="jsonMessageTranslator" method="receive"/>
+      <to uri="mock:q1-1"/>
+    </route>
+
+    <route id="q1-2">
+      <from
+        uri="jpa:edu.colorado.cires.argonaut.messaging.cameljpa.JsonMessageEntity?maximumResults=10&amp;parameters=#two&amp;namedQuery=dequeue&amp;entityManagerFactory=#q1EntityManagerFactory&amp;transactionStrategy=#q1TransactionStrategy"/>
+      <bean ref="jsonMessageTranslator" method="receive"/>
+      <to uri="mock:q1-2"/>
+    </route>
+
+    <route id="q2-1">
+      <from
+        uri="jpa:edu.colorado.cires.argonaut.messaging.cameljpa.JsonMessageEntity?maximumResults=10&amp;parameters=#one&amp;namedQuery=dequeue&amp;entityManagerFactory=#q2EntityManagerFactory&amp;transactionStrategy=#q2TransactionStrategy"/>
+      <bean ref="jsonMessageTranslator" method="receive"/>
+      <to uri="mock:q2-1"/>
+    </route>
+
+    <route id="q2-2">
+      <from
+        uri="jpa:edu.colorado.cires.argonaut.messaging.cameljpa.JsonMessageEntity?maximumResults=10&amp;parameters=#two&amp;namedQuery=dequeue&amp;entityManagerFactory=#q2EntityManagerFactory&amp;transactionStrategy=#q2TransactionStrategy"/>
+      <bean ref="jsonMessageTranslator" method="receive"/>
+      <to uri="mock:q2-2"/>
+    </route>
+
+  </camelContext>
+
+
+</beans>

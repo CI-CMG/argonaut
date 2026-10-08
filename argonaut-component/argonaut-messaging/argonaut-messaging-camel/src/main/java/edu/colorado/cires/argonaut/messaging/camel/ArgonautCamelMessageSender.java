@@ -10,12 +10,12 @@ public class ArgonautCamelMessageSender implements MessageSender, CamelContextAw
 
   private CamelContext camelContext;
   private String producerTemplateId;
-  private Function<String, Object> messageTranslator = (json) -> json;
+  private ArgonautCamelMessageTranslator messageTranslator = (queue, json) -> json;
 
   @Override
   public void sendJson(String queue, String json) {
     ProducerTemplate producerTemplate = camelContext.getRegistry().lookupByNameAndType(producerTemplateId, ProducerTemplate.class);
-    producerTemplate.sendBody(queue, messageTranslator.apply(json));
+    producerTemplate.sendBody(queue, messageTranslator.translate(queue, json));
   }
 
   @Override
@@ -32,7 +32,7 @@ public class ArgonautCamelMessageSender implements MessageSender, CamelContextAw
     this.producerTemplateId = producerTemplateId;
   }
 
-  public void setMessageTranslator(Function<String, Object> messageTranslator) {
+  public void setMessageTranslator(ArgonautCamelMessageTranslator messageTranslator) {
     this.messageTranslator = messageTranslator;
   }
 }
