@@ -49,6 +49,7 @@ public abstract class BaseIndexProcessor implements IndexProcessor {
   private int pageSize = 2000;
   private Path localTempDir;
   private Supplier<Instant> nowGenerator = () -> Instant.now();
+  private boolean enabled = true;
 
   protected BaseIndexProcessor(String title, String description, String fileNameBase) {
     this.title = title;
@@ -56,6 +57,9 @@ public abstract class BaseIndexProcessor implements IndexProcessor {
     this.fileNameBase = fileNameBase;
   }
 
+  public void setEnabled(boolean enabled) {
+    this.enabled = enabled;
+  }
 
   public void setProject(String project) {
     this.project = project;
@@ -185,43 +189,44 @@ public abstract class BaseIndexProcessor implements IndexProcessor {
 
   @Override
   public void generateIndex() {
-    LOGGER.info("Updating " + fileNameBase);
-    String textFileName = fileNameBase + ".txt";
-    Path dir = createTempDirectory();
-    try {
-      Path textFile = dir.resolve(textFileName);
-      try (
-          Writer writer = Files.newBufferedWriter(textFile, StandardCharsets.UTF_8);
-          CSVPrinter printer = new CSVPrinter(writer, CSVFormat.RFC4180.builder().setCommentMarker('#').setTrim(true).get())
-      ) {
-        writeHeader(printer);
-        writeColumnHeadersInternal(printer);
-        MetadataRecordPage page = queryPage(metadataStore, DefaultIndexPageRequest.builder().withPageNumber(1).withPageSize(pageSize).build());
-        writePage(printer, page);
-        Optional<IndexPageRequest> maybeNextPage = page.getNextPage();
-        while (maybeNextPage.isPresent()) {
-          page = queryPage(metadataStore, DefaultIndexPageRequest.builder(maybeNextPage.get()).build());
-          writePage(printer, page);
-          maybeNextPage = page.getNextPage();
-        }
-      } catch (IOException e) {
-        throw new RuntimeException("Unable to open index file for writing", e);
-      }
-
+    if (enabled) {
+      LOGGER.info("Updating " + fileNameBase);
+      String textFileName = fileNameBase + ".txt";
+      Path dir = createTempDirectory();
       try {
-        String path = outputFileStore.appendToPath(outputFileStore.getRoot(), textFileName);
-        outputFileStore.uploadLocalFile(textFile, path);
-        try (InputStream in = Files.newInputStream(textFile);
-            OutputStream out = new GZIPOutputStream(outputFileStore.getOutputStream(path + ".gz"))) {
-          IOUtils.copy(in, out);
+        Path textFile = dir.resolve(textFileName);
+        try (
+            Writer writer = Files.newBufferedWriter(textFile, StandardCharsets.UTF_8);
+            CSVPrinter printer = new CSVPrinter(writer, CSVFormat.RFC4180.builder().setCommentMarker('#').setTrim(true).get())
+        ) {
+          writeHeader(printer);
+          writeColumnHeadersInternal(printer);
+          MetadataRecordPage page = queryPage(metadataStore, DefaultIndexPageRequest.builder().withPageNumber(1).withPageSize(pageSize).build());
+          writePage(printer, page);
+          Optional<IndexPageRequest> maybeNextPage = page.getNextPage();
+          while (maybeNextPage.isPresent()) {
+            page = queryPage(metadataStore, DefaultIndexPageRequest.builder(maybeNextPage.get()).build());
+            writePage(printer, page);
+            maybeNextPage = page.getNextPage();
+          }
+        } catch (IOException e) {
+          throw new RuntimeException("Unable to open index file for writing", e);
         }
-      } catch (IOException e) {
-        throw new RuntimeException("Unable to upload index file", e);
+
+        try {
+          String path = outputFileStore.appendToPath(outputFileStore.getRoot(), textFileName);
+          outputFileStore.uploadLocalFile(textFile, path);
+          try (InputStream in = Files.newInputStream(textFile);
+              OutputStream out = new GZIPOutputStream(outputFileStore.getOutputStream(path + ".gz"))) {
+            IOUtils.copy(in, out);
+          }
+        } catch (IOException e) {
+          throw new RuntimeException("Unable to upload index file", e);
+        }
+
+      } finally {
+        FileUtils.deleteQuietly(dir.toFile());
       }
-
-    } finally {
-      FileUtils.deleteQuietly(dir.toFile());
     }
-
   }
 }

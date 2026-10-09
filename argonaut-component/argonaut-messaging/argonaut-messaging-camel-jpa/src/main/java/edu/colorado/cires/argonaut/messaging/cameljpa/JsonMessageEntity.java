@@ -3,6 +3,7 @@ package edu.colorado.cires.argonaut.messaging.cameljpa;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.Lob;
 import jakarta.persistence.NamedQuery;
 import jakarta.persistence.Table;
@@ -10,7 +11,7 @@ import java.time.ZonedDateTime;
 import java.util.UUID;
 
 @Entity
-@Table(name = "json_message_queue")
+@Table(name = "json_message_queue", indexes = @Index(name = "queue_idx", columnList = "queue"))
 @NamedQuery(name = "dequeue", query = "select x from JsonMessageEntity x where x.queue = :queue order by x.queueTime")
 public class JsonMessageEntity {
 
