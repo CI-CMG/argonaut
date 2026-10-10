@@ -11,12 +11,13 @@ import java.time.ZonedDateTime;
 import java.util.UUID;
 
 @Entity
-@Table(name = "json_message_queue", indexes = @Index(name = "json_message_queue_queue_idx", columnList = "queue"))
-@NamedQuery(name = "dequeue", query = "select x from JsonMessageEntity x where x.queue = :queue order by x.queueTime")
-public class JsonMessageEntity {
+@Table(name = "argonaut_message", indexes = @Index(name = "argonaut_message_queue_idx", columnList = "queue"))
+@NamedQuery(name = "dequeue", query = "select x from ArgonautMessageEntity x where x.queue = :queue order by x.queueTime")
+public class ArgonautMessageEntity {
 
   @Id
-  private UUID id;
+  @Column(name = "id", length = 36, nullable = false)
+  private String id;
 
   @Column(name = "queue_time", nullable = false)
   private ZonedDateTime queueTime;
@@ -29,11 +30,11 @@ public class JsonMessageEntity {
   private String jsonMessage;
 
   public UUID getId() {
-    return id;
+    return id == null ? null : UUID.fromString(id);
   }
 
   public void setId(UUID id) {
-    this.id = id;
+    this.id = id == null ? null : id.toString();
   }
 
   public String getQueue() {
@@ -62,8 +63,8 @@ public class JsonMessageEntity {
 
   @Override
   public String toString() {
-    return "JsonMessageEntity{" +
-        "id=" + id +
+    return "ArgonautMessageEntity{" +
+        "id='" + id + '\'' +
         ", queueTime=" + queueTime +
         ", queue='" + queue + '\'' +
         ", jsonMessage='" + jsonMessage + '\'' +

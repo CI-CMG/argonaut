@@ -6,7 +6,7 @@
   version="3.0">
   <persistence-unit name="argonaut-messaging" transaction-type="RESOURCE_LOCAL">
     <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
-    <class>edu.colorado.cires.argonaut.messaging.cameljpa.JsonMessageEntity</class>
+    <class>edu.colorado.cires.argonaut.messaging.cameljpa.ArgonautMessageEntity</class>
     <exclude-unlisted-classes>true</exclude-unlisted-classes>
     <properties>
       <property name="jakarta.persistence.jdbc.url" value=""/>

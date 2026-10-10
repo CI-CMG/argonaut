@@ -19,7 +19,7 @@ public class CamelJpaMessageSender implements MessageSender, CamelContextAware {
   public void sendJson(String queue, String json) {
     ProducerTemplate producerTemplate = camelContext.getRegistry().lookupByNameAndType(producerTemplateId, ProducerTemplate.class);
     String url = String.format("jpa:%s?entityManagerFactory=#%s&transactionStrategy=#%s&persistenceUnit=%s",
-        JsonMessageEntity.class.getName(),
+        ArgonautMessageEntity.class.getName(),
         entityManagerFactoryId,
         transactionStrategyId,
         persistenceUnit);

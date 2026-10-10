@@ -97,28 +97,28 @@
 
     <route id="q1-1">
       <from
-        uri="jpa:edu.colorado.cires.argonaut.messaging.cameljpa.JsonMessageEntity?maximumResults=10&amp;parameters=#one&amp;namedQuery=dequeue&amp;entityManagerFactory=#q1EntityManagerFactory&amp;transactionStrategy=#q1TransactionStrategy"/>
+        uri="jpa:edu.colorado.cires.argonaut.messaging.cameljpa.ArgonautMessageEntity?maximumResults=10&amp;parameters=#one&amp;namedQuery=dequeue&amp;entityManagerFactory=#q1EntityManagerFactory&amp;transactionStrategy=#q1TransactionStrategy"/>
       <bean ref="jsonMessageTranslator" method="receive"/>
       <to uri="mock:q1-1"/>
     </route>
 
     <route id="q1-2">
       <from
-        uri="jpa:edu.colorado.cires.argonaut.messaging.cameljpa.JsonMessageEntity?maximumResults=10&amp;parameters=#two&amp;namedQuery=dequeue&amp;entityManagerFactory=#q1EntityManagerFactory&amp;transactionStrategy=#q1TransactionStrategy"/>
+        uri="jpa:edu.colorado.cires.argonaut.messaging.cameljpa.ArgonautMessageEntity?maximumResults=10&amp;parameters=#two&amp;namedQuery=dequeue&amp;entityManagerFactory=#q1EntityManagerFactory&amp;transactionStrategy=#q1TransactionStrategy"/>
       <bean ref="jsonMessageTranslator" method="receive"/>
       <to uri="mock:q1-2"/>
     </route>
 
     <route id="q2-1">
       <from
-        uri="jpa:edu.colorado.cires.argonaut.messaging.cameljpa.JsonMessageEntity?maximumResults=10&amp;parameters=#one&amp;namedQuery=dequeue&amp;entityManagerFactory=#q2EntityManagerFactory&amp;transactionStrategy=#q2TransactionStrategy"/>
+        uri="jpa:edu.colorado.cires.argonaut.messaging.cameljpa.ArgonautMessageEntity?maximumResults=10&amp;parameters=#one&amp;namedQuery=dequeue&amp;entityManagerFactory=#q2EntityManagerFactory&amp;transactionStrategy=#q2TransactionStrategy"/>
       <bean ref="jsonMessageTranslator" method="receive"/>
       <to uri="mock:q2-1"/>
     </route>
 
     <route id="q2-2">
       <from
-        uri="jpa:edu.colorado.cires.argonaut.messaging.cameljpa.JsonMessageEntity?maximumResults=10&amp;parameters=#two&amp;namedQuery=dequeue&amp;entityManagerFactory=#q2EntityManagerFactory&amp;transactionStrategy=#q2TransactionStrategy"/>
+        uri="jpa:edu.colorado.cires.argonaut.messaging.cameljpa.ArgonautMessageEntity?maximumResults=10&amp;parameters=#two&amp;namedQuery=dequeue&amp;entityManagerFactory=#q2EntityManagerFactory&amp;transactionStrategy=#q2TransactionStrategy"/>
       <bean ref="jsonMessageTranslator" method="receive"/>
       <to uri="mock:q2-2"/>
     </route>

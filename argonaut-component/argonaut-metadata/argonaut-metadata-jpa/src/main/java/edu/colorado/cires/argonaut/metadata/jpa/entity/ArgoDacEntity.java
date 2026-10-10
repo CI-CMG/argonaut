@@ -11,30 +11,30 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "dac")
-public class DacEntity {
+@Table(name = "argo_dac")
+public class ArgoDacEntity {
 
   @Id
-  @Column(name = "dac", nullable = false, length = 10)
-  private String dac;
+  @Column(name = "dac_name", nullable = false, length = 10)
+  private String dacName;
 
   @Version
   @Column(name = "version", nullable = false)
   private int version;
 
   // No accessors on purpose. For JPQL queries.
-  @OneToMany(mappedBy = "dac", cascade = {CascadeType.DETACH, CascadeType.REFRESH})
-  private List<FloatEntity> floats = new ArrayList<>();
+  @OneToMany(mappedBy = "argoDac", cascade = {CascadeType.DETACH, CascadeType.REFRESH})
+  private List<ArgoFloatEntity> argoFloats = new ArrayList<>();
 
-  public String getDac() {
-    return dac;
+  public String getDacName() {
+    return dacName;
   }
 
   public int getVersion() {
     return version;
   }
 
-  public void setDac(String dac) {
-    this.dac = dac;
+  public void setDacName(String dac) {
+    this.dacName = dac;
   }
 }

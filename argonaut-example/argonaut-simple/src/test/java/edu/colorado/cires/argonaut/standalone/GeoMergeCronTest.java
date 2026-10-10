@@ -4,7 +4,7 @@ import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import edu.colorado.cires.argonaut.metadata.jpa.entity.ProfileFileEntity;
+import edu.colorado.cires.argonaut.metadata.jpa.entity.ArgoFloatProfileEntity;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import java.nio.file.Files;
@@ -174,7 +174,7 @@ public class GeoMergeCronTest {
 
       submittedFiles.stream().map(Path::toString).forEach(path -> {
         try (EntityManager em = entityManagerFactory.createEntityManager()) {
-          ProfileFileEntity profile = em.find(ProfileFileEntity.class, path);
+          ArgoFloatProfileEntity profile = em.find(ArgoFloatProfileEntity.class, path);
           assertNotNull(profile, "missing " + path);
           assertNotNull(profile.getGeoMergeTime(), "missing merge time " + path);
         }

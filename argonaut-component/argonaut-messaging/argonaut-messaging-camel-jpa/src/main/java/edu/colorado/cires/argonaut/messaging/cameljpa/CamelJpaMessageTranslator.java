@@ -7,5 +7,5 @@ public interface CamelJpaMessageTranslator extends ArgonautCamelMessageTranslato
   default Object send(String queue, String json){
     return translate(queue, json);
   }
-  String receive(JsonMessageEntity entity);
+  String receive(ArgonautMessageEntity entity);
 }

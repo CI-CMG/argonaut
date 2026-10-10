@@ -10,21 +10,23 @@ import java.time.ZonedDateTime;
 import java.util.UUID;
 
 @Entity
-@Table(name = "audit", indexes = {
-    @Index(name = "audit_dac_idx", columnList = "dac"),
-    @Index(name = "audit_event_type_idx", columnList = "event_type"),
-    @Index(name = "audit_processor_idx", columnList = "processor")
+@Table(name = "argonaut_audit", indexes = {
+    @Index(name = "argonaut_audit_trace_id_idx", columnList = "trace_id"),
+    @Index(name = "argonaut_audit_dac_idx", columnList = "dac_name"),
+    @Index(name = "argonaut_audit_event_type_idx", columnList = "event_type"),
+    @Index(name = "argonaut_audit_processor_idx", columnList = "processor")
 })
-public class AuditEntity {
+public class ArgonautAuditEntity {
 
   @Id
-  private UUID id;
+  @Column(name = "id", length = 36, nullable = false)
+  private String id;
 
-  @Column(name = "trace_id", nullable = false)
-  private UUID traceId;
+  @Column(name = "trace_id", length = 36, nullable = false)
+  private String traceId;
 
-  @Column(name = "dac", nullable = false, length = 10)
-  private String dac;
+  @Column(name = "dac_name", nullable = false, length = 10)
+  private String dacName;
 
   @Column(name = "timestamp", nullable = false)
   private ZonedDateTime timestamp;
@@ -49,27 +51,27 @@ public class AuditEntity {
   private ZonedDateTime reportDate;
 
   public UUID getId() {
-    return id;
+    return id == null ? null : UUID.fromString(id);
   }
 
   public void setId(UUID id) {
-    this.id = id;
+    this.id = id == null ? null : id.toString();
   }
 
   public UUID getTraceId() {
-    return traceId;
+    return traceId == null ? null : UUID.fromString(traceId);
   }
 
   public void setTraceId(UUID traceId) {
-    this.traceId = traceId;
+    this.traceId = traceId == null ? null : traceId.toString();
   }
 
-  public String getDac() {
-    return dac;
+  public String getDacName() {
+    return dacName;
   }
 
-  public void setDac(String dac) {
-    this.dac = dac;
+  public void setDacName(String dac) {
+    this.dacName = dac;
   }
 
   public ZonedDateTime getTimestamp() {
@@ -130,10 +132,10 @@ public class AuditEntity {
 
   @Override
   public String toString() {
-    return "AuditEntity{" +
-        "id=" + id +
-        ", traceId=" + traceId +
-        ", dac='" + dac + '\'' +
+    return "ArgonautAuditEntity{" +
+        "id='" + id + '\'' +
+        ", traceId='" + traceId + '\'' +
+        ", dacName='" + dacName + '\'' +
         ", timestamp=" + timestamp +
         ", eventType='" + eventType + '\'' +
         ", processor='" + processor + '\'' +

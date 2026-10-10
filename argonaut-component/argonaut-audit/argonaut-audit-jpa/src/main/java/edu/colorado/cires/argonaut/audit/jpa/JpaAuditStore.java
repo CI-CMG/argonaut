@@ -5,7 +5,7 @@ import edu.colorado.cires.argonaut.audit.core.DefaultSubmissionPage;
 import edu.colorado.cires.argonaut.audit.core.DefaultSubmissionReportSearch;
 import edu.colorado.cires.argonaut.audit.core.SubmissionPage;
 import edu.colorado.cires.argonaut.audit.core.SubmissionReportSearch;
-import edu.colorado.cires.argonaut.audit.jpa.entity.AuditEntity;
+import edu.colorado.cires.argonaut.audit.jpa.entity.ArgonautAuditEntity;
 import edu.colorado.cires.argonaut.messaging.core.databind.AuditEventProcessor;
 import edu.colorado.cires.argonaut.messaging.core.databind.AuditMessage;
 import edu.colorado.cires.argonaut.messaging.core.databind.AuditMessage.EventType;
@@ -30,11 +30,11 @@ public class JpaAuditStore implements AuditStore {
       EntityTransaction tx = em.getTransaction();
       tx.begin();
       try {
-        AuditEntity entity = new AuditEntity();
+        ArgonautAuditEntity entity = new ArgonautAuditEntity();
         entity.setId(UUID.randomUUID());
         entity.setTraceId(auditMessage.getTraceId());
         entity.setTimestamp(auditMessage.getTimestamp().atZone(ZoneId.of("UTC")));
-        entity.setDac(auditMessage.getDac());
+        entity.setDacName(auditMessage.getDac());
         entity.setEventType(auditMessage.getEventType().toString());
         entity.setProcessor(auditMessage.getProcessor().toString());
         entity.setMessage(auditMessage.getMessage());
@@ -55,7 +55,7 @@ public class JpaAuditStore implements AuditStore {
       EntityTransaction tx = em.getTransaction();
       tx.begin();
       try {
-        AuditEntity entity = em.find(AuditEntity.class, auditMessage.getEventId());
+        ArgonautAuditEntity entity = em.find(ArgonautAuditEntity.class, auditMessage.getEventId().toString());
         if (entity != null) {
           entity.setReportDate(auditMessage.getTimestamp().atZone(ZoneId.of("UTC")));
         }
@@ -67,11 +67,11 @@ public class JpaAuditStore implements AuditStore {
     }
   }
 
-  private static AuditMessage fromEntity(AuditEntity entity) {
+  private static AuditMessage fromEntity(ArgonautAuditEntity entity) {
     return AuditMessage.builder()
         .withTraceId(entity.getTraceId())
         .withEventId(entity.getId())
-        .withDac(entity.getDac())
+        .withDac(entity.getDacName())
         .withTimestamp(entity.getTimestamp().toInstant())
         .withEventType(EventType.valueOf(entity.getEventType()))
         .withProcessor(AuditEventProcessor.valueOf(entity.getProcessor()))
@@ -86,8 +86,8 @@ public class JpaAuditStore implements AuditStore {
     try (EntityManager em = entityManagerFactory.createEntityManager()) {
       long count = em.createQuery(
               """
-                    SELECT COUNT(a.id) FROM AuditEntity a 
-                      WHERE a.dac = :dac 
+                    SELECT COUNT(a.id) FROM ArgonautAuditEntity a 
+                      WHERE a.dacName = :dac 
                       AND a.processor = 'FILE_RECEIVED'
                       AND (a.message = 'triggered file update' OR a.message = 'triggered file removal')
                       AND a.timestamp < :timestamp
@@ -98,17 +98,17 @@ public class JpaAuditStore implements AuditStore {
           .setParameter("timestamp", search.getTimestampLt().atZone(ZoneId.of("UTC")))
           .getSingleResult();
 
-      List<AuditEntity> auditRecords = em.createQuery(
+      List<ArgonautAuditEntity> auditRecords = em.createQuery(
               """
-                    SELECT a FROM AuditEntity a 
-                      WHERE a.dac = :dac 
+                    SELECT a FROM ArgonautAuditEntity a 
+                      WHERE a.dacName = :dac 
                       AND a.processor = 'FILE_RECEIVED'
                       AND (a.message = 'triggered file update' OR a.message = 'triggered file removal')
                       AND a.timestamp < :timestamp
                       AND a.reportDate IS NULL
                       ORDER BY a.timestamp, a.id
                   """,
-              AuditEntity.class)
+              ArgonautAuditEntity.class)
           .setParameter("dac", search.getDac())
           .setParameter("timestamp", search.getTimestampLt().atZone(ZoneId.of("UTC")))
           .setMaxResults(search.getPageSize())
@@ -126,10 +126,10 @@ public class JpaAuditStore implements AuditStore {
   @Override
   public List<AuditMessage> getHistoryForTraceId(UUID traceId) {
     try (EntityManager em = entityManagerFactory.createEntityManager()) {
-      List<AuditEntity> auditRecords = em.createQuery(
-              "SELECT a FROM AuditEntity a WHERE a.traceId = :traceId ORDER BY a.timestamp, a.id",
-              AuditEntity.class)
-          .setParameter("traceId", traceId)
+      List<ArgonautAuditEntity> auditRecords = em.createQuery(
+              "SELECT a FROM ArgonautAuditEntity a WHERE a.traceId = :traceId ORDER BY a.timestamp, a.id",
+              ArgonautAuditEntity.class)
+          .setParameter("traceId", traceId.toString())
           .getResultList();
 
       return auditRecords.stream().map(JpaAuditStore::fromEntity).toList();

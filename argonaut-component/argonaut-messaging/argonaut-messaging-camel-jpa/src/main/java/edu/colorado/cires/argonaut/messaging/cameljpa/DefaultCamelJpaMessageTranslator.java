@@ -12,7 +12,7 @@ public class DefaultCamelJpaMessageTranslator implements CamelJpaMessageTranslat
 
   @Override
   public Object translate(String queue, String message) {
-    JsonMessageEntity entity = new JsonMessageEntity();
+    ArgonautMessageEntity entity = new ArgonautMessageEntity();
     entity.setJsonMessage(message);
     entity.setId(uuidSupplier.get());
     entity.setQueueTime(timestampSupplier.get().atOffset(ZoneOffset.UTC).toZonedDateTime());
@@ -21,7 +21,7 @@ public class DefaultCamelJpaMessageTranslator implements CamelJpaMessageTranslat
   }
 
   @Override
-  public String receive(JsonMessageEntity entity) {
+  public String receive(ArgonautMessageEntity entity) {
     return entity.getJsonMessage();
   }
 }

@@ -16,43 +16,44 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "profile", indexes = {
-    @Index(name = "profile_cycle_idx", columnList = "cycle"),
-    @Index(name = "profile_file_type_idx", columnList = "file_type"),
-    @Index(name = "profile_file_status_idx", columnList = "file_status"),
-    @Index(name = "profile_date_idx", columnList = "date_year,date_month,date_day"),
-    @Index(name = "profile_ocean_idx", columnList = "ocean"),
-    @Index(name = "profile_geo_merge_time_idx", columnList = "geo_merge_time"),
-    @Index(name = "profile_multi_float_merge_time_idx", columnList = "multi_float_merge_time"),
-    @Index(name = "profile_synthetic_merge_time_idx", columnList = "synthetic_merge_time"),
-    @Index(name = "profile_last_updated_time_idx", columnList = "last_updated_time")
+@Table(name = "argo_float_profile", indexes = {
+    @Index(name = "argo_float_profile_cycle_idx", columnList = "argo_float_cycle"),
+    @Index(name = "argo_float_profile_file_type_idx", columnList = "file_type"),
+    @Index(name = "argo_float_profile_file_status_idx", columnList = "file_status"),
+    @Index(name = "argo_float_profile_date_idx", columnList = "profile_date_year,profile_date_month,profile_date_day"),
+    @Index(name = "argo_float_profile_ocean_idx", columnList = "ocean"),
+    @Index(name = "argo_float_profile_geo_merge_time_idx", columnList = "geo_merge_time"),
+    @Index(name = "argo_float_profile_multi_float_merge_time_idx", columnList = "multi_float_merge_time"),
+    @Index(name = "argo_float_profile_synthetic_merge_time_idx", columnList = "synthetic_merge_time"),
+    @Index(name = "argo_float_profile_last_updated_time_idx", columnList = "last_updated_time"),
+    @Index(name = "argo_float_profile_latest_merge_file_name_idx", columnList = "latest_merge_file_name")
 })
-public class ProfileFileEntity {
+public class ArgoFloatProfileEntity {
 
   @Id
-  @Column(name = "file", nullable = false, length = 100)
-  private String file;
+  @Column(name = "file_path", nullable = false, length = 100)
+  private String filePath;
 
   @Version
   @Column(name = "version", nullable = false)
   private int version;
 
   @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.DETACH, CascadeType.REFRESH})
-  @JoinColumn(name = "cycle", nullable = false)
-  private CycleEntity cycle;
+  @JoinColumn(name = "argo_float_cycle", nullable = false)
+  private ArgoFloatCycleEntity argoFloatCycle;
 
   @Column(name = "file_type", length = 50, nullable = false)
   private String fileType;
   @Column(name = "file_status", length = 50, nullable = false)
   private String fileStatus;
-  @Column(name = "date")
-  private ZonedDateTime date;
-  @Column(name = "date_year")
-  private Integer year;
-  @Column(name = "date_month")
-  private Integer month;
-  @Column(name = "date_day")
-  private Integer day;
+  @Column(name = "profile_date")
+  private ZonedDateTime profileDate;
+  @Column(name = "profile_date_year")
+  private Integer profileDateYear;
+  @Column(name = "profile_date_month")
+  private Integer profileDateMonth;
+  @Column(name = "profile_date_day")
+  private Integer profileDateDay;
   @Column(name = "latitude")
   private Double latitude;
   @Column(name = "latitude_min")
@@ -89,30 +90,30 @@ public class ProfileFileEntity {
   private ZonedDateTime lastUpdatedTime;
   @Column(name = "file_name", nullable = false, length = 20)
   private String fileName;
-  @Column(name = "latest_merge_file_Name", length = 9)
+  @Column(name = "latest_merge_file_name", length = 9)
   private String latestMergeFileName;
 
-  @OneToMany(mappedBy = "profile", cascade = CascadeType.ALL, orphanRemoval = true)
-  private List<FileRemovedTimeEntity> removedTimes = new ArrayList<>();
+  @OneToMany(mappedBy = "argoFloatProfile", cascade = CascadeType.ALL, orphanRemoval = true)
+  private List<ArgonautFileRemovedTimeEntity> removedTimes = new ArrayList<>();
 
-  @OneToMany(mappedBy = "profile", cascade = CascadeType.ALL, orphanRemoval = true)
-  private List<ProfileParameterEntity> parameters = new ArrayList<>();
+  @OneToMany(mappedBy = "argoFloatProfile", cascade = CascadeType.ALL, orphanRemoval = true)
+  private List<ArgoFloatProfileParameterEntity> parameters = new ArrayList<>();
 
 
-  public String getFile() {
-    return file;
+  public String getFilePath() {
+    return filePath;
   }
 
-  public void setFile(String file) {
-    this.file = file;
+  public void setFilePath(String file) {
+    this.filePath = file;
   }
 
-  public CycleEntity getCycle() {
-    return cycle;
+  public ArgoFloatCycleEntity getArgoFloatCycle() {
+    return argoFloatCycle;
   }
 
-  public void setCycle(CycleEntity cycle) {
-    this.cycle = cycle;
+  public void setArgoFloatCycle(ArgoFloatCycleEntity cycle) {
+    this.argoFloatCycle = cycle;
   }
 
   public String getFileType() {
@@ -131,12 +132,12 @@ public class ProfileFileEntity {
     this.fileStatus = fileStatus;
   }
 
-  public ZonedDateTime getDate() {
-    return date;
+  public ZonedDateTime getProfileDate() {
+    return profileDate;
   }
 
-  public void setDate(ZonedDateTime date) {
-    this.date = date;
+  public void setProfileDate(ZonedDateTime date) {
+    this.profileDate = date;
   }
 
   public Double getLatitude() {
@@ -263,28 +264,28 @@ public class ProfileFileEntity {
     return version;
   }
 
-  public Integer getYear() {
-    return year;
+  public Integer getProfileDateYear() {
+    return profileDateYear;
   }
 
-  public void setYear(Integer year) {
-    this.year = year;
+  public void setProfileDateYear(Integer year) {
+    this.profileDateYear = year;
   }
 
-  public Integer getMonth() {
-    return month;
+  public Integer getProfileDateMonth() {
+    return profileDateMonth;
   }
 
-  public void setMonth(Integer month) {
-    this.month = month;
+  public void setProfileDateMonth(Integer month) {
+    this.profileDateMonth = month;
   }
 
-  public Integer getDay() {
-    return day;
+  public Integer getProfileDateDay() {
+    return profileDateDay;
   }
 
-  public void setDay(Integer day) {
-    this.day = day;
+  public void setProfileDateDay(Integer day) {
+    this.profileDateDay = day;
   }
 
   public String getFileName() {
@@ -295,11 +296,11 @@ public class ProfileFileEntity {
     this.fileName = fileName;
   }
 
-  public List<FileRemovedTimeEntity> getRemovedTimes() {
+  public List<ArgonautFileRemovedTimeEntity> getRemovedTimes() {
     return removedTimes;
   }
 
-  public void setRemovedTimes(List<FileRemovedTimeEntity> removedTimes) {
+  public void setRemovedTimes(List<ArgonautFileRemovedTimeEntity> removedTimes) {
     this.removedTimes = removedTimes;
   }
 
@@ -327,18 +328,18 @@ public class ProfileFileEntity {
     this.dataModeFilePrefix = dataModeFilePrefix;
   }
 
-  public List<ProfileParameterEntity> getParameters() {
+  public List<ArgoFloatProfileParameterEntity> getParameters() {
     return parameters;
   }
 
-  public void setParameters(List<ProfileParameterEntity> parameters) {
+  public void setParameters(List<ArgoFloatProfileParameterEntity> parameters) {
     this.parameters = parameters;
   }
 
   @Override
   public String toString() {
-    return "ProfileFileEntity{" +
-        "file='" + file + '\'' +
+    return "ArgoFloatProfileEntity{" +
+        "filePath='" + filePath + '\'' +
         ", fileStatus='" + fileStatus + '\'' +
         ", dataMode='" + dataMode + '\'' +
         ", dataModeFilePrefix='" + dataModeFilePrefix + '\'' +

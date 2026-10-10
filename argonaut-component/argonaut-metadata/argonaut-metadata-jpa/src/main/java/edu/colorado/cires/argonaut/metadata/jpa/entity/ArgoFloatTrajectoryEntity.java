@@ -12,23 +12,23 @@ import jakarta.persistence.Version;
 import java.time.ZonedDateTime;
 
 @Entity
-@Table(name = "trajectory", indexes = {
-    @Index(name = "trajectory_float_idx", columnList = "float"),
-    @Index(name = "trajectory_file_status_idx", columnList = "file_status")
+@Table(name = "argo_float_trajectory", indexes = {
+    @Index(name = "argo_float_trajectory_float_idx", columnList = "argo_float"),
+    @Index(name = "argo_float_trajectory_file_status_idx", columnList = "file_status")
 })
-public class TrajectoryFileEntity {
+public class ArgoFloatTrajectoryEntity {
 
   @Id
-  @Column(name = "file", nullable = false, length = 100)
-  private String file;
+  @Column(name = "file_path", nullable = false, length = 100)
+  private String filePath;
 
   @Version
   @Column(name = "version", nullable = false)
   private int version;
 
   @OneToOne(cascade = {CascadeType.DETACH, CascadeType.REFRESH})
-  @JoinColumn(name = "float", nullable = false)
-  private FloatEntity floatId;
+  @JoinColumn(name = "argo_float", nullable = false)
+  private ArgoFloatEntity argoFloat;
 
   @Column(name = "profiler_type", length = 4)
   private String profilerType;
@@ -54,12 +54,12 @@ public class TrajectoryFileEntity {
   @Column(name = "file_status", length = 50, nullable = false)
   private String fileStatus;
 
-  public String getFile() {
-    return file;
+  public String getFilePath() {
+    return filePath;
   }
 
-  public void setFile(String file) {
-    this.file = file;
+  public void setFilePath(String file) {
+    this.filePath = file;
   }
 
   public int getVersion() {
@@ -70,12 +70,12 @@ public class TrajectoryFileEntity {
     this.version = version;
   }
 
-  public FloatEntity getFloatId() {
-    return floatId;
+  public ArgoFloatEntity getArgoFloat() {
+    return argoFloat;
   }
 
-  public void setFloatId(FloatEntity floatId) {
-    this.floatId = floatId;
+  public void setArgoFloat(ArgoFloatEntity floatId) {
+    this.argoFloat = floatId;
   }
 
   public String getProfilerType() {

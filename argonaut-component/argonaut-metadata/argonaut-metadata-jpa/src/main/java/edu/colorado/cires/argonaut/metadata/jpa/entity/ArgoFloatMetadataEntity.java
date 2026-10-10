@@ -6,19 +6,23 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.Version;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
-@Table(name = "profile_merge", indexes = {
-    @Index(name = "profile_merge_float_idx", columnList = "float")
+@Table(name = "argo_float_metadata", indexes = {
+    @Index(name = "argo_float_metadata_float_idx", columnList = "argo_float"),
+    @Index(name = "argo_float_metadata_file_status_idx", columnList = "file_status")
 })
-public class ProfileMergeFileEntity {
+public class ArgoFloatMetadataEntity {
 
   @Id
-  @Column(name = "file", nullable = false, length = 100)
+  @Column(name = "file_path", nullable = false, length = 100)
   private String file;
 
   @Version
@@ -26,13 +30,16 @@ public class ProfileMergeFileEntity {
   private int version;
 
   @OneToOne(cascade = {CascadeType.DETACH, CascadeType.REFRESH})
-  @JoinColumn(name = "float", nullable = false)
-  private FloatEntity floatId;
+  @JoinColumn(name = "argo_float", nullable = false)
+  private ArgoFloatEntity argoFloat;
+
+  @OneToMany(mappedBy = "argoFloatMetadata", cascade = CascadeType.ALL, orphanRemoval = true)
+  private List<ArgonautSyntheticMergeMetadataEntity> syntheticMerges = new ArrayList<>();
 
   @Column(name = "file_status", length = 50, nullable = false)
   private String fileStatus;
-  @Column(name = "date")
-  private ZonedDateTime date;
+  @Column(name = "metadata_date")
+  private ZonedDateTime metadataDate;
   @Column(name = "latitude")
   private Double latitude;
   @Column(name = "latitude_min")
@@ -62,6 +69,9 @@ public class ProfileMergeFileEntity {
   @Column(name = "file_name", nullable = false, length = 20)
   private String fileName;
 
+  @OneToMany(mappedBy = "argoFloatMetadata", cascade = CascadeType.ALL, orphanRemoval = true)
+  private List<ArgonautFileRemovedTimeEntity> removedTimes = new ArrayList<>();
+
 
   public String getFile() {
     return file;
@@ -75,12 +85,12 @@ public class ProfileMergeFileEntity {
     this.file = file;
   }
 
-  public FloatEntity getFloatId() {
-    return floatId;
+  public ArgoFloatEntity getArgoFloat() {
+    return argoFloat;
   }
 
-  public void setFloatId(FloatEntity floatId) {
-    this.floatId = floatId;
+  public void setArgoFloat(ArgoFloatEntity floatId) {
+    this.argoFloat = floatId;
   }
 
   public String getFileStatus() {
@@ -91,12 +101,12 @@ public class ProfileMergeFileEntity {
     this.fileStatus = fileStatus;
   }
 
-  public ZonedDateTime getDate() {
-    return date;
+  public ZonedDateTime getMetadataDate() {
+    return metadataDate;
   }
 
-  public void setDate(ZonedDateTime date) {
-    this.date = date;
+  public void setMetadataDate(ZonedDateTime date) {
+    this.metadataDate = date;
   }
 
   public Double getLatitude() {
@@ -209,5 +219,21 @@ public class ProfileMergeFileEntity {
 
   public void setFileName(String fileName) {
     this.fileName = fileName;
+  }
+
+  public List<ArgonautSyntheticMergeMetadataEntity> getSyntheticMerges() {
+    return syntheticMerges;
+  }
+
+  public void setSyntheticMerges(List<ArgonautSyntheticMergeMetadataEntity> syntheticMerges) {
+    this.syntheticMerges = syntheticMerges;
+  }
+
+  public List<ArgonautFileRemovedTimeEntity> getRemovedTimes() {
+    return removedTimes;
+  }
+
+  public void setRemovedTimes(List<ArgonautFileRemovedTimeEntity> removedTimes) {
+    this.removedTimes = removedTimes;
   }
 }

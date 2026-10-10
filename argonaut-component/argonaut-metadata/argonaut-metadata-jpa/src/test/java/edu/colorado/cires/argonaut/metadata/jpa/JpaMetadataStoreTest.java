@@ -14,7 +14,6 @@ import edu.colorado.cires.argonaut.messaging.core.databind.ArgoOcean;
 import edu.colorado.cires.argonaut.messaging.core.databind.GeoMergeInfo;
 import edu.colorado.cires.argonaut.messaging.core.databind.MetadataRecord;
 import edu.colorado.cires.argonaut.messaging.core.databind.MetadataRecord.Action;
-import edu.colorado.cires.argonaut.messaging.core.databind.MetadataRecord.Builder;
 import edu.colorado.cires.argonaut.messaging.core.databind.MetadataRecord.FileStatus;
 import edu.colorado.cires.argonaut.messaging.core.databind.ProfileMode;
 import edu.colorado.cires.argonaut.messaging.core.databind.ProfileOperation;
@@ -27,14 +26,13 @@ import edu.colorado.cires.argonaut.metadata.core.IndexPageRequest;
 import edu.colorado.cires.argonaut.metadata.core.MetadataRecordPage;
 import edu.colorado.cires.argonaut.metadata.core.ProfilePage;
 import edu.colorado.cires.argonaut.metadata.core.RemovedFilePage;
-import edu.colorado.cires.argonaut.metadata.jpa.entity.ProfileFileEntity;
-import edu.colorado.cires.argonaut.metadata.jpa.entity.ProfileMergeFileEntity;
+import edu.colorado.cires.argonaut.metadata.jpa.entity.ArgoFloatProfileEntity;
+import edu.colorado.cires.argonaut.metadata.jpa.entity.ArgonautProfileMergeFileEntity;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.EntityTransaction;
 import jakarta.persistence.Persistence;
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
@@ -78,17 +76,17 @@ public class JpaMetadataStoreTest {
       EntityTransaction tx = em.getTransaction();
       tx.begin();
       try {
-        em.createQuery("delete from ProfileParameterEntity ").executeUpdate();
-        em.createQuery("delete from FileRemovedTimeEntity").executeUpdate();
-        em.createQuery("delete from MetadataSyntheticMergeEntity").executeUpdate();
-        em.createQuery("delete from ProfileMergeFileEntity").executeUpdate();
-        em.createQuery("delete from ProfileFileEntity").executeUpdate();
-        em.createQuery("delete from MetadataFileEntity").executeUpdate();
-        em.createQuery("delete from CycleEntity").executeUpdate();
-        em.createQuery("delete from TechnicalFileEntity").executeUpdate();
-        em.createQuery("delete from TrajectoryFileEntity ").executeUpdate();
-        em.createQuery("delete from FloatEntity").executeUpdate();
-        em.createQuery("delete from DacEntity").executeUpdate();
+        em.createQuery("delete from ArgoFloatProfileParameterEntity ").executeUpdate();
+        em.createQuery("delete from ArgonautFileRemovedTimeEntity").executeUpdate();
+        em.createQuery("delete from ArgonautSyntheticMergeMetadataEntity").executeUpdate();
+        em.createQuery("delete from ArgonautProfileMergeFileEntity").executeUpdate();
+        em.createQuery("delete from ArgoFloatProfileEntity").executeUpdate();
+        em.createQuery("delete from ArgoFloatMetadataEntity").executeUpdate();
+        em.createQuery("delete from ArgoFloatCycleEntity").executeUpdate();
+        em.createQuery("delete from ArgoFloatTechnicalInfoEntity").executeUpdate();
+        em.createQuery("delete from ArgoFloatTrajectoryEntity ").executeUpdate();
+        em.createQuery("delete from ArgoFloatEntity").executeUpdate();
+        em.createQuery("delete from ArgoDacEntity").executeUpdate();
         tx.commit();
       } catch (Exception e) {
         tx.rollback();
@@ -2377,14 +2375,14 @@ public class JpaMetadataStoreTest {
       EntityTransaction tx = em.getTransaction();
       tx.begin();
       try {
-        assertEquals(FileStatus.REMOVED.toString(), em.find(ProfileMergeFileEntity.class, "aoml/1111/1111_prof.nc").getFileStatus());
-        assertEquals(FileStatus.ACTIVE.toString(), em.find(ProfileMergeFileEntity.class, "aoml/13857/13857_prof.nc").getFileStatus());
+        assertEquals(FileStatus.REMOVED.toString(), em.find(ArgonautProfileMergeFileEntity.class, "aoml/1111/1111_prof.nc").getFileStatus());
+        assertEquals(FileStatus.ACTIVE.toString(), em.find(ArgonautProfileMergeFileEntity.class, "aoml/13857/13857_prof.nc").getFileStatus());
 
-        ProfileFileEntity d13857 = em.find(ProfileFileEntity.class, "aoml/13857/profiles/D13857_001.nc");
+        ArgoFloatProfileEntity d13857 = em.find(ArgoFloatProfileEntity.class, "aoml/13857/profiles/D13857_001.nc");
         assertEquals(FileStatus.ACTIVE.toString(), d13857.getFileStatus());
         assertNotNull(d13857.getMultiFloatMergeTime());
 
-        ProfileFileEntity d1111 = em.find(ProfileFileEntity.class, "aoml/1111/profiles/D1111_001.nc");
+        ArgoFloatProfileEntity d1111 = em.find(ArgoFloatProfileEntity.class, "aoml/1111/profiles/D1111_001.nc");
         assertEquals(FileStatus.REMOVED.toString(), d1111.getFileStatus());
         assertNull(d1111.getMultiFloatMergeTime());
 
@@ -2867,11 +2865,11 @@ public class JpaMetadataStoreTest {
       tx.begin();
       try {
 
-        ProfileFileEntity d13857 = em.find(ProfileFileEntity.class, "aoml/13857/profiles/D13857_001.nc");
+        ArgoFloatProfileEntity d13857 = em.find(ArgoFloatProfileEntity.class, "aoml/13857/profiles/D13857_001.nc");
         assertEquals(FileStatus.ACTIVE.toString(), d13857.getFileStatus());
         assertNotNull(d13857.getGeoMergeTime());
 
-        ProfileFileEntity d1111 = em.find(ProfileFileEntity.class, "aoml/1111/profiles/D1111_001.nc");
+        ArgoFloatProfileEntity d1111 = em.find(ArgoFloatProfileEntity.class, "aoml/1111/profiles/D1111_001.nc");
         assertEquals(FileStatus.REMOVED.toString(), d1111.getFileStatus());
         assertNull(d1111.getGeoMergeTime());
 

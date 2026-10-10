@@ -6,7 +6,7 @@
   version="3.0">
   <persistence-unit name="argonaut-audit">
     <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
-    <class>edu.colorado.cires.argonaut.audit.jpa.entity.AuditEntity</class>
+    <class>edu.colorado.cires.argonaut.audit.jpa.entity.ArgonautAuditEntity</class>
     <exclude-unlisted-classes>true</exclude-unlisted-classes>
     <properties>
       <property name="jakarta.persistence.jdbc.url" value=""/>

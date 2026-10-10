@@ -65,10 +65,10 @@ public class CamelJpaMessageSenderTest {
   @AfterEach
   public void setup() throws Exception{
     q1TransactionTemplate.executeWithoutResult(s -> {
-      q1Em.createQuery("delete from JsonMessageEntity").executeUpdate();
+      q1Em.createQuery("delete from ArgonautMessageEntity").executeUpdate();
     });
     q2TransactionTemplate.executeWithoutResult(s -> {
-      q2Em.createQuery("delete from JsonMessageEntity").executeUpdate();
+      q2Em.createQuery("delete from ArgonautMessageEntity").executeUpdate();
     });
   }
 

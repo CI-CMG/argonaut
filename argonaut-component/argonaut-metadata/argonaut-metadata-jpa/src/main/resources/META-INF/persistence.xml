@@ -6,17 +6,17 @@
   version="3.0">
   <persistence-unit name="argonaut-index">
     <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
-    <class>edu.colorado.cires.argonaut.metadata.jpa.entity.ProfileMergeFileEntity</class>
-    <class>edu.colorado.cires.argonaut.metadata.jpa.entity.CycleEntity</class>
-    <class>edu.colorado.cires.argonaut.metadata.jpa.entity.DacEntity</class>
-    <class>edu.colorado.cires.argonaut.metadata.jpa.entity.FloatEntity</class>
-    <class>edu.colorado.cires.argonaut.metadata.jpa.entity.MetadataFileEntity</class>
-    <class>edu.colorado.cires.argonaut.metadata.jpa.entity.ProfileFileEntity</class>
-    <class>edu.colorado.cires.argonaut.metadata.jpa.entity.MetadataSyntheticMergeEntity</class>
-    <class>edu.colorado.cires.argonaut.metadata.jpa.entity.FileRemovedTimeEntity</class>
-    <class>edu.colorado.cires.argonaut.metadata.jpa.entity.ProfileParameterEntity</class>
-    <class>edu.colorado.cires.argonaut.metadata.jpa.entity.TrajectoryFileEntity</class>
-    <class>edu.colorado.cires.argonaut.metadata.jpa.entity.TechnicalFileEntity</class>
+    <class>edu.colorado.cires.argonaut.metadata.jpa.entity.ArgonautProfileMergeFileEntity</class>
+    <class>edu.colorado.cires.argonaut.metadata.jpa.entity.ArgoFloatCycleEntity</class>
+    <class>edu.colorado.cires.argonaut.metadata.jpa.entity.ArgoDacEntity</class>
+    <class>edu.colorado.cires.argonaut.metadata.jpa.entity.ArgoFloatEntity</class>
+    <class>edu.colorado.cires.argonaut.metadata.jpa.entity.ArgoFloatMetadataEntity</class>
+    <class>edu.colorado.cires.argonaut.metadata.jpa.entity.ArgoFloatProfileEntity</class>
+    <class>edu.colorado.cires.argonaut.metadata.jpa.entity.ArgonautSyntheticMergeMetadataEntity</class>
+    <class>edu.colorado.cires.argonaut.metadata.jpa.entity.ArgonautFileRemovedTimeEntity</class>
+    <class>edu.colorado.cires.argonaut.metadata.jpa.entity.ArgoFloatProfileParameterEntity</class>
+    <class>edu.colorado.cires.argonaut.metadata.jpa.entity.ArgoFloatTrajectoryEntity</class>
+    <class>edu.colorado.cires.argonaut.metadata.jpa.entity.ArgoFloatTechnicalInfoEntity</class>
     <exclude-unlisted-classes>true</exclude-unlisted-classes>
     <properties>
       <property name="jakarta.persistence.jdbc.url" value=""/>

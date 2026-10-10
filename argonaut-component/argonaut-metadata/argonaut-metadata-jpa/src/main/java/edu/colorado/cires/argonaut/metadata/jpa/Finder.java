@@ -20,14 +20,14 @@ import edu.colorado.cires.argonaut.metadata.core.ProfilePage;
 import edu.colorado.cires.argonaut.metadata.core.RecentProfileSearch;
 import edu.colorado.cires.argonaut.metadata.core.RemovedFilePage;
 import edu.colorado.cires.argonaut.metadata.core.RemovedFileSearch;
-import edu.colorado.cires.argonaut.metadata.jpa.entity.CycleEntity;
-import edu.colorado.cires.argonaut.metadata.jpa.entity.FileRemovedTimeEntity;
-import edu.colorado.cires.argonaut.metadata.jpa.entity.FloatEntity;
-import edu.colorado.cires.argonaut.metadata.jpa.entity.MetadataFileEntity;
-import edu.colorado.cires.argonaut.metadata.jpa.entity.ProfileFileEntity;
-import edu.colorado.cires.argonaut.metadata.jpa.entity.ProfileParameterEntity;
-import edu.colorado.cires.argonaut.metadata.jpa.entity.TechnicalFileEntity;
-import edu.colorado.cires.argonaut.metadata.jpa.entity.TrajectoryFileEntity;
+import edu.colorado.cires.argonaut.metadata.jpa.entity.ArgoFloatCycleEntity;
+import edu.colorado.cires.argonaut.metadata.jpa.entity.ArgonautFileRemovedTimeEntity;
+import edu.colorado.cires.argonaut.metadata.jpa.entity.ArgoFloatEntity;
+import edu.colorado.cires.argonaut.metadata.jpa.entity.ArgoFloatMetadataEntity;
+import edu.colorado.cires.argonaut.metadata.jpa.entity.ArgoFloatProfileEntity;
+import edu.colorado.cires.argonaut.metadata.jpa.entity.ArgoFloatProfileParameterEntity;
+import edu.colorado.cires.argonaut.metadata.jpa.entity.ArgoFloatTechnicalInfoEntity;
+import edu.colorado.cires.argonaut.metadata.jpa.entity.ArgoFloatTrajectoryEntity;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import java.time.Instant;
@@ -65,11 +65,11 @@ class Finder {
   Optional<MetadataRecord> findByFile(String file, boolean includeRemoved) {
     if (file.endsWith("_meta.nc")) {
       try (EntityManager em = entityManagerFactory.createEntityManager()) {
-        MetadataFileEntity result;
+        ArgoFloatMetadataEntity result;
         if (includeRemoved) {
-          result = em.find(MetadataFileEntity.class, file);
+          result = em.find(ArgoFloatMetadataEntity.class, file);
         } else {
-          result = em.createQuery("SELECT m FROM MetadataFileEntity m WHERE m.file = :file AND m.fileStatus = 'ACTIVE'", MetadataFileEntity.class)
+          result = em.createQuery("SELECT m FROM ArgoFloatMetadataEntity m WHERE m.file = :file AND m.fileStatus = 'ACTIVE'", ArgoFloatMetadataEntity.class)
               .setParameter("file", file)
               .getSingleResultOrNull();
         }
@@ -80,12 +80,12 @@ class Finder {
 
         return Optional.of(MetadataRecord.builder()
             .withFileType(ArgoFileType.METADATA)
-            .withDac(result.getFloatId().getDac().getDac())
+            .withDac(result.getArgoFloat().getArgoDac().getDacName())
             .withFile(result.getFile())
             .withFileName(result.getFileName())
-            .withFloatId(result.getFloatId().getFloatId())
+            .withFloatId(result.getArgoFloat().getFloatId())
             .withFileStatus(FileStatus.valueOf(result.getFileStatus()))
-            .withDate(result.getDate() == null ? null : result.getDate().toInstant())
+            .withDate(result.getMetadataDate() == null ? null : result.getMetadataDate().toInstant())
             .withLatitude(result.getLatitude())
             .withLatitudeMin(result.getLatitudeMin())
             .withLatitudeMax(result.getLatitudeMax())
@@ -105,11 +105,11 @@ class Finder {
       //TODO traj, etc
     } else if (file.contains("profile")) {
       try (EntityManager em = entityManagerFactory.createEntityManager()) {
-        ProfileFileEntity result;
+        ArgoFloatProfileEntity result;
         if (includeRemoved) {
-          result = em.find(ProfileFileEntity.class, file);
+          result = em.find(ArgoFloatProfileEntity.class, file);
         } else {
-          result = em.createQuery("SELECT p FROM ProfileFileEntity p WHERE p.file = :file AND p.fileStatus = 'ACTIVE'", ProfileFileEntity.class)
+          result = em.createQuery("SELECT p FROM ArgoFloatProfileEntity p WHERE p.filePath = :file AND p.fileStatus = 'ACTIVE'", ArgoFloatProfileEntity.class)
               .setParameter("file", file)
               .getSingleResultOrNull();
         }
@@ -118,15 +118,15 @@ class Finder {
           return Optional.empty();
         }
         return Optional.of(MetadataRecord.builder()
-            .withDirection(result.getCycle().getDirection().toString())
-            .withCycleNumber(result.getCycle().getCycleNumber())
+            .withDirection(result.getArgoFloatCycle().getDirection().toString())
+            .withCycleNumber(result.getArgoFloatCycle().getCycleNumber())
             .withFileType(ArgoFileType.valueOf(result.getFileType()))
-            .withDac(result.getCycle().getFloatId().getDac().getDac())
-            .withFile(result.getFile())
+            .withDac(result.getArgoFloatCycle().getArgoFloat().getArgoDac().getDacName())
+            .withFile(result.getFilePath())
             .withFileName(result.getFileName())
-            .withFloatId(result.getCycle().getFloatId().getFloatId())
+            .withFloatId(result.getArgoFloatCycle().getArgoFloat().getFloatId())
             .withFileStatus(FileStatus.valueOf(result.getFileStatus()))
-            .withDate(result.getDate() == null ? null : result.getDate().toInstant())
+            .withDate(result.getProfileDate() == null ? null : result.getProfileDate().toInstant())
             .withLatitude(result.getLatitude())
             .withLatitudeMin(result.getLatitudeMin())
             .withLatitudeMax(result.getLatitudeMax())
@@ -137,7 +137,7 @@ class Finder {
             .withProfilerType(result.getProfilerType())
             .withInstitution(result.getInstitution())
             .withDateUpdate(result.getDateUpdate() == null ? null : result.getDateUpdate().toInstant())
-            .withParameters(result.getParameters().stream().map(ProfileParameterEntity::getParameterName).toList())
+            .withParameters(result.getParameters().stream().map(ArgoFloatProfileParameterEntity::getParameterName).toList())
             .withParameterDataMode(result.getParameterDataMode())
             .withProfileMode(ProfileMode.fromCharacter(result.getDataMode()))
             .withActionTimestamp(result.getLastUpdatedTime().toInstant())
@@ -145,11 +145,11 @@ class Finder {
       }
     } else if (file.endsWith("traj.nc")) {
       try (EntityManager em = entityManagerFactory.createEntityManager()) {
-        TrajectoryFileEntity result;
+        ArgoFloatTrajectoryEntity result;
         if (includeRemoved) {
-          result = em.find(TrajectoryFileEntity.class, file);
+          result = em.find(ArgoFloatTrajectoryEntity.class, file);
         } else {
-          result = em.createQuery("select t from TrajectoryFileEntity t where t.file = :file and t.fileStatus = 'ACTIVE'", TrajectoryFileEntity.class)
+          result = em.createQuery("select t from ArgoFloatTrajectoryEntity t where t.filePath = :file and t.fileStatus = 'ACTIVE'", ArgoFloatTrajectoryEntity.class)
             .setParameter("file", file)
             .getSingleResultOrNull();
 
@@ -161,11 +161,11 @@ class Finder {
       }
     } else if (file.endsWith("tech.nc")) {
       try (EntityManager em = entityManagerFactory.createEntityManager()) {
-        TechnicalFileEntity result;
+        ArgoFloatTechnicalInfoEntity result;
         if (includeRemoved) {
-          result = em.find(TechnicalFileEntity.class, file);
+          result = em.find(ArgoFloatTechnicalInfoEntity.class, file);
         } else {
-          result = em.createQuery("select t from TechnicalFileEntity t where t.file = :file and t.fileStatus = 'ACTIVE'", TechnicalFileEntity.class)
+          result = em.createQuery("select t from ArgoFloatTechnicalInfoEntity t where t.filePath = :file and t.fileStatus = 'ACTIVE'", ArgoFloatTechnicalInfoEntity.class)
             .setParameter("file", file)
             .getSingleResultOrNull();
 
@@ -181,12 +181,12 @@ class Finder {
   }
 
   private static List<MetadataRecord> getGeoPaths(EntityManager em, int year, int month, int day, String ocean) {
-    List<ProfileFileEntity> entities = em.createQuery(
+    List<ArgoFloatProfileEntity> entities = em.createQuery(
             """
-                SELECT p FROM ProfileFileEntity p
-                  WHERE p.year = :year
-                    AND p.month = :month
-                    AND p.day = :day
+                SELECT p FROM ArgoFloatProfileEntity p
+                  WHERE p.profileDateYear = :year
+                    AND p.profileDateMonth = :month
+                    AND p.profileDateDay = :day
                     AND ocean = :ocean
                     AND p.fileType = 'PROFILE_CORE'
                     AND (p.fileStatus = 'ACTIVE' OR p.geoMergeTime IS NOT NULL)
@@ -199,11 +199,11 @@ class Finder {
 
     return entities.stream().map(entity -> MetadataRecord.builder()
         .withFileName(entity.getFileName())
-        .withDac(entity.getCycle().getFloatId().getDac().getDac())
-        .withFile(entity.getFile())
-        .withFloatId(entity.getCycle().getFloatId().getFloatId())
+        .withDac(entity.getArgoFloatCycle().getArgoFloat().getArgoDac().getDacName())
+        .withFile(entity.getFilePath())
+        .withFloatId(entity.getArgoFloatCycle().getArgoFloat().getFloatId())
         .withFileStatus(FileStatus.valueOf(entity.getFileStatus()))
-        .withDate(entity.getDate() == null ? null : entity.getDate().toInstant())
+        .withDate(entity.getProfileDate() == null ? null : entity.getProfileDate().toInstant())
         .build()).toList();
 
   }
@@ -212,7 +212,7 @@ class Finder {
     try (EntityManager em = entityManagerFactory.createEntityManager()) {
       long count = em.createQuery(
           """
-                 SELECT COUNT(DISTINCT CONCAT(profile.year, '_', profile.month, '_', profile.day, '_', profile.ocean)) FROM ProfileFileEntity profile
+                 SELECT COUNT(DISTINCT CONCAT(profile.profileDateYear, '_', profile.profileDateMonth, '_', profile.profileDateDay, '_', profile.ocean)) FROM ArgoFloatProfileEntity profile
                  WHERE profile.fileType = 'PROFILE_CORE' AND 
                        (( profile.fileStatus = 'ACTIVE' AND profile.geoMergeTime IS NULL ) 
                        OR  
@@ -220,7 +220,7 @@ class Finder {
               """, Long.class).getSingleResult();
       List<String> geoMergeIds = em.createQuery(
               """
-                     SELECT DISTINCT CONCAT(profile.year, '_', profile.month, '_', profile.day, '_', profile.ocean) id FROM ProfileFileEntity profile
+                     SELECT DISTINCT CONCAT(profile.profileDateYear, '_', profile.profileDateMonth, '_', profile.profileDateDay, '_', profile.ocean) id FROM ArgoFloatProfileEntity profile
                        WHERE profile.fileType = 'PROFILE_CORE' AND 
                        (( profile.fileStatus = 'ACTIVE' AND profile.geoMergeTime IS NULL ) 
                        OR  
@@ -256,7 +256,7 @@ class Finder {
     try (EntityManager em = entityManagerFactory.createEntityManager()) {
       long count = em.createQuery(
           """
-                 SELECT COUNT(DISTINCT profile.cycle.floatId.id) FROM ProfileFileEntity profile
+                 SELECT COUNT(DISTINCT profile.argoFloatCycle.argoFloat.id) FROM ArgoFloatProfileEntity profile
                  WHERE profile.fileType = 'PROFILE_CORE' AND 
                        (( profile.fileStatus = 'ACTIVE' AND profile.multiFloatMergeTime IS NULL ) 
                        OR  
@@ -264,7 +264,7 @@ class Finder {
               """, Long.class).getSingleResult();
       List<String> floatIds = em.createQuery(
               """
-                     SELECT DISTINCT profile.cycle.floatId.id fid FROM ProfileFileEntity profile
+                     SELECT DISTINCT profile.argoFloatCycle.argoFloat.id fid FROM ArgoFloatProfileEntity profile
                          WHERE profile.fileType = 'PROFILE_CORE' AND 
                          (( profile.fileStatus = 'ACTIVE' AND profile.multiFloatMergeTime IS NULL ) 
                          OR  
@@ -275,16 +275,16 @@ class Finder {
           .setFirstResult((pageRequest.getPageNumber() - 1) * pageRequest.getPageSize())
           .getResultList();
 
-      List<FloatEntity> pageResults = new ArrayList<>(floatIds.size());
+      List<ArgoFloatEntity> pageResults = new ArrayList<>(floatIds.size());
       for (String floatId : floatIds) {
-        pageResults.add(em.find(FloatEntity.class, floatId));
+        pageResults.add(em.find(ArgoFloatEntity.class, floatId));
       }
 
       return DefaultProfilePage.builder()
           .withTotalRecords(count)
           .withIndexPageRequest(DefaultIndexPageRequest.builder(pageRequest).build())
           .withPage(pageResults.stream().map(floatEntity -> ProfileOperation.builder()
-              .withDac(floatEntity.getDac().getDac())
+              .withDac(floatEntity.getArgoDac().getDacName())
               .withFloatId(floatEntity.getFloatId())
               .withFiles(getMergeFileInfo(floatEntity))
               .build()
@@ -292,17 +292,17 @@ class Finder {
     }
   }
 
-  private static List<MetadataRecord> getMergeFileInfo(FloatEntity floatEntity) {
+  private static List<MetadataRecord> getMergeFileInfo(ArgoFloatEntity floatEntity) {
     List<MetadataRecord> result = new LinkedList<>();
-    for (CycleEntity cycle : floatEntity.getCycles()) {
-      for (ProfileFileEntity profile : cycle.getProfiles()) {
+    for (ArgoFloatCycleEntity cycle : floatEntity.getCycles()) {
+      for (ArgoFloatProfileEntity profile : cycle.getProfiles()) {
         if (ArgoFileType.PROFILE_CORE.toString().equals(profile.getFileType())) {
           if (FileStatus.ACTIVE.toString().equals(profile.getFileStatus()) || profile.getMultiFloatMergeTime() != null) {
             result.add(MetadataRecord.builder()
                 .withFileName(profile.getFileName())
-                .withFile(profile.getFile())
+                .withFile(profile.getFilePath())
                 .withFileStatus(FileStatus.valueOf(profile.getFileStatus()))
-                .withDate(profile.getDate() == null ? null : profile.getDate().toInstant())
+                .withDate(profile.getProfileDate() == null ? null : profile.getProfileDate().toInstant())
                 .build());
           }
         }
@@ -315,23 +315,23 @@ class Finder {
     try (EntityManager em = entityManagerFactory.createEntityManager()) {
       long count = em.createQuery(
           """
-                 SELECT COUNT(DISTINCT profile.cycle.id) FROM ProfileFileEntity profile
+                 SELECT COUNT(DISTINCT profile.argoFloatCycle.id) FROM ArgoFloatProfileEntity profile
                            WHERE
                            (
                              profile.fileStatus = 'ACTIVE'
-                             AND profile.cycle.floatId.metadata.fileStatus = 'ACTIVE'
+                             AND profile.argoFloatCycle.argoFloat.metadata.fileStatus = 'ACTIVE'
                              AND (
                                     (
                                       profile.fileType = 'PROFILE_BIOCHEMICAL' 
-                                      AND EXISTS (SELECT core.file FROM ProfileFileEntity core WHERE core.fileType = 'PROFILE_CORE' AND core.fileStatus = 'ACTIVE' AND core.cycle = profile.cycle)
+                                      AND EXISTS (SELECT core.filePath FROM ArgoFloatProfileEntity core WHERE core.fileType = 'PROFILE_CORE' AND core.fileStatus = 'ACTIVE' AND core.argoFloatCycle = profile.argoFloatCycle)
                                     ) OR (
                                       profile.fileType = 'PROFILE_CORE'
-                                      AND EXISTS (SELECT bio.file FROM ProfileFileEntity bio WHERE bio.fileType = 'PROFILE_BIOCHEMICAL' AND bio.fileStatus = 'ACTIVE' AND bio.cycle = profile.cycle) 
+                                      AND EXISTS (SELECT bio.filePath FROM ArgoFloatProfileEntity bio WHERE bio.fileType = 'PROFILE_BIOCHEMICAL' AND bio.fileStatus = 'ACTIVE' AND bio.argoFloatCycle = profile.argoFloatCycle) 
                                     )
                                 )
                              AND (
                                profile.syntheticMergeTime IS NULL 
-                               OR NOT EXISTS (SELECT mds.syntheticMergeTime FROM MetadataSyntheticMergeEntity mds WHERE mds.profile = profile)
+                               OR NOT EXISTS (SELECT mds.syntheticMergeTime FROM ArgonautSyntheticMergeMetadataEntity mds WHERE mds.argoFloatProfile = profile)
                              )
                            ) OR (
                              (profile.fileType = 'PROFILE_BIOCHEMICAL' OR profile.fileType = 'PROFILE_CORE' )
@@ -341,7 +341,7 @@ class Finder {
                              (profile.fileType = 'PROFILE_BIOCHEMICAL' OR profile.fileType = 'PROFILE_CORE' )
                              AND profile.fileStatus = 'ACTIVE'
                              AND profile.syntheticMergeTime IS NOT NULL
-                             AND NOT profile.cycle.floatId.metadata.fileStatus = 'ACTIVE'
+                             AND NOT profile.argoFloatCycle.argoFloat.metadata.fileStatus = 'ACTIVE'
                            )
               """, Long.class).getSingleResult();
 
@@ -352,23 +352,23 @@ class Finder {
 
       List<String> cycleIds = em.createQuery(
               """
-                     SELECT DISTINCT profile.cycle.id cid FROM ProfileFileEntity profile
+                     SELECT DISTINCT profile.argoFloatCycle.id cid FROM ArgoFloatProfileEntity profile
                          WHERE
                            (
                              profile.fileStatus = 'ACTIVE'
-                             AND profile.cycle.floatId.metadata.fileStatus = 'ACTIVE'
+                             AND profile.argoFloatCycle.argoFloat.metadata.fileStatus = 'ACTIVE'
                              AND (
                                     (
                                       profile.fileType = 'PROFILE_BIOCHEMICAL' 
-                                      AND EXISTS (SELECT core.file FROM ProfileFileEntity core WHERE core.fileType = 'PROFILE_CORE' AND core.fileStatus = 'ACTIVE' AND core.cycle = profile.cycle)
+                                      AND EXISTS (SELECT core.filePath FROM ArgoFloatProfileEntity core WHERE core.fileType = 'PROFILE_CORE' AND core.fileStatus = 'ACTIVE' AND core.argoFloatCycle = profile.argoFloatCycle)
                                     ) OR (
                                       profile.fileType = 'PROFILE_CORE'
-                                      AND EXISTS (SELECT bio.file FROM ProfileFileEntity bio WHERE bio.fileType = 'PROFILE_BIOCHEMICAL' AND bio.fileStatus = 'ACTIVE' AND bio.cycle = profile.cycle) 
+                                      AND EXISTS (SELECT bio.filePath FROM ArgoFloatProfileEntity bio WHERE bio.fileType = 'PROFILE_BIOCHEMICAL' AND bio.fileStatus = 'ACTIVE' AND bio.argoFloatCycle = profile.argoFloatCycle) 
                                     )
                                 )
                              AND (
                                profile.syntheticMergeTime IS NULL 
-                               OR NOT EXISTS (SELECT mds.syntheticMergeTime FROM MetadataSyntheticMergeEntity mds WHERE mds.profile = profile)
+                               OR NOT EXISTS (SELECT mds.syntheticMergeTime FROM ArgonautSyntheticMergeMetadataEntity mds WHERE mds.argoFloatProfile = profile)
                              )
                            ) OR (
                              (profile.fileType = 'PROFILE_BIOCHEMICAL' OR profile.fileType = 'PROFILE_CORE' )
@@ -378,7 +378,7 @@ class Finder {
                              (profile.fileType = 'PROFILE_BIOCHEMICAL' OR profile.fileType = 'PROFILE_CORE' )
                              AND profile.fileStatus = 'ACTIVE'
                              AND profile.syntheticMergeTime IS NOT NULL
-                             AND NOT profile.cycle.floatId.metadata.fileStatus = 'ACTIVE'
+                             AND NOT profile.argoFloatCycle.argoFloat.metadata.fileStatus = 'ACTIVE'
                            )
                      order by cid
                   """, String.class)
@@ -386,44 +386,44 @@ class Finder {
           .setFirstResult((pageRequest.getPageNumber() - 1) * pageRequest.getPageSize())
           .getResultList();
 
-      List<CycleEntity> pageResults = new ArrayList<>(cycleIds.size());
+      List<ArgoFloatCycleEntity> pageResults = new ArrayList<>(cycleIds.size());
       for (String cycleId : cycleIds) {
-        pageResults.add(em.find(CycleEntity.class, cycleId));
+        pageResults.add(em.find(ArgoFloatCycleEntity.class, cycleId));
       }
 
       return DefaultProfilePage.builder()
           .withTotalRecords(count)
           .withIndexPageRequest(DefaultIndexPageRequest.builder(pageRequest).build())
           .withPage(pageResults.stream().map(cycle -> ProfileOperation.builder()
-              .withDac(cycle.getFloatId().getDac().getDac())
-              .withFloatId(cycle.getFloatId().getFloatId())
+              .withDac(cycle.getArgoFloat().getArgoDac().getDacName())
+              .withFloatId(cycle.getArgoFloat().getFloatId())
               .withFiles(getSyntheticMergeFiles(cycle))
               .build()
           ).toList()).build();
     }
   }
 
-  private static List<MetadataRecord> getSyntheticMergeFiles(CycleEntity cycle) {
+  private static List<MetadataRecord> getSyntheticMergeFiles(ArgoFloatCycleEntity cycle) {
     List<MetadataRecord> result = new LinkedList<>();
-    MetadataFileEntity metadataFileEntity = cycle.getFloatId().getMetadata();
+    ArgoFloatMetadataEntity metadataFileEntity = cycle.getArgoFloat().getMetadata();
     if (metadataFileEntity != null) {
       result.add(MetadataRecord.builder()
           .withFileType(ArgoFileType.METADATA)
           .withFileName(metadataFileEntity.getFileName())
           .withFile(metadataFileEntity.getFile())
           .withFileStatus(FileStatus.valueOf(metadataFileEntity.getFileStatus()))
-          .withDate(metadataFileEntity.getDate() == null ? null : metadataFileEntity.getDate().toInstant())
+          .withDate(metadataFileEntity.getMetadataDate() == null ? null : metadataFileEntity.getMetadataDate().toInstant())
           .build());
     }
     List<MetadataRecord> profileList = new LinkedList<>();
-    for (ProfileFileEntity profile : cycle.getProfiles()) {
+    for (ArgoFloatProfileEntity profile : cycle.getProfiles()) {
       if (ArgoFileType.PROFILE_CORE.toString().equals(profile.getFileType()) || ArgoFileType.PROFILE_BIOCHEMICAL.toString().equals(profile.getFileType())) {
         profileList.add(MetadataRecord.builder()
             .withFileType(ArgoFileType.valueOf(profile.getFileType()))
             .withFileName(profile.getFileName())
-            .withFile(profile.getFile())
+            .withFile(profile.getFilePath())
             .withFileStatus(FileStatus.valueOf(profile.getFileStatus()))
-            .withDate(profile.getDate() == null ? null : profile.getDate().toInstant())
+            .withDate(profile.getProfileDate() == null ? null : profile.getProfileDate().toInstant())
             .build());
       }
     }
@@ -444,19 +444,19 @@ class Finder {
     try (EntityManager em = entityManagerFactory.createEntityManager()) {
       long count = em.createQuery(
           """
-              SELECT COUNT(frt.id) FROM FileRemovedTimeEntity frt 
+              SELECT COUNT(frt.id) FROM ArgonautFileRemovedTimeEntity frt 
               WHERE frt.removedTime < :olderThan AND frt.fileType IN (:forFileTypes)
               """, Long.class)
           .setParameter("olderThan", queryOlderThan)
           .setParameter("forFileTypes", fileTypes)
           .getSingleResult();
 
-      List<FileRemovedTimeEntity> pageResults = em.createQuery(
+      List<ArgonautFileRemovedTimeEntity> pageResults = em.createQuery(
               """
-                     SELECT frt FROM FileRemovedTimeEntity frt 
+                     SELECT frt FROM ArgonautFileRemovedTimeEntity frt 
                      WHERE frt.removedTime < :olderThan AND frt.fileType IN (:forFileTypes)
-                     ORDER BY frt.metadata.file, frt.profile.file
-                  """, FileRemovedTimeEntity.class)
+                     ORDER BY frt.argoFloatMetadata.file, frt.argoFloatProfile.filePath
+                  """, ArgonautFileRemovedTimeEntity.class)
           .setParameter("olderThan", queryOlderThan)
           .setParameter("forFileTypes", fileTypes)
           .setMaxResults(pageRequest.getPageSize())
@@ -470,26 +470,26 @@ class Finder {
             String dac = null;
             String floatId = null;
             MetadataRecord fileInfo = null;
-            if (frt.getMetadata() != null) {
-              dac = frt.getMetadata().getFloatId().getDac().getDac();
-              floatId = frt.getMetadata().getFloatId().getFloatId();
+            if (frt.getArgoFloatMetadata() != null) {
+              dac = frt.getArgoFloatMetadata().getArgoFloat().getArgoDac().getDacName();
+              floatId = frt.getArgoFloatMetadata().getArgoFloat().getFloatId();
               fileInfo = MetadataRecord.builder()
-                  .withFileName(frt.getMetadata().getFileName())
-                  .withFile(frt.getMetadata().getFile())
-                  .withFileStatus(FileStatus.valueOf(frt.getMetadata().getFileStatus()))
-                  .withDate(frt.getMetadata().getDate() == null ? null : frt.getMetadata().getDate().toInstant())
+                  .withFileName(frt.getArgoFloatMetadata().getFileName())
+                  .withFile(frt.getArgoFloatMetadata().getFile())
+                  .withFileStatus(FileStatus.valueOf(frt.getArgoFloatMetadata().getFileStatus()))
+                  .withDate(frt.getArgoFloatMetadata().getMetadataDate() == null ? null : frt.getArgoFloatMetadata().getMetadataDate().toInstant())
                   .withFileType(ArgoFileType.METADATA)
                   .withActionTimestamp(frt.getRemovedTime().toInstant())
                   .build();
-            } else if(frt.getProfile() != null) {
-              dac = frt.getProfile().getCycle().getFloatId().getDac().getDac();
-              floatId = frt.getProfile().getCycle().getFloatId().getFloatId();
+            } else if(frt.getArgoFloatProfile() != null) {
+              dac = frt.getArgoFloatProfile().getArgoFloatCycle().getArgoFloat().getArgoDac().getDacName();
+              floatId = frt.getArgoFloatProfile().getArgoFloatCycle().getArgoFloat().getFloatId();
               fileInfo = MetadataRecord.builder()
-                  .withFileName(frt.getProfile().getFileName())
-                  .withFile(frt.getProfile().getFile())
-                  .withFileStatus(FileStatus.valueOf(frt.getProfile().getFileStatus()))
-                  .withDate(frt.getProfile().getDate() == null ? null : frt.getProfile().getDate().toInstant())
-                  .withFileType(ArgoFileType.valueOf(frt.getProfile().getFileType()))
+                  .withFileName(frt.getArgoFloatProfile().getFileName())
+                  .withFile(frt.getArgoFloatProfile().getFilePath())
+                  .withFileStatus(FileStatus.valueOf(frt.getArgoFloatProfile().getFileStatus()))
+                  .withDate(frt.getArgoFloatProfile().getProfileDate() == null ? null : frt.getArgoFloatProfile().getProfileDate().toInstant())
+                  .withFileType(ArgoFileType.valueOf(frt.getArgoFloatProfile().getFileType()))
                   .withActionTimestamp(frt.getRemovedTime().toInstant())
                   .build();
             }
@@ -511,7 +511,7 @@ class Finder {
 
        long count = em.createQuery(
               """
-                     SELECT COUNT(profile.file) FROM ProfileFileEntity profile 
+                     SELECT COUNT(profile.filePath) FROM ArgoFloatProfileEntity profile 
                      WHERE profile.lastUpdatedTime >= :updatedGe AND profile.lastUpdatedTime < :updatedLt AND profile.dataModeFilePrefix = :dataMode
                      AND profile.fileType = 'PROFILE_CORE'
                      AND ((profile.fileStatus = 'ACTIVE' AND profile.latestMergeFileName IS NULL) OR (profile.fileStatus = 'REMOVED' AND profile.latestMergeFileName IS NOT NULL))
@@ -522,16 +522,16 @@ class Finder {
           .setMaxResults(pageRequest.getLimit())
           .getSingleResult();
 
-       List<ProfileFileEntity> results;
+       List<ArgoFloatProfileEntity> results;
        if (count > 0L) {
          results = em.createQuery(
                  """
-                        SELECT profile FROM ProfileFileEntity profile 
+                        SELECT profile FROM ArgoFloatProfileEntity profile 
                         WHERE profile.lastUpdatedTime >= :updatedGe AND profile.lastUpdatedTime < :updatedLt AND profile.dataModeFilePrefix = :dataMode
                         AND profile.fileType = 'PROFILE_CORE'
                         AND ((profile.fileStatus = 'ACTIVE') OR (profile.fileStatus = 'REMOVED' AND profile.latestMergeFileName IS NOT NULL))
-                        order by profile.date
-                     """, ProfileFileEntity.class)
+                        order by profile.profileDate
+                     """, ArgoFloatProfileEntity.class)
              .setParameter("updatedGe", pageRequest.getLastUpdatedDateGe().atZone(ZoneId.of("UTC")))
              .setParameter("updatedLt", pageRequest.getLastUpdatedDateLt().atZone(ZoneId.of("UTC")))
              .setParameter("dataMode", pageRequest.getProfileMode().getFilePrefix())
@@ -543,16 +543,16 @@ class Finder {
 
 
       List<MetadataRecord> files = new ArrayList<>(results.size());
-      for (ProfileFileEntity profile : results) {
+      for (ArgoFloatProfileEntity profile : results) {
         files.add(MetadataRecord.builder()
-            .withDac(profile.getCycle().getFloatId().getDac().getDac())
-            .withFloatId(profile.getCycle().getFloatId().getFloatId())
-            .withFile(profile.getFile())
+            .withDac(profile.getArgoFloatCycle().getArgoFloat().getArgoDac().getDacName())
+            .withFloatId(profile.getArgoFloatCycle().getArgoFloat().getFloatId())
+            .withFile(profile.getFilePath())
             .withFileName(profile.getFileName())
             .withFileStatus(FileStatus.valueOf(profile.getFileStatus()))
-            .withCycleNumber(profile.getCycle().getCycleNumber())
+            .withCycleNumber(profile.getArgoFloatCycle().getCycleNumber())
             .withActionTimestamp(profile.getLastUpdatedTime().toInstant())
-            .withDate(profile.getDate() == null ? null : profile.getDate().toInstant())
+            .withDate(profile.getProfileDate() == null ? null : profile.getProfileDate().toInstant())
             .withFileType(ArgoFileType.PROFILE_CORE)
             .build());
       }
@@ -569,17 +569,17 @@ class Finder {
     try (EntityManager em = entityManagerFactory.createEntityManager()) {
       long count = em.createQuery(
               """
-                  SELECT COUNT(profile.file) FROM ProfileFileEntity profile 
+                  SELECT COUNT(profile.filePath) FROM ArgoFloatProfileEntity profile 
                   WHERE profile.fileStatus = 'ACTIVE' AND profile.fileType = 'PROFILE_BIOCHEMICAL'
                   """, Long.class)
           .getSingleResult();
 
-      List<ProfileFileEntity> pageResults = em.createQuery(
+      List<ArgoFloatProfileEntity> pageResults = em.createQuery(
               """
-                    SELECT profile FROM ProfileFileEntity profile 
+                    SELECT profile FROM ArgoFloatProfileEntity profile 
                     WHERE profile.fileStatus = 'ACTIVE' AND profile.fileType = 'PROFILE_BIOCHEMICAL'
-                    ORDER BY profile.file
-                  """, ProfileFileEntity.class)
+                    ORDER BY profile.filePath
+                  """, ArgoFloatProfileEntity.class)
           .setMaxResults(pageRequest.getPageSize())
           .setFirstResult((pageRequest.getPageNumber() - 1) * pageRequest.getPageSize())
           .getResultList();
@@ -590,16 +590,17 @@ class Finder {
     }
   }
 
-  private static MetadataRecord fromProfileEntity(ProfileFileEntity profile) {
+  private static MetadataRecord fromProfileEntity(ArgoFloatProfileEntity profile) {
     return MetadataRecord.builder()
-      .withFile(profile.getFile())
-      .withDate(profile.getDate() == null ? null : profile.getDate().toInstant())
+      .withFile(profile.getFilePath())
+      .withDate(profile.getProfileDate() == null ? null : profile.getProfileDate().toInstant())
       .withLatitude(profile.getLatitude())
       .withLongitude(profile.getLongitude())
       .withOcean(profile.getOcean() == null ? null : ArgoOcean.fromCode(profile.getOcean()))
       .withProfilerType(profile.getProfilerType())
       .withInstitution(profile.getInstitution())
-      .withParameters(profile.getParameters().stream().sorted(Comparator.comparingInt(ProfileParameterEntity::getParameterIndex)).map(ProfileParameterEntity::getParameterName).toList())
+      .withParameters(profile.getParameters().stream().sorted(Comparator.comparingInt(ArgoFloatProfileParameterEntity::getParameterIndex)).map(
+          ArgoFloatProfileParameterEntity::getParameterName).toList())
       .withParameterDataMode(profile.getParameterDataMode())
       .withDateUpdate(profile.getDateUpdate() == null ? null : profile.getDateUpdate().toInstant())
       .build();
@@ -621,17 +622,17 @@ class Finder {
     try (EntityManager em = entityManagerFactory.createEntityManager()) {
       long count = em.createQuery(
               """
-                  SELECT COUNT(profile.file) FROM ProfileFileEntity profile 
+                  SELECT COUNT(profile.filePath) FROM ArgoFloatProfileEntity profile 
                   WHERE profile.fileStatus = 'ACTIVE' AND profile.fileType = 'SYNTHETIC_PROFILE_SINGLE_CYCLE'
                   """, Long.class)
           .getSingleResult();
 
-      List<ProfileFileEntity> pageResults = em.createQuery(
+      List<ArgoFloatProfileEntity> pageResults = em.createQuery(
               """
-                    SELECT profile FROM ProfileFileEntity profile 
+                    SELECT profile FROM ArgoFloatProfileEntity profile 
                     WHERE profile.fileStatus = 'ACTIVE' AND profile.fileType = 'SYNTHETIC_PROFILE_SINGLE_CYCLE'
-                    ORDER BY profile.file
-                  """, ProfileFileEntity.class)
+                    ORDER BY profile.filePath
+                  """, ArgoFloatProfileEntity.class)
           .setMaxResults(pageRequest.getPageSize())
           .setFirstResult((pageRequest.getPageNumber() - 1) * pageRequest.getPageSize())
           .getResultList();
@@ -644,16 +645,16 @@ class Finder {
   MetadataRecordPage getTechnicalIndexPage(IndexPageRequest indexPageRequest) {
     try (EntityManager em = entityManagerFactory.createEntityManager()) {
       long count = em.createQuery("""
-      SELECT COUNT(t.file) FROM TechnicalFileEntity t
+      SELECT COUNT(t.filePath) FROM ArgoFloatTechnicalInfoEntity t
       WHERE t.fileStatus = 'ACTIVE'
       """, Long.class)
         .getSingleResult();
 
-      List<TechnicalFileEntity> pageResults = em.createQuery("""
-      SELECT t FROM TechnicalFileEntity t
+      List<ArgoFloatTechnicalInfoEntity> pageResults = em.createQuery("""
+      SELECT t FROM ArgoFloatTechnicalInfoEntity t
       WHERE t.fileStatus = 'ACTIVE'
-      ORDER BY t.file
-      """, TechnicalFileEntity.class)
+      ORDER BY t.filePath
+      """, ArgoFloatTechnicalInfoEntity.class)
         .setMaxResults(indexPageRequest.getPageSize())
         .setFirstResult((indexPageRequest.getPageNumber() - 1) * indexPageRequest.getPageSize())
         .getResultList();
@@ -662,12 +663,12 @@ class Finder {
     }
   }
 
-  private static MetadataRecord fromTechnicalEntity(TechnicalFileEntity technicalFile) {
+  private static MetadataRecord fromTechnicalEntity(ArgoFloatTechnicalInfoEntity technicalFile) {
     return MetadataRecord.builder()
       .withFileType(ArgoFileType.TECHNICAL_DATA)
-      .withFile(technicalFile.getFile())
-      .withDac(technicalFile.getFloatId().getDac().getDac())
-      .withFloatId(technicalFile.getFloatId().getFloatId())
+      .withFile(technicalFile.getFilePath())
+      .withDac(technicalFile.getArgoFloat().getArgoDac().getDacName())
+      .withFloatId(technicalFile.getArgoFloat().getFloatId())
       .withInstitution(technicalFile.getInstitution())
       .withDateUpdate(technicalFile.getDateUpdate() == null ? null : technicalFile.getDateUpdate().toInstant())
       .build();
@@ -676,16 +677,16 @@ class Finder {
   MetadataRecordPage getTrajectoryIndexPage(IndexPageRequest indexPageRequest) {
     try (EntityManager em = entityManagerFactory.createEntityManager()) {
       long count = em.createQuery("""
-      SELECT COUNT(t.file) FROM TrajectoryFileEntity t
+      SELECT COUNT(t.filePath) FROM ArgoFloatTrajectoryEntity t
       WHERE t.fileStatus = 'ACTIVE'
       """, Long.class)
         .getSingleResult();
 
-      List<TrajectoryFileEntity> pageResults = em.createQuery("""
-      SELECT t FROM TrajectoryFileEntity t
+      List<ArgoFloatTrajectoryEntity> pageResults = em.createQuery("""
+      SELECT t FROM ArgoFloatTrajectoryEntity t
       WHERE t.fileStatus = 'ACTIVE'
-      ORDER BY t.file
-      """, TrajectoryFileEntity.class)
+      ORDER BY t.filePath
+      """, ArgoFloatTrajectoryEntity.class)
         .setMaxResults(indexPageRequest.getPageSize())
         .setFirstResult((indexPageRequest.getPageNumber() - 1) * indexPageRequest.getPageSize())
         .getResultList();
@@ -694,12 +695,12 @@ class Finder {
     }
   }
 
-  private static MetadataRecord fromTrajectoryEntity(TrajectoryFileEntity trajectoryFile) {
+  private static MetadataRecord fromTrajectoryEntity(ArgoFloatTrajectoryEntity trajectoryFile) {
     return MetadataRecord.builder()
       .withFileType(ArgoFileType.TRAJECTORY)
-      .withFile(trajectoryFile.getFile())
-      .withDac(trajectoryFile.getFloatId().getDac().getDac())
-      .withFloatId(trajectoryFile.getFloatId().getFloatId())
+      .withFile(trajectoryFile.getFilePath())
+      .withDac(trajectoryFile.getArgoFloat().getArgoDac().getDacName())
+      .withFloatId(trajectoryFile.getArgoFloat().getFloatId())
       .withProfilerType(trajectoryFile.getProfilerType())
       .withInstitution(trajectoryFile.getInstitution())
       .withDateUpdate(trajectoryFile.getDateUpdate() == null ? null : trajectoryFile.getDateUpdate().toInstant())

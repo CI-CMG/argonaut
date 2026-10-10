@@ -15,10 +15,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "cycle", indexes = {
-    @Index(name = "cycle_float_id_idx", columnList = "float_id")
+@Table(name = "argo_float_cycle", indexes = {
+    @Index(name = "argo_float_cycle_float_id_idx", columnList = "argo_float")
 })
-public class CycleEntity {
+public class ArgoFloatCycleEntity {
 
   @Id
   @Column(name = "id", nullable = false, length = 26)
@@ -29,8 +29,8 @@ public class CycleEntity {
   private int version;
 
   @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.DETACH, CascadeType.REFRESH})
-  @JoinColumn(name = "float_id", nullable = false)
-  private FloatEntity floatId;
+  @JoinColumn(name = "argo_float", nullable = false)
+  private ArgoFloatEntity argoFloat;
 
   @Column(name = "data_mode", length = 1, nullable = false)
   private Character dataMode;
@@ -41,8 +41,8 @@ public class CycleEntity {
   @Column(name = "cycle_number", length = 4, nullable = false)
   private String cycleNumber;
 
-  @OneToMany(mappedBy = "cycle", cascade = {CascadeType.DETACH, CascadeType.REFRESH})
-  private List<ProfileFileEntity> profiles = new ArrayList<>();
+  @OneToMany(mappedBy = "argoFloatCycle", cascade = {CascadeType.DETACH, CascadeType.REFRESH})
+  private List<ArgoFloatProfileEntity> profiles = new ArrayList<>();
 
   public String getId() {
     return id;
@@ -56,12 +56,12 @@ public class CycleEntity {
     this.id = id;
   }
 
-  public FloatEntity getFloatId() {
-    return floatId;
+  public ArgoFloatEntity getArgoFloat() {
+    return argoFloat;
   }
 
-  public void setFloatId(FloatEntity floatId) {
-    this.floatId = floatId;
+  public void setArgoFloat(ArgoFloatEntity floatId) {
+    this.argoFloat = floatId;
   }
 
   public Character getDataMode() {
@@ -88,7 +88,7 @@ public class CycleEntity {
     this.cycleNumber = cycleNumber;
   }
 
-  public List<ProfileFileEntity> getProfiles() {
+  public List<ArgoFloatProfileEntity> getProfiles() {
     return profiles;
   }
 

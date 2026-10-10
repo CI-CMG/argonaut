@@ -44,7 +44,7 @@ public class MessagingCamelJpaTest {
   @AfterEach
   public void setup() throws Exception{
     transactionTemplate.executeWithoutResult(s -> {
-      em.createQuery("delete from JsonMessageEntity").executeUpdate();
+      em.createQuery("delete from ArgonautMessageEntity").executeUpdate();
     });
   }
 

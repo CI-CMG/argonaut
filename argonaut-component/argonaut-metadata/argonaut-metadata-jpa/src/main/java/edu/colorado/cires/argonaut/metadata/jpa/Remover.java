@@ -3,12 +3,12 @@ package edu.colorado.cires.argonaut.metadata.jpa;
 import edu.colorado.cires.argonaut.messaging.core.databind.ArgoFileType;
 import edu.colorado.cires.argonaut.messaging.core.databind.MetadataRecord;
 import edu.colorado.cires.argonaut.messaging.core.databind.MetadataRecord.FileStatus;
-import edu.colorado.cires.argonaut.metadata.jpa.entity.FileRemovedTimeEntity;
-import edu.colorado.cires.argonaut.metadata.jpa.entity.MetadataFileEntity;
-import edu.colorado.cires.argonaut.metadata.jpa.entity.ProfileFileEntity;
-import edu.colorado.cires.argonaut.metadata.jpa.entity.ProfileMergeFileEntity;
-import edu.colorado.cires.argonaut.metadata.jpa.entity.TechnicalFileEntity;
-import edu.colorado.cires.argonaut.metadata.jpa.entity.TrajectoryFileEntity;
+import edu.colorado.cires.argonaut.metadata.jpa.entity.ArgonautFileRemovedTimeEntity;
+import edu.colorado.cires.argonaut.metadata.jpa.entity.ArgoFloatMetadataEntity;
+import edu.colorado.cires.argonaut.metadata.jpa.entity.ArgoFloatProfileEntity;
+import edu.colorado.cires.argonaut.metadata.jpa.entity.ArgonautProfileMergeFileEntity;
+import edu.colorado.cires.argonaut.metadata.jpa.entity.ArgoFloatTechnicalInfoEntity;
+import edu.colorado.cires.argonaut.metadata.jpa.entity.ArgoFloatTrajectoryEntity;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.EntityTransaction;
@@ -27,17 +27,17 @@ class Remover {
   }
 
   private static void removeProfile(EntityManager em, MetadataRecord record) {
-    ProfileFileEntity existing = em.find(ProfileFileEntity.class, record.getFile(), LockModeType.OPTIMISTIC);
+    ArgoFloatProfileEntity existing = em.find(ArgoFloatProfileEntity.class, record.getFile(), LockModeType.OPTIMISTIC);
     if (existing != null) {
       if (!FileStatus.REMOVED.name().equals(existing.getFileStatus())) {
-        List<FileRemovedTimeEntity> frts = em.createQuery("SELECT frt FROM FileRemovedTimeEntity frt WHERE frt.profile = :profile",
-                FileRemovedTimeEntity.class)
+        List<ArgonautFileRemovedTimeEntity> frts = em.createQuery("SELECT frt FROM ArgonautFileRemovedTimeEntity frt WHERE frt.argoFloatProfile = :profile",
+                ArgonautFileRemovedTimeEntity.class)
             .setParameter("profile", existing)
             .getResultList();
         if (frts.isEmpty()) {
-          FileRemovedTimeEntity frt = new FileRemovedTimeEntity();
+          ArgonautFileRemovedTimeEntity frt = new ArgonautFileRemovedTimeEntity();
           frt.setRemovedTime(record.getActionTimestamp().atOffset(ZoneOffset.UTC).toZonedDateTime());
-          frt.setProfile(existing);
+          frt.setArgoFloatProfile(existing);
           frt.setFileType(existing.getFileType());
           frt.setId(UUID.randomUUID());
           em.persist(frt);
@@ -48,17 +48,17 @@ class Remover {
   }
 
   private static void removeMetadata(EntityManager em, MetadataRecord record) {
-    MetadataFileEntity existing = em.find(MetadataFileEntity.class, record.getFile(), LockModeType.OPTIMISTIC);
+    ArgoFloatMetadataEntity existing = em.find(ArgoFloatMetadataEntity.class, record.getFile(), LockModeType.OPTIMISTIC);
     if (existing != null) {
       if (!FileStatus.REMOVED.name().equals(existing.getFileStatus())) {
-        List<FileRemovedTimeEntity> frts = em.createQuery("SELECT frt FROM FileRemovedTimeEntity frt WHERE frt.metadata = :metadata",
-                FileRemovedTimeEntity.class)
+        List<ArgonautFileRemovedTimeEntity> frts = em.createQuery("SELECT frt FROM ArgonautFileRemovedTimeEntity frt WHERE frt.argoFloatMetadata = :metadata",
+                ArgonautFileRemovedTimeEntity.class)
             .setParameter("metadata", existing)
             .getResultList();
         if (frts.isEmpty()) {
-          FileRemovedTimeEntity frt = new FileRemovedTimeEntity();
+          ArgonautFileRemovedTimeEntity frt = new ArgonautFileRemovedTimeEntity();
           frt.setRemovedTime(record.getActionTimestamp().atOffset(ZoneOffset.UTC).toZonedDateTime());
-          frt.setMetadata(existing);
+          frt.setArgoFloatMetadata(existing);
           frt.setFileType(ArgoFileType.METADATA.toString());
           frt.setId(UUID.randomUUID());
           em.persist(frt);
@@ -70,7 +70,7 @@ class Remover {
   }
 
   private static void removeTrajectory(EntityManager em, MetadataRecord record) {
-    TrajectoryFileEntity existing = em.find(TrajectoryFileEntity.class, record.getFile(), LockModeType.OPTIMISTIC);
+    ArgoFloatTrajectoryEntity existing = em.find(ArgoFloatTrajectoryEntity.class, record.getFile(), LockModeType.OPTIMISTIC);
     if (existing != null) {
       existing.setFileStatus(FileStatus.REMOVED.name());
       existing.setLastUpdatedTime(record.getActionTimestamp().atOffset(ZoneOffset.UTC).toZonedDateTime());
@@ -78,7 +78,7 @@ class Remover {
   }
 
   private static void removeTechnical(EntityManager em, MetadataRecord record) {
-    TechnicalFileEntity existing = em.find(TechnicalFileEntity.class, record.getFile(), LockModeType.OPTIMISTIC);
+    ArgoFloatTechnicalInfoEntity existing = em.find(ArgoFloatTechnicalInfoEntity.class, record.getFile(), LockModeType.OPTIMISTIC);
     if (existing != null) {
       existing.setFileStatus(FileStatus.REMOVED.name());
       existing.setLastUpdatedTime(record.getActionTimestamp().atOffset(ZoneOffset.UTC).toZonedDateTime());
@@ -86,7 +86,7 @@ class Remover {
   }
 
   private static void removeMultiProfileMerge(EntityManager em, MetadataRecord record) {
-    ProfileMergeFileEntity existing = em.find(ProfileMergeFileEntity.class, record.getFile(), LockModeType.OPTIMISTIC);
+    ArgonautProfileMergeFileEntity existing = em.find(ArgonautProfileMergeFileEntity.class, record.getFile(), LockModeType.OPTIMISTIC);
     if (existing != null) {
       existing.setFileStatus(FileStatus.REMOVED.name());
     } else {
@@ -138,14 +138,14 @@ class Remover {
   }
 
   private static void deleteProfile(EntityManager em, MetadataRecord record) {
-    ProfileFileEntity existing = em.find(ProfileFileEntity.class, record.getFile(), LockModeType.OPTIMISTIC);
+    ArgoFloatProfileEntity existing = em.find(ArgoFloatProfileEntity.class, record.getFile(), LockModeType.OPTIMISTIC);
     if (existing != null) {
       if (FileStatus.REMOVED.name().equals(existing.getFileStatus())) {
-        List<FileRemovedTimeEntity> frts = em.createQuery("SELECT frt FROM FileRemovedTimeEntity frt WHERE frt.profile = :profile",
-                FileRemovedTimeEntity.class)
+        List<ArgonautFileRemovedTimeEntity> frts = em.createQuery("SELECT frt FROM ArgonautFileRemovedTimeEntity frt WHERE frt.argoFloatProfile = :profile",
+                ArgonautFileRemovedTimeEntity.class)
             .setParameter("profile", existing)
             .getResultList();
-        for (FileRemovedTimeEntity frt : frts) {
+        for (ArgonautFileRemovedTimeEntity frt : frts) {
           em.remove(frt);
         }
       }
@@ -153,14 +153,14 @@ class Remover {
   }
 
   private static void deleteMetadata(EntityManager em, MetadataRecord record) {
-    MetadataFileEntity existing = em.find(MetadataFileEntity.class, record.getFile(), LockModeType.OPTIMISTIC);
+    ArgoFloatMetadataEntity existing = em.find(ArgoFloatMetadataEntity.class, record.getFile(), LockModeType.OPTIMISTIC);
     if (existing != null) {
       if (FileStatus.REMOVED.name().equals(existing.getFileStatus())) {
-        List<FileRemovedTimeEntity> frts = em.createQuery("SELECT frt FROM FileRemovedTimeEntity frt WHERE frt.metadata = :metadata",
-                FileRemovedTimeEntity.class)
+        List<ArgonautFileRemovedTimeEntity> frts = em.createQuery("SELECT frt FROM ArgonautFileRemovedTimeEntity frt WHERE frt.argoFloatMetadata = :metadata",
+                ArgonautFileRemovedTimeEntity.class)
             .setParameter("metadata", existing)
             .getResultList();
-        for (FileRemovedTimeEntity frt : frts) {
+        for (ArgonautFileRemovedTimeEntity frt : frts) {
           em.remove(frt);
         }
       }
@@ -189,14 +189,14 @@ class Remover {
   }
 
   private static void deleteTechnical(EntityManager em, MetadataRecord record) {
-    TechnicalFileEntity existing = em.find(TechnicalFileEntity.class, record.getFile(), LockModeType.OPTIMISTIC);
+    ArgoFloatTechnicalInfoEntity existing = em.find(ArgoFloatTechnicalInfoEntity.class, record.getFile(), LockModeType.OPTIMISTIC);
     if (existing != null) {
       existing.setLastUpdatedTime(record.getActionTimestamp().atOffset(ZoneOffset.UTC).toZonedDateTime());
     }
   }
 
   private static void deleteTrajectory(EntityManager em, MetadataRecord record) {
-    TrajectoryFileEntity existing = em.find(TrajectoryFileEntity.class, record.getFile(),
+    ArgoFloatTrajectoryEntity existing = em.find(ArgoFloatTrajectoryEntity.class, record.getFile(),
       LockModeType.OPTIMISTIC);
     if (existing != null) {
       existing.setLastUpdatedTime(record.getActionTimestamp().atOffset(ZoneOffset.UTC).toZonedDateTime());

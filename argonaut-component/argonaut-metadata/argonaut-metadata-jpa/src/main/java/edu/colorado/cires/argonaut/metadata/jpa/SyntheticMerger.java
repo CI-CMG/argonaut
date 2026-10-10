@@ -2,10 +2,9 @@ package edu.colorado.cires.argonaut.metadata.jpa;
 
 import edu.colorado.cires.argonaut.messaging.core.databind.ArgoFileType;
 import edu.colorado.cires.argonaut.messaging.core.databind.MetadataRecord;
-import edu.colorado.cires.argonaut.messaging.core.databind.MetadataRecord.FileStatus;
-import edu.colorado.cires.argonaut.metadata.jpa.entity.MetadataFileEntity;
-import edu.colorado.cires.argonaut.metadata.jpa.entity.MetadataSyntheticMergeEntity;
-import edu.colorado.cires.argonaut.metadata.jpa.entity.ProfileFileEntity;
+import edu.colorado.cires.argonaut.metadata.jpa.entity.ArgoFloatMetadataEntity;
+import edu.colorado.cires.argonaut.metadata.jpa.entity.ArgonautSyntheticMergeMetadataEntity;
+import edu.colorado.cires.argonaut.metadata.jpa.entity.ArgoFloatProfileEntity;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.EntityTransaction;
@@ -34,29 +33,29 @@ class SyntheticMerger {
           EntityTransaction tx = em.getTransaction();
           tx.begin();
           try {
-            MetadataFileEntity metadata = em.find(MetadataFileEntity.class, record.getFile(), LockModeType.OPTIMISTIC);
-            List<ProfileFileEntity> profiles = record.getRelatedFiles().stream()
-                .map(file -> em.find(ProfileFileEntity.class, file, LockModeType.OPTIMISTIC)).toList();
+            ArgoFloatMetadataEntity metadata = em.find(ArgoFloatMetadataEntity.class, record.getFile(), LockModeType.OPTIMISTIC);
+            List<ArgoFloatProfileEntity> profiles = record.getRelatedFiles().stream()
+                .map(file -> em.find(ArgoFloatProfileEntity.class, file, LockModeType.OPTIMISTIC)).toList();
             if (metadata != null) {
-              for (ProfileFileEntity profile : profiles) {
+              for (ArgoFloatProfileEntity profile : profiles) {
                 if (profile != null) {
-                  LOGGER.info("Updating synth merge for " + profile.getFile());
+                  LOGGER.info("Updating synth merge for " + profile.getFilePath());
                   profile.setSyntheticMergeTime(remove ? null : record.getActionTimestamp().atZone(ZoneId.of("UTC")));
                 }
-                List<MetadataSyntheticMergeEntity> mds = em.createQuery(
-                        "SELECT m FROM MetadataSyntheticMergeEntity m WHERE m.profile = :profile AND m.metadata = :metadata")
+                List<ArgonautSyntheticMergeMetadataEntity> mds = em.createQuery(
+                        "SELECT m FROM ArgonautSyntheticMergeMetadataEntity m WHERE m.argoFloatProfile = :profile AND m.argoFloatMetadata = :metadata")
                     .setParameter("profile", profile)
                     .setParameter("metadata", metadata)
                     .getResultList();
 
                 if (remove) {
-                  for (MetadataSyntheticMergeEntity md : mds) {
+                  for (ArgonautSyntheticMergeMetadataEntity md : mds) {
                     em.remove(md);
                   }
                 } else if (mds.isEmpty()) {
-                  MetadataSyntheticMergeEntity md = new MetadataSyntheticMergeEntity();
-                  md.setMetadata(metadata);
-                  md.setProfile(profile);
+                  ArgonautSyntheticMergeMetadataEntity md = new ArgonautSyntheticMergeMetadataEntity();
+                  md.setArgoFloatMetadata(metadata);
+                  md.setArgoFloatProfile(profile);
                   md.setSyntheticMergeTime(record.getActionTimestamp().atZone(ZoneId.of("UTC")));
                   md.setId(UUID.randomUUID());
                   em.persist(md);

@@ -11,7 +11,7 @@ import edu.colorado.cires.argonaut.core.netcdf.profile.v31.ArgoProfileV31;
 import edu.colorado.cires.argonaut.core.netcdf.profile.v31.ArgoProfileV31Calibration;
 import edu.colorado.cires.argonaut.core.netcdf.profile.v31.ArgoProfileV31Level;
 import edu.colorado.cires.argonaut.core.netcdf.profile.v31.ArgoProfileV31Reader;
-import edu.colorado.cires.argonaut.metadata.jpa.entity.ProfileFileEntity;
+import edu.colorado.cires.argonaut.metadata.jpa.entity.ArgoFloatProfileEntity;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import java.io.BufferedReader;
@@ -137,7 +137,7 @@ public class LatestMergeTest {
 
       submissions.stream().map(path -> path.subpath(5, 9).toString()).forEach(path -> {
         try (EntityManager em = entityManagerFactory.createEntityManager()) {
-          ProfileFileEntity profile = em.find(ProfileFileEntity.class, path);
+          ArgoFloatProfileEntity profile = em.find(ArgoFloatProfileEntity.class, path);
           assertNotNull(profile, "missing " + path);
           assertEquals("ACTIVE", profile.getFileStatus());
         }
@@ -150,7 +150,7 @@ public class LatestMergeTest {
 
       submissions.stream().map(path -> path.subpath(5, 9).toString()).forEach(path -> {
         try (EntityManager em = entityManagerFactory.createEntityManager()) {
-          ProfileFileEntity profile = em.find(ProfileFileEntity.class, path);
+          ArgoFloatProfileEntity profile = em.find(ArgoFloatProfileEntity.class, path);
           assertNotNull(profile, "missing " + path);
           assertEquals("ACTIVE", profile.getFileStatus());
           assertNotNull(profile.getLatestMergeFileName());

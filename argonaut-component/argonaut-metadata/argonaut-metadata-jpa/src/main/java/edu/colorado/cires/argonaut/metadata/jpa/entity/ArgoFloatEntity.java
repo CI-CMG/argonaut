@@ -16,11 +16,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "float", indexes = {
-    @Index(name = "float_float_id_idx", columnList = "float_id"),
-    @Index(name = "float_dac_idx", columnList = "dac")
+@Table(name = "argo_float", indexes = {
+    @Index(name = "argo_float_float_id_idx", columnList = "float_id"),
+    @Index(name = "argo_float_dac_idx", columnList = "argo_dac")
 })
-public class FloatEntity {
+public class ArgoFloatEntity {
 
   @Id
   @Column(name = "id", nullable = false, length = 20)
@@ -34,17 +34,17 @@ public class FloatEntity {
   private String floatId;
 
   @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.DETACH, CascadeType.REFRESH})
-  @JoinColumn(name = "dac", nullable = false)
-  private DacEntity dac;
+  @JoinColumn(name = "argo_dac", nullable = false)
+  private ArgoDacEntity argoDac;
 
-  @OneToMany(mappedBy = "floatId", cascade = {CascadeType.DETACH, CascadeType.REFRESH})
-  private List<CycleEntity> cycles = new ArrayList<>();
+  @OneToMany(mappedBy = "argoFloat", cascade = {CascadeType.DETACH, CascadeType.REFRESH})
+  private List<ArgoFloatCycleEntity> cycles = new ArrayList<>();
 
-  @OneToOne(mappedBy = "floatId")
-  private MetadataFileEntity metadata;
+  @OneToOne(mappedBy = "argoFloat")
+  private ArgoFloatMetadataEntity metadata;
 
-  @OneToOne(mappedBy = "floatId")
-  private ProfileMergeFileEntity profileMerge;
+  @OneToOne(mappedBy = "argoFloat")
+  private ArgonautProfileMergeFileEntity profileMerge;
 
   public String getId() {
     return id;
@@ -66,31 +66,31 @@ public class FloatEntity {
     this.floatId = floatId;
   }
 
-  public DacEntity getDac() {
-    return dac;
+  public ArgoDacEntity getArgoDac() {
+    return argoDac;
   }
 
-  public void setDac(DacEntity dac) {
-    this.dac = dac;
+  public void setArgoDac(ArgoDacEntity dac) {
+    this.argoDac = dac;
   }
 
-  public MetadataFileEntity getMetadata() {
+  public ArgoFloatMetadataEntity getMetadata() {
     return metadata;
   }
 
-  public void setMetadata(MetadataFileEntity metadata) {
+  public void setMetadata(ArgoFloatMetadataEntity metadata) {
     this.metadata = metadata;
   }
 
-  public List<CycleEntity> getCycles() {
+  public List<ArgoFloatCycleEntity> getCycles() {
     return cycles;
   }
 
-  public ProfileMergeFileEntity getProfileMerge() {
+  public ArgonautProfileMergeFileEntity getProfileMerge() {
     return profileMerge;
   }
 
-  public void setProfileMerge(ProfileMergeFileEntity profileMerge) {
+  public void setProfileMerge(ArgonautProfileMergeFileEntity profileMerge) {
     this.profileMerge = profileMerge;
   }
 }

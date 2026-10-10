@@ -6,9 +6,9 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import edu.colorado.cires.argonaut.audit.jpa.entity.AuditEntity;
-import edu.colorado.cires.argonaut.metadata.jpa.entity.FileRemovedTimeEntity;
-import edu.colorado.cires.argonaut.metadata.jpa.entity.ProfileFileEntity;
+import edu.colorado.cires.argonaut.audit.jpa.entity.ArgonautAuditEntity;
+import edu.colorado.cires.argonaut.metadata.jpa.entity.ArgonautFileRemovedTimeEntity;
+import edu.colorado.cires.argonaut.metadata.jpa.entity.ArgoFloatProfileEntity;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.EntityTransaction;
@@ -91,7 +91,7 @@ public class RemovalTest {
 
       submissions.stream().map(path -> path.subpath(4, 8).toString()).forEach(path -> {
         try (EntityManager em = entityManagerFactory.createEntityManager()) {
-          ProfileFileEntity profile = em.find(ProfileFileEntity.class, path);
+          ArgoFloatProfileEntity profile = em.find(ArgoFloatProfileEntity.class, path);
           assertNotNull(profile, "missing " + path);
           assertEquals("ACTIVE", profile.getFileStatus());
         }
@@ -118,7 +118,7 @@ public class RemovalTest {
 
       submissions.stream().map(path -> path.subpath(4, 8).toString()).forEach(path -> {
         try (EntityManager em = entityManagerFactory.createEntityManager()) {
-          ProfileFileEntity profile = em.find(ProfileFileEntity.class, path);
+          ArgoFloatProfileEntity profile = em.find(ArgoFloatProfileEntity.class, path);
           assertNotNull(profile, "missing " + path);
           boolean removed = toBeRemoved.stream().map(p -> p.subpath(4, 8).toString()).collect(Collectors.toSet()).contains(path);
           assertEquals(removed ? "REMOVED" : "ACTIVE", profile.getFileStatus());
@@ -142,8 +142,8 @@ public class RemovalTest {
       EntityTransaction tx = em.getTransaction();
       tx.begin();
       try {
-        List<FileRemovedTimeEntity> entities = em.createQuery("select f from FileRemovedTimeEntity f", FileRemovedTimeEntity.class).getResultList();
-        for (FileRemovedTimeEntity fileRemovedTimeEntity : entities) {
+        List<ArgonautFileRemovedTimeEntity> entities = em.createQuery("select f from ArgonautFileRemovedTimeEntity f", ArgonautFileRemovedTimeEntity.class).getResultList();
+        for (ArgonautFileRemovedTimeEntity fileRemovedTimeEntity : entities) {
           fileRemovedTimeEntity.setRemovedTime(Instant.now().minus(100, ChronoUnit.DAYS).atZone(ZoneId.of("UTC")));
         }
         tx.commit();
@@ -193,7 +193,7 @@ public class RemovalTest {
 
       submissions.stream().map(path -> path.subpath(4, 8).toString()).forEach(path -> {
         try (EntityManager em = entityManagerFactory.createEntityManager()) {
-          ProfileFileEntity profile = em.find(ProfileFileEntity.class, path);
+          ArgoFloatProfileEntity profile = em.find(ArgoFloatProfileEntity.class, path);
           assertNotNull(profile, "missing " + path);
           assertEquals("ACTIVE", profile.getFileStatus());
         }
@@ -219,7 +219,7 @@ public class RemovalTest {
 
       submissions.stream().map(path -> path.subpath(4, 8).toString()).forEach(path -> {
         try (EntityManager em = entityManagerFactory.createEntityManager()) {
-          ProfileFileEntity profile = em.find(ProfileFileEntity.class, path);
+          ArgoFloatProfileEntity profile = em.find(ArgoFloatProfileEntity.class, path);
           assertNotNull(profile, "missing " + path);
           assertEquals("ACTIVE", profile.getFileStatus());
         }
@@ -234,7 +234,7 @@ public class RemovalTest {
         });
 
     try (EntityManager em = auditEntityManagerFactory.createEntityManager()) {
-      List<AuditEntity> audits = em.createQuery("select p from AuditEntity p where p.eventType = 'ERROR' and p.fileName = 'coriolis_removal.txt' and p.dac = 'aoml' ", AuditEntity.class).getResultList();
+      List<ArgonautAuditEntity> audits = em.createQuery("select p from ArgonautAuditEntity p where p.eventType = 'ERROR' and p.fileName = 'coriolis_removal.txt' and p.dacName = 'aoml' ", ArgonautAuditEntity.class).getResultList();
       assertEquals(1, audits.size());
       assertEquals("file name does not start with DAC identifier: 'coriolis_removal.txt', aoml", audits.get(0).getStackTrace());
     }

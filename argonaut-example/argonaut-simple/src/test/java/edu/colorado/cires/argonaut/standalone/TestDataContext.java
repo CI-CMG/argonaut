@@ -29,15 +29,15 @@ public final class TestDataContext {
       EntityTransaction tx = em.getTransaction();
       tx.begin();
       try {
-        em.createQuery("delete from ProfileParameterEntity").executeUpdate();
-        em.createQuery("delete from FileRemovedTimeEntity").executeUpdate();
-        em.createQuery("delete from MetadataSyntheticMergeEntity").executeUpdate();
-        em.createQuery("delete from ProfileMergeFileEntity").executeUpdate();
-        em.createQuery("delete from ProfileFileEntity").executeUpdate();
-        em.createQuery("delete from MetadataFileEntity").executeUpdate();
-        em.createQuery("delete from CycleEntity").executeUpdate();
-        em.createQuery("delete from FloatEntity").executeUpdate();
-        em.createQuery("delete from DacEntity").executeUpdate();
+        em.createQuery("delete from ArgoFloatProfileParameterEntity").executeUpdate();
+        em.createQuery("delete from ArgonautFileRemovedTimeEntity").executeUpdate();
+        em.createQuery("delete from ArgonautSyntheticMergeMetadataEntity").executeUpdate();
+        em.createQuery("delete from ArgonautProfileMergeFileEntity").executeUpdate();
+        em.createQuery("delete from ArgoFloatProfileEntity").executeUpdate();
+        em.createQuery("delete from ArgoFloatMetadataEntity").executeUpdate();
+        em.createQuery("delete from ArgoFloatCycleEntity").executeUpdate();
+        em.createQuery("delete from ArgoFloatEntity").executeUpdate();
+        em.createQuery("delete from ArgoDacEntity").executeUpdate();
         tx.commit();
       } catch (Exception e) {
         tx.rollback();
@@ -49,7 +49,7 @@ public final class TestDataContext {
       EntityTransaction tx = em.getTransaction();
       tx.begin();
       try {
-        em.createQuery("delete from AuditEntity ").executeUpdate();
+        em.createQuery("delete from ArgonautAuditEntity ").executeUpdate();
         tx.commit();
       } catch (Exception e) {
         tx.rollback();

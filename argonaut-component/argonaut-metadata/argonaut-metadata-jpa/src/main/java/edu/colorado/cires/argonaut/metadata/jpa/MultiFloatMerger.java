@@ -2,8 +2,7 @@ package edu.colorado.cires.argonaut.metadata.jpa;
 
 import edu.colorado.cires.argonaut.messaging.core.databind.ArgoFileType;
 import edu.colorado.cires.argonaut.messaging.core.databind.MetadataRecord;
-import edu.colorado.cires.argonaut.messaging.core.databind.MetadataRecord.FileStatus;
-import edu.colorado.cires.argonaut.metadata.jpa.entity.ProfileFileEntity;
+import edu.colorado.cires.argonaut.metadata.jpa.entity.ArgoFloatProfileEntity;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.EntityTransaction;
@@ -30,7 +29,7 @@ class MultiFloatMerger {
           EntityTransaction tx = em.getTransaction();
           tx.begin();
           try {
-            ProfileFileEntity entity = em.find(ProfileFileEntity.class, record.getFile(), LockModeType.OPTIMISTIC);
+            ArgoFloatProfileEntity entity = em.find(ArgoFloatProfileEntity.class, record.getFile(), LockModeType.OPTIMISTIC);
             if (entity != null) {
               LOGGER.info("Updating multi-float merge for " + record.getFile());
               entity.setMultiFloatMergeTime(remove ? null : record.getActionTimestamp().atZone(ZoneId.of("UTC")));
@@ -55,7 +54,7 @@ class MultiFloatMerger {
           EntityTransaction tx = em.getTransaction();
           tx.begin();
           try {
-            ProfileFileEntity entity = em.find(ProfileFileEntity.class, record.getFile(), LockModeType.OPTIMISTIC);
+            ArgoFloatProfileEntity entity = em.find(ArgoFloatProfileEntity.class, record.getFile(), LockModeType.OPTIMISTIC);
             if (entity != null) {
               LOGGER.info("Updating geo merge for " + record.getFile());
               entity.setGeoMergeTime(remove ? null : record.getActionTimestamp().atZone(ZoneId.of("UTC")));
@@ -80,7 +79,7 @@ class MultiFloatMerger {
           EntityTransaction tx = em.getTransaction();
           tx.begin();
           try {
-            ProfileFileEntity entity = em.find(ProfileFileEntity.class, record.getFile(), LockModeType.OPTIMISTIC);
+            ArgoFloatProfileEntity entity = em.find(ArgoFloatProfileEntity.class, record.getFile(), LockModeType.OPTIMISTIC);
             if (entity != null) {
               String fileName = record.getRelatedFiles().get(0);
               LOGGER.info("Updating latest merge for {} - {}", record.getFile(), fileName);

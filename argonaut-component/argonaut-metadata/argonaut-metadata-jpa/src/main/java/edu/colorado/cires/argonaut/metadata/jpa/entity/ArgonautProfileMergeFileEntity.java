@@ -6,23 +6,20 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.Version;
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 @Entity
-@Table(name = "metadata", indexes = {
-    @Index(name = "metadata_float_idx", columnList = "float"),
-    @Index(name = "metadata_file_status_idx", columnList = "file_status")
+@Table(name = "argonaut_profile_merge", indexes = {
+    @Index(name = "argonaut_profile_merge_argo_float_idx", columnList = "argo_float"),
+    @Index(name = "argonaut_profile_merge_file_name_idx", columnList = "file_name")
 })
-public class MetadataFileEntity {
+public class ArgonautProfileMergeFileEntity {
 
   @Id
-  @Column(name = "file", nullable = false, length = 100)
+  @Column(name = "file_path", nullable = false, length = 100)
   private String file;
 
   @Version
@@ -30,15 +27,12 @@ public class MetadataFileEntity {
   private int version;
 
   @OneToOne(cascade = {CascadeType.DETACH, CascadeType.REFRESH})
-  @JoinColumn(name = "float", nullable = false)
-  private FloatEntity floatId;
-
-  @OneToMany(mappedBy = "metadata", cascade = CascadeType.ALL, orphanRemoval = true)
-  private List<MetadataSyntheticMergeEntity> syntheticMerges = new ArrayList<>();
+  @JoinColumn(name = "argo_float", nullable = false)
+  private ArgoFloatEntity argoFloat;
 
   @Column(name = "file_status", length = 50, nullable = false)
   private String fileStatus;
-  @Column(name = "date")
+  @Column(name = "profile_date")
   private ZonedDateTime date;
   @Column(name = "latitude")
   private Double latitude;
@@ -69,9 +63,6 @@ public class MetadataFileEntity {
   @Column(name = "file_name", nullable = false, length = 20)
   private String fileName;
 
-  @OneToMany(mappedBy = "metadata", cascade = CascadeType.ALL, orphanRemoval = true)
-  private List<FileRemovedTimeEntity> removedTimes = new ArrayList<>();
-
 
   public String getFile() {
     return file;
@@ -85,12 +76,12 @@ public class MetadataFileEntity {
     this.file = file;
   }
 
-  public FloatEntity getFloatId() {
-    return floatId;
+  public ArgoFloatEntity getArgoFloat() {
+    return argoFloat;
   }
 
-  public void setFloatId(FloatEntity floatId) {
-    this.floatId = floatId;
+  public void setArgoFloat(ArgoFloatEntity floatId) {
+    this.argoFloat = floatId;
   }
 
   public String getFileStatus() {
@@ -219,21 +210,5 @@ public class MetadataFileEntity {
 
   public void setFileName(String fileName) {
     this.fileName = fileName;
-  }
-
-  public List<MetadataSyntheticMergeEntity> getSyntheticMerges() {
-    return syntheticMerges;
-  }
-
-  public void setSyntheticMerges(List<MetadataSyntheticMergeEntity> syntheticMerges) {
-    this.syntheticMerges = syntheticMerges;
-  }
-
-  public List<FileRemovedTimeEntity> getRemovedTimes() {
-    return removedTimes;
-  }
-
-  public void setRemovedTimes(List<FileRemovedTimeEntity> removedTimes) {
-    this.removedTimes = removedTimes;
   }
 }

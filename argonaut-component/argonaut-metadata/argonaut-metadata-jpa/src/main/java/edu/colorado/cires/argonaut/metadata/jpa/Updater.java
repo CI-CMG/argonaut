@@ -5,15 +5,15 @@ import static edu.colorado.cires.argonaut.messaging.core.databind.MetadataRecord
 import edu.colorado.cires.argonaut.messaging.core.databind.MetadataRecord;
 import edu.colorado.cires.argonaut.messaging.core.databind.MetadataRecord.FileStatus;
 import edu.colorado.cires.argonaut.messaging.core.databind.ProfileMode;
-import edu.colorado.cires.argonaut.metadata.jpa.entity.CycleEntity;
-import edu.colorado.cires.argonaut.metadata.jpa.entity.DacEntity;
-import edu.colorado.cires.argonaut.metadata.jpa.entity.FloatEntity;
-import edu.colorado.cires.argonaut.metadata.jpa.entity.MetadataFileEntity;
-import edu.colorado.cires.argonaut.metadata.jpa.entity.ProfileFileEntity;
-import edu.colorado.cires.argonaut.metadata.jpa.entity.ProfileMergeFileEntity;
-import edu.colorado.cires.argonaut.metadata.jpa.entity.ProfileParameterEntity;
-import edu.colorado.cires.argonaut.metadata.jpa.entity.TechnicalFileEntity;
-import edu.colorado.cires.argonaut.metadata.jpa.entity.TrajectoryFileEntity;
+import edu.colorado.cires.argonaut.metadata.jpa.entity.ArgoFloatCycleEntity;
+import edu.colorado.cires.argonaut.metadata.jpa.entity.ArgoDacEntity;
+import edu.colorado.cires.argonaut.metadata.jpa.entity.ArgoFloatEntity;
+import edu.colorado.cires.argonaut.metadata.jpa.entity.ArgoFloatMetadataEntity;
+import edu.colorado.cires.argonaut.metadata.jpa.entity.ArgoFloatProfileEntity;
+import edu.colorado.cires.argonaut.metadata.jpa.entity.ArgonautProfileMergeFileEntity;
+import edu.colorado.cires.argonaut.metadata.jpa.entity.ArgoFloatProfileParameterEntity;
+import edu.colorado.cires.argonaut.metadata.jpa.entity.ArgoFloatTechnicalInfoEntity;
+import edu.colorado.cires.argonaut.metadata.jpa.entity.ArgoFloatTrajectoryEntity;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.EntityTransaction;
@@ -43,13 +43,13 @@ class Updater {
         EntityTransaction tx = em.getTransaction();
         tx.begin();
         try {
-          DacEntity entity = em.find(DacEntity.class, dac);
+          ArgoDacEntity entity = em.find(ArgoDacEntity.class, dac);
           if (entity != null) {
             tx.rollback();
             return;
           } else {
-            entity = new DacEntity();
-            entity.setDac(dac);
+            entity = new ArgoDacEntity();
+            entity.setDacName(dac);
             em.merge(entity);
             tx.commit();
           }
@@ -80,16 +80,16 @@ class Updater {
         EntityTransaction tx = em.getTransaction();
         tx.begin();
         try {
-          DacEntity dacEntity = em.find(DacEntity.class, dac);
-          FloatEntity entity = em.find(FloatEntity.class, id);
+          ArgoDacEntity argoDacEntity = em.find(ArgoDacEntity.class, dac);
+          ArgoFloatEntity entity = em.find(ArgoFloatEntity.class, id);
           if (entity != null) {
             tx.rollback();
             return;
           } else {
-            entity = new FloatEntity();
+            entity = new ArgoFloatEntity();
             entity.setId(id);
             entity.setFloatId(floatId);
-            entity.setDac(dacEntity);
+            entity.setArgoDac(argoDacEntity);
             em.merge(entity);
             tx.commit();
           }
@@ -135,17 +135,17 @@ class Updater {
         EntityTransaction tx = em.getTransaction();
         tx.begin();
         try {
-          FloatEntity floatEntity = em.find(FloatEntity.class, getFloatId(record));
-          CycleEntity entity = em.find(CycleEntity.class, id);
+          ArgoFloatEntity floatEntity = em.find(ArgoFloatEntity.class, getFloatId(record));
+          ArgoFloatCycleEntity entity = em.find(ArgoFloatCycleEntity.class, id);
           if (entity != null) {
             tx.rollback();
             return;
           } else {
-            entity = new CycleEntity();
+            entity = new ArgoFloatCycleEntity();
             entity.setId(id);
             entity.setDirection(direction.charAt(0));
             entity.setDataMode(dataMode.getCharacter().charAt(0));
-            entity.setFloatId(floatEntity);
+            entity.setArgoFloat(floatEntity);
             entity.setCycleNumber(cycleNumber);
             em.merge(entity);
             tx.commit();
@@ -172,14 +172,14 @@ class Updater {
         EntityTransaction tx = em.getTransaction();
         tx.begin();
         try {
-          CycleEntity cycle = em.find(CycleEntity.class, cycleId);
-          ProfileFileEntity entity = em.find(ProfileFileEntity.class, file, LockModeType.OPTIMISTIC);
+          ArgoFloatCycleEntity cycle = em.find(ArgoFloatCycleEntity.class, cycleId);
+          ArgoFloatProfileEntity entity = em.find(ArgoFloatProfileEntity.class, file, LockModeType.OPTIMISTIC);
           boolean add = (entity == null);
 
           if (add) {
-            entity = new ProfileFileEntity();
-            entity.setFile(file);
-            entity.setCycle(cycle);
+            entity = new ArgoFloatProfileEntity();
+            entity.setFilePath(file);
+            entity.setArgoFloatCycle(cycle);
           }
 
           entity.setFileName(record.getFileName());
@@ -189,16 +189,16 @@ class Updater {
           entity.setDataMode(record.getProfileMode() == null ? null : record.getProfileMode().getCharacter());
           entity.setLatestMergeFileName(null);
           if (record.getDate() == null) {
-            entity.setDate(null);
-            entity.setYear(null);
-            entity.setMonth(null);
-            entity.setDay(null);
+            entity.setProfileDate(null);
+            entity.setProfileDateYear(null);
+            entity.setProfileDateMonth(null);
+            entity.setProfileDateDay(null);
           } else {
             ZonedDateTime date = record.getDate().atOffset(ZoneOffset.UTC).toZonedDateTime();
-            entity.setDate(date);
-            entity.setYear(date.getYear());
-            entity.setMonth(date.getMonthValue());
-            entity.setDay(date.getDayOfMonth());
+            entity.setProfileDate(date);
+            entity.setProfileDateYear(date.getYear());
+            entity.setProfileDateMonth(date.getMonthValue());
+            entity.setProfileDateDay(date.getDayOfMonth());
           }
           entity.setLatitude(record.getLatitude());
           entity.setLatitudeMin(record.getLatitudeMin());
@@ -217,14 +217,14 @@ class Updater {
           entity.setLastUpdatedTime(record.getActionTimestamp().atOffset(ZoneOffset.UTC).toZonedDateTime());
           entity.getRemovedTimes().clear();
 
-          List<ProfileParameterEntity> parameters = entity.getParameters();
+          List<ArgoFloatProfileParameterEntity> parameters = entity.getParameters();
           parameters.clear();
           for (int i = 0; i < record.getParameters().size(); i++) {
             String parameterName =  record.getParameters().get(i);
-            ProfileParameterEntity parameter = new ProfileParameterEntity();
+            ArgoFloatProfileParameterEntity parameter = new ArgoFloatProfileParameterEntity();
             parameter.setId(UUID.randomUUID());
             parameter.setParameterName(parameterName);
-            parameter.setProfile(entity);
+            parameter.setArgoFloatProfile(entity);
             parameter.setParameterIndex(i);
             parameters.add(parameter);
           }
@@ -250,14 +250,14 @@ class Updater {
     String floatId = getFloatId(record);
     String file = Objects.requireNonNull(record.getFile());
 
-    FloatEntity floatEntity = em.find(FloatEntity.class, floatId);
-    ProfileMergeFileEntity entity = em.find(ProfileMergeFileEntity.class, file);
+    ArgoFloatEntity floatEntity = em.find(ArgoFloatEntity.class, floatId);
+    ArgonautProfileMergeFileEntity entity = em.find(ArgonautProfileMergeFileEntity.class, file);
     boolean add = (entity == null);
 
     if (add) {
-      entity = new ProfileMergeFileEntity();
+      entity = new ArgonautProfileMergeFileEntity();
       entity.setFile(file);
-      entity.setFloatId(floatEntity);
+      entity.setArgoFloat(floatEntity);
     }
 
     entity.setFileName(record.getFileName());
@@ -306,19 +306,19 @@ class Updater {
       EntityTransaction tx = em.getTransaction();
       tx.begin();
       try {
-        FloatEntity floatEntity = em.find(FloatEntity.class, floatId);
-        MetadataFileEntity entity = em.find(MetadataFileEntity.class, file);
+        ArgoFloatEntity floatEntity = em.find(ArgoFloatEntity.class, floatId);
+        ArgoFloatMetadataEntity entity = em.find(ArgoFloatMetadataEntity.class, file);
         boolean add = (entity == null);
 
         if (add) {
-          entity = new MetadataFileEntity();
+          entity = new ArgoFloatMetadataEntity();
           entity.setFile(file);
-          entity.setFloatId(floatEntity);
+          entity.setArgoFloat(floatEntity);
         }
 
         entity.setFileName(record.getFileName());
         entity.setFileStatus(ACTIVE.toString());
-        entity.setDate(record.getDate() == null ? null : record.getDate().atOffset(ZoneOffset.UTC).toZonedDateTime());
+        entity.setMetadataDate(record.getDate() == null ? null : record.getDate().atOffset(ZoneOffset.UTC).toZonedDateTime());
         entity.setLatitude(record.getLatitude());
         entity.setLatitudeMin(record.getLatitudeMin());
         entity.setLatitudeMax(record.getLatitudeMax());
@@ -383,14 +383,14 @@ class Updater {
       EntityTransaction tx = em.getTransaction();
       tx.begin();
       try {
-        FloatEntity floatEntity = em.find(FloatEntity.class, floatId);
-        TechnicalFileEntity entity = em.find(TechnicalFileEntity.class, file);
+        ArgoFloatEntity floatEntity = em.find(ArgoFloatEntity.class, floatId);
+        ArgoFloatTechnicalInfoEntity entity = em.find(ArgoFloatTechnicalInfoEntity.class, file);
         boolean add = (entity == null);
 
         if (add) {
-          entity = new TechnicalFileEntity();
-          entity.setFile(file);
-          entity.setFloatId(floatEntity);
+          entity = new ArgoFloatTechnicalInfoEntity();
+          entity.setFilePath(file);
+          entity.setArgoFloat(floatEntity);
         }
 
         entity.setInstitution(record.getInstitution());
@@ -417,14 +417,14 @@ class Updater {
       EntityTransaction tx = em.getTransaction();
       tx.begin();
       try {
-        FloatEntity floatEntity = em.find(FloatEntity.class, floatId);
-        TrajectoryFileEntity entity = em.find(TrajectoryFileEntity.class, file);
+        ArgoFloatEntity floatEntity = em.find(ArgoFloatEntity.class, floatId);
+        ArgoFloatTrajectoryEntity entity = em.find(ArgoFloatTrajectoryEntity.class, file);
         boolean add = (entity == null);
 
         if (add) {
-          entity = new TrajectoryFileEntity();
-          entity.setFile(file);
-          entity.setFloatId(floatEntity);
+          entity = new ArgoFloatTrajectoryEntity();
+          entity.setFilePath(file);
+          entity.setArgoFloat(floatEntity);
         }
 
         entity.setProfilerType(record.getProfilerType());

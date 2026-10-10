@@ -12,40 +12,40 @@ import jakarta.persistence.Table;
 import java.util.UUID;
 
 @Entity
-@Table(name = "profile_parameter", indexes = {
-    @Index(name = "profile_parameter_profile_idx", columnList = "profile")
+@Table(name = "argo_float_profile_parameter", indexes = {
+    @Index(name = "argo_float_profile_parameter_profile_idx", columnList = "argo_float_profile")
 })
-public class ProfileParameterEntity {
+public class ArgoFloatProfileParameterEntity {
 
   @Id
-  @Column(name = "id")
-  private UUID id;
+  @Column(name = "id", nullable = false, length = 36)
+  private String id;
 
   @Column(name = "parameter_index", nullable = false)
   private int parameterIndex;
 
   @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.DETACH, CascadeType.REFRESH})
-  @JoinColumn(name = "profile")
-  private ProfileFileEntity profile;
+  @JoinColumn(name = "argo_float_profile")
+  private ArgoFloatProfileEntity argoFloatProfile;
 
   @Column(name = "parameter_name", nullable = false, length = 100)
   private String parameterName;
 
 
   public UUID getId() {
-    return id;
+    return id == null ? null : UUID.fromString(id);
   }
 
   public void setId(UUID id) {
-    this.id = id;
+    this.id = id == null ? null : id.toString();
   }
 
-  public ProfileFileEntity getProfile() {
-    return profile;
+  public ArgoFloatProfileEntity getArgoFloatProfile() {
+    return argoFloatProfile;
   }
 
-  public void setProfile(ProfileFileEntity profile) {
-    this.profile = profile;
+  public void setArgoFloatProfile(ArgoFloatProfileEntity profile) {
+    this.argoFloatProfile = profile;
   }
 
   public String getParameterName() {

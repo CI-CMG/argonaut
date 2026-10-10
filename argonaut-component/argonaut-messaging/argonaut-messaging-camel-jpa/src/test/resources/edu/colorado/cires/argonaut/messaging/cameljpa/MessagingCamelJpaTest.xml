@@ -54,10 +54,10 @@
     <route id="sender">
       <from uri="seda:start"/>
       <bean ref="jsonMessageTranslator" method="send('test-queue', ${body})"/>
-      <to uri="jpa:edu.colorado.cires.argonaut.messaging.cameljpa.JsonMessageEntity?flushOnSend=true"/>
+      <to uri="jpa:edu.colorado.cires.argonaut.messaging.cameljpa.ArgonautMessageEntity?flushOnSend=true"/>
     </route>
     <route id="receiver">
-      <from uri="jpa:edu.colorado.cires.argonaut.messaging.cameljpa.JsonMessageEntity?maximumResults=10&amp;parameters=#testQueue&amp;namedQuery=dequeue"/>
+      <from uri="jpa:edu.colorado.cires.argonaut.messaging.cameljpa.ArgonautMessageEntity?maximumResults=10&amp;parameters=#testQueue&amp;namedQuery=dequeue"/>
       <bean ref="jsonMessageTranslator" method="receive"/>
       <to uri="mock:end"/>
     </route>

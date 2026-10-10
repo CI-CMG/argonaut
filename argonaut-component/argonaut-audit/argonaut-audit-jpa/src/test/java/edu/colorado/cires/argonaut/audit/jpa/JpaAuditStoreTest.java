@@ -43,7 +43,7 @@ public class JpaAuditStoreTest {
       EntityTransaction tx = em.getTransaction();
       tx.begin();
       try {
-        em.createQuery("delete from AuditEntity ").executeUpdate();
+        em.createQuery("delete from ArgonautAuditEntity ").executeUpdate();
         tx.commit();
       } catch (Exception e) {
         tx.rollback();

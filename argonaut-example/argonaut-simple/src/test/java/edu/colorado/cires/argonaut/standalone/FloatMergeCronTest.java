@@ -4,7 +4,7 @@ import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import edu.colorado.cires.argonaut.metadata.jpa.entity.ProfileFileEntity;
+import edu.colorado.cires.argonaut.metadata.jpa.entity.ArgoFloatProfileEntity;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import java.nio.file.Files;
@@ -153,10 +153,10 @@ public class FloatMergeCronTest {
 
       fileNames.stream().map(fileName -> "meds/4902704/profiles/" + fileName).forEach(path -> {
         try (EntityManager em = entityManagerFactory.createEntityManager()) {
-          ProfileFileEntity profile = em.find(ProfileFileEntity.class, path);
+          ArgoFloatProfileEntity profile = em.find(ArgoFloatProfileEntity.class, path);
           assertNotNull(profile, "missing " + path);
           assertNotNull(profile.getMultiFloatMergeTime(), "missing merge time " + path);
-          assertNotNull(profile.getCycle().getFloatId().getProfileMerge());
+          assertNotNull(profile.getArgoFloatCycle().getArgoFloat().getProfileMerge());
         }
       });
     });
