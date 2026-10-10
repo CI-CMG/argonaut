@@ -3,13 +3,18 @@ package edu.colorado.cires.argonaut.audit.jpa.entity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.Lob;
 import jakarta.persistence.Table;
 import java.time.ZonedDateTime;
 import java.util.UUID;
 
 @Entity
-@Table(name = "audit")
+@Table(name = "audit", indexes = {
+    @Index(name = "audit_dac_idx", columnList = "dac"),
+    @Index(name = "audit_event_type_idx", columnList = "event_type"),
+    @Index(name = "audit_processor_idx", columnList = "processor")
+})
 public class AuditEntity {
 
   @Id

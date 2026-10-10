@@ -5,6 +5,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
@@ -15,7 +16,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "profile")
+@Table(name = "profile", indexes = {
+    @Index(name = "profile_cycle_idx", columnList = "cycle"),
+    @Index(name = "profile_file_type_idx", columnList = "file_type"),
+    @Index(name = "profile_file_status_idx", columnList = "file_status"),
+    @Index(name = "profile_date_idx", columnList = "date_year,date_month,date_day"),
+    @Index(name = "profile_ocean_idx", columnList = "ocean"),
+    @Index(name = "profile_geo_merge_time_idx", columnList = "geo_merge_time"),
+    @Index(name = "profile_multi_float_merge_time_idx", columnList = "multi_float_merge_time"),
+    @Index(name = "profile_synthetic_merge_time_idx", columnList = "synthetic_merge_time"),
+    @Index(name = "profile_last_updated_time_idx", columnList = "last_updated_time")
+})
 public class ProfileFileEntity {
 
   @Id

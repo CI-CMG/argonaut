@@ -4,6 +4,7 @@ import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
@@ -11,7 +12,10 @@ import jakarta.persistence.Version;
 import java.time.ZonedDateTime;
 
 @Entity
-@Table(name = "technical")
+@Table(name = "technical", indexes = {
+    @Index(name = "technical_float_idx", columnList = "float"),
+    @Index(name = "technical_file_status_idx", columnList = "file_status")
+})
 public class TechnicalFileEntity {
 
   @Id

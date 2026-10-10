@@ -11,7 +11,7 @@ import java.time.ZonedDateTime;
 import java.util.UUID;
 
 @Entity
-@Table(name = "json_message_queue", indexes = @Index(name = "queue_idx", columnList = "queue"))
+@Table(name = "json_message_queue", indexes = @Index(name = "json_message_queue_queue_idx", columnList = "queue"))
 @NamedQuery(name = "dequeue", query = "select x from JsonMessageEntity x where x.queue = :queue order by x.queueTime")
 public class JsonMessageEntity {
 

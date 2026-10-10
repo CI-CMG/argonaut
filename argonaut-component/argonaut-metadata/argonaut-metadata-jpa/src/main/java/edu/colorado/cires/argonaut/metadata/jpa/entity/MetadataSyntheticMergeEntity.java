@@ -5,6 +5,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
@@ -12,7 +13,10 @@ import java.time.ZonedDateTime;
 import java.util.UUID;
 
 @Entity
-@Table(name = "metadata_synthetic_merge")
+@Table(name = "metadata_synthetic_merge", indexes = {
+    @Index(name = "metadata_synthetic_merge_metadata_idx", columnList = "metadata"),
+    @Index(name = "metadata_synthetic_merge_profile_idx", columnList = "profile")
+})
 public class MetadataSyntheticMergeEntity {
 
   @Id

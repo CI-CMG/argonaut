@@ -4,6 +4,7 @@ import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
@@ -11,7 +12,9 @@ import jakarta.persistence.Version;
 import java.time.ZonedDateTime;
 
 @Entity
-@Table(name = "profile_merge")
+@Table(name = "profile_merge", indexes = {
+    @Index(name = "profile_merge_float_idx", columnList = "float")
+})
 public class ProfileMergeFileEntity {
 
   @Id

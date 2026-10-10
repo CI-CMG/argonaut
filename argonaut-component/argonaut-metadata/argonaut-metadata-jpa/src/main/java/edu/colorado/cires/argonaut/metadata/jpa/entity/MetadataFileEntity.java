@@ -4,6 +4,7 @@ import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
@@ -14,7 +15,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "metadata")
+@Table(name = "metadata", indexes = {
+    @Index(name = "metadata_float_idx", columnList = "float"),
+    @Index(name = "metadata_file_status_idx", columnList = "file_status")
+})
 public class MetadataFileEntity {
 
   @Id
