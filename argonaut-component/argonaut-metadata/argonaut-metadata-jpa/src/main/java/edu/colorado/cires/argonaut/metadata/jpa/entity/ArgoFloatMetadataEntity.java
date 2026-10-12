@@ -16,7 +16,6 @@ import java.util.List;
 
 @Entity
 @Table(name = "argo_float_metadata", indexes = {
-    @Index(name = "argo_float_metadata_float_idx", columnList = "argo_float"),
     @Index(name = "argo_float_metadata_file_status_idx", columnList = "file_status")
 })
 public class ArgoFloatMetadataEntity {
@@ -30,7 +29,7 @@ public class ArgoFloatMetadataEntity {
   private int version;
 
   @OneToOne(cascade = {CascadeType.DETACH, CascadeType.REFRESH})
-  @JoinColumn(name = "argo_float", nullable = false)
+  @JoinColumn(name = "argo_float", nullable = false, unique = true)
   private ArgoFloatEntity argoFloat;
 
   @OneToMany(mappedBy = "argoFloatMetadata", cascade = CascadeType.ALL, orphanRemoval = true)

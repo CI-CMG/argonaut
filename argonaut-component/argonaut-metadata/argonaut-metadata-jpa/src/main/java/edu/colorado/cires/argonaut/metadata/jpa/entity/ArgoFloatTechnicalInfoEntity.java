@@ -13,7 +13,6 @@ import java.time.ZonedDateTime;
 
 @Entity
 @Table(name = "argo_float_technical_info", indexes = {
-    @Index(name = "argo_float_technical_info_float_idx", columnList = "argo_float"),
     @Index(name = "argo_float_technical_info_file_status_idx", columnList = "file_status")
 })
 public class ArgoFloatTechnicalInfoEntity {
@@ -27,7 +26,7 @@ public class ArgoFloatTechnicalInfoEntity {
   private int version;
 
   @OneToOne(cascade = {CascadeType.DETACH, CascadeType.REFRESH})
-  @JoinColumn(name = "argo_float", nullable = false)
+  @JoinColumn(name = "argo_float", nullable = false, unique = true)
   private ArgoFloatEntity argoFloat;
 
   @Column(name = "institution", length = 2)

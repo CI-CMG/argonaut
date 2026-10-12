@@ -13,7 +13,6 @@ import java.time.ZonedDateTime;
 
 @Entity
 @Table(name = "argonaut_profile_merge", indexes = {
-    @Index(name = "argonaut_profile_merge_argo_float_idx", columnList = "argo_float"),
     @Index(name = "argonaut_profile_merge_file_name_idx", columnList = "file_name")
 })
 public class ArgonautProfileMergeFileEntity {
@@ -27,7 +26,7 @@ public class ArgonautProfileMergeFileEntity {
   private int version;
 
   @OneToOne(cascade = {CascadeType.DETACH, CascadeType.REFRESH})
-  @JoinColumn(name = "argo_float", nullable = false)
+  @JoinColumn(name = "argo_float", nullable = false, unique = true)
   private ArgoFloatEntity argoFloat;
 
   @Column(name = "file_status", length = 50, nullable = false)

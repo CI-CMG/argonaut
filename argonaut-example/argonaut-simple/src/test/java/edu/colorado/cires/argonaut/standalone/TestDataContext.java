@@ -38,6 +38,8 @@ public final class TestDataContext {
         em.createQuery("delete from ArgoFloatCycleEntity").executeUpdate();
         em.createQuery("delete from ArgoFloatEntity").executeUpdate();
         em.createQuery("delete from ArgoDacEntity").executeUpdate();
+        em.createQuery("delete from ArgoFloatTechnicalInfoEntity ").executeUpdate();
+        em.createQuery("delete from ArgoFloatTrajectoryEntity").executeUpdate();
         tx.commit();
       } catch (Exception e) {
         tx.rollback();
