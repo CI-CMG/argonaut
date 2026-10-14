@@ -18,4 +18,5 @@ public interface MetadataStore {
   MetadataRecordPage getSyntheticProfileIndexPage(IndexPageRequest pageRequest);
   MetadataRecordPage getTechnicalIndexPage(IndexPageRequest indexPageRequest);
   MetadataRecordPage getTrajectoryIndexPage(IndexPageRequest indexPageRequest);
+  MetadataRecordPage getCoreProfileIndexPage(IndexPageRequest pageRequest);
 }

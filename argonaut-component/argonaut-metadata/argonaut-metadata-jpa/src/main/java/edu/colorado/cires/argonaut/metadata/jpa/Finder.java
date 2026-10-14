@@ -710,4 +710,30 @@ class Finder {
       .withLongitudeMin(trajectoryFile.getLongitudeMin())
       .build();
   }
+
+  MetadataRecordPage getCoreProfileIndexPage(IndexPageRequest pageRequest) {
+
+    try (EntityManager em = entityManagerFactory.createEntityManager()) {
+      long count = em.createQuery(
+              """
+                  SELECT COUNT(profile.filePath) FROM ArgoFloatProfileEntity profile 
+                  WHERE profile.fileStatus = 'ACTIVE' AND profile.fileType = 'PROFILE_CORE'
+                  """, Long.class)
+          .getSingleResult();
+
+      List<ArgoFloatProfileEntity> pageResults = em.createQuery(
+              """
+                    SELECT profile FROM ArgoFloatProfileEntity profile 
+                    WHERE profile.fileStatus = 'ACTIVE' AND profile.fileType = 'PROFILE_CORE'
+                    ORDER BY profile.filePath
+                  """, ArgoFloatProfileEntity.class)
+          .setMaxResults(pageRequest.getPageSize())
+          .setFirstResult((pageRequest.getPageNumber() - 1) * pageRequest.getPageSize())
+          .getResultList();
+
+
+
+      return createMetadataRecordPage(count, pageResults, Finder::fromProfileEntity, pageRequest);
+    }
+  }
 }
