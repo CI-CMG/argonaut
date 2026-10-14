@@ -190,6 +190,7 @@ public abstract class BaseIndexProcessor implements IndexProcessor {
   @Override
   public void generateIndex() {
     if (enabled) {
+      long start = System.currentTimeMillis();
       LOGGER.info("Updating " + fileNameBase);
       String textFileName = fileNameBase + ".txt";
       Path dir = createTempDirectory();
@@ -227,6 +228,8 @@ public abstract class BaseIndexProcessor implements IndexProcessor {
       } finally {
         FileUtils.deleteQuietly(dir.toFile());
       }
+      long end = System.currentTimeMillis();
+      LOGGER.info("Finished Updating {} in {} seconds", fileNameBase, (long)(((double)end - (double)start) / 60d));
     }
   }
 }
