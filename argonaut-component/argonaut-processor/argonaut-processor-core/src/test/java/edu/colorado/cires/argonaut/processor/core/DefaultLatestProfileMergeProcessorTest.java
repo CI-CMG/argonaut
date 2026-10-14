@@ -9,6 +9,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import edu.colorado.cires.argonaut.core.merge.multiprof.LocalPathSupplier;
@@ -195,6 +196,70 @@ public class DefaultLatestProfileMergeProcessorTest {
           .build())));
     }
 
+
+  }
+
+
+
+  @Test
+  public void testRemove() throws Exception {
+    FileStore outputFileStore = mock(FileStore.class);
+    MessageSender messageSender = mock(MessageSender.class);
+    MultiProfileMerger merger = mock(MultiProfileMerger.class);
+    Instant now = Instant.now();
+
+    String fileName = "D20260923";
+    List<String> filesInDir = Arrays.asList(
+        "D20260923_prof_0.nc",
+        "D20260923_prof_1.nc",
+        "D20260923_prof_2.nc",
+        "D20260922_prof_0.nc",
+        "R20260923_prof_0.nc",
+        "R20260922_prof_0.nc"
+    );
+
+    when(outputFileStore.getRoot()).thenReturn("/foo/bar");
+    when(outputFileStore.appendToPath(eq("/foo/bar"), eq("latest_data"))).thenReturn("/foo/bar/latest_data");
+    when(outputFileStore.listFileNamesInDirectory(eq("/foo/bar/latest_data"))).thenReturn(filesInDir);
+    when(outputFileStore.appendToPath(eq("/foo/bar/latest_data"), eq("D20260923_prof_0.nc"))).thenReturn("/foo/bar/latest_data/D20260923_prof_0.nc");
+    when(outputFileStore.appendToPath(eq("/foo/bar/latest_data"), eq("D20260923_prof_1.nc"))).thenReturn("/foo/bar/latest_data/D20260923_prof_1.nc");
+    when(outputFileStore.appendToPath(eq("/foo/bar/latest_data"), eq("D20260923_prof_2.nc"))).thenReturn("/foo/bar/latest_data/D20260923_prof_2.nc");
+    when(outputFileStore.appendToPath(eq("/foo/bar"), eq("latest_data"), eq("D20260923_prof_0.nc"))).thenReturn(
+        "/foo/bar/latest_data/D20260923_prof_0.nc");
+    when(outputFileStore.appendToPath(eq("/foo/bar"), eq("latest_data"), eq("D20260923_prof_1.nc"))).thenReturn(
+        "/foo/bar/latest_data/D20260923_prof_1.nc");
+
+    DefaultLatestProfileMergeProcessor processor = new DefaultLatestProfileMergeProcessor();
+    processor.setOutputFileStore(outputFileStore);
+    processor.setLocalTempDir(localTempDir);
+    processor.setMessageSender(messageSender);
+    processor.setUpdateIndexQueue("updateIndexQueue");
+    processor.setJsonMapper(jsonMapper);
+    processor.setMerger(merger);
+    processor.setMaxProfilesPerFile(2);
+    processor.setNowGenerator(() -> now);
+
+    UUID traceId = UUID.randomUUID();
+
+
+    ProfileOperation message = ProfileOperation.builder()
+        .withTraceId(traceId)
+        .withFileName(fileName)
+        .withFiles(Collections.emptyList())
+        .build();
+
+    processor.merge(message);
+
+    verify(outputFileStore, times(1)).delete(eq("/foo/bar/latest_data/D20260923_prof_0.nc"));
+    verify(outputFileStore, times(1)).delete(eq("/foo/bar/latest_data/D20260923_prof_1.nc"));
+    verify(outputFileStore, times(1)).delete(eq("/foo/bar/latest_data/D20260923_prof_2.nc"));
+
+    // clear mocked verifications in order to ensure no extra interactions can be verified
+    verify(outputFileStore, times(1)).getRoot();
+    verify(outputFileStore, times(4)).appendToPath(any(), any());
+    verify(outputFileStore, times(1)).listFileNamesInDirectory(any());
+
+    verifyNoMoreInteractions(outputFileStore);
 
   }
 

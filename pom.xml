@@ -158,7 +158,7 @@
       <dependency>
         <groupId>org.hibernate.orm</groupId>
         <artifactId>hibernate-platform</artifactId>
-        <version>7.4.11.Final</version>
+        <version>7.4.12.Final</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
@@ -363,7 +363,7 @@
       <plugin>
         <groupId>org.sonatype.central</groupId>
         <artifactId>central-publishing-maven-plugin</artifactId>
-        <version>0.11.0</version>
+        <version>0.12.0</version>
         <extensions>true</extensions>
         <configuration>
           <publishingServerId>central</publishingServerId>

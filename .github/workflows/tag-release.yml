@@ -16,10 +16,6 @@ jobs:
         with:
           java-version: '21'
           distribution: 'temurin'
-      - name: Customize Maven Version
-        uses: batmahdi/setup-maven@v3
-        with:
-          maven-version: '3.9.9'
       - name: set up git
         run: git config --global user.email bloop@bloop.org && git config --global user.name 'Bloopy McBloopFace'
       - id: version
