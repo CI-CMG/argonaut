@@ -8,7 +8,6 @@
 
   <routeContext id="gdac-routes" xmlns="http://camel.apache.org/schema/spring">
 
-
     <route id="dac-submission-work">
       <errorHandler>
         <deadLetterChannel deadLetterUri="seda:audit" onPrepareFailureRef="prepareErrorAuditProcessor"/>
@@ -234,6 +233,11 @@
     <route id="bio-profile-index-cron">
       <from uri="cron:bio-profile-index?schedule={{bio-profile-index.cron}}"/>
       <bean ref="bioProfileIndexProcessor" method="generateIndex"/>
+    </route>
+
+    <route id="core-profile-index-cron">
+      <from uri="cron:core-profile-index?schedule={{core-profile-index.cron}}"/>
+      <bean ref="coreProfileIndexProcessor" method="generateIndex"/>
     </route>
 
     <route id="synth-profile-index-cron">
