@@ -17,7 +17,7 @@ jobs:
           java-version: '21'
           distribution: 'temurin'
       - name: set up git
-        run: git config --global user.email bloop@bloop.org && git config --global user.name 'Bloopy McBloopFace'
+        run: git config --global user.email rudy.klucik+git@noaa.gov && git config --global user.name 'Rudy Klucik Git Service User'
       - id: version
         run: |
           majorVersion=$(mvn build-helper:parse-version help:evaluate -Dexpression=parsedVersion.majorVersion  -q -DforceStdout)
