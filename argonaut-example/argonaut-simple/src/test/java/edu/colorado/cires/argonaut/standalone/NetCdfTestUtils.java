@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import edu.colorado.cires.argonaut.core.netcdf.profile.v31.ArgoProfileV31;
+import edu.colorado.cires.argonaut.core.netcdf.profile.v31.ArgoProfileV31Calibration;
 import edu.colorado.cires.argonaut.core.netcdf.profile.v31.ArgoProfileV31Level;
 import edu.colorado.cires.argonaut.core.netcdf.profile.v31.ArgoProfileV31Reader;
 import java.io.IOException;
@@ -40,13 +41,13 @@ public class NetCdfTestUtils {
         assertEquals(expectedProfile.getDataMode(), profile.getDataMode());
         assertTrue(Math.abs(expectedProfile.getJulianDate().toEpochMilli() - profile.getJulianDate().toEpochMilli()) < 1000);
         assertEquals(expectedProfile.getJulianDateQc(), profile.getJulianDateQc());
-//        Long expectedJulianDateOfLocation = expectedProfile.getJulianDateOfLocation() == null ? null : expectedProfile.getJulianDateOfLocation().toEpochMilli();
-//        Long profileJulianDateOfLocation = profile.getJulianDateOfLocation() == null ? null : profile.getJulianDateOfLocation().toEpochMilli();
-//        if(expectedJulianDateOfLocation == null || profileJulianDateOfLocation == null){
-//          assertEquals(expectedJulianDateOfLocation, profileJulianDateOfLocation);
-//        } else {
-//          assertTrue(Math.abs(expectedJulianDateOfLocation - profileJulianDateOfLocation) < 1000);
-//        }
+        Long expectedJulianDateOfLocation = expectedProfile.getJulianDateOfLocation() == null ? null : expectedProfile.getJulianDateOfLocation().toEpochMilli();
+        Long profileJulianDateOfLocation = profile.getJulianDateOfLocation() == null ? null : profile.getJulianDateOfLocation().toEpochMilli();
+        if(expectedJulianDateOfLocation == null || profileJulianDateOfLocation == null){
+          assertEquals(expectedJulianDateOfLocation, profileJulianDateOfLocation);
+        } else {
+          assertTrue(Math.abs(expectedJulianDateOfLocation - profileJulianDateOfLocation) < 1000);
+        }
         if (expectedProfile.getLatitude() == null) {
           assertNull(profile.getLatitude());
         } else {
@@ -64,18 +65,18 @@ public class NetCdfTestUtils {
         assertEquals(expectedProfile.getConfigMissionNumber(), profile.getConfigMissionNumber());
 
         for (String parameterName : Arrays.asList("PRES", "TEMP", "PSAL")) {
-//          List<ArgoProfileV31Calibration> calibrations = profile.getParameter(parameterName).getCalibrations();
-//          List<ArgoProfileV31Calibration> expectedCalibrations = expectedProfile.getParameter(parameterName).getCalibrations();
-//          assertEquals(expectedCalibrations.size(), calibrations.size());
-//          for (int c = 0; c < calibrations.size(); c++) {
-//            ArgoProfileV31Calibration calibration = calibrations.get(c);
-//            ArgoProfileV31Calibration expectedCalibration = expectedCalibrations.get(c);
-//            assertEquals(expectedCalibration.getDate(), calibration.getDate());
-//            assertEquals(expectedCalibration.getParameterName(), calibration.getParameterName());
-//            assertEquals(expectedCalibration.getEquation(), calibration.getEquation());
-//            assertEquals(expectedCalibration.getCoefficient(), calibration.getCoefficient());
-//            assertEquals(expectedCalibration.getComment(), calibration.getComment());
-//          }
+          List<ArgoProfileV31Calibration> calibrations = profile.getParameter(parameterName).getCalibrations();
+          List<ArgoProfileV31Calibration> expectedCalibrations = expectedProfile.getParameter(parameterName).getCalibrations();
+          assertEquals(expectedCalibrations.size(), calibrations.size());
+          for (int c = 0; c < calibrations.size(); c++) {
+            ArgoProfileV31Calibration calibration = calibrations.get(c);
+            ArgoProfileV31Calibration expectedCalibration = expectedCalibrations.get(c);
+            assertEquals(expectedCalibration.getDate(), calibration.getDate());
+            assertEquals(expectedCalibration.getParameterName(), calibration.getParameterName());
+            assertEquals(expectedCalibration.getEquation(), calibration.getEquation());
+            assertEquals(expectedCalibration.getCoefficient(), calibration.getCoefficient());
+            assertEquals(expectedCalibration.getComment(), calibration.getComment());
+          }
 
           List<ArgoProfileV31Level> levels = profile.getParameter(parameterName).getLevels();
           List<ArgoProfileV31Level> expectedlevels = expectedProfile.getParameter(parameterName).getLevels();
