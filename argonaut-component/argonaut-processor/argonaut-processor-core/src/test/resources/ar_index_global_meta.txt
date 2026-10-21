@@ -1,0 +1,12 @@
+# Title : Metadata directory file of the Argo Global Data Assembly Center
+# Description : The directory file describes all metadata files of the argo GDAC data store.
+# Project : ARGO
+# Format version : 2.2
+# Date of update : 20260928202403
+# HTTP root number 1 : https://example.com/argo/dac
+# HTTP root number 2 : https://foo.bar/argo/dac
+# GDAC node : TEST
+file,profiler_type,institution,date_update
+aoml/13857/13857_meta.nc,845,AO,20181011200014
+aoml/13858/13858_meta.nc,845,AO,20181011200015
+aoml/13859/13859_meta.nc,845,AO,20181011200025

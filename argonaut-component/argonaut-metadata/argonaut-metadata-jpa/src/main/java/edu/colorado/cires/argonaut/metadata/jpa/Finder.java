@@ -616,7 +616,6 @@ class Finder {
         .build();
   }
 
-
   MetadataRecordPage getSyntheticProfileIndexPage(IndexPageRequest pageRequest) {
 
     try (EntityManager em = entityManagerFactory.createEntityManager()) {
@@ -640,7 +639,6 @@ class Finder {
       return createMetadataRecordPage(count, pageResults, Finder::fromProfileEntity, pageRequest);
     }
   }
-
 
   MetadataRecordPage getTechnicalIndexPage(IndexPageRequest indexPageRequest) {
     try (EntityManager em = entityManagerFactory.createEntityManager()) {
@@ -731,7 +729,29 @@ class Finder {
           .setFirstResult((pageRequest.getPageNumber() - 1) * pageRequest.getPageSize())
           .getResultList();
 
+      return createMetadataRecordPage(count, pageResults, Finder::fromProfileEntity, pageRequest);
+    }
+  }
 
+  MetadataRecordPage getGlobalMetaIndexPage(IndexPageRequest pageRequest) {
+
+    try (EntityManager em = entityManagerFactory.createEntityManager()) {
+      long count = em.createQuery(
+                      """
+                          SELECT COUNT(profile.filePath) FROM ArgoFloatProfileEntity profile 
+                          WHERE profile.fileStatus = 'ACTIVE' AND profile.fileType = 'METADATA'
+                          """, Long.class)
+              .getSingleResult();
+
+      List<ArgoFloatProfileEntity> pageResults = em.createQuery(
+                      """
+                            SELECT profile FROM ArgoFloatProfileEntity profile 
+                            WHERE profile.fileStatus = 'ACTIVE' AND profile.fileType = 'METADATA'
+                            ORDER BY profile.filePath
+                          """, ArgoFloatProfileEntity.class)
+              .setMaxResults(pageRequest.getPageSize())
+              .setFirstResult((pageRequest.getPageNumber() - 1) * pageRequest.getPageSize())
+              .getResultList();
 
       return createMetadataRecordPage(count, pageResults, Finder::fromProfileEntity, pageRequest);
     }
