@@ -2,28 +2,32 @@ package edu.colorado.cires.argonaut.messaging.cameljpa;
 
 import edu.colorado.cires.argonaut.messaging.camel.ArgonautCamelMessageTranslator;
 import edu.colorado.cires.argonaut.messaging.core.queue.MessageSender;
+import jakarta.persistence.EntityManager;
 import org.apache.camel.CamelContext;
 import org.apache.camel.CamelContextAware;
 import org.apache.camel.ProducerTemplate;
+import org.apache.camel.component.jpa.JpaConstants;
 
 public class CamelJpaMessageSender implements MessageSender, CamelContextAware {
+
+  private static final String JPA_POOL_URL = String.format("jpaPool:%s?usePassedInEntityManager=true", ArgonautMessageEntity.class.getName());
+  private static final String JPA_URL = String.format("jpa:%s?usePassedInEntityManager=true", ArgonautMessageEntity.class.getName());
+
 
   private CamelContext camelContext;
   private String producerTemplateId;
   private ArgonautCamelMessageTranslator messageTranslator = new DefaultCamelJpaMessageTranslator();
-  private String persistenceUnit = "argonaut-messaging";
-  private String entityManagerFactoryId;
-  private String transactionStrategyId;
+  private boolean useJpaPoolEndpoint = true;
 
   @Override
   public void sendJson(String queue, String json) {
+    EntityManager entityManager = EntityManagerThreadContext.getEntityManager();
     ProducerTemplate producerTemplate = camelContext.getRegistry().lookupByNameAndType(producerTemplateId, ProducerTemplate.class);
-    String url = String.format("jpa:%s?entityManagerFactory=#%s&transactionStrategy=#%s&persistenceUnit=%s",
-        ArgonautMessageEntity.class.getName(),
-        entityManagerFactoryId,
-        transactionStrategyId,
-        persistenceUnit);
-    producerTemplate.sendBody(url, messageTranslator.translate(queue, json));
+    String url = JPA_POOL_URL;
+    if (!useJpaPoolEndpoint) {
+      url = JPA_URL;
+    }
+    producerTemplate.sendBodyAndHeader(url, messageTranslator.translate(queue, json), JpaConstants.ENTITY_MANAGER, entityManager);
   }
 
   @Override
@@ -42,17 +46,5 @@ public class CamelJpaMessageSender implements MessageSender, CamelContextAware {
 
   public void setMessageTranslator(ArgonautCamelMessageTranslator messageTranslator) {
     this.messageTranslator = messageTranslator;
-  }
-
-  public void setEntityManagerFactoryId(String entityManagerFactoryId) {
-    this.entityManagerFactoryId = entityManagerFactoryId;
-  }
-
-  public void setTransactionStrategyId(String transactionStrategyId) {
-    this.transactionStrategyId = transactionStrategyId;
-  }
-
-  public void setPersistenceUnit(String persistenceUnit) {
-    this.persistenceUnit = persistenceUnit;
   }
 }

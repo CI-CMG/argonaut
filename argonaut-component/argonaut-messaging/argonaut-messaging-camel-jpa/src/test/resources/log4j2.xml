@@ -6,13 +6,25 @@
       <PatternLayout>
 <!--        <Pattern>%d{ISO8601} %5level %pid{-} -&#45;&#45; [%15.15t] %c : %m%n%throwable</Pattern>-->
         <Pattern>
-          %style{%d{ISO8601}}{dim} %highlight{%5level} %style{[%15.15t]}{dim} %style{%c}{blue} %style{:}{dim} %highlight{%m%n%throwable}
+          %style{%d{ISO8601}}{dim} %highlight{%5level} %style{[%20.20t]}{dim} %style{%c}{blue} %style{:}{dim} %highlight{%m%n%throwable}
         </Pattern>
       </PatternLayout>
     </Console>
   </Appenders>
   <Loggers>
     <Logger name="edu.colorado" level="debug" additivity="false">
+      <AppenderRef ref="Console"/>
+    </Logger>
+
+    <Logger name="com.zaxxer" level="trace" additivity="false">
+      <AppenderRef ref="Console"/>
+    </Logger>
+
+    <Logger name="org.springframework.orm.jpa" level="debug" additivity="false">
+      <AppenderRef ref="Console"/>
+    </Logger>
+
+    <Logger name="jakarta.persistence" level="debug" additivity="false">
       <AppenderRef ref="Console"/>
     </Logger>
 

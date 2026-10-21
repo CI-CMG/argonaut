@@ -1,0 +1,100 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="
+       http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://camel.apache.org/schema/spring
+       http://camel.apache.org/schema/spring/camel-spring.xsd">
+
+  <bean id="entityManagerFactory" class="jakarta.persistence.Persistence" factory-method="createEntityManagerFactory">
+    <constructor-arg value="argonaut-messaging"/>
+    <constructor-arg>
+      <map>
+        <entry key="jakarta.persistence.jdbc.driver" value="org.h2.Driver"/>
+        <entry key="jakarta.persistence.jdbc.url" value="jdbc:h2:./target/pool"/>
+        <entry key="jakarta.persistence.jdbc.user" value="sa"/>
+        <entry key="jakarta.persistence.jdbc.password" value=""/>
+        <entry key="hibernate.hbm2ddl.auto" value="update"/>
+        <entry key="hibernate.connection.provider_class" value="com.zaxxer.hikari.hibernate.HikariConnectionProvider"/>
+        <entry key="hibernate.hikari.poolName" value="QueueConnectionPool"/>
+        <entry key="hibernate.hikari.maximumPoolSize" value="1"/>
+        <entry key="hibernate.hikari.connectionTimeout" value="60000"/>
+        <entry key="hibernate.hikari.maxLifetime" value="0"/>
+      </map>
+    </constructor-arg>
+  </bean>
+
+  <bean id="jsonMessageTranslator" class="edu.colorado.cires.argonaut.messaging.cameljpa.DefaultCamelJpaMessageTranslator"/>
+
+  <bean id="fileTranslator" class="edu.colorado.cires.argonaut.messaging.cameljpa.FileTranslator" />
+
+  <bean id="queue1" class="edu.colorado.cires.argonaut.messaging.cameljpa.CamelJpaParameterFactory" factory-method="queueParameter">
+    <constructor-arg value="queue1"/>
+  </bean>
+
+  <bean id="queue2" class="edu.colorado.cires.argonaut.messaging.cameljpa.CamelJpaParameterFactory" factory-method="queueParameter">
+    <constructor-arg value="queue2"/>
+  </bean>
+
+  <bean id="queue3" class="edu.colorado.cires.argonaut.messaging.cameljpa.CamelJpaParameterFactory" factory-method="queueParameter">
+    <constructor-arg value="queue3"/>
+  </bean>
+
+  <bean id="sender" class="edu.colorado.cires.argonaut.messaging.cameljpa.CamelJpaMessageSender">
+    <property name="messageTranslator" ref="jsonMessageTranslator"/>
+    <property name="producerTemplateId" value="producerTemplate"/>
+  </bean>
+
+  <bean id="splitter" class="edu.colorado.cires.argonaut.messaging.cameljpa.ExampleSplitter">
+    <property name="sender" ref="sender" />
+  </bean>
+
+  <bean id="entityManagerProcessor" class="edu.colorado.cires.argonaut.messaging.cameljpa.EntityManagerContextProcessor">
+    <property name="entityManagerFactory" ref="entityManagerFactory"/>
+  </bean>
+
+  <bean id="jpaPool" class="edu.colorado.cires.argonaut.messaging.cameljpa.JpaPoolComponent">
+    <property name="entityManagerFactory" ref="entityManagerFactory"/>
+    <property name="joinTransaction" value="false"/>
+  </bean>
+
+  <camelContext id="argonaut-camel" xmlns="http://camel.apache.org/schema/spring">
+    <template id="producerTemplate"/>
+
+    <route id="file">
+      <from uri="file:target/submit?greedy=true&amp;delete=true&amp;maxMessagesPerPoll=1"/>
+      <bean ref="fileTranslator"/>
+      <bean ref="jsonMessageTranslator" method="send('queue1', ${body})"/>
+      <bean ref="entityManagerProcessor"/>
+      <to uri="jpaPool:edu.colorado.cires.argonaut.messaging.cameljpa.ArgonautMessageEntity?usePassedInEntityManager=true"/>
+    </route>
+
+    <route id="queue1">
+      <from uri="jpaPool:edu.colorado.cires.argonaut.messaging.cameljpa.ArgonautMessageEntity?greedy=true&amp;maximumResults=1&amp;parameters=#queue1&amp;namedQuery=dequeue"/>
+      <bean ref="entityManagerProcessor"/>
+      <bean ref="jsonMessageTranslator" method="receive"/>
+      <log message="${body}"/>
+      <bean ref="splitter" method="send(${body})"/>
+    </route>
+
+    <route id="queue2">
+      <from uri="jpaPool:edu.colorado.cires.argonaut.messaging.cameljpa.ArgonautMessageEntity?greedy=true&amp;maximumResults=1&amp;parameters=#queue2&amp;namedQuery=dequeue"/>
+<!--      <bean ref="entityManagerProcessor"/>-->
+      <bean ref="jsonMessageTranslator" method="receive"/>
+      <bean ref="jsonMessageTranslator" method="send('queue3', ${body})"/>
+      <to uri="jpaPool:edu.colorado.cires.argonaut.messaging.cameljpa.ArgonautMessageEntity?usePassedInEntityManager=true"/>
+    </route>
+
+    <route id="queue3">
+      <from uri="jpaPool:edu.colorado.cires.argonaut.messaging.cameljpa.ArgonautMessageEntity?greedy=true&amp;maximumResults=1&amp;parameters=#queue3&amp;namedQuery=dequeue"/>
+<!--      <bean ref="entityManagerProcessor"/>-->
+      <bean ref="jsonMessageTranslator" method="receive"/>
+      <log message="${body}"/>
+      <to uri="mock:mock"/>
+    </route>
+
+
+  </camelContext>
+
+
+</beans>
