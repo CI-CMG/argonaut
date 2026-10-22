@@ -310,6 +310,15 @@
     <property name="enabled" value="${core-profile-index.enabled}"/>
   </bean>
 
+  <bean id="weeklyProfileIndexProcessor" class="edu.colorado.cires.argonaut.processor.core.DefaultWeeklyProfileIndexProcessor">
+    <property name="outputFileStore" ref="outputFileStore"/>
+    <property name="localTempDir" value="${work-directory}"/>
+    <property name="metadataStore" ref="metadataStore"/>
+    <property name="pageSize" value="${weekly-profile-index.page-size}"/>
+    <property name="gdacNode" value="${gdac-institution}"/>
+    <property name="accessPathDocumentation" ref="accessPathsMap"/>
+  </bean>
+
   <bean id="globalMetaIndexProcessor" class="edu.colorado.cires.argonaut.processor.core.DefaultGlobalMetaIndexProcessor">
     <property name="outputFileStore" ref="outputFileStore"/>
     <property name="localTempDir" value="${work-directory}"/>

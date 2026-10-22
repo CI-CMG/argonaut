@@ -240,6 +240,11 @@
       <bean ref="coreProfileIndexProcessor" method="generateIndex"/>
     </route>
 
+    <route id="weekly-profile-index-cron">
+      <from uri="cron:weekly-profile-index?schedule={{weekly-profile-index.cron}}"/>
+      <bean ref="weeklyProfileIndexProcessor" method="generateIndex"/>
+    </route>
+
     <route id="global-meta-index-cron">
       <from uri="cron:global-meta-index?schedule={{global-meta-index.cron}}"/>
       <bean ref="globalMetaIndexProcessor" method="generateIndex"/>

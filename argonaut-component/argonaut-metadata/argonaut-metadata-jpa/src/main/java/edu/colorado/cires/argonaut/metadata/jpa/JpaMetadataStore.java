@@ -133,6 +133,11 @@ public class JpaMetadataStore implements MetadataStore {
   }
 
   @Override
+  public MetadataRecordPage getWeeklyProfileIndexPage(IndexPageRequest pageRequest) {
+    return finder.getWeeklyProfileIndexPage(pageRequest);
+  }
+
+  @Override
   public MetadataRecordPage getGlobalMetaIndexPage(IndexPageRequest pageRequest) {
     return finder.getGlobalMetaIndexPage(pageRequest);
   }

@@ -359,6 +359,7 @@ class Updater {
         createOrUpdateProfile(record);
         break;
       case METADATA:
+//        createCycleIfMissing(record);
         createOrUpdateMetadata(record);
         break;
       case PROFILE_MULTI_CYCLE:

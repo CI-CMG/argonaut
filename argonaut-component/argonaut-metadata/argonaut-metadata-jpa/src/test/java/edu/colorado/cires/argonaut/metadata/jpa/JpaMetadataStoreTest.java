@@ -32,7 +32,10 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.EntityTransaction;
 import jakarta.persistence.Persistence;
+
+import java.time.Duration;
 import java.time.Instant;
+import java.time.ZoneOffset;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
@@ -48,6 +51,7 @@ import java.util.function.Supplier;
 import java.util.stream.IntStream;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Named;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -4404,4 +4408,379 @@ public class JpaMetadataStoreTest {
 
   }
 
+  @Test
+  public void testFindCoreProfileIndex() throws Exception {
+
+    Instant now = Instant.parse("2026-09-25T01:00:00Z");
+
+    // should be in results, core profile
+    datastore.updateIndex(MetadataRecord.builder()
+            .withFile("aoml/13857/profiles/D13857_001.nc")
+            .withFileName("D13857_001.nc")
+            .withDac("aoml")
+            .withFloatId("13857")
+            .withCycleNumber("001")
+            .withDirection("A")
+            .withParameterDataMode("D")
+            .withActionTimestamp(now)
+            .withDate(Instant.parse("2025-10-10T14:00:00Z"))
+            .withLatitude(0.267)
+            .withLatitudeMin(0.1)
+            .withLatitudeMax(0.4)
+            .withLongitude(-16.032)
+            .withLongitudeMin(-17.0)
+            .withLongitudeMax(-14.0)
+            .withOcean(ArgoOcean.ATLANTIC_OCEAN)
+            .withProfilerType("845")
+            .withInstitution("AO")
+            .withDateUpdate(Instant.parse("2025-10-10T14:00:00Z"))
+            .withParameters(Arrays.asList("params"))
+            .withAction(Action.UPDATE)
+            .withFileType(ArgoFileType.PROFILE_CORE)
+            .withProfileMode(ProfileMode.DELAYED_MODE)
+            .build());
+
+    // synthetic shouldn't be in results
+    datastore.updateIndex(MetadataRecord.builder()
+            .withFile("aoml/1901378/profiles/SD1901378_002.nc")
+            .withFileName("SD1901378_002.nc")
+            .withDac("aoml")
+            .withFloatId("1901378")
+            .withCycleNumber("002")
+            .withDirection("A")
+            .withParameterDataMode("RRRDRRD")
+            .withProfileMode(ProfileMode.DELAYED_MODE)
+            .withActionTimestamp(now)
+            .withDate(Instant.parse("2009-10-13T13:05:57Z"))
+            .withLatitude(31.7562)
+            .withLatitudeMin(0.1)
+            .withLatitudeMax(0.4)
+            .withLongitude(-64.2821)
+            .withLongitudeMin(-17.0)
+            .withLongitudeMax(-14.0)
+            .withOcean(ArgoOcean.ATLANTIC_OCEAN)
+            .withProfilerType("846")
+            .withInstitution("AO")
+            .withDateUpdate(Instant.parse("2026-06-24T06:05:15Z"))
+            .withParameters(Arrays.asList("PRES", "TEMP_DOXY BPHASE_DOXY", "DOXY UV_INTENSITY_DARK_NITRATE", "UV_INTENSITY_NITRATE", "NITRATE"))
+            .withAction(Action.UPDATE)
+            .withFileType(ArgoFileType.SYNTHETIC_PROFILE_SINGLE_CYCLE)
+            .build());
+
+    // in results
+    datastore.updateIndex(MetadataRecord.builder()
+            .withFile("aoml/1901378/profiles/D1901378_003.nc")
+            .withFileName("D1901378_003.nc")
+            .withDac("aoml")
+            .withFloatId("1901378")
+            .withCycleNumber("003")
+            .withDirection("A")
+            .withParameterDataMode("RRRDRRD")
+            .withActionTimestamp(now)
+            .withDate(Instant.parse("2009-10-14T13:36:42Z"))
+            .withLatitude(31.741)
+            .withLatitudeMin(0.1)
+            .withLatitudeMax(0.4)
+            .withLongitude(-64.323)
+            .withLongitudeMin(-17.0)
+            .withLongitudeMax(-14.0)
+            .withOcean(ArgoOcean.ATLANTIC_OCEAN)
+            .withProfilerType("846")
+            .withInstitution("AO")
+            .withDateUpdate(Instant.parse("2026-06-24T06:05:15Z"))
+            .withParameters(Arrays.asList("params"))
+            .withAction(Action.UPDATE)
+            .withFileType(ArgoFileType.PROFILE_CORE)
+            .withProfileMode(ProfileMode.DELAYED_MODE)
+            .build());
+
+
+    // in results
+    datastore.updateIndex(MetadataRecord.builder()
+            .withFile("aoml/1901378/profiles/D1901378_001.nc")
+            .withFileName("D1901378_001.nc")
+            .withDac("aoml")
+            .withFloatId("1901378")
+            .withCycleNumber("001")
+            .withDirection("A")
+            .withParameterDataMode("RRRDRRD")
+            .withActionTimestamp(now)
+            .withDate(Instant.parse("2009-10-12T13:39:09Z"))
+            .withLatitude(31.6897)
+            .withLatitudeMin(0.1)
+            .withLatitudeMax(0.4)
+            .withLongitude(-64.2017)
+            .withLongitudeMin(-17.0)
+            .withLongitudeMax(-14.0)
+            .withOcean(ArgoOcean.ATLANTIC_OCEAN)
+            .withProfilerType("846")
+            .withInstitution("AO")
+            .withDateUpdate(Instant.parse("2026-06-24T06:05:15Z"))
+            .withParameters(Arrays.asList("params"))
+            .withAction(Action.UPDATE)
+            .withFileType(ArgoFileType.PROFILE_CORE)
+            .withProfileMode(ProfileMode.DELAYED_MODE)
+            .build());
+
+    MetadataRecordPage results = datastore.getCoreProfileIndexPage(DefaultIndexPageRequest.builder().withPageSize(2).withPageNumber(1).build());
+
+    assertEquals(DefaultMetadataRecordPage.builder()
+                    .withTotalRecords(3)
+                    .withPage(Arrays.asList(
+                            MetadataRecord.builder()
+                                    .withFile("aoml/13857/profiles/D13857_001.nc")
+                                    .withDate(Instant.parse("2025-10-10T14:00:00Z"))
+                                    .withLatitude(0.267)
+                                    .withLongitude(-16.032)
+                                    .withOcean(ArgoOcean.ATLANTIC_OCEAN)
+                                    .withProfilerType("845")
+                                    .withInstitution("AO")
+                                    .withParameters(Arrays.asList("params"))
+                                    .withParameterDataMode("D")
+                                    .withDateUpdate(Instant.parse("2025-10-10T14:00:00Z"))
+                                    .build(),
+                            MetadataRecord.builder()
+                                    .withFile("aoml/1901378/profiles/D1901378_001.nc")
+                                    .withDate(Instant.parse("2009-10-12T13:39:09Z"))
+                                    .withLatitude(31.6897)
+                                    .withLongitude(-64.2017)
+                                    .withOcean(ArgoOcean.ATLANTIC_OCEAN)
+                                    .withProfilerType("846")
+                                    .withInstitution("AO")
+                                    .withParameters(Arrays.asList("params"))
+                                    .withParameterDataMode("RRRDRRD")
+                                    .withDateUpdate(Instant.parse("2026-06-24T06:05:15Z"))
+                                    .build()
+                    ))
+                    .withIndexPageRequest(DefaultIndexPageRequest.builder().withPageNumber(1).withPageSize(2).build())
+                    .build(),
+            results);
+
+    results = datastore.getCoreProfileIndexPage(DefaultIndexPageRequest.builder().withPageSize(2).withPageNumber(2).build());
+
+    assertEquals(DefaultMetadataRecordPage.builder()
+                    .withTotalRecords(3)
+                    .withPage(Arrays.asList(
+                            MetadataRecord.builder()
+                                    .withFile("aoml/1901378/profiles/D1901378_003.nc")
+                                    .withDate(Instant.parse("2009-10-14T13:36:42Z"))
+                                    .withLatitude(31.741)
+                                    .withLongitude(-64.323)
+                                    .withOcean(ArgoOcean.ATLANTIC_OCEAN)
+                                    .withProfilerType("846")
+                                    .withInstitution("AO")
+                                    .withParameters(Arrays.asList("params"))
+                                    .withParameterDataMode("RRRDRRD")
+                                    .withDateUpdate(Instant.parse("2026-06-24T06:05:15Z"))
+                                    .build()
+                    ))
+                    .withIndexPageRequest(DefaultIndexPageRequest.builder().withPageNumber(2).withPageSize(2).build())
+                    .build(),
+            results);
+
+  }
+
+  @Test
+  public void testFindWeeklyProfileIndex() throws Exception {
+    Instant now = Instant.parse("2026-09-25T01:00:22Z");
+
+    // TODO: create two dates, one from past week and one from before
+    Instant t0 = Instant.now().minus(Duration.ofDays(8));
+    Instant t1 = Instant.now().minus(Duration.ofDays(5));
+
+    // should not be in results
+    datastore.updateIndex(MetadataRecord.builder()
+            .withFile("aoml/13857/profiles/D13857_001.nc")
+            .withFileName("D13857_001.nc")
+            .withDac("aoml")
+            .withFloatId("13857")
+            .withCycleNumber("001")
+            .withDirection("A")
+            .withParameterDataMode("D")
+            .withActionTimestamp(now)
+            .withDate(Instant.parse("2026-10-10T14:00:00Z"))
+            .withLatitude(0.267)
+            .withLatitudeMin(0.1)
+            .withLatitudeMax(0.4)
+            .withLongitude(-16.032)
+            .withLongitudeMin(-17.0)
+            .withLongitudeMax(-14.0)
+            .withOcean(ArgoOcean.ATLANTIC_OCEAN)
+            .withProfilerType("845")
+            .withInstitution("AO")
+            .withDateUpdate(t0) // older than week
+            .withParameters(Arrays.asList("params"))
+            .withAction(Action.UPDATE)
+            .withFileType(ArgoFileType.PROFILE_CORE)
+            .withProfileMode(ProfileMode.DELAYED_MODE)
+            .build());
+
+
+    // should be in results
+    datastore.updateIndex(MetadataRecord.builder()
+            .withFile("aoml/1901378/profiles/D1901378_002.nc")
+            .withFileName("D1901378_002.nc")
+            .withDac("aoml")
+            .withFloatId("1901378")
+            .withCycleNumber("002")
+            .withDirection("A")
+            .withParameterDataMode("RRRDRRD")
+            .withActionTimestamp(now)
+            .withDate(Instant.parse("2026-10-11T14:00:00Z"))
+            .withLatitude(31.741)
+            .withLatitudeMin(0.1)
+            .withLatitudeMax(0.4)
+            .withLongitude(-64.323)
+            .withLongitudeMin(-17.0)
+            .withLongitudeMax(-14.0)
+            .withOcean(ArgoOcean.ATLANTIC_OCEAN)
+            .withProfilerType("846")
+            .withInstitution("AO")
+            .withDateUpdate(t1) // younger than week
+            .withParameters(Arrays.asList("params"))
+            .withAction(Action.UPDATE)
+            .withFileType(ArgoFileType.PROFILE_CORE)
+            .withProfileMode(ProfileMode.DELAYED_MODE)
+            .build());
+
+    MetadataRecordPage results = datastore.getWeeklyProfileIndexPage(DefaultIndexPageRequest.builder().withPageSize(2).withPageNumber(1).build());
+
+    assertEquals(DefaultMetadataRecordPage.builder()
+                    .withTotalRecords(1)
+                    .withPage(Arrays.asList(
+                            MetadataRecord.builder()
+                                    .withFile("aoml/1901378/profiles/D1901378_002.nc")
+                                    .withDate(Instant.parse("2026-10-11T14:00:00Z"))
+                                    .withLatitude(31.741)
+                                    .withLongitude(-64.323)
+                                    .withOcean(ArgoOcean.ATLANTIC_OCEAN)
+                                    .withProfilerType("846")
+                                    .withInstitution("AO")
+                                    .withParameters(Arrays.asList("params"))
+                                    .withParameterDataMode("RRRDRRD")
+                                    .withDateUpdate(t1)
+                                    .build()
+                    ))
+                    .withIndexPageRequest(DefaultIndexPageRequest.builder().withPageNumber(1).withPageSize(2).build())
+                    .build(),
+            results);
+  }
+
+  @Disabled
+  public void testFindGlobalMetaIndex() throws Exception {
+    // Issue: https://github.com/CI-CMG/argonaut/issues/98
+
+    Instant now = Instant.parse("2026-09-25T01:00:00Z");
+
+    // should be in results, core profile
+//    datastore.updateIndex(MetadataRecord.builder()
+//            .withFile("aoml/13857/13857_meta.nc")
+//            .withFileName("13857_meta.nc")
+//            .withDac("aoml")
+//            .withFloatId("13857")
+//            .withCycleNumber("001")
+//            .withDirection("A")
+//            .withParameterDataMode("D")
+//            .withActionTimestamp(now)
+//            .withDate(Instant.parse("2018-10-11T20:00:14Z"))
+//            .withLatitude(0.267)
+//            .withLatitudeMin(0.1)
+//            .withLatitudeMax(0.4)
+//            .withLongitude(-16.032)
+//            .withLongitudeMin(-17.0)
+//            .withLongitudeMax(-14.0)
+//            .withOcean(ArgoOcean.ATLANTIC_OCEAN)
+//            .withProfilerType("845")
+//            .withInstitution("AO")
+//            .withDateUpdate(Instant.parse("2025-10-10T14:00:00Z"))
+//            .withParameters(Arrays.asList("params"))
+//            .withAction(Action.UPDATE)
+//            .withFileType(ArgoFileType.METADATA)
+//            .withProfileMode(ProfileMode.DELAYED_MODE)
+//            .build());
+    datastore.updateIndex(MetadataRecord.builder()
+            .withFile("aoml/13857/13857_meta.nc")
+            .withFileName("13857_meta.nc")
+            .withDac("aoml")
+            .withFloatId("13857")
+            .withCycleNumber("001")
+            .withDirection("A")
+            .withParameterDataMode("D")
+            .withActionTimestamp(now)
+            .withDate(Instant.parse("2025-10-10T14:00:00Z"))
+            .withLatitude(0.267)
+            .withLatitudeMin(0.1)
+            .withLatitudeMax(0.4)
+            .withLongitude(-16.032)
+            .withLongitudeMin(-17.0)
+            .withLongitudeMax(-14.0)
+            .withOcean(ArgoOcean.ATLANTIC_OCEAN)
+            .withProfilerType("845")
+            .withInstitution("AO")
+            .withDateUpdate(Instant.parse("2025-10-10T14:00:00Z"))
+            .withParameters(Arrays.asList("params"))
+            .withAction(Action.UPDATE)
+            .withFileType(ArgoFileType.METADATA)
+            .withProfileMode(ProfileMode.DELAYED_MODE)
+            .build());
+
+
+    MetadataRecordPage results = datastore.getGlobalMetaIndexPage(DefaultIndexPageRequest.builder().withPageSize(1).withPageNumber(1).build());
+//    MetadataRecordPage results = datastore.getGlobalMetaIndexPage(DefaultIndexPageRequest.builder().withPageSize(1).withPageNumber(1).build());
+
+    assertEquals(DefaultMetadataRecordPage.builder()
+                    .withTotalRecords(3)
+                    .withPage(Arrays.asList(
+                            MetadataRecord.builder()
+                                    .withFile("aoml/13857/profiles/D13857_001.nc")
+                                    .withDate(Instant.parse("2025-10-10T14:00:00Z"))
+                                    .withLatitude(0.267)
+                                    .withLongitude(-16.032)
+                                    .withOcean(ArgoOcean.ATLANTIC_OCEAN)
+                                    .withProfilerType("845")
+                                    .withInstitution("AO")
+                                    .withParameters(Arrays.asList("params"))
+                                    .withParameterDataMode("D")
+                                    .withDateUpdate(Instant.parse("2025-10-10T14:00:00Z"))
+                                    .build(),
+                            MetadataRecord.builder()
+                                    .withFile("aoml/1901378/profiles/D1901378_001.nc")
+                                    .withDate(Instant.parse("2009-10-12T13:39:09Z"))
+                                    .withLatitude(31.6897)
+                                    .withLongitude(-64.2017)
+                                    .withOcean(ArgoOcean.ATLANTIC_OCEAN)
+                                    .withProfilerType("846")
+                                    .withInstitution("AO")
+                                    .withParameters(Arrays.asList("params"))
+                                    .withParameterDataMode("RRRDRRD")
+                                    .withDateUpdate(Instant.parse("2026-06-24T06:05:15Z"))
+                                    .build()
+                    ))
+                    .withIndexPageRequest(DefaultIndexPageRequest.builder().withPageNumber(1).withPageSize(2).build())
+                    .build(),
+            results);
+
+    results = datastore.getGlobalMetaIndexPage(DefaultIndexPageRequest.builder().withPageSize(2).withPageNumber(2).build());
+
+    assertEquals(DefaultMetadataRecordPage.builder()
+                    .withTotalRecords(3)
+                    .withPage(Arrays.asList(
+                            MetadataRecord.builder()
+                                    .withFile("aoml/1901378/profiles/D1901378_003.nc")
+                                    .withDate(Instant.parse("2009-10-14T13:36:42Z"))
+                                    .withLatitude(31.741)
+                                    .withLongitude(-64.323)
+                                    .withOcean(ArgoOcean.ATLANTIC_OCEAN)
+                                    .withProfilerType("846")
+                                    .withInstitution("AO")
+                                    .withParameters(Arrays.asList("params"))
+                                    .withParameterDataMode("RRRDRRD")
+                                    .withDateUpdate(Instant.parse("2026-06-24T06:05:15Z"))
+                                    .build()
+                    ))
+                    .withIndexPageRequest(DefaultIndexPageRequest.builder().withPageNumber(2).withPageSize(2).build())
+                    .build(),
+            results);
+
+  }
 }

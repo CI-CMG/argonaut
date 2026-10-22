@@ -30,10 +30,9 @@ import edu.colorado.cires.argonaut.metadata.jpa.entity.ArgoFloatTechnicalInfoEnt
 import edu.colorado.cires.argonaut.metadata.jpa.entity.ArgoFloatTrajectoryEntity;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
-import java.time.Instant;
-import java.time.ZoneId;
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
+import jakarta.persistence.TypedQuery;
+
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -728,6 +727,38 @@ class Finder {
           .setMaxResults(pageRequest.getPageSize())
           .setFirstResult((pageRequest.getPageNumber() - 1) * pageRequest.getPageSize())
           .getResultList();
+
+      return createMetadataRecordPage(count, pageResults, Finder::fromProfileEntity, pageRequest);
+    }
+  }
+
+  // only selects from the past weeks data
+  MetadataRecordPage getWeeklyProfileIndexPage(IndexPageRequest pageRequest) {
+
+    try (EntityManager em = entityManagerFactory.createEntityManager()) {
+      ZonedDateTime oneWeekAgo = Instant.now().minus(Duration.ofDays(7)).atZone(ZoneOffset.UTC);
+      long count = em.createQuery(
+              """
+                SELECT COUNT(p) FROM ArgoFloatProfileEntity p
+                WHERE p.fileStatus = ?1 AND p.fileType = ?2 AND p.dateUpdate >= ?3
+              """, Long.class)
+              .setParameter(1, "ACTIVE")
+              .setParameter(2, "PROFILE_CORE")
+              .setParameter(3, oneWeekAgo)
+              .getSingleResult();
+
+      List<ArgoFloatProfileEntity> pageResults = em.createQuery(
+                      """
+                            SELECT p FROM ArgoFloatProfileEntity p
+                            WHERE p.fileStatus = ?1 AND p.fileType = ?2 AND p.dateUpdate >= ?3
+                            ORDER BY p.filePath
+                          """, ArgoFloatProfileEntity.class)
+              .setParameter(1, "ACTIVE")
+              .setParameter(2, "PROFILE_CORE")
+              .setParameter(3, oneWeekAgo)
+              .setMaxResults(pageRequest.getPageSize())
+              .setFirstResult((pageRequest.getPageNumber() - 1) * pageRequest.getPageSize())
+              .getResultList();
 
       return createMetadataRecordPage(count, pageResults, Finder::fromProfileEntity, pageRequest);
     }
