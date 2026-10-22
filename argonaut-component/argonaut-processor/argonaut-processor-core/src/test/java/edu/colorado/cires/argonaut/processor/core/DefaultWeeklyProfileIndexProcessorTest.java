@@ -52,9 +52,9 @@ public class DefaultWeeklyProfileIndexProcessorTest {
     accessPathDocumentation.put("HTTP root number 1", "https://example.com/argo/dac");
     accessPathDocumentation.put("HTTP root number 2", "https://foo.bar/argo/dac");
 
-    Instant now = Instant.parse("2026-09-28T20:24:02Z");
+    Instant now = Instant.parse("2026-10-22T03:20:01Z");
 
-    DefaultCoreProfileIndexProcessor processor = new DefaultCoreProfileIndexProcessor();
+    DefaultWeeklyProfileIndexProcessor processor = new DefaultWeeklyProfileIndexProcessor();
     processor.setGdacNode("TEST");
     processor.setAccessPathDocumentation(accessPathDocumentation);
     processor.setMetadataStore(metadataStore);
@@ -63,7 +63,7 @@ public class DefaultWeeklyProfileIndexProcessorTest {
     processor.setLocalTempDir(localTempDir);
     processor.setNowGenerator(() -> now);
 
-    when(metadataStore.getCoreProfileIndexPage(eq(DefaultIndexPageRequest.builder().withPageNumber(1).withPageSize(2).build())))
+    when(metadataStore.getWeeklyProfileIndexPage(eq(DefaultIndexPageRequest.builder().withPageNumber(1).withPageSize(2).build())))
         .thenReturn(DefaultMetadataRecordPage.builder()
             .withTotalRecords(3)
             .withPage(Arrays.asList(
@@ -91,7 +91,7 @@ public class DefaultWeeklyProfileIndexProcessorTest {
             .withIndexPageRequest(DefaultIndexPageRequest.builder().withPageNumber(1).withPageSize(2).build())
             .build());
 
-    when(metadataStore.getCoreProfileIndexPage(eq(DefaultIndexPageRequest.builder().withPageNumber(2).withPageSize(2).build())))
+    when(metadataStore.getWeeklyProfileIndexPage(eq(DefaultIndexPageRequest.builder().withPageNumber(2).withPageSize(2).build())))
         .thenReturn(DefaultMetadataRecordPage.builder()
             .withTotalRecords(3)
             .withPage(Arrays.asList(
@@ -111,13 +111,13 @@ public class DefaultWeeklyProfileIndexProcessorTest {
 
     processor.generateIndex();
 
-    String expected = Files.readString(Paths.get("src/test/resources/ar_index_global_prof.txt"), StandardCharsets.UTF_8);
-    assertTrue(Files.exists(outputDir.resolve("ar_index_global_prof.txt")));
-    assertEquals(expected, Files.readString(outputDir.resolve("ar_index_global_prof.txt"), StandardCharsets.UTF_8));
+    String expected = Files.readString(Paths.get("src/test/resources/ar_index_this_week_prof.txt"), StandardCharsets.UTF_8);
+    assertTrue(Files.exists(outputDir.resolve("ar_index_this_week_prof.txt")));
+    assertEquals(expected, Files.readString(outputDir.resolve("ar_index_this_week_prof.txt"), StandardCharsets.UTF_8));
 
-    assertTrue(Files.exists(outputDir.resolve("ar_index_global_prof.txt.gz")));
+    assertTrue(Files.exists(outputDir.resolve("ar_index_this_week_prof.txt.gz")));
     ByteArrayOutputStream out = new ByteArrayOutputStream();
-    try(InputStream in = new GZIPInputStream(Files.newInputStream(outputDir.resolve("ar_index_global_prof.txt.gz")))) {
+    try(InputStream in = new GZIPInputStream(Files.newInputStream(outputDir.resolve("ar_index_this_week_prof.txt.gz")))) {
       IOUtils.copy(in, out);
     }
 
