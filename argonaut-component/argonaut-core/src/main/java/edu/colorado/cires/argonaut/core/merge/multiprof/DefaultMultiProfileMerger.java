@@ -11,8 +11,10 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -120,7 +122,7 @@ public class DefaultMultiProfileMerger implements MultiProfileMerger {
 
   public static List<LocalPathSupplier> orderByJulianDateDescending(List<LocalPathSupplier> inputFileSuppliers) {
     return inputFileSuppliers.stream().sorted((lps1, lps2) -> {
-      if (lps1.getJulD().equals(lps2.getJulD())) {
+      if (Objects.equals(lps1.getJulD(), lps2.getJulD())) {
         String file1 = lps1.getFileName();
         String file2 = lps2.getFileName();
         Matcher matcher1 = FILE_NAME_REGEX.matcher(file1);
@@ -148,7 +150,7 @@ public class DefaultMultiProfileMerger implements MultiProfileMerger {
           return Long.compare(floatId1, floatId2);
         }
       } else {
-        return lps2.getJulD().compareTo(lps1.getJulD());
+        return Objects.compare(lps2.getJulD(), lps1.getJulD(), Comparator.nullsLast(Comparator.naturalOrder()));
       }
 
     }).toList();
@@ -156,7 +158,7 @@ public class DefaultMultiProfileMerger implements MultiProfileMerger {
 
   public static List<LocalPathSupplier> orderByJulianDateAcending(List<LocalPathSupplier> inputFileSuppliers) {
     return inputFileSuppliers.stream().sorted((lps1, lps2) -> {
-      if (lps1.getJulD().equals(lps2.getJulD())) {
+      if (Objects.equals(lps1.getJulD(), lps2.getJulD())) {
         String file1 = lps1.getFileName();
         String file2 = lps2.getFileName();
         Matcher matcher1 = FILE_NAME_REGEX.matcher(file1);
@@ -184,7 +186,7 @@ public class DefaultMultiProfileMerger implements MultiProfileMerger {
           return Long.compare(floatId1, floatId2);
         }
       } else {
-        return lps1.getJulD().compareTo(lps2.getJulD());
+        return Objects.compare(lps1.getJulD(), lps2.getJulD(), Comparator.nullsLast(Comparator.naturalOrder()));
       }
 
     }).toList();
@@ -211,7 +213,7 @@ public class DefaultMultiProfileMerger implements MultiProfileMerger {
       String d2 = matcher2.group(3).isEmpty() ? "A" : "D";
 
       if (c1 == c2) {
-        if (lps1.getJulD().equals(lps2.getJulD())) {
+        if (Objects.equals(lps1.getJulD(), lps2.getJulD())) {
           if (d2.equals(d1)) {
             return Long.compare(floatId1, floatId2);
           } else {
@@ -219,7 +221,7 @@ public class DefaultMultiProfileMerger implements MultiProfileMerger {
             return d2.compareTo(d1);
           }
         } else {
-          return lps1.getJulD().compareTo(lps2.getJulD());
+          return Objects.compare(lps1.getJulD(), lps2.getJulD(), Comparator.nullsLast(Comparator.naturalOrder()));
         }
       } else {
         return Integer.compare(c1, c2);

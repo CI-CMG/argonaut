@@ -30,6 +30,11 @@ public class JpaAuditStore implements AuditStore {
       EntityTransaction tx = em.getTransaction();
       tx.begin();
       try {
+        String message = auditMessage.getMessage();
+        if (message.length() > 255) {
+          message = message.substring(0, 255);
+        }
+
         ArgonautAuditEntity entity = new ArgonautAuditEntity();
         entity.setId(UUID.randomUUID());
         entity.setTraceId(auditMessage.getTraceId());
@@ -37,7 +42,7 @@ public class JpaAuditStore implements AuditStore {
         entity.setDacName(auditMessage.getDac());
         entity.setEventType(auditMessage.getEventType().toString());
         entity.setProcessor(auditMessage.getProcessor().toString());
-        entity.setMessage(auditMessage.getMessage());
+        entity.setMessage(message);
         entity.setStackTrace(auditMessage.getStackTrace());
         entity.setFileName(auditMessage.getFileName());
         em.merge(entity);
