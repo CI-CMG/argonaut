@@ -605,6 +605,15 @@ class Finder {
       .build();
   }
 
+  private static MetadataRecord fromMetadataEntity(ArgoFloatMetadataEntity metadataEntity) {
+    return MetadataRecord.builder()
+            .withFile(metadataEntity.getFile())
+            .withProfilerType(metadataEntity.getProfilerType())
+            .withInstitution(metadataEntity.getInstitution())
+            .withDateUpdate(metadataEntity.getDateUpdate() == null ? null : metadataEntity.getDateUpdate().toInstant())
+            .build();
+  }
+
   private static <T> DefaultMetadataRecordPage createMetadataRecordPage(long count, List<T> pageResults, Function<T, MetadataRecord> transform, IndexPageRequest pageRequest) {
     return DefaultMetadataRecordPage.builder()
         .withTotalRecords(count)
@@ -732,14 +741,13 @@ class Finder {
     }
   }
 
-  // only selects from the past weeks data
   MetadataRecordPage getWeeklyProfileIndexPage(IndexPageRequest pageRequest) {
 
     try (EntityManager em = entityManagerFactory.createEntityManager()) {
       ZonedDateTime oneWeekAgo = Instant.now().minus(Duration.ofDays(7)).atZone(ZoneOffset.UTC);
       long count = em.createQuery(
               """
-                SELECT COUNT(p) FROM ArgoFloatProfileEntity p
+                SELECT COUNT(p.filePath) FROM ArgoFloatProfileEntity p
                 WHERE p.fileStatus = ?1 AND p.fileType = ?2 AND p.dateUpdate >= ?3
               """, Long.class)
               .setParameter(1, "ACTIVE")
@@ -767,24 +775,24 @@ class Finder {
   MetadataRecordPage getGlobalMetaIndexPage(IndexPageRequest pageRequest) {
 
     try (EntityManager em = entityManagerFactory.createEntityManager()) {
-      long count = em.createQuery(
-                      """
-                          SELECT COUNT(profile.filePath) FROM ArgoFloatProfileEntity profile 
-                          WHERE profile.fileStatus = 'ACTIVE' AND profile.fileType = 'METADATA'
-                          """, Long.class)
+      long count = em.createQuery( //  AND m.fileType = 'METADATA'
+      """
+                SELECT COUNT(m) FROM ArgoFloatMetadataEntity m
+                WHERE m.fileStatus = 'ACTIVE'
+              """, Long.class)
               .getSingleResult();
 
-      List<ArgoFloatProfileEntity> pageResults = em.createQuery(
+      // //                            ORDER BY profile.filePath
+      List<ArgoFloatMetadataEntity> pageResults = em.createQuery( //  AND profile.fileType = 'METADATA'
                       """
-                            SELECT profile FROM ArgoFloatProfileEntity profile 
-                            WHERE profile.fileStatus = 'ACTIVE' AND profile.fileType = 'METADATA'
-                            ORDER BY profile.filePath
-                          """, ArgoFloatProfileEntity.class)
+                            SELECT p FROM ArgoFloatMetadataEntity p
+                            WHERE p.fileStatus = 'ACTIVE'
+                          """, ArgoFloatMetadataEntity.class)
               .setMaxResults(pageRequest.getPageSize())
               .setFirstResult((pageRequest.getPageNumber() - 1) * pageRequest.getPageSize())
               .getResultList();
 
-      return createMetadataRecordPage(count, pageResults, Finder::fromProfileEntity, pageRequest);
+      return createMetadataRecordPage(count, pageResults, Finder::fromMetadataEntity, pageRequest);
     }
   }
 }
