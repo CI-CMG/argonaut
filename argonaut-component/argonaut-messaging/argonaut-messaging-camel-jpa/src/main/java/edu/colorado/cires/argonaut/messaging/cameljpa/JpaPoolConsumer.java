@@ -83,7 +83,6 @@ public class JpaPoolConsumer extends JpaConsumer {
           } catch (PersistenceException e) {
             cause = e;
           } catch (Exception e) {
-            LOG.error("Error caught when processing message", e);
             cause = new PersistenceException(e);
           }
 
