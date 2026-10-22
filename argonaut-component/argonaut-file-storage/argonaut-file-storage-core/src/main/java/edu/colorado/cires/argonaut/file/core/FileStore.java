@@ -28,5 +28,9 @@ public interface FileStore {
 
   boolean fileExists(String path);
 
-  List<String> listFileNamesInDirectory(String pathPrefix);
+  default List<String> listFileNamesInDirectory(String pathPrefix) {
+    return listFileNamesInDirectory(pathPrefix, false);
+  }
+
+  List<String> listFileNamesInDirectory(String pathPrefix, boolean includeDirectories);
 }

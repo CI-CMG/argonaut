@@ -1,5 +1,6 @@
 package edu.colorado.cires.argonaut.file.local;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -7,6 +8,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.List;
+import java.util.TreeSet;
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -185,6 +189,48 @@ public class LocalFileStoreTest {
     });
 
     assertFalse(Files.exists(moved.resolve("1")));
+
+
+
+  }
+
+
+  @Test
+  public void testListFiles() throws Exception{
+    LocalFileStore fileStore = new LocalFileStore();
+    fileStore.setRootPath(rootPath);
+    Path test1 = rootPath.resolve("foo/bar/cat/dog/woof.txt");
+    Path test12 = rootPath.resolve("foo/bar/cat/dog/bark.txt");
+    Path test2 = rootPath.resolve("foo/bar/cat/meow.txt");
+    Path test3 = rootPath.resolve("a/b/c/d.txt");
+    Path nogo = otherPath.resolve("1/2/3/4.txt");
+    Files.createDirectories(test1.getParent());
+    Files.createDirectories(test3.getParent());
+    Files.createDirectories(nogo.getParent());
+    Files.createFile(test1);
+    Files.createFile(test12);
+    Files.createFile(test2);
+    Files.createFile(test3);
+    Files.createFile(nogo);
+
+    List<String> files = fileStore.listFileNamesInDirectory(fileStore.appendToPath(fileStore.getRoot(), "foo", "bar", "cat", "dog"));
+    assertEquals(new TreeSet<>(Arrays.asList("woof.txt", "bark.txt")), new TreeSet<>(files));
+
+    files = fileStore.listFileNamesInDirectory(fileStore.appendToPath(fileStore.getRoot(), "foo", "bar", "cat"));
+    assertEquals(new TreeSet<>(Arrays.asList("meow.txt")), new TreeSet<>(files));
+
+    files = fileStore.listFileNamesInDirectory(fileStore.appendToPath(fileStore.getRoot(), "foo", "bar"));
+    assertTrue(files.isEmpty());
+
+
+    files = fileStore.listFileNamesInDirectory(fileStore.appendToPath(fileStore.getRoot(), "foo", "bar", "cat", "dog"), true);
+    assertEquals(new TreeSet<>(Arrays.asList("woof.txt", "bark.txt")), new TreeSet<>(files));
+
+    files = fileStore.listFileNamesInDirectory(fileStore.appendToPath(fileStore.getRoot(), "foo", "bar", "cat"), true);
+    assertEquals(new TreeSet<>(Arrays.asList("meow.txt", "dog")), new TreeSet<>(files));
+
+    files = fileStore.listFileNamesInDirectory(fileStore.appendToPath(fileStore.getRoot(), "foo", "bar"), true);
+    assertEquals(new TreeSet<>(Arrays.asList("cat")), new TreeSet<>(files));
 
 
 
