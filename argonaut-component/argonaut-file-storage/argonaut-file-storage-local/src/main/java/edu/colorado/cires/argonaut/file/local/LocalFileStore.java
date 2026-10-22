@@ -159,7 +159,7 @@ public class LocalFileStore implements FileStore {
     if (dir == null) {
       return;
     }
-    if(stopDeleteEmptyDirsAt != null && stopDeleteEmptyDirsAt.equals(dir.getFileName().toString())) {
+    if(dir.getFileName().toString().equals(stopDeleteEmptyDirsAt)) {
       return;
     }
     Path rootAbsolutePath = rootPath.toAbsolutePath().normalize();
