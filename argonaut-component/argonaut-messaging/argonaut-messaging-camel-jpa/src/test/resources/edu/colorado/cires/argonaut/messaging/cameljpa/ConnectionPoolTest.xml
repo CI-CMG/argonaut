@@ -79,7 +79,6 @@
 
     <route id="queue2">
       <from uri="jpaPool:edu.colorado.cires.argonaut.messaging.cameljpa.ArgonautMessageEntity?greedy=true&amp;maximumResults=1&amp;parameters=#queue2&amp;namedQuery=dequeue"/>
-<!--      <bean ref="entityManagerProcessor"/>-->
       <bean ref="jsonMessageTranslator" method="receive"/>
       <bean ref="jsonMessageTranslator" method="send('queue3', ${body})"/>
       <to uri="jpaPool:edu.colorado.cires.argonaut.messaging.cameljpa.ArgonautMessageEntity?usePassedInEntityManager=true"/>
@@ -87,7 +86,6 @@
 
     <route id="queue3">
       <from uri="jpaPool:edu.colorado.cires.argonaut.messaging.cameljpa.ArgonautMessageEntity?greedy=true&amp;maximumResults=1&amp;parameters=#queue3&amp;namedQuery=dequeue"/>
-<!--      <bean ref="entityManagerProcessor"/>-->
       <bean ref="jsonMessageTranslator" method="receive"/>
       <log message="${body}"/>
       <to uri="mock:mock"/>
