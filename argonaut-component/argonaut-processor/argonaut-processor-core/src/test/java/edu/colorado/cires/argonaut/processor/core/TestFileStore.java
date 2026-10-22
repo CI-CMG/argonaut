@@ -11,6 +11,7 @@ import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 class TestFileStore implements FileStore {
@@ -119,14 +120,15 @@ class TestFileStore implements FileStore {
   }
 
   @Override
-  public List<String> listFileNamesInDirectory(String pathPrefix) {
+  public List<String> listFileNamesInDirectory(String pathPrefix, boolean includeDirectories) {
     Path path = validatePath(pathPrefix);
     if (!Files.isDirectory(path)) {
       return Collections.emptyList();
     }
+    Predicate<Path> filter = includeDirectories ? (p) -> Files.isDirectory(p) || Files.isRegularFile(p) : Files::isRegularFile;
     try (Stream<Path> stream = Files.list(path)) {
       return stream
-          .filter(Files::isRegularFile)
+          .filter(filter)
           .map(Path::getFileName)
           .map(Path::toString)
           .toList();
