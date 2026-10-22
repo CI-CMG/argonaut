@@ -26,6 +26,14 @@
       <from uri="cron:aoml-report-cron?schedule={{dac.report.cron}}"/>
       <bean ref="submissionReportTrigger" method="trigger('aoml')"/>
     </route>
+    <route id="aoml-submitted-cleanup">
+      <from uri="cron:aoml-submitted-cleanup-cron?schedule={{submitted-cleanup.cron}}"/>
+      <bean ref="submissionCleanupProcessor" method="trigger('aoml', {{submitted-cleanup.older-than-days}})"/>
+    </route>
+    <route id="aoml-rejected-cleanup">
+      <from uri="cron:aoml-rejected-cleanup-cron?schedule={{rejected-cleanup.cron}}"/>
+      <bean ref="rejectedSubmissionCleanupProcessor" method="trigger('aoml', {{rejected-cleanup.older-than-days}})"/>
+    </route>
 
     <route id="bodc-dac-submission">
       <errorHandler>
@@ -44,6 +52,14 @@
     <route id="bodc-dac-submission-report">
       <from uri="cron:bodc-report-cron?schedule={{dac.report.cron}}"/>
       <bean ref="submissionReportTrigger" method="trigger('bodc')"/>
+    </route>
+    <route id="bodc-submitted-cleanup">
+      <from uri="cron:bodc-submitted-cleanup-cron?schedule={{submitted-cleanup.cron}}"/>
+      <bean ref="submissionCleanupProcessor" method="trigger('bodc', {{submitted-cleanup.older-than-days}})"/>
+    </route>
+    <route id="bodc-rejected-cleanup">
+      <from uri="cron:bodc-rejected-cleanup-cron?schedule={{rejected-cleanup.cron}}"/>
+      <bean ref="rejectedSubmissionCleanupProcessor" method="trigger('bodc', {{rejected-cleanup.older-than-days}})"/>
     </route>
 
     <route id="coriolis-dac-submission">
@@ -64,6 +80,14 @@
       <from uri="cron:coriolis-report-cron?schedule={{dac.report.cron}}"/>
       <bean ref="submissionReportTrigger" method="trigger('coriolis')"/>
     </route>
+    <route id="coriolis-submitted-cleanup">
+      <from uri="cron:coriolis-submitted-cleanup-cron?schedule={{submitted-cleanup.cron}}"/>
+      <bean ref="submissionCleanupProcessor" method="trigger('coriolis', {{submitted-cleanup.older-than-days}})"/>
+    </route>
+    <route id="coriolis-rejected-cleanup">
+      <from uri="cron:coriolis-rejected-cleanup-cron?schedule={{rejected-cleanup.cron}}"/>
+      <bean ref="rejectedSubmissionCleanupProcessor" method="trigger('coriolis', {{rejected-cleanup.older-than-days}})"/>
+    </route>
 
     <route id="csio-dac-submission">
       <errorHandler>
@@ -82,6 +106,14 @@
     <route id="csio-dac-submission-report">
       <from uri="cron:csio-report-cron?schedule={{dac.report.cron}}"/>
       <bean ref="submissionReportTrigger" method="trigger('csio')"/>
+    </route>
+    <route id="csio-submitted-cleanup">
+      <from uri="cron:csio-submitted-cleanup-cron?schedule={{submitted-cleanup.cron}}"/>
+      <bean ref="submissionCleanupProcessor" method="trigger('csio', {{submitted-cleanup.older-than-days}})"/>
+    </route>
+    <route id="csio-rejected-cleanup">
+      <from uri="cron:csio-rejected-cleanup-cron?schedule={{rejected-cleanup.cron}}"/>
+      <bean ref="rejectedSubmissionCleanupProcessor" method="trigger('csio', {{rejected-cleanup.older-than-days}})"/>
     </route>
 
     <route id="csiro-dac-submission">
@@ -102,6 +134,14 @@
       <from uri="cron:csiro-report-cron?schedule={{dac.report.cron}}"/>
       <bean ref="submissionReportTrigger" method="trigger('csiro')"/>
     </route>
+    <route id="csiro-submitted-cleanup">
+      <from uri="cron:csiro-submitted-cleanup-cron?schedule={{submitted-cleanup.cron}}"/>
+      <bean ref="submissionCleanupProcessor" method="trigger('csiro', {{submitted-cleanup.older-than-days}})"/>
+    </route>
+    <route id="csiro-rejected-cleanup">
+      <from uri="cron:csiro-rejected-cleanup-cron?schedule={{rejected-cleanup.cron}}"/>
+      <bean ref="rejectedSubmissionCleanupProcessor" method="trigger('csiro', {{rejected-cleanup.older-than-days}})"/>
+    </route>
 
     <route id="incois-dac-submission">
       <errorHandler>
@@ -120,6 +160,14 @@
     <route id="incois-dac-submission-report">
       <from uri="cron:incois-report-cron?schedule={{dac.report.cron}}"/>
       <bean ref="submissionReportTrigger" method="trigger('incois')"/>
+    </route>
+    <route id="incois-submitted-cleanup">
+      <from uri="cron:incois-submitted-cleanup-cron?schedule={{submitted-cleanup.cron}}"/>
+      <bean ref="submissionCleanupProcessor" method="trigger('incois', {{submitted-cleanup.older-than-days}})"/>
+    </route>
+    <route id="incois-rejected-cleanup">
+      <from uri="cron:incois-rejected-cleanup-cron?schedule={{rejected-cleanup.cron}}"/>
+      <bean ref="rejectedSubmissionCleanupProcessor" method="trigger('incois', {{rejected-cleanup.older-than-days}})"/>
     </route>
 
     <route id="jma-dac-submission">
@@ -140,6 +188,14 @@
       <from uri="cron:jma-report-cron?schedule={{dac.report.cron}}"/>
       <bean ref="submissionReportTrigger" method="trigger('jma')"/>
     </route>
+    <route id="jma-submitted-cleanup">
+      <from uri="cron:jma-submitted-cleanup-cron?schedule={{submitted-cleanup.cron}}"/>
+      <bean ref="submissionCleanupProcessor" method="trigger('jma', {{submitted-cleanup.older-than-days}})"/>
+    </route>
+    <route id="jma-rejected-cleanup">
+      <from uri="cron:jma-rejected-cleanup-cron?schedule={{rejected-cleanup.cron}}"/>
+      <bean ref="rejectedSubmissionCleanupProcessor" method="trigger('jma', {{rejected-cleanup.older-than-days}})"/>
+    </route>
 
     <route id="kiost-dac-submission">
       <errorHandler>
@@ -158,6 +214,14 @@
     <route id="kiost-dac-submission-report">
       <from uri="cron:kiost-report-cron?schedule={{dac.report.cron}}"/>
       <bean ref="submissionReportTrigger" method="trigger('kiost')"/>
+    </route>
+    <route id="kiost-submitted-cleanup">
+      <from uri="cron:kiost-submitted-cleanup-cron?schedule={{submitted-cleanup.cron}}"/>
+      <bean ref="submissionCleanupProcessor" method="trigger('kiost', {{submitted-cleanup.older-than-days}})"/>
+    </route>
+    <route id="kiost-rejected-cleanup">
+      <from uri="cron:kiost-rejected-cleanup-cron?schedule={{rejected-cleanup.cron}}"/>
+      <bean ref="rejectedSubmissionCleanupProcessor" method="trigger('kiost', {{rejected-cleanup.older-than-days}})"/>
     </route>
 
     <route id="kma-dac-submission">
@@ -178,6 +242,14 @@
       <from uri="cron:kma-report-cron?schedule={{dac.report.cron}}"/>
       <bean ref="submissionReportTrigger" method="trigger('kma')"/>
     </route>
+    <route id="kma-submitted-cleanup">
+      <from uri="cron:kma-submitted-cleanup-cron?schedule={{submitted-cleanup.cron}}"/>
+      <bean ref="submissionCleanupProcessor" method="trigger('kma', {{submitted-cleanup.older-than-days}})"/>
+    </route>
+    <route id="kma-rejected-cleanup">
+      <from uri="cron:kma-rejected-cleanup-cron?schedule={{rejected-cleanup.cron}}"/>
+      <bean ref="rejectedSubmissionCleanupProcessor" method="trigger('kma', {{rejected-cleanup.older-than-days}})"/>
+    </route>
 
     <route id="meds-dac-submission">
       <errorHandler>
@@ -196,6 +268,14 @@
     <route id="meds-dac-submission-report">
       <from uri="cron:meds-report-cron?schedule={{dac.report.cron}}"/>
       <bean ref="submissionReportTrigger" method="trigger('meds')"/>
+    </route>
+    <route id="meds-submitted-cleanup">
+      <from uri="cron:meds-submitted-cleanup-cron?schedule={{submitted-cleanup.cron}}"/>
+      <bean ref="submissionCleanupProcessor" method="trigger('meds', {{submitted-cleanup.older-than-days}})"/>
+    </route>
+    <route id="meds-rejected-cleanup">
+      <from uri="cron:meds-rejected-cleanup-cron?schedule={{rejected-cleanup.cron}}"/>
+      <bean ref="rejectedSubmissionCleanupProcessor" method="trigger('meds', {{rejected-cleanup.older-than-days}})"/>
     </route>
 
     <route id="nmdis-dac-submission">
@@ -216,9 +296,17 @@
       <from uri="cron:nmdis-report-cron?schedule={{dac.report.cron}}"/>
       <bean ref="submissionReportTrigger" method="trigger('nmdis')"/>
     </route>
+    <route id="nmdis-submitted-cleanup">
+      <from uri="cron:nmdis-submitted-cleanup-cron?schedule={{submitted-cleanup.cron}}"/>
+      <bean ref="submissionCleanupProcessor" method="trigger('nmdis', {{submitted-cleanup.older-than-days}})"/>
+    </route>
+    <route id="nmdis-rejected-cleanup">
+      <from uri="cron:nmdis-rejected-cleanup-cron?schedule={{rejected-cleanup.cron}}"/>
+      <bean ref="rejectedSubmissionCleanupProcessor" method="trigger('nmdis', {{rejected-cleanup.older-than-days}})"/>
+    </route>
 
     <!-- DAC submission directory template -->
-    <!-- Replace DAC-CODE with the short name of the DAC.  Ex. 'aoml'.  6 places. -->
+    <!-- Replace DAC-CODE with the short name of the DAC.  Ex. 'aoml'.-->
     <!--
     <route id="DAC-CODE-dac-submission">
       <errorHandler>
@@ -237,6 +325,14 @@
     <route id="DAC-CODE-submission-report">
       <from uri="cron:DAC-CODE-report-cron?schedule={{dac.report.cron}}"/>
       <bean ref="submissionReportTrigger" method="trigger('DAC-CODE')"/>
+    </route>
+    <route id="DAC-CODE-submitted-cleanup">
+      <from uri="cron:DAC-CODE-submitted-cleanup-cron?schedule={{submitted-cleanup.cron}}"/>
+      <bean ref="submissionCleanupProcessor" method="trigger('CODE', {{submitted-cleanup.older-than-days}})"/>
+    </route>
+    <route id="DAC-CODE-rejected-cleanup">
+      <from uri="cron:DAC-CODE-rejected-cleanup-cron?schedule={{rejected-cleanup.cron}}"/>
+      <bean ref="rejectedSubmissionCleanupProcessor" method="trigger('DAC-CODE', {{rejected-cleanup.older-than-days}})"/>
     </route>
     -->
 

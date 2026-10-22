@@ -27,7 +27,18 @@ class TestFileStore implements FileStore {
     return rootPath.toString();
   }
 
-  private static void copy(Path fromPath, Path toPath, boolean delete) {
+  @Override
+  public void move(String from, String to) {
+    Path toPath = validatePath(to);
+    Path fromPath = Paths.get(from);
+    copy(fromPath, toPath, true);
+  }
+
+  private void copy(Path fromPath, Path toPath, boolean delete) {
+    if (!Files.exists(fromPath)) {
+      throw new IllegalStateException("File " + fromPath + " does not exist");
+    }
+
     try {
       Path parent = toPath.getParent();
       if (parent != null) {
@@ -35,18 +46,11 @@ class TestFileStore implements FileStore {
       }
       Files.copy(fromPath, toPath, StandardCopyOption.REPLACE_EXISTING);
       if (delete) {
-        Files.delete(fromPath);
+        delete(fromPath);
       }
     } catch (IOException e) {
       throw new RuntimeException("Unable to move " + fromPath + " -> " + toPath, e);
     }
-  }
-
-  @Override
-  public void move(String from, String to) {
-    Path toPath = validatePath(to);
-    Path fromPath = Paths.get(from);
-    copy(fromPath, toPath, true);
   }
 
   @Override
@@ -79,18 +83,28 @@ class TestFileStore implements FileStore {
     copy(localFile, toPath, false);
   }
 
+  @Override
+  public InputStream getInputStream(String path) throws IOException {
+    return Files.newInputStream(validatePath(path));
+  }
+
   private Path validatePath(String path) {
-    Path rootAbsolutePath = rootPath.toAbsolutePath().normalize();
-    Path toPath = Paths.get(path).toAbsolutePath().normalize();
-    if (!toPath.startsWith(rootAbsolutePath)) {
-      throw new IllegalArgumentException("Path " + toPath + " does not start with " + rootAbsolutePath);
+    Path toPath = validatePathNoThrow(Paths.get(path));
+    if (toPath == null) {
+      Path rootAbsolutePath = rootPath.toAbsolutePath().normalize();
+      Path absPath = Paths.get(path).toAbsolutePath().normalize();
+      throw new IllegalArgumentException("Path " + absPath + " does not start with " + rootAbsolutePath);
     }
     return toPath;
   }
 
-  @Override
-  public InputStream getInputStream(String path) throws IOException {
-    return Files.newInputStream(validatePath(path));
+  private Path validatePathNoThrow(Path path) {
+    Path rootAbsolutePath = rootPath.toAbsolutePath().normalize();
+    Path toPath = path.toAbsolutePath().normalize();
+    if (!toPath.startsWith(rootAbsolutePath)) {
+      return null;
+    }
+    return toPath;
   }
 
   @Override
@@ -103,14 +117,49 @@ class TestFileStore implements FileStore {
     return Files.newOutputStream(toPath, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE);
   }
 
-  @Override
-  public void delete(String path) {
-    Path toPath = validatePath(path);
-    //TODO delete empty directories
+  private void delete(Path toPath) {
+    if (Files.isDirectory(toPath)) {
+      throw new IllegalArgumentException("Path to delete was not a file: " + toPath);
+    }
     try {
       Files.delete(toPath);
     } catch (IOException e) {
       throw new RuntimeException("Unable to delete " + toPath, e);
+    }
+    try {
+      deleteEmptyDirectories(toPath.getParent());
+    } catch (IOException e) {
+      //
+    }
+  }
+
+  @Override
+  public void delete(String path) {
+    delete(validatePath(path));
+  }
+
+  private static boolean isEmptyDir(Path dir) throws IOException {
+    long count;
+    try (Stream<Path> stream = Files.list(dir)) {
+      count = stream.count();
+    }
+    return count == 0;
+  }
+
+  private void deleteEmptyDirectories(Path dir) throws IOException {
+    if (dir == null) {
+      return;
+    }
+    Path rootAbsolutePath = rootPath.toAbsolutePath().normalize();
+    Path absolutePath = validatePathNoThrow(dir);
+    if (absolutePath != null
+        && !absolutePath.equals(rootAbsolutePath)
+        && Files.isDirectory(absolutePath)
+        && isEmptyDir(absolutePath)
+    ) {
+      Path parent = absolutePath.getParent();
+      Files.delete(absolutePath);
+      deleteEmptyDirectories(parent);
     }
   }
 

@@ -297,6 +297,7 @@
     <property name="pageSize" value="${bio-profile-index.page-size}"/>
     <property name="gdacNode" value="${gdac-institution}"/>
     <property name="accessPathDocumentation" ref="accessPathsMap"/>
+    <property name="enabled" value="${bio-profile-index.enabled}"/>
   </bean>
 
   <bean id="coreProfileIndexProcessor" class="edu.colorado.cires.argonaut.processor.core.DefaultCoreProfileIndexProcessor">
@@ -306,6 +307,7 @@
     <property name="pageSize" value="${core-profile-index.page-size}"/>
     <property name="gdacNode" value="${gdac-institution}"/>
     <property name="accessPathDocumentation" ref="accessPathsMap"/>
+    <property name="enabled" value="${core-profile-index.enabled}"/>
   </bean>
 
   <bean id="globalMetaIndexProcessor" class="edu.colorado.cires.argonaut.processor.core.DefaultGlobalMetaIndexProcessor">
@@ -315,6 +317,7 @@
     <property name="pageSize" value="${global-meta-index.page-size}"/>
     <property name="gdacNode" value="${gdac-institution}"/>
     <property name="accessPathDocumentation" ref="accessPathsMap"/>
+    <property name="enabled" value="${global-meta-index.enabled}"/>
   </bean>
 
   <bean id="synthProfileIndexProcessor" class="edu.colorado.cires.argonaut.processor.core.DefaultSyntheticProfileIndexProcessor">
@@ -324,6 +327,7 @@
     <property name="pageSize" value="${synthetic-profile-index.page-size}"/>
     <property name="gdacNode" value="${gdac-institution}"/>
     <property name="accessPathDocumentation" ref="accessPathsMap"/>
+    <property name="enabled" value="${synthetic-profile-index.enabled}"/>
   </bean>
 
   <bean id="techIndexProcessor" class="edu.colorado.cires.argonaut.processor.core.TechnicalIndexProcessor">
@@ -333,6 +337,7 @@
     <property name="pageSize" value="${tech-index.page-size}"/>
     <property name="gdacNode" value="${gdac-institution}"/>
     <property name="accessPathDocumentation" ref="accessPathsMap"/>
+    <property name="enabled" value="${tech-index.enabled}"/>
   </bean>
 
   <bean id="trajIndexProcessor" class="edu.colorado.cires.argonaut.processor.core.TrajectoryIndexProcessor">
@@ -342,6 +347,7 @@
     <property name="pageSize" value="${traj-index.page-size}"/>
     <property name="gdacNode" value="${gdac-institution}"/>
     <property name="accessPathDocumentation" ref="accessPathsMap"/>
+    <property name="enabled" value="${traj-index.enabled}"/>
   </bean>
 
   <bean id="submissionReportTrigger" class="edu.colorado.cires.argonaut.processor.core.DefaultSubmissionReportTrigger">
@@ -366,6 +372,17 @@
 
   <bean id="netCdfReader" class="edu.colorado.cires.argonaut.processor.core.NetCdfReader">
     <property name="geoFilter" ref="geoFilter"/>
+  </bean>
+
+  <bean id="submissionCleanupProcessor" class="edu.colorado.cires.argonaut.processor.core.DefaultSubmissionProcessedCleanupProcessor">
+    <property name="enabled" value="${submitted-cleanup.enabled}"/>
+    <property name="submissionStore" ref="submissionFileStore"/>
+  </bean>
+
+  <bean id="rejectedSubmissionCleanupProcessor" class="edu.colorado.cires.argonaut.processor.core.DefaultSubmissionProcessedCleanupProcessor">
+    <property name="enabled" value="${rejected-cleanup.enabled}"/>
+    <property name="submissionStore" ref="submissionFileStore"/>
+    <property name="cleanRejects" value="true"/>
   </bean>
 
   <camelContext id="argonaut-camel" xmlns="http://camel.apache.org/schema/spring">
