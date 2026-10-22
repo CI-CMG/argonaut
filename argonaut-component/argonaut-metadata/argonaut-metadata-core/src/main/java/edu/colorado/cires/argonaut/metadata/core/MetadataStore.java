@@ -21,4 +21,5 @@ public interface MetadataStore {
   MetadataRecordPage getCoreProfileIndexPage(IndexPageRequest pageRequest);
   MetadataRecordPage getWeeklyProfileIndexPage(IndexPageRequest pageRequest);
   MetadataRecordPage getGlobalMetaIndexPage(IndexPageRequest pageRequest);
+  MetadataRecordPage getWeeklyMetaIndexPage(IndexPageRequest pageRequest);
 }

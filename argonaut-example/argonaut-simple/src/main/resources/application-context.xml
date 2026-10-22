@@ -318,6 +318,17 @@
     <property name="pageSize" value="${weekly-profile-index.page-size}"/>
     <property name="gdacNode" value="${gdac-institution}"/>
     <property name="accessPathDocumentation" ref="accessPathsMap"/>
+    <property name="enabled" value="${weekly-profile-index.enabled}"/>
+  </bean>
+
+  <bean id="weeklyMetaIndexProcessor" class="edu.colorado.cires.argonaut.processor.core.DefaultWeeklyMetaIndexProcessor">
+    <property name="outputFileStore" ref="outputFileStore"/>
+    <property name="localTempDir" value="${work-directory}"/>
+    <property name="metadataStore" ref="metadataStore"/>
+    <property name="pageSize" value="${weekly-meta-index.page-size}"/>
+    <property name="gdacNode" value="${gdac-institution}"/>
+    <property name="accessPathDocumentation" ref="accessPathsMap"/>
+    <property name="enabled" value="${weekly-meta-index.enabled}"/>
   </bean>
 
   <bean id="globalMetaIndexProcessor" class="edu.colorado.cires.argonaut.processor.core.DefaultGlobalMetaIndexProcessor">

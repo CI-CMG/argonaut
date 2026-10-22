@@ -795,4 +795,32 @@ class Finder {
       return createMetadataRecordPage(count, pageResults, Finder::fromMetadataEntity, pageRequest);
     }
   }
+
+  MetadataRecordPage getWeeklyMetaIndexPage(IndexPageRequest pageRequest) {
+    try (EntityManager em = entityManagerFactory.createEntityManager()) {
+      ZonedDateTime oneWeekAgo = Instant.now().minus(Duration.ofDays(7)).atZone(ZoneOffset.UTC);
+      long count = em.createQuery(
+                      """
+                                SELECT COUNT(m.file) FROM ArgoFloatMetadataEntity m
+                                WHERE m.fileStatus = ?1 AND m.dateUpdate >= ?2
+                              """, Long.class)
+              .setParameter(1, "ACTIVE")
+              .setParameter(2, oneWeekAgo)
+              .getSingleResult();
+
+      List<ArgoFloatMetadataEntity> pageResults = em.createQuery(
+          """
+                SELECT p FROM ArgoFloatMetadataEntity p
+                WHERE p.fileStatus = ?1 AND p.dateUpdate >= ?2
+                ORDER BY p.file
+              """, ArgoFloatMetadataEntity.class)
+              .setParameter(1, "ACTIVE")
+              .setParameter(2, oneWeekAgo)
+              .setMaxResults(pageRequest.getPageSize())
+              .setFirstResult((pageRequest.getPageNumber() - 1) * pageRequest.getPageSize())
+              .getResultList();
+
+      return createMetadataRecordPage(count, pageResults, Finder::fromMetadataEntity, pageRequest);
+    }
+  }
 }
