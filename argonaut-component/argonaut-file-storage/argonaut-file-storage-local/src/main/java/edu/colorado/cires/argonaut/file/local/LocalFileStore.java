@@ -11,6 +11,7 @@ import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 import org.slf4j.Logger;
@@ -159,7 +160,7 @@ public class LocalFileStore implements FileStore {
     if (dir == null) {
       return;
     }
-    if(dir.getFileName().toString().equals(stopDeleteEmptyDirsAt)) {
+    if(Objects.requireNonNull(dir.getFileName()).toString().equals(stopDeleteEmptyDirsAt)) {
       return;
     }
     Path rootAbsolutePath = rootPath.toAbsolutePath().normalize();
