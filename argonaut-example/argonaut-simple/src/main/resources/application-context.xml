@@ -41,6 +41,7 @@
 
   <bean id="submissionFileStore" class="edu.colorado.cires.argonaut.file.local.LocalFileStore">
     <property name="rootPath" value="${dac.submission.directory}"/>
+    <property name="stopDeleteEmptyDirsAt" value="submit"/>
   </bean>
 
   <bean id="processingFileStore" class="edu.colorado.cires.argonaut.file.local.LocalFileStore">

@@ -21,9 +21,14 @@ public class LocalFileStore implements FileStore {
   private static final Logger LOGGER = LoggerFactory.getLogger(LocalFileStore.class);
 
   private Path rootPath;
+  private String stopDeleteEmptyDirsAt;
 
   public void setRootPath(Path root) {
     this.rootPath = root;
+  }
+
+  public void setStopDeleteEmptyDirsAt(String stopDeleteEmptyDirsAt) {
+    this.stopDeleteEmptyDirsAt = stopDeleteEmptyDirsAt;
   }
 
   @Override
@@ -152,6 +157,9 @@ public class LocalFileStore implements FileStore {
 
   private void deleteEmptyDirectories(Path dir) throws IOException {
     if (dir == null) {
+      return;
+    }
+    if(stopDeleteEmptyDirsAt != null && stopDeleteEmptyDirsAt.equals(dir.getFileName().toString())) {
       return;
     }
     Path rootAbsolutePath = rootPath.toAbsolutePath().normalize();

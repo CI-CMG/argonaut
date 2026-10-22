@@ -93,6 +93,72 @@ public class LocalFileStoreTest {
 
 
   @Test
+  public void testDeleteEmptyDirStopAt() throws Exception{
+    LocalFileStore fileStore = new LocalFileStore();
+    fileStore.setRootPath(rootPath);
+    fileStore.setStopDeleteEmptyDirsAt("bar");
+    Path test1 = rootPath.resolve("foo/bar/cat/dog/woof.txt");
+    Path test12 = rootPath.resolve("foo/bar/cat/dog/bark.txt");
+    Path test2 = rootPath.resolve("foo/bar/cat/meow.txt");
+    Path test3 = rootPath.resolve("a/b/c/d.txt");
+    Path nogo = otherPath.resolve("1/2/3/4.txt");
+    Files.createDirectories(test1.getParent());
+    Files.createDirectories(test3.getParent());
+    Files.createDirectories(nogo.getParent());
+    Files.createFile(test1);
+    Files.createFile(test12);
+    Files.createFile(test2);
+    Files.createFile(test3);
+    Files.createFile(nogo);
+
+    fileStore.delete(fileStore.appendToPath(fileStore.getRoot(), "foo", "bar", "cat", "dog", "woof.txt"));
+    assertFalse(Files.exists(test1));
+    assertTrue(Files.exists(test2));
+    assertTrue(Files.exists(test3));
+    assertTrue(Files.exists(nogo));
+    assertTrue(Files.exists(rootPath.resolve("foo/bar/cat")));
+    assertTrue(Files.exists(rootPath.resolve("foo/bar/cat/dog")));
+    assertTrue(Files.exists(test12));
+    assertTrue(Files.exists(rootPath.resolve("a")));
+
+    fileStore.delete(fileStore.appendToPath(fileStore.getRoot(), "foo", "bar", "cat", "dog", "bark.txt"));
+    assertFalse(Files.exists(test12));
+    assertTrue(Files.exists(test2));
+    assertTrue(Files.exists(test3));
+    assertTrue(Files.exists(nogo));
+    assertTrue(Files.exists(rootPath.resolve("foo/bar/cat")));
+    assertFalse(Files.exists(rootPath.resolve("foo/bar/cat/dog")));
+    assertTrue(Files.exists(rootPath.resolve("a")));
+
+    fileStore.delete(fileStore.appendToPath(fileStore.getRoot(), "foo", "bar", "cat", "meow.txt"));
+    assertFalse(Files.exists(test1));
+    assertFalse(Files.exists(test2));
+    assertTrue(Files.exists(test3));
+    assertTrue(Files.exists(nogo));
+    assertFalse(Files.exists(rootPath.resolve("foo/bar/cat")));
+    assertTrue(Files.exists(rootPath.resolve("foo/bar")));
+    assertTrue(Files.exists(rootPath.resolve("a")));
+    assertTrue(Files.exists(rootPath));
+
+    fileStore.delete(fileStore.appendToPath(fileStore.getRoot(), "a", "b", "c", "d.txt"));
+    assertFalse(Files.exists(test1));
+    assertFalse(Files.exists(test2));
+    assertFalse(Files.exists(test3));
+    assertTrue(Files.exists(nogo));
+    assertFalse(Files.exists(rootPath.resolve("a")));
+    assertTrue(Files.exists(rootPath));
+
+
+    assertThrows(RuntimeException.class, () -> {
+      fileStore.delete(fileStore.appendToPath(fileStore.getRoot(), "1", "2", "3", "4.txt"));
+    });
+
+
+
+  }
+
+
+  @Test
   public void testMove() throws Exception{
     LocalFileStore fileStore = new LocalFileStore();
     fileStore.setRootPath(rootPath);
