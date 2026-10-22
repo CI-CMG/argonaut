@@ -203,10 +203,12 @@ public abstract class BaseIndexProcessor implements IndexProcessor {
           writeHeader(printer);
           writeColumnHeadersInternal(printer);
           MetadataRecordPage page = queryPage(metadataStore, DefaultIndexPageRequest.builder().withPageNumber(1).withPageSize(pageSize).build());
+          LOGGER.info("Index page {} #{} pageSize={} totalRecords={} recordsInPage={}", fileNameBase, page.getPageNumber(), page.getPageSize(), page.getTotalRecords(), page.getPage().size());
           writePage(printer, page);
           Optional<IndexPageRequest> maybeNextPage = page.getNextPage();
           while (maybeNextPage.isPresent()) {
             page = queryPage(metadataStore, DefaultIndexPageRequest.builder(maybeNextPage.get()).build());
+            LOGGER.info("Index page {} #{} pageSize={} totalRecords={} recordsInPage={}", fileNameBase, page.getPageNumber(), page.getPageSize(), page.getTotalRecords(), page.getPage().size());
             writePage(printer, page);
             maybeNextPage = page.getNextPage();
           }
