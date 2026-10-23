@@ -1,6 +1,7 @@
 package edu.colorado.cires.argonaut.processor.core;
 
 import edu.colorado.cires.argonaut.file.core.FileStore;
+import edu.colorado.cires.argonaut.file.local.LocalFileStore;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -11,15 +12,27 @@ import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 class TestFileStore implements FileStore {
 
+  private static final Logger LOGGER = LoggerFactory.getLogger(LocalFileStore.class);
+  private final ReentrantReadWriteLock deleteEmptyLock = new ReentrantReadWriteLock();
+
   private final Path rootPath;
+  private String stopDeleteEmptyDirsAt;
 
   TestFileStore(Path rootPath) {
     this.rootPath = rootPath;
+  }
+
+  public void setStopDeleteEmptyDirsAt(String stopDeleteEmptyDirsAt) {
+    this.stopDeleteEmptyDirsAt = stopDeleteEmptyDirsAt;
   }
 
   @Override
@@ -35,21 +48,38 @@ class TestFileStore implements FileStore {
   }
 
   private void copy(Path fromPath, Path toPath, boolean delete) {
-    if (!Files.exists(fromPath)) {
-      throw new IllegalStateException("File " + fromPath + " does not exist");
+    Path deletedPath = null;
+    deleteEmptyLock.readLock().lock();
+    try {
+      if (!Files.exists(fromPath)) {
+        throw new IllegalStateException("File " + fromPath + " does not exist");
+      }
+
+      try {
+        Path parent = toPath.getParent();
+        if (parent != null) {
+          Files.createDirectories(parent);
+        }
+        Files.copy(fromPath, toPath, StandardCopyOption.REPLACE_EXISTING);
+        if (delete) {
+          deletedPath = delete(fromPath);
+        }
+      } catch (IOException e) {
+        throw new RuntimeException("Unable to move " + fromPath + " -> " + toPath, e);
+      }
+    } finally {
+      deleteEmptyLock.readLock().unlock();
     }
 
-    try {
-      Path parent = toPath.getParent();
-      if (parent != null) {
-        Files.createDirectories(parent);
+    if (deletedPath != null) {
+      deleteEmptyLock.writeLock().lock();
+      try {
+        deleteEmptyDirectories(deletedPath.getParent());
+      } catch (IOException e) {
+        LOGGER.warn("Unable to delete empty parent directories for {}", toPath, e);
+      } finally {
+        deleteEmptyLock.writeLock().unlock();
       }
-      Files.copy(fromPath, toPath, StandardCopyOption.REPLACE_EXISTING);
-      if (delete) {
-        delete(fromPath);
-      }
-    } catch (IOException e) {
-      throw new RuntimeException("Unable to move " + fromPath + " -> " + toPath, e);
     }
   }
 
@@ -85,7 +115,12 @@ class TestFileStore implements FileStore {
 
   @Override
   public InputStream getInputStream(String path) throws IOException {
-    return Files.newInputStream(validatePath(path));
+    deleteEmptyLock.readLock().lock();
+    try {
+      return Files.newInputStream(validatePath(path));
+    } finally {
+      deleteEmptyLock.readLock().unlock();
+    }
   }
 
   private Path validatePath(String path) {
@@ -109,15 +144,20 @@ class TestFileStore implements FileStore {
 
   @Override
   public OutputStream getOutputStream(String path) throws IOException {
-    Path toPath = validatePath(path);
-    Path parent = toPath.getParent();
-    if (parent != null) {
-      Files.createDirectories(parent);
+    deleteEmptyLock.readLock().lock();
+    try {
+      Path toPath = validatePath(path);
+      Path parent = toPath.getParent();
+      if (parent != null) {
+        Files.createDirectories(parent);
+      }
+      return Files.newOutputStream(toPath, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE);
+    } finally {
+      deleteEmptyLock.readLock().unlock();
     }
-    return Files.newOutputStream(toPath, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE);
   }
 
-  private void delete(Path toPath) {
+  private Path delete(Path toPath) {
     if (Files.isDirectory(toPath)) {
       throw new IllegalArgumentException("Path to delete was not a file: " + toPath);
     }
@@ -126,16 +166,26 @@ class TestFileStore implements FileStore {
     } catch (IOException e) {
       throw new RuntimeException("Unable to delete " + toPath, e);
     }
-    try {
-      deleteEmptyDirectories(toPath.getParent());
-    } catch (IOException e) {
-      //
-    }
+    return toPath;
   }
 
   @Override
   public void delete(String path) {
-    delete(validatePath(path));
+    Path toPath;
+    deleteEmptyLock.readLock().lock();
+    try {
+      toPath = delete(validatePath(path));
+    } finally {
+      deleteEmptyLock.readLock().unlock();
+    }
+    deleteEmptyLock.writeLock().lock();
+    try {
+      deleteEmptyDirectories(toPath.getParent());
+    } catch (IOException e) {
+      LOGGER.warn("Unable to delete empty parent directories for {}", toPath, e);
+    } finally {
+      deleteEmptyLock.writeLock().unlock();
+    }
   }
 
   private static boolean isEmptyDir(Path dir) throws IOException {
@@ -148,6 +198,9 @@ class TestFileStore implements FileStore {
 
   private void deleteEmptyDirectories(Path dir) throws IOException {
     if (dir == null) {
+      return;
+    }
+    if (Objects.requireNonNull(dir.getFileName()).toString().equals(stopDeleteEmptyDirsAt)) {
       return;
     }
     Path rootAbsolutePath = rootPath.toAbsolutePath().normalize();
@@ -170,19 +223,24 @@ class TestFileStore implements FileStore {
 
   @Override
   public List<String> listFileNamesInDirectory(String pathPrefix, boolean includeDirectories) {
-    Path path = validatePath(pathPrefix);
-    if (!Files.isDirectory(path)) {
-      return Collections.emptyList();
-    }
-    Predicate<Path> filter = includeDirectories ? (p) -> Files.isDirectory(p) || Files.isRegularFile(p) : Files::isRegularFile;
-    try (Stream<Path> stream = Files.list(path)) {
-      return stream
-          .filter(filter)
-          .map(Path::getFileName)
-          .map(Path::toString)
-          .toList();
-    } catch (IOException e) {
-      throw new RuntimeException("Unable to list files in " + path, e);
+    deleteEmptyLock.readLock().lock();
+    try {
+      Path path = validatePath(pathPrefix);
+      if (!Files.isDirectory(path)) {
+        return Collections.emptyList();
+      }
+      Predicate<Path> filter = includeDirectories ? (p) -> Files.isDirectory(p) || Files.isRegularFile(p) : Files::isRegularFile;
+      try (Stream<Path> stream = Files.list(path)) {
+        return stream
+            .filter(filter)
+            .map(Path::getFileName)
+            .map(Path::toString)
+            .toList();
+      } catch (IOException e) {
+        throw new RuntimeException("Unable to list files in " + path, e);
+      }
+    } finally {
+      deleteEmptyLock.readLock().unlock();
     }
   }
 }

@@ -231,7 +231,9 @@ public abstract class BaseIndexProcessor implements IndexProcessor {
         FileUtils.deleteQuietly(dir.toFile());
       }
       long end = System.currentTimeMillis();
-      LOGGER.info("Finished Updating {} in {} seconds", fileNameBase, (long)(((double)end - (double)start) / 60d));
+      long ms = end - start;
+      int seconds = (int) ((double) ms / 1000d);
+      LOGGER.info("Finished Updating {} in {} seconds", fileNameBase, seconds);
     }
   }
 }
