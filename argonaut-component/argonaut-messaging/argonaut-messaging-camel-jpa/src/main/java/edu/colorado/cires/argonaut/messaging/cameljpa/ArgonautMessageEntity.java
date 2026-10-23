@@ -12,7 +12,8 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "argonaut_message", indexes = @Index(name = "argonaut_message_queue_idx", columnList = "queue"))
-@NamedQuery(name = "dequeue", query = "select x from ArgonautMessageEntity x where x.queue = :queue order by x.queueTime")
+@NamedQuery(name = "dequeue", query = "select x from ArgonautMessageEntity x where x.queue = :queue")
+@NamedQuery(name = "dequeueOrdered", query = "select x from ArgonautMessageEntity x where x.queue = :queue order by x.queueTime")
 public class ArgonautMessageEntity {
 
   @Id
