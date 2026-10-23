@@ -24,8 +24,12 @@ import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 class Updater {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(Updater.class);
 
   private final EntityManagerFactory entityManagerFactory;
 
@@ -231,11 +235,15 @@ class Updater {
 
           if (add) {
             em.persist(entity);
+            LOGGER.info("Added {} record for {}", record.getFileType().toString(), file);
+          } else {
+            LOGGER.info("Updated {} record for {}", record.getFileType().toString(), file);
           }
 
           tx.commit();
           break;
         } catch (OptimisticLockException e) {
+          LOGGER.warn("Database collision detected.  Update will retry. {}", file);
           tx.rollback();
         } catch (Exception e) {
           tx.rollback();
