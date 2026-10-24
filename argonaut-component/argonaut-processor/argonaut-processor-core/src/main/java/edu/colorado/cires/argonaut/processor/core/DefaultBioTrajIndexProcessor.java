@@ -42,7 +42,6 @@ public class DefaultBioTrajIndexProcessor extends BaseIndexProcessor {
     protected void writeRecord(CSVPrinter printer, MetadataRecord record) throws IOException {
         printer.printRecord(
                 record.getFile(),
-//                formatDate(record.getDate()),
                 formatLatLon(record.getLatitudeMax()),
                 formatLatLon(record.getLatitudeMin()),
                 formatLatLon(record.getLongitudeMax()),

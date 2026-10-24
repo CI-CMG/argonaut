@@ -3,6 +3,8 @@ package edu.colorado.cires.argonaut.metadata.jpa.entity;
 import jakarta.persistence.*;
 
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "argo_float_bio_trajectory", indexes = {
@@ -43,8 +45,11 @@ public class ArgoFloatBioTrajectoryEntity {
   @Column(name = "longitude_max")
   private Double longitudeMax;
 
+  // TODO: switch from string to list?
   @Column(name = "parameters", length = 100)
   private String parameters;
+//  @OneToMany(mappedBy = "argoFloatProfile", cascade = CascadeType.ALL, orphanRemoval = true)
+//  private List<ArgoFloatProfileParameterEntity> parameters = new ArrayList<>();
 
   @Column(name = "last_updated_time", nullable = false)
   private ZonedDateTime lastUpdatedTime;
