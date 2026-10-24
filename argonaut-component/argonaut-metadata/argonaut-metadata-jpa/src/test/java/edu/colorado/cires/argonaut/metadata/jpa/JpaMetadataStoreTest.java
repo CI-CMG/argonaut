@@ -4773,7 +4773,7 @@ public class JpaMetadataStoreTest {
             .withOcean(ArgoOcean.ATLANTIC_OCEAN)
             .withProfilerType("845")
             .withInstitution("AO")
-            .withDateUpdate(t0)
+            .withDateUpdate(t0) // 8 days ago!, so don't parse
             .withParameters(Arrays.asList("params"))
             .withAction(Action.UPDATE)
             .withFileType(ArgoFileType.METADATA)
@@ -4799,7 +4799,7 @@ public class JpaMetadataStoreTest {
             .withOcean(ArgoOcean.ATLANTIC_OCEAN)
             .withProfilerType("846")
             .withInstitution("AO")
-            .withDateUpdate(t1)
+            .withDateUpdate(t1) // 5 days ago!, so parse
             .withParameters(Arrays.asList("params"))
             .withAction(Action.UPDATE)
             .withFileType(ArgoFileType.METADATA)

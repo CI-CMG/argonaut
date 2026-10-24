@@ -20,14 +20,7 @@ import edu.colorado.cires.argonaut.metadata.core.ProfilePage;
 import edu.colorado.cires.argonaut.metadata.core.RecentProfileSearch;
 import edu.colorado.cires.argonaut.metadata.core.RemovedFilePage;
 import edu.colorado.cires.argonaut.metadata.core.RemovedFileSearch;
-import edu.colorado.cires.argonaut.metadata.jpa.entity.ArgoFloatCycleEntity;
-import edu.colorado.cires.argonaut.metadata.jpa.entity.ArgonautFileRemovedTimeEntity;
-import edu.colorado.cires.argonaut.metadata.jpa.entity.ArgoFloatEntity;
-import edu.colorado.cires.argonaut.metadata.jpa.entity.ArgoFloatMetadataEntity;
-import edu.colorado.cires.argonaut.metadata.jpa.entity.ArgoFloatProfileEntity;
-import edu.colorado.cires.argonaut.metadata.jpa.entity.ArgoFloatProfileParameterEntity;
-import edu.colorado.cires.argonaut.metadata.jpa.entity.ArgoFloatTechnicalInfoEntity;
-import edu.colorado.cires.argonaut.metadata.jpa.entity.ArgoFloatTrajectoryEntity;
+import edu.colorado.cires.argonaut.metadata.jpa.entity.*;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.TypedQuery;
@@ -583,9 +576,31 @@ class Finder {
           .setFirstResult((pageRequest.getPageNumber() - 1) * pageRequest.getPageSize())
           .getResultList();
 
-
-
       return createMetadataRecordPage(count, pageResults, Finder::fromProfileEntity, pageRequest);
+    }
+  }
+
+  //argo_bio-traj_index.txt
+  MetadataRecordPage getBioTrajIndexPage(IndexPageRequest pageRequest) {
+    try (EntityManager em = entityManagerFactory.createEntityManager()) {
+      long count = em.createQuery(
+          """
+              SELECT COUNT(profile.filePath) FROM ArgoFloatBioTrajectoryEntity profile 
+              WHERE profile.fileStatus = 'ACTIVE'
+              """, Long.class)
+        .getSingleResult();
+
+      List<ArgoFloatBioTrajectoryEntity> pageResults = em.createQuery(
+                      """
+                            SELECT profile FROM ArgoFloatBioTrajectoryEntity profile 
+                            WHERE profile.fileStatus = 'ACTIVE'
+                            ORDER BY profile.filePath
+                          """, ArgoFloatBioTrajectoryEntity.class)
+              .setMaxResults(pageRequest.getPageSize())
+              .setFirstResult((pageRequest.getPageNumber() - 1) * pageRequest.getPageSize())
+              .getResultList();
+
+      return createMetadataRecordPage(count, pageResults, Finder::fromBioTrajectoryEntity, pageRequest);
     }
   }
 
@@ -611,6 +626,25 @@ class Finder {
             .withProfilerType(metadataEntity.getProfilerType())
             .withInstitution(metadataEntity.getInstitution())
             .withDateUpdate(metadataEntity.getDateUpdate() == null ? null : metadataEntity.getDateUpdate().toInstant())
+            .build();
+  }
+
+  private static MetadataRecord fromBioTrajectoryEntity(ArgoFloatBioTrajectoryEntity profile) {
+    return MetadataRecord.builder()
+            .withFile(profile.getFilePath())
+//            .withDate(profile.getProfileDate() == null ? null : profile.getProfileDate().toInstant())
+            .withLatitudeMax(profile.getLatitudeMax())
+            .withLatitudeMin(profile.getLatitudeMin())
+            .withLongitudeMax(profile.getLongitudeMax())
+            .withLongitudeMin(profile.getLongitudeMin())
+            .withProfilerType(profile.getProfilerType())
+            .withInstitution(profile.getInstitution())
+//            .withParameters(profile.getParameters().stream().sorted(Comparator.comparingInt(ArgoFloatBioTrajectoryEntity::getParameterIndex)).map(
+//                    ArgoFloatBioTrajectoryEntity::getParameterName).toList())
+//            .withParameterDataMode(profile.getParameterDataMode())
+            .withParameters(profile.getParameters().stream().sorted(Comparator.comparingInt(ArgoFloatProfileParameterEntity::getParameterIndex)).map(
+                    ArgoFloatProfileParameterEntity::getParameterName).toList())
+            .withDateUpdate(profile.getDateUpdate() == null ? null : profile.getDateUpdate().toInstant())
             .build();
   }
 

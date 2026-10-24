@@ -113,6 +113,11 @@ public class JpaMetadataStore implements MetadataStore {
   }
 
   @Override
+  public MetadataRecordPage getBioTrajIndexPage(IndexPageRequest pageRequest) {
+    return finder.getBioTrajIndexPage(pageRequest);
+  }
+
+  @Override
   public MetadataRecordPage getSyntheticProfileIndexPage(IndexPageRequest pageRequest) {
     return finder.getSyntheticProfileIndexPage(pageRequest);
   }

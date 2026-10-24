@@ -301,6 +301,16 @@
     <property name="enabled" value="${bio-profile-index.enabled}"/>
   </bean>
 
+  <bean id="bioTrajIndexProcessor" class="edu.colorado.cires.argonaut.processor.core.DefaultBioTrajIndexProcessor">
+    <property name="outputFileStore" ref="outputFileStore"/>
+    <property name="localTempDir" value="${work-directory}"/>
+    <property name="metadataStore" ref="metadataStore"/>
+    <property name="pageSize" value="${bio-traj-index.page-size}"/>
+    <property name="gdacNode" value="${gdac-institution}"/>
+    <property name="accessPathDocumentation" ref="accessPathsMap"/>
+    <property name="enabled" value="${bio-traj-index.enabled}"/>
+  </bean>
+
   <bean id="coreProfileIndexProcessor" class="edu.colorado.cires.argonaut.processor.core.DefaultCoreProfileIndexProcessor">
     <property name="outputFileStore" ref="outputFileStore"/>
     <property name="localTempDir" value="${work-directory}"/>

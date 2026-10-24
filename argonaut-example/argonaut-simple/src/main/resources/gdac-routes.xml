@@ -255,6 +255,11 @@
       <bean ref="globalMetaIndexProcessor" method="generateIndex"/>
     </route>
 
+    <route id="bio-traj-index-cron">
+      <from uri="cron:bio-traj-index?schedule={{bio-traj-index.cron}}"/>
+      <bean ref="bioTrajIndexProcessor" method="generateIndex"/>
+    </route>
+
     <route id="synth-profile-index-cron">
       <from uri="cron:synth-profile-index?schedule={{synthetic-profile-index.cron}}"/>
       <bean ref="synthProfileIndexProcessor" method="generateIndex"/>
