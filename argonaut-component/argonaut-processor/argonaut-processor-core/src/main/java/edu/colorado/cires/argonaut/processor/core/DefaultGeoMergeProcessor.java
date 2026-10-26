@@ -125,9 +125,9 @@ public class DefaultGeoMergeProcessor implements GeoMergeProcessor {
   }
 
   private void mergeProfiles(GeoMergeInfo message) {
-    LOGGER.info("Geo merge executing: {} {}/{}/{}", message.getOcean(), message.getYear(), message.getMonth(), message.getDay());
-    if (LOGGER.isDebugEnabled()) {
-      LOGGER.debug("Geo merge executing: {}", message);
+    LOGGER.debug("Geo merge executing: {} {}/{}/{}", message.getOcean(), message.getYear(), message.getMonth(), message.getDay());
+    if (LOGGER.isTraceEnabled()) {
+      LOGGER.trace("Geo merge executing: {}", message);
     }
 
     String outputFile = getOutputFile(message);
@@ -159,7 +159,7 @@ public class DefaultGeoMergeProcessor implements GeoMergeProcessor {
   private void removeMergeFile(GeoMergeInfo message) {
     String outputFile = getOutputFile(message);
     outputFileStore.delete(outputFile);
-    LOGGER.info("Removed geo-merge file: {}", outputFile);
+    LOGGER.debug("Removed geo-merge file: {}", outputFile);
   }
 
   private String getOutputFile(GeoMergeInfo message) {

@@ -235,9 +235,9 @@ class Updater {
 
           if (add) {
             em.persist(entity);
-            LOGGER.info("Added {} record for {}", record.getFileType().toString(), file);
+            LOGGER.debug("Added {} record for {}", record.getFileType().toString(), file);
           } else {
-            LOGGER.info("Updated {} record for {}", record.getFileType().toString(), file);
+            LOGGER.debug("Updated {} record for {}", record.getFileType().toString(), file);
           }
 
           tx.commit();

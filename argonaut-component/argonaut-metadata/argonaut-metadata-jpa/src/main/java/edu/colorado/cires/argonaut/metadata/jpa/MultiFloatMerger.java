@@ -31,7 +31,7 @@ class MultiFloatMerger {
           try {
             ArgoFloatProfileEntity entity = em.find(ArgoFloatProfileEntity.class, record.getFile(), LockModeType.OPTIMISTIC);
             if (entity != null) {
-              LOGGER.info("Updating multi-float merge for " + record.getFile());
+              LOGGER.debug("Updating multi-float merge for {}", record.getFile());
               entity.setMultiFloatMergeTime(remove ? null : record.getActionTimestamp().atZone(ZoneId.of("UTC")));
             }
             tx.commit();
@@ -56,7 +56,7 @@ class MultiFloatMerger {
           try {
             ArgoFloatProfileEntity entity = em.find(ArgoFloatProfileEntity.class, record.getFile(), LockModeType.OPTIMISTIC);
             if (entity != null) {
-              LOGGER.info("Updating geo merge for " + record.getFile());
+              LOGGER.debug("Updating geo merge for {}", record.getFile());
               entity.setGeoMergeTime(remove ? null : record.getActionTimestamp().atZone(ZoneId.of("UTC")));
             }
             tx.commit();
@@ -82,7 +82,7 @@ class MultiFloatMerger {
             ArgoFloatProfileEntity entity = em.find(ArgoFloatProfileEntity.class, record.getFile(), LockModeType.OPTIMISTIC);
             if (entity != null) {
               String fileName = record.getRelatedFiles().get(0);
-              LOGGER.info("Updating latest merge for {} - {}", record.getFile(), fileName);
+              LOGGER.debug("Updating latest merge for {} - {}", record.getFile(), fileName);
               entity.setLatestMergeFileName(remove ? null : fileName);
             }
             tx.commit();
