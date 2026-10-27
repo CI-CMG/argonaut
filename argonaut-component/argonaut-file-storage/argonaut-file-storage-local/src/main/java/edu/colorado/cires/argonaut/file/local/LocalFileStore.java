@@ -43,11 +43,11 @@ public class LocalFileStore implements FileStore {
   public void move(String from, String to) {
     Path toPath = validatePath(to);
     Path fromPath = Paths.get(from);
-    copy(fromPath, toPath, true);
+    copyOrMove(fromPath, toPath, true);
   }
 
-  private void copy(Path fromPath, Path toPath, boolean delete) {
-    Path deletedPath = null;
+  private void copyOrMove(Path fromPath, Path toPath, boolean move) {
+    Path deletedParentPath = null;
     deleteEmptyLock.readLock().lock();
     try {
       if (!Files.exists(fromPath)) {
@@ -59,9 +59,12 @@ public class LocalFileStore implements FileStore {
         if (parent != null) {
           Files.createDirectories(parent);
         }
-        Files.copy(fromPath, toPath, StandardCopyOption.REPLACE_EXISTING);
-        if (delete) {
-          deletedPath = delete(fromPath);
+        if (move) {
+          Path fromPathParent = fromPath.getParent();
+          Files.move(fromPath, toPath, StandardCopyOption.REPLACE_EXISTING);
+          deletedParentPath = fromPathParent;
+        } else {
+          Files.copy(fromPath, toPath, StandardCopyOption.REPLACE_EXISTING);
         }
       } catch (IOException e) {
         throw new RuntimeException("Unable to move " + fromPath + " -> " + toPath, e);
@@ -70,10 +73,10 @@ public class LocalFileStore implements FileStore {
       deleteEmptyLock.readLock().unlock();
     }
 
-    if (deletedPath != null) {
+    if (deletedParentPath != null) {
       deleteEmptyLock.writeLock().lock();
       try {
-        deleteEmptyDirectories(deletedPath.getParent());
+        deleteEmptyDirectories(deletedParentPath);
       } catch (IOException e) {
         LOGGER.warn("Unable to delete empty parent directories for {}", toPath, e);
       } finally {
@@ -103,13 +106,13 @@ public class LocalFileStore implements FileStore {
   @Override
   public void downloadLocalFile(String path, Path localFile) throws IOException {
     Path fromPath = Paths.get(path);
-    copy(fromPath, localFile, false);
+    copyOrMove(fromPath, localFile, false);
   }
 
   @Override
   public void uploadLocalFile(Path localFile, String path) throws IOException {
     Path toPath = validatePath(path);
-    copy(localFile, toPath, false);
+    copyOrMove(localFile, toPath, false);
   }
 
   @Override

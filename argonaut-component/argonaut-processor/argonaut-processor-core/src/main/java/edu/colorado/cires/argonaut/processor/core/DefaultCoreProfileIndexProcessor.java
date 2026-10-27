@@ -39,11 +39,9 @@ public class DefaultCoreProfileIndexProcessor extends BaseIndexProcessor {
     printer.printRecord(
         record.getFile(),
         formatDate(record.getDate()),
-        formatLatLon(record.getLatitudeMax()),
-        formatLatLon(record.getLatitudeMin()),
-        formatLatLon(record.getLongitudeMax()),
-        formatLatLon(record.getLongitudeMin()),
-//        record.getOcean() == null ? null : record.getOcean().getCode(),
+        formatLatLon(record.getLatitude()),
+        formatLatLon(record.getLongitude()),
+        record.getOcean() == null ? null : record.getOcean().getCode(),
         record.getProfilerType(),
         record.getInstitution(),
         formatDate(record.getDateUpdate()));
