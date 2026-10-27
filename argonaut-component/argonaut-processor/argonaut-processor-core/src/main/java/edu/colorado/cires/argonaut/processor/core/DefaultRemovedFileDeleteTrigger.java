@@ -10,6 +10,7 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Supplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,6 +29,7 @@ public class DefaultRemovedFileDeleteTrigger implements RemovedFileDeleteTrigger
   private int pageSize = 200;
   private boolean enabled = true;
   private int removedFileRetentionDays;
+  private final ReentrantLock lock = new ReentrantLock();
 
   public void setRemovedFileRetentionDays(int removedFileRetentionDays) {
     this.removedFileRetentionDays = removedFileRetentionDays;
@@ -77,7 +79,15 @@ public class DefaultRemovedFileDeleteTrigger implements RemovedFileDeleteTrigger
   @Override
   public void trigger() {
     if (enabled) {
-      execute();
+      if(lock.tryLock()) {
+        try {
+          execute();
+        } finally {
+          lock.unlock();
+        }
+      } else {
+        LOGGER.info("Removed file delete trigger already in progress, skipping.");
+      }
     }
   }
 

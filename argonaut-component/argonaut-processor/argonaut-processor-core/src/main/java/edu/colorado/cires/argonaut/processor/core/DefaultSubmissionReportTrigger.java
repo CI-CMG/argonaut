@@ -7,7 +7,10 @@ import edu.colorado.cires.argonaut.audit.core.SubmissionReportSearch;
 import edu.colorado.cires.argonaut.messaging.core.databind.SubmissionReportSet;
 import edu.colorado.cires.argonaut.messaging.core.queue.MessageSender;
 import java.time.Instant;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Supplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,6 +28,7 @@ public class DefaultSubmissionReportTrigger implements SubmissionReportTrigger {
   private Supplier<Instant> nowSupplier = Instant::now;
   private boolean enabled = true;
   private JsonMapper jsonMapper;
+  private final Map<String, ReentrantLock> perDacLock = new HashMap<>();
 
   public void setMessageSender(MessageSender messageSender) {
     this.messageSender = messageSender;
@@ -61,19 +65,36 @@ public class DefaultSubmissionReportTrigger implements SubmissionReportTrigger {
   @Override
   public void trigger(String dac) {
     if (enabled) {
-      LOGGER.info("Triggered submission report query for {}", dac);
-      Instant now = nowSupplier.get();
-      SubmissionPage page = auditStore.findUnreportedSubmissions(DefaultSubmissionReportSearch.builder()
-          .withDac(dac)
-          .withPageSize(maxRecordsPerReport)
-          .withTimestampLt(now.minusSeconds((long) minutesBack * 60L))
-          .build());
-      sendMessage(page);
-      Optional<SubmissionReportSearch> maybeNextPage = page.getNextPage();
-      while (maybeNextPage.isPresent()) {
-        page = auditStore.findUnreportedSubmissions(DefaultSubmissionReportSearch.builder(maybeNextPage.get()).build());
-        sendMessage(page);
-        maybeNextPage = page.getNextPage();
+      final ReentrantLock lock;
+      synchronized (perDacLock) {
+        ReentrantLock maybeLock = perDacLock.get(dac);
+        if (maybeLock == null) {
+          maybeLock = new ReentrantLock();
+          perDacLock.put(dac, maybeLock);
+        }
+        lock = maybeLock;
+      }
+      if (lock.tryLock()){
+        try {
+          LOGGER.info("Triggered submission report query for {}", dac);
+          Instant now = nowSupplier.get();
+          SubmissionPage page = auditStore.findUnreportedSubmissions(DefaultSubmissionReportSearch.builder()
+              .withDac(dac)
+              .withPageSize(maxRecordsPerReport)
+              .withTimestampLt(now.minusSeconds((long) minutesBack * 60L))
+              .build());
+          sendMessage(page);
+          Optional<SubmissionReportSearch> maybeNextPage = page.getNextPage();
+          while (maybeNextPage.isPresent()) {
+            page = auditStore.findUnreportedSubmissions(DefaultSubmissionReportSearch.builder(maybeNextPage.get()).build());
+            sendMessage(page);
+            maybeNextPage = page.getNextPage();
+          }
+        } finally {
+          lock.unlock();
+        }
+      } else {
+        LOGGER.info("Submission report query for {} already in progress, skipping.", dac);
       }
     }
   }

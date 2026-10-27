@@ -9,10 +9,15 @@ import edu.colorado.cires.argonaut.metadata.core.MetadataStore;
 import edu.colorado.cires.argonaut.metadata.core.ProfilePage;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Supplier;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import tools.jackson.databind.json.JsonMapper;
 
 public class DefaultSyntheticProfileAggregator implements SyntheticProfileAggregator {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(DefaultSyntheticProfileAggregator.class);
 
   private Supplier<UUID> traceIdGenerator = () -> UUID.randomUUID();
   private MetadataStore metadataStore;
@@ -21,6 +26,7 @@ public class DefaultSyntheticProfileAggregator implements SyntheticProfileAggreg
   private String syntheticProfileQueue;
   private int pageSize = 200;
   private boolean enabled = true;
+  private final ReentrantLock lock = new ReentrantLock();
 
   public void setTraceIdGenerator(Supplier<UUID> traceIdGenerator) {
     this.traceIdGenerator = traceIdGenerator;
@@ -71,13 +77,21 @@ public class DefaultSyntheticProfileAggregator implements SyntheticProfileAggreg
   @Override
   public void trigger() {
     if (enabled) {
-      ProfilePage page = metadataStore.findUpdatedOrMissingSyntheticProfilesPage(DefaultIndexPageRequest.builder().withPageSize(pageSize).build());
-      sendMessages(page);
-      Optional<IndexPageRequest> maybeNextPage = page.getNextPage();
-      while (maybeNextPage.isPresent()) {
-        page = metadataStore.findUpdatedOrMissingSyntheticProfilesPage(DefaultIndexPageRequest.builder(maybeNextPage.get()).build());
-        sendMessages(page);
-        maybeNextPage = page.getNextPage();
+      if (lock.tryLock()) {
+        try {
+          ProfilePage page = metadataStore.findUpdatedOrMissingSyntheticProfilesPage(DefaultIndexPageRequest.builder().withPageSize(pageSize).build());
+          sendMessages(page);
+          Optional<IndexPageRequest> maybeNextPage = page.getNextPage();
+          while (maybeNextPage.isPresent()) {
+            page = metadataStore.findUpdatedOrMissingSyntheticProfilesPage(DefaultIndexPageRequest.builder(maybeNextPage.get()).build());
+            sendMessages(page);
+            maybeNextPage = page.getNextPage();
+          }
+        } finally {
+          lock.unlock();
+        }
+      } else {
+        LOGGER.info("Synthetic merge aggregator already in progress, skipping.");
       }
     }
   }

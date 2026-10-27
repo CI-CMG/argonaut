@@ -16,8 +16,7 @@ import java.util.List;
 
 @Entity
 @Table(name = "argo_float_metadata", indexes = {
-    @Index(name = "argo_float_metadata_file_status_idx", columnList = "file_status"),
-    @Index(name = "argo_float_metadata_argo_float_idx", columnList = "argo_float")
+    @Index(name = "argo_float_metadata_file_status_idx", columnList = "file_status")
 })
 public class ArgoFloatMetadataEntity {
 

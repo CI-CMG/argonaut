@@ -8,6 +8,7 @@ import edu.colorado.cires.argonaut.metadata.core.IndexPageRequest;
 import edu.colorado.cires.argonaut.metadata.core.MetadataStore;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Supplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,6 +26,7 @@ public class DefaultGeoMergeAggregator implements FloatMergeAggregator {
   private String geoMergeQueue;
   private int pageSize = 200;
   private boolean enabled = true;
+  private final ReentrantLock lock = new ReentrantLock();
 
   public void setTraceIdGenerator(Supplier<UUID> traceIdGenerator) {
     this.traceIdGenerator = traceIdGenerator;
@@ -66,7 +68,15 @@ public class DefaultGeoMergeAggregator implements FloatMergeAggregator {
   @Override
   public void trigger() {
     if (enabled) {
-      execute();
+      if(lock.tryLock()) {
+        try {
+          execute();
+        } finally {
+          lock.unlock();
+        }
+      } else {
+        LOGGER.info("Geo merge already in progress, skipping");
+      }
     }
   }
 

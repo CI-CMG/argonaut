@@ -8,6 +8,7 @@ import edu.colorado.cires.argonaut.metadata.core.MetadataStore;
 import edu.colorado.cires.argonaut.metadata.core.ProfilePage;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Supplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,6 +26,7 @@ public class DefaultFloatMergeAggregator implements FloatMergeAggregator {
   private String floatMergeQueue;
   private int pageSize = 200;
   private boolean enabled = true;
+  private final ReentrantLock lock = new ReentrantLock();
 
   public void setTraceIdGenerator(Supplier<UUID> traceIdGenerator) {
     this.traceIdGenerator = traceIdGenerator;
@@ -67,7 +69,15 @@ public class DefaultFloatMergeAggregator implements FloatMergeAggregator {
   @Override
   public void trigger() {
     if (enabled) {
-      execute();
+      if (lock.tryLock()) {
+        try {
+          execute();
+        } finally {
+          lock.unlock();
+        }
+      } else {
+        LOGGER.info("Float merge aggregator already in process, skipping.");
+      }
     }
   }
 

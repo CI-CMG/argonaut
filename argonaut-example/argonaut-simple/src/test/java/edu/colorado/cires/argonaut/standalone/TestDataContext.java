@@ -29,6 +29,7 @@ public final class TestDataContext {
       EntityTransaction tx = em.getTransaction();
       tx.begin();
       try {
+        em.createQuery("delete from ArgoFloatBioTrajectoryEntity").executeUpdate();
         em.createQuery("delete from ArgoFloatProfileParameterEntity").executeUpdate();
         em.createQuery("delete from ArgonautFileRemovedTimeEntity").executeUpdate();
         em.createQuery("delete from ArgonautSyntheticMergeMetadataEntity").executeUpdate();

@@ -19,6 +19,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Supplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,6 +41,7 @@ public class DefaultLatestProfileMergeTrigger implements LatestProfileMergeTrigg
   private boolean enabled = true;
   private int daysBack = 30;
   private int limit = 10000;
+  private final ReentrantLock lock = new ReentrantLock();
 
   public void setLimit(int limit) {
     if (limit > 10000) {
@@ -92,7 +94,15 @@ public class DefaultLatestProfileMergeTrigger implements LatestProfileMergeTrigg
   @Override
   public void trigger() {
     if (enabled) {
-      execute();
+      if (lock.tryLock()) {
+        try {
+          execute();
+        } finally {
+          lock.unlock();
+        }
+      } else {
+        LOGGER.info("Latest profile merge trigger already in progress, skipping.");
+      }
     }
   }
 

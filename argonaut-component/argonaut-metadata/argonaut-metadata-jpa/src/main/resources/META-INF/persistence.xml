@@ -17,6 +17,7 @@
     <class>edu.colorado.cires.argonaut.metadata.jpa.entity.ArgoFloatProfileParameterEntity</class>
     <class>edu.colorado.cires.argonaut.metadata.jpa.entity.ArgoFloatTrajectoryEntity</class>
     <class>edu.colorado.cires.argonaut.metadata.jpa.entity.ArgoFloatTechnicalInfoEntity</class>
+    <class>edu.colorado.cires.argonaut.metadata.jpa.entity.ArgoFloatBioTrajectoryEntity</class>
     <exclude-unlisted-classes>true</exclude-unlisted-classes>
     <properties>
       <property name="jakarta.persistence.jdbc.url" value=""/>
