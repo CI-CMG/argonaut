@@ -2,7 +2,6 @@ package edu.colorado.cires.argonaut.processor.core;
 
 
 import edu.colorado.cires.argonaut.file.core.FileStore;
-import edu.colorado.cires.argonaut.messaging.core.databind.ArgoOcean;
 import edu.colorado.cires.argonaut.messaging.core.databind.MetadataRecord;
 import edu.colorado.cires.argonaut.metadata.core.DefaultIndexPageRequest;
 import edu.colorado.cires.argonaut.metadata.core.DefaultMetadataRecordPage;
@@ -21,6 +20,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Instant;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.zip.GZIPInputStream;
@@ -54,7 +54,7 @@ public class DefaultBioTrajIndexProcessorTest {
 
     Instant now = Instant.parse("2026-09-28T20:24:55Z");
 
-    DefaultBioTrajIndexProcessor processor = new DefaultBioTrajIndexProcessor();
+    DefaultBioTrajectoryIndexProcessor processor = new DefaultBioTrajectoryIndexProcessor();
     processor.setGdacNode("TEST");
     processor.setAccessPathDocumentation(accessPathDocumentation);
     processor.setMetadataStore(metadataStore);
@@ -63,7 +63,7 @@ public class DefaultBioTrajIndexProcessorTest {
     processor.setLocalTempDir(localTempDir);
     processor.setNowGenerator(() -> now);
 
-    when(metadataStore.getBioTrajIndexPage(eq(DefaultIndexPageRequest.builder().withPageNumber(1).withPageSize(2).build())))
+    when(metadataStore.getBioTrajectoryIndexPage(eq(DefaultIndexPageRequest.builder().withPageNumber(1).withPageSize(2).build())))
         .thenReturn(DefaultMetadataRecordPage.builder()
             .withTotalRecords(3)
             .withPage(Arrays.asList(
@@ -89,21 +89,21 @@ public class DefaultBioTrajIndexProcessorTest {
             .withIndexPageRequest(DefaultIndexPageRequest.builder().withPageNumber(1).withPageSize(2).build())
             .build());
 
-    when(metadataStore.getBioTrajIndexPage(eq(DefaultIndexPageRequest.builder().withPageNumber(2).withPageSize(2).build())))
+    when(metadataStore.getBioTrajectoryIndexPage(eq(DefaultIndexPageRequest.builder().withPageNumber(2).withPageSize(2).build())))
         .thenReturn(DefaultMetadataRecordPage.builder()
             .withTotalRecords(3)
-            .withPage(Arrays.asList(
-                MetadataRecord.builder()
-                    .withFile("csio/2901551/2901551_BRtraj.nc")
-                    .withLatitudeMax(29.891)
-                    .withLatitudeMin(23.523)
-                    .withLongitudeMax(149.631)
-                    .withLongitudeMin(139.986)
-                    .withProfilerType("841")
-                    .withInstitution("HZ")
-                    .withParameters(Arrays.asList("PRES", "C1PHASE_DOXY", "C2PHASE_DOXY", "TEMP_DOXY", "DOXY PPOX_DOXY"))
-                    .withDateUpdate(Instant.parse("2024-11-16T06:06:54Z"))
-                    .build()
+            .withPage(List.of(
+                    MetadataRecord.builder()
+                            .withFile("csio/2901551/2901551_BRtraj.nc")
+                            .withLatitudeMax(29.891)
+                            .withLatitudeMin(23.523)
+                            .withLongitudeMax(149.631)
+                            .withLongitudeMin(139.986)
+                            .withProfilerType("841")
+                            .withInstitution("HZ")
+                            .withParameters(Arrays.asList("PRES", "C1PHASE_DOXY", "C2PHASE_DOXY", "TEMP_DOXY", "DOXY PPOX_DOXY"))
+                            .withDateUpdate(Instant.parse("2024-11-16T06:06:54Z"))
+                            .build()
             ))
             .withIndexPageRequest(DefaultIndexPageRequest.builder().withPageNumber(2).withPageSize(2).build())
             .build());

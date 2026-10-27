@@ -25,9 +25,9 @@ public class ArgoFloatBioTrajectoryEntity {
   @Column(name = "version", nullable = false)
   private int version;
 
-  @OneToOne(cascade = {CascadeType.DETACH, CascadeType.REFRESH})
-  @JoinColumn(name = "argo_float", nullable = false, unique = true)
-  private ArgoFloatEntity argoFloat;
+//  @OneToOne(cascade = {CascadeType.DETACH, CascadeType.REFRESH})
+//  @JoinColumn(name = "argo_float", nullable = false, unique = true)
+//  private ArgoFloatEntity argoFloat;
 
   @Column(name = "profiler_type", length = 4)
   private String profilerType;
@@ -51,9 +51,9 @@ public class ArgoFloatBioTrajectoryEntity {
   private Double longitudeMax;
 
   // TODO: switch from string to list?
-  @Column(name = "parameters", length = 100)
-  private String parameters;
-//  @OneToMany(mappedBy = "argoFloatProfile", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Column(name = "parameters") // TODO: should be a list of parameters
+    private List<String> parameters;
+//  @OneToMany(mappedBy = "ArgoFloatBioTrajectory", cascade = CascadeType.ALL, orphanRemoval = true)
 //  private List<ArgoFloatProfileParameterEntity> parameters = new ArrayList<>();
 
   @Column(name = "last_updated_time", nullable = false)
@@ -78,13 +78,13 @@ public class ArgoFloatBioTrajectoryEntity {
     this.version = version;
   }
 
-  public ArgoFloatEntity getArgoFloat() {
-    return argoFloat;
-  }
-
-  public void setArgoFloat(ArgoFloatEntity floatId) {
-    this.argoFloat = floatId;
-  }
+//  public ArgoFloatEntity getArgoFloat() {
+//    return argoFloat;
+//  }
+//
+//  public void setArgoFloat(ArgoFloatEntity floatId) {
+//    this.argoFloat = floatId;
+//  }
 
   public String getProfilerType() {
     return profilerType;
@@ -142,9 +142,17 @@ public class ArgoFloatBioTrajectoryEntity {
     this.longitudeMax = longitudeMax;
   }
 
-  public String getParameters() { return parameters; }
+  public List<String> getParameters() { return parameters; }
 
-  public void setParameters(String parameters) { this.parameters = parameters; }
+  public void setParameters(List<String> parameters) { this.parameters = parameters; }
+
+//  public List<ArgoFloatProfileParameterEntity> getParameters() {
+//    return parameters;
+//  }
+
+//  public void setParameters(List<ArgoFloatProfileParameterEntity> parameters) {
+//    this.parameters = parameters;
+//  }
 
   public ZonedDateTime getLastUpdatedTime() {
     return lastUpdatedTime;

@@ -5,15 +5,7 @@ import static edu.colorado.cires.argonaut.messaging.core.databind.MetadataRecord
 import edu.colorado.cires.argonaut.messaging.core.databind.MetadataRecord;
 import edu.colorado.cires.argonaut.messaging.core.databind.MetadataRecord.FileStatus;
 import edu.colorado.cires.argonaut.messaging.core.databind.ProfileMode;
-import edu.colorado.cires.argonaut.metadata.jpa.entity.ArgoFloatCycleEntity;
-import edu.colorado.cires.argonaut.metadata.jpa.entity.ArgoDacEntity;
-import edu.colorado.cires.argonaut.metadata.jpa.entity.ArgoFloatEntity;
-import edu.colorado.cires.argonaut.metadata.jpa.entity.ArgoFloatMetadataEntity;
-import edu.colorado.cires.argonaut.metadata.jpa.entity.ArgoFloatProfileEntity;
-import edu.colorado.cires.argonaut.metadata.jpa.entity.ArgonautProfileMergeFileEntity;
-import edu.colorado.cires.argonaut.metadata.jpa.entity.ArgoFloatProfileParameterEntity;
-import edu.colorado.cires.argonaut.metadata.jpa.entity.ArgoFloatTechnicalInfoEntity;
-import edu.colorado.cires.argonaut.metadata.jpa.entity.ArgoFloatTrajectoryEntity;
+import edu.colorado.cires.argonaut.metadata.jpa.entity.*;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.EntityTransaction;
@@ -371,6 +363,9 @@ class Updater {
       case PROFILE_MULTI_CYCLE:
         createOrUpdateProfileMergeFile(record);
         break;
+      case BIO_TRAJECTORY:
+        createOrUpdateBioTrajectory(record);
+        break;
       case TRAJECTORY:
         createOrUpdateTrajectory(record);
         break;
@@ -380,7 +375,6 @@ class Updater {
       default:
         throw new UnsupportedOperationException("Unsupported file type: " + record.getFileType());
     }
-
   }
 
   private void createOrUpdateTechnical(MetadataRecord record) {
@@ -443,6 +437,69 @@ class Updater {
 
         entity.setLongitudeMin(record.getLongitudeMin());
         entity.setLongitudeMax(record.getLongitudeMax());
+
+        entity.setLastUpdatedTime(record.getActionTimestamp().atOffset(ZoneOffset.UTC).toZonedDateTime());
+        entity.setFileStatus(ACTIVE.toString());
+
+        if (add) {
+          em.persist(entity);
+        }
+        tx.commit();
+      } catch (Exception e) {
+        tx.rollback();
+        throw e;
+      }
+    }
+  }
+
+  private void createOrUpdateBioTrajectory(MetadataRecord record) {
+//    file,latitude_max,latitude_min,longitude_max,longitude_min,profiler_type,institution,parameters,date_update
+    String floatId = getFloatId(record);
+    String file = Objects.requireNonNull(record.getFile());
+    try (EntityManager em = entityManagerFactory.createEntityManager()) {
+      EntityTransaction tx = em.getTransaction();
+      tx.begin();
+      try {
+//        ArgoFloatEntity floatEntity = em.find(ArgoFloatEntity.class, floatId);
+        ArgoFloatBioTrajectoryEntity entity = em.find(ArgoFloatBioTrajectoryEntity.class, file);
+        boolean add = (entity == null);
+
+        if (add) {
+          entity = new ArgoFloatBioTrajectoryEntity(); //ArgoFloatTrajectoryEntity();
+          entity.setFilePath(file);
+//          entity.setFileName(record.getFileName());
+//          entity.setArgoFloat(floatEntity);
+        }
+
+        entity.setProfilerType(record.getProfilerType());
+        entity.setInstitution(record.getInstitution());
+        entity.setDateUpdate(record.getDateUpdate() == null ? null : record.getDateUpdate().atOffset(ZoneOffset.UTC).toZonedDateTime());
+
+        entity.setLatitudeMax(record.getLatitudeMax());
+        entity.setLatitudeMin(record.getLatitudeMin());
+
+        entity.setLongitudeMax(record.getLongitudeMax());
+        entity.setLongitudeMin(record.getLongitudeMin());
+
+        entity.setProfilerType(record.getProfilerType());
+        entity.setInstitution(record.getInstitution());
+//        entity.setFileType(record.getFileType().toString());
+        entity.setFileStatus(ACTIVE.toString());
+
+//        List<ArgoFloatProfileParameterEntity> parameters = entity.getParameters();
+//        parameters.clear();
+//        for (int i = 0; i < record.getParameters().size(); i++) {
+//          String parameterName =  record.getParameters().get(i);
+//          ArgoFloatProfileParameterEntity parameter = new ArgoFloatProfileParameterEntity();
+//          parameter.setId(UUID.randomUUID());
+//          parameter.setParameterName(parameterName);
+////          parameter.setArgoFloatProfile(entity); // TODO: what to do here?
+//          parameter.setParameterIndex(i);
+//          parameters.add(parameter);
+//        }
+        entity.setParameters(record.getParameters());
+
+        entity.setDateUpdate(record.getDateUpdate().atOffset(ZoneOffset.UTC).toZonedDateTime());
 
         entity.setLastUpdatedTime(record.getActionTimestamp().atOffset(ZoneOffset.UTC).toZonedDateTime());
         entity.setFileStatus(ACTIVE.toString());

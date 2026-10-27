@@ -23,7 +23,6 @@ import edu.colorado.cires.argonaut.metadata.core.RemovedFileSearch;
 import edu.colorado.cires.argonaut.metadata.jpa.entity.*;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
-import jakarta.persistence.TypedQuery;
 
 import java.time.*;
 import java.time.format.DateTimeFormatter;
@@ -561,14 +560,14 @@ class Finder {
     try (EntityManager em = entityManagerFactory.createEntityManager()) {
       long count = em.createQuery(
               """
-                  SELECT COUNT(profile.filePath) FROM ArgoFloatProfileEntity profile 
+                  SELECT COUNT(profile.filePath) FROM ArgoFloatProfileEntity profile
                   WHERE profile.fileStatus = 'ACTIVE' AND profile.fileType = 'PROFILE_BIOCHEMICAL'
                   """, Long.class)
           .getSingleResult();
 
       List<ArgoFloatProfileEntity> pageResults = em.createQuery(
               """
-                    SELECT profile FROM ArgoFloatProfileEntity profile 
+                    SELECT profile FROM ArgoFloatProfileEntity profile
                     WHERE profile.fileStatus = 'ACTIVE' AND profile.fileType = 'PROFILE_BIOCHEMICAL'
                     ORDER BY profile.filePath
                   """, ArgoFloatProfileEntity.class)
@@ -581,24 +580,23 @@ class Finder {
   }
 
   //argo_bio-traj_index.txt
-  MetadataRecordPage getBioTrajIndexPage(IndexPageRequest pageRequest) {
+  MetadataRecordPage getBioTrajectoryIndexPage(IndexPageRequest pageRequest) {
     try (EntityManager em = entityManagerFactory.createEntityManager()) {
-      long count = em.createQuery(
+      long count = em.createQuery( // WHERE bioTrajectory.fileStatus = 'ACTIVE'; //              ORDER BY bioTrajectory.filePath
           """
-              SELECT COUNT(profile.filePath) FROM ArgoFloatBioTrajectoryEntity profile 
-              WHERE profile.fileStatus = 'ACTIVE'
-              """, Long.class)
+              SELECT COUNT(bioTrajectory) FROM ArgoFloatBioTrajectoryEntity bioTrajectory
+          """, Long.class)
         .getSingleResult();
 
       List<ArgoFloatBioTrajectoryEntity> pageResults = em.createQuery(
-                      """
-                            SELECT profile FROM ArgoFloatBioTrajectoryEntity profile 
-                            WHERE profile.fileStatus = 'ACTIVE'
-                            ORDER BY profile.filePath
-                          """, ArgoFloatBioTrajectoryEntity.class)
-              .setMaxResults(pageRequest.getPageSize())
-              .setFirstResult((pageRequest.getPageNumber() - 1) * pageRequest.getPageSize())
-              .getResultList();
+                      //          WHERE bioTrajectory.fileStatus = 'ACTIVE'
+    """
+          SELECT bioTrajectory FROM ArgoFloatBioTrajectoryEntity bioTrajectory
+          ORDER BY bioTrajectory.filePath
+        """, ArgoFloatBioTrajectoryEntity.class)
+        .setMaxResults(pageRequest.getPageSize())
+        .setFirstResult((pageRequest.getPageNumber() - 1) * pageRequest.getPageSize())
+        .getResultList();
 
       return createMetadataRecordPage(count, pageResults, Finder::fromBioTrajectoryEntity, pageRequest);
     }
@@ -629,6 +627,7 @@ class Finder {
             .build();
   }
 
+//  private static MetadataRecord fromBioTrajectoryEntity(ArgoFloatProfileEntity profile) {
   private static MetadataRecord fromBioTrajectoryEntity(ArgoFloatBioTrajectoryEntity profile) {
     return MetadataRecord.builder()
             .withFile(profile.getFilePath())
@@ -640,9 +639,11 @@ class Finder {
             .withInstitution(profile.getInstitution())
 //            .withParameters(profile.getParameters().stream().sorted(Comparator.comparingInt(ArgoFloatBioTrajectoryEntity::getParameterIndex)).map(
 //                    ArgoFloatBioTrajectoryEntity::getParameterName).toList())
-            .withParameterDataMode(profile.getParameters()) // TODO: need to destructure the ParameterEntities?
+//            .withParameters(profile.getParameters().stream().sorted(Comparator.comparingInt(ArgoFloatProfileParameterEntity::getParameterIndex)).map(
+//                    ArgoFloatProfileParameterEntity::getParameterName).toList()) // TODO: need to destructure the ParameterEntities?
 //            .withParameters(profile.getParameters().stream().sorted(Comparator.comparingInt(ArgoFloatProfileParameterEntity::getParameterIndex)).map(
 //                    ArgoFloatProfileParameterEntity::getParameterName).toList())
+            .withParameters(profile.getParameters())
             .withDateUpdate(profile.getDateUpdate() == null ? null : profile.getDateUpdate().toInstant())
             .build();
   }

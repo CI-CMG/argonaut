@@ -12,6 +12,7 @@ public enum ArgoFileType {
   SYNTHETIC_PROFILE_MULTI_CYCLE,
   MERGED_PROFILE_SINGLE_CYCLE,
   TRAJECTORY,
+  BIO_TRAJECTORY,
   METADATA,
   TECHNICAL_DATA,
   AUXILIARY,
@@ -19,6 +20,7 @@ public enum ArgoFileType {
   REMOVAL_TXT,
   LATEST_PROFILE_MERGE;
 
+  // TODO: match "argo_bio-traj_index.txt"
   private static final Pattern LATEST_PROFILE_MERGE_REGEX = Pattern.compile("([RD])([0-9]{8})_prof_([0-9])\\.nc");
   private static final Pattern REMOVAL_TXT_REGEX = Pattern.compile("([a-z]+)_removal\\.txt");
   private static final Pattern PROFILE_MULTI_CYCLE_REGEX = Pattern.compile("([0-9]+)_prof\\.nc");
@@ -26,22 +28,22 @@ public enum ArgoFileType {
   private static final Pattern PROFILE_BIOCHEMICAL_REGEX = Pattern.compile("B([RD])([0-9]+)_([0-9]+)(D?)\\.nc");
   private static final Pattern MERGED_PROFILE_SINGLE_CYCLE_REGEX = Pattern.compile("M([RD])([0-9]+)_([0-9]+)(D?)\\.nc");
   private static final Pattern TRAJECTORY_REGEX = Pattern.compile("([0-9]+)_([RD])traj\\.nc");
+  //  https://data-argo.ifremer.fr/argo_bio-traj_index.txt --> "csio/2901550/2901550_BRtraj.nc"
+  private static final Pattern BIO_TRAJECTORY_REGEX = Pattern.compile("([0-9]+)_B([RD])traj\\.nc");
   private static final Pattern METADATA_REGEX = Pattern.compile("([0-9]+)_meta\\.nc");
   private static final Pattern TECHNICAL_DATA_REGEX = Pattern.compile("([0-9]+)_tech\\.nc");
   private static final Pattern SYNTHETIC_PROFILE_SINGLE_CYCLE_REGEX = Pattern.compile("S([RD])([0-9]+)_([0-9]+)(D?)\\.nc");
   private static final Pattern SYNTHETIC_PROFILE_MULTI_CYCLE_REGEX = Pattern.compile("([0-9]+)_Sprof\\.nc");
 
   public static boolean isProfile(ArgoFileType type) {
-    switch (type) {
-      case PROFILE_CORE:
-      case PROFILE_BIOCHEMICAL:
-      case SYNTHETIC_PROFILE_SINGLE_CYCLE:
-      case MERGED_PROFILE_SINGLE_CYCLE:
-      case LATEST_PROFILE_MERGE:
-        return true;
-      default:
-        return false;
-    }
+      return switch (type) {
+          case PROFILE_CORE,
+               PROFILE_BIOCHEMICAL,
+               SYNTHETIC_PROFILE_SINGLE_CYCLE,
+               MERGED_PROFILE_SINGLE_CYCLE,
+               LATEST_PROFILE_MERGE -> true;
+          default -> false;
+      };
   }
 
   public static ArgoFileTypeDetails getFileNameDetails(String fileName) {
@@ -76,6 +78,11 @@ public enum ArgoFileType {
       }
       return new ArgoFileTypeDetails(ArgoFileType.MERGED_PROFILE_SINGLE_CYCLE, DataMode.valueOf(matcher.group(1)), matcher.group(2), matcher.group(3),
           Direction.valueOf(dir));
+    }
+    matcher = BIO_TRAJECTORY_REGEX.matcher(fileName);
+    if (matcher.matches()) {
+      // TODO: should this be 'BIO_TRAJECTORY' or just 'TRAJECTORY'?
+      return new ArgoFileTypeDetails(ArgoFileType.BIO_TRAJECTORY, DataMode.valueOf(matcher.group(2)), matcher.group(1), null, null);
     }
     matcher = TRAJECTORY_REGEX.matcher(fileName);
     if (matcher.matches()) {

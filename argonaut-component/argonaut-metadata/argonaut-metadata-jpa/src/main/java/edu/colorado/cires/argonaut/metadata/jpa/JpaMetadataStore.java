@@ -81,7 +81,6 @@ public class JpaMetadataStore implements MetadataStore {
     return finder.findByFile(file, includeRemoved);
   }
 
-
   @Override
   public ProfilePage findUpdatedOrMissingMergeFilesPage(IndexPageRequest pageRequest) {
     return finder.findUpdatedOrMissingMergeFilesPage(pageRequest);
@@ -113,8 +112,8 @@ public class JpaMetadataStore implements MetadataStore {
   }
 
   @Override
-  public MetadataRecordPage getBioTrajIndexPage(IndexPageRequest pageRequest) {
-    return finder.getBioTrajIndexPage(pageRequest);
+  public MetadataRecordPage getBioTrajectoryIndexPage(IndexPageRequest pageRequest) {
+    return finder.getBioTrajectoryIndexPage(pageRequest);
   }
 
   @Override

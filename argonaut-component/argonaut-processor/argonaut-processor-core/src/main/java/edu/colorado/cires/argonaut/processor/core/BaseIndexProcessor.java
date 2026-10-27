@@ -50,7 +50,7 @@ public abstract class BaseIndexProcessor implements IndexProcessor {
   private FileStore outputFileStore;
   private int pageSize = 2000;
   private Path localTempDir;
-  private Supplier<Instant> nowGenerator = () -> Instant.now();
+  private Supplier<Instant> nowGenerator = Instant::now;
   private boolean enabled = true;
 
   protected BaseIndexProcessor(String title, String description, String fileNameBase) {

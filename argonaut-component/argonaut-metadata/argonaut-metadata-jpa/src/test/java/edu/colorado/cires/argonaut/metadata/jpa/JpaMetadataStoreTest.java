@@ -50,7 +50,6 @@ import java.util.function.Supplier;
 import java.util.stream.IntStream;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Named;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -428,7 +427,6 @@ public class JpaMetadataStoreTest {
     );
     assertFalse(datastore.findByFile("aoml/13857/profiles/D13857_004.nc").isPresent());
   }
-
 
   @Test
   public void testFindMissingSyntheticProfilesPage() throws Exception {
@@ -2108,7 +2106,6 @@ public class JpaMetadataStoreTest {
 
   }
 
-
   @Test
   public void testFindRemovedMergeFilesPage() throws Exception {
 
@@ -2887,7 +2884,6 @@ public class JpaMetadataStoreTest {
 
   }
 
-
   @Test
   public void testFindRemovedFilesPage() throws Exception {
     Instant date = Instant.now();
@@ -3389,7 +3385,6 @@ public class JpaMetadataStoreTest {
         page.getPage());
 
   }
-
 
   @Test
   public void testFindLatest() throws Exception {
@@ -3974,9 +3969,8 @@ public class JpaMetadataStoreTest {
 
   }
 
-
   @Test
-  public void testFindBioIndex() throws Exception {
+  public void testFindBioProfileIndex() throws Exception {
 
     Instant now = Instant.parse("2026-09-25T01:00:00Z");
 
@@ -4129,9 +4123,6 @@ public class JpaMetadataStoreTest {
         .withFileType(ArgoFileType.PROFILE_BIOCHEMICAL)
         .build());
 
-
-
-
     MetadataRecordPage results = datastore.getBioProfileIndexPage(DefaultIndexPageRequest.builder().withPageSize(2).withPageNumber(1).build());
 
     assertEquals(DefaultMetadataRecordPage.builder()
@@ -4191,6 +4182,102 @@ public class JpaMetadataStoreTest {
 
   }
 
+  @Test
+  public void testFindBioTrajectoryIndex() throws Exception {
+    // Example of both 'R' and 'D' trajectories:
+    //    https://data-argo.ifremer.fr/dac/aoml/1902367/
+    // Example of 'BD' trajectory (no example in the user guide):
+    //    https://data-argo.ifremer.fr/dac/bodc/6904189/
+    Instant now = Instant.parse("2026-09-25T11:22:33Z");
+
+    datastore.updateIndex(MetadataRecord.builder()
+            .withFile("bodc/6904189/6904189_BRtraj.nc")
+            .withFileName("6904189_BRtraj.nc")
+            .withDac("bodc")
+            .withFloatId("6904189")
+            .withProfileMode(ProfileMode.REAL_TIME)
+            .withActionTimestamp(now)
+            .withDate(Instant.parse("2024-01-10T01:30:18Z")) // 20240110013018
+            .withProfilerType("836")
+            .withInstitution("BO")
+            .withFileStatus(FileStatus.ACTIVE)
+            .withDateUpdate(Instant.parse("2025-10-10T14:00:11Z"))
+            .withParameters(Arrays.asList("PRES", "C1PHASE_DOXY", "C2PHASE_DOXY", "TEMP_DOXY", "DOXY", "RAW_DOWNWELLING_IRRADIANCE380", "RAW_DOWNWELLING_IRRADIANCE412", "RAW_DOWNWELLING_IRRADIANCE490", "RAW_DOWNWELLING_PAR", "DOWN_IRRADIANCE380", "DOWN_IRRADIANCE412", "DOWN_IRRADIANCE490", "DOWNWELLING_PAR", "VRS_PH", "PH_IN_SITU_FREE", "PH_IN_SITU_TOTAL", "FLUORESCENCE_CHLA", "BETA_BACKSCATTERING700", "FLUORESCENCE_CDOM", "CHLA", "BBP700", "CDOM", "TEMP_NITRATE", "TEMP_SPECTROPHOTOMETER_NITRATE", "HUMIDITY_NITRATE", "UV_INTENSITY_DARK_NITRATE", "UV_INTENSITY_DARK_NITRATE_STD", "FIT_ERROR_NITRATE", "UV_INTENSITY_NITRATE", "NITRATE", "PPOX_DOXY"))
+            .withAction(Action.UPDATE)
+            .withFileType(ArgoFileType.BIO_TRAJECTORY)
+            .build());
+
+    datastore.updateIndex(MetadataRecord.builder()
+            .withFile("csio/2901550/2901550_BRtraj.nc")
+            .withFileName("2901550_BRtraj.nc")
+            .withDac("csio")
+            .withFloatId("2901550")
+            .withProfileMode(ProfileMode.REAL_TIME)
+            .withActionTimestamp(now)
+            .withDate(Instant.parse("2024-11-16T06:06:44Z")) // 20241116060644
+            .withLatitudeMax(36.813)
+            .withLatitudeMin(27.921)
+            .withLongitudeMax(155.622)
+            .withLongitudeMin(134.477)
+            .withProfilerType("841")
+            .withInstitution("HZ")
+            .withFileStatus(FileStatus.ACTIVE)
+            .withDateUpdate(Instant.parse("2025-10-10T14:00:22Z"))
+            .withParameters(Arrays.asList("PRES", "C1PHASE_DOXY", "C2PHASE_DOXY", "TEMP_DOXY", "DOXY", "PPOX_DOXY"))
+            .withAction(Action.UPDATE)
+            .withFileType(ArgoFileType.BIO_TRAJECTORY)
+            .build());
+
+    datastore.updateIndex(MetadataRecord.builder()
+            .withFile("csio/2901551/2901551_BRtraj.nc")
+            .withFileName("2901551_BRtraj.nc")
+            .withDac("csio")
+            .withFloatId("2901551")
+            .withProfileMode(ProfileMode.REAL_TIME)
+            .withActionTimestamp(now)
+            .withDate(Instant.parse("2024-11-16T06:06:54Z")) // 20241116060654
+            .withLatitudeMax(29.891)
+            .withLatitudeMin(23.523)
+            .withLongitudeMax(149.631)
+            .withLongitudeMin(139.986)
+            .withProfilerType("841")
+            .withInstitution("HZ")
+            .withFileStatus(FileStatus.ACTIVE)
+            .withDateUpdate(Instant.parse("2025-10-10T14:00:33Z"))
+            .withParameters(Arrays.asList("PRES", "C1PHASE_DOXY", "C2PHASE_DOXY", "TEMP_DOXY", "DOXY", "PPOX_DOXY"))
+            .withAction(Action.UPDATE)
+            .withFileType(ArgoFileType.BIO_TRAJECTORY)
+            .build());
+
+    MetadataRecordPage results = datastore.getBioTrajectoryIndexPage(DefaultIndexPageRequest.builder().withPageSize(2).withPageNumber(1).build());
+
+    assertEquals(DefaultMetadataRecordPage.builder()
+                    .withTotalRecords(3)
+                    .withPage(Arrays.asList(
+                            MetadataRecord.builder()
+                                  .withFile("bodc/6904189/6904189_BRtraj.nc")
+                                  .withProfilerType("836")
+                                  .withInstitution("BO")
+                                  .withParameters(Arrays.asList("PRES", "C1PHASE_DOXY", "C2PHASE_DOXY", "TEMP_DOXY", "DOXY", "RAW_DOWNWELLING_IRRADIANCE380", "RAW_DOWNWELLING_IRRADIANCE412", "RAW_DOWNWELLING_IRRADIANCE490", "RAW_DOWNWELLING_PAR", "DOWN_IRRADIANCE380", "DOWN_IRRADIANCE412", "DOWN_IRRADIANCE490", "DOWNWELLING_PAR", "VRS_PH", "PH_IN_SITU_FREE", "PH_IN_SITU_TOTAL", "FLUORESCENCE_CHLA", "BETA_BACKSCATTERING700", "FLUORESCENCE_CDOM", "CHLA", "BBP700", "CDOM", "TEMP_NITRATE", "TEMP_SPECTROPHOTOMETER_NITRATE", "HUMIDITY_NITRATE", "UV_INTENSITY_DARK_NITRATE", "UV_INTENSITY_DARK_NITRATE_STD", "FIT_ERROR_NITRATE", "UV_INTENSITY_NITRATE", "NITRATE", "PPOX_DOXY"))
+                                  .withDateUpdate(Instant.parse("2025-10-10T14:00:11Z"))
+                                  .build(),
+                            MetadataRecord.builder()
+                                    .withFile("csio/2901550/2901550_BRtraj.nc")
+                                    .withLatitudeMax(36.813)
+                                    .withLatitudeMin(27.921)
+                                    .withLongitudeMax(155.622)
+                                    .withLongitudeMin(134.477)
+                                    .withProfilerType("841")
+                                    .withInstitution("HZ")
+                                    .withParameters(Arrays.asList("PRES", "C1PHASE_DOXY", "C2PHASE_DOXY", "TEMP_DOXY", "DOXY", "PPOX_DOXY"))
+                                    .withDateUpdate(Instant.parse("2025-10-10T14:00:22Z"))
+                                    .build()
+                    ))
+                    .withIndexPageRequest(DefaultIndexPageRequest.builder().withPageNumber(1).withPageSize(2).build())
+                    .build(),
+            results);
+
+  }
 
   @Test
   public void testFindSynthIndex() throws Exception {

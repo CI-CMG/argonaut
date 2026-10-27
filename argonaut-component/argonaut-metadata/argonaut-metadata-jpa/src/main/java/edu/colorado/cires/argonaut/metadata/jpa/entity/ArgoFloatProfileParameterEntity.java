@@ -31,7 +31,6 @@ public class ArgoFloatProfileParameterEntity {
   @Column(name = "parameter_name", nullable = false, length = 100)
   private String parameterName;
 
-
   public UUID getId() {
     return id == null ? null : UUID.fromString(id);
   }

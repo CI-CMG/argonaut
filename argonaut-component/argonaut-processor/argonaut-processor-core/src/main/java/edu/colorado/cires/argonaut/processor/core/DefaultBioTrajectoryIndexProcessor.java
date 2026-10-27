@@ -8,9 +8,9 @@ import org.apache.commons.csv.CSVPrinter;
 
 import java.io.IOException;
 
-public class DefaultBioTrajIndexProcessor extends BaseIndexProcessor {
+public class DefaultBioTrajectoryIndexProcessor extends BaseIndexProcessor {
 
-    public DefaultBioTrajIndexProcessor() {
+    public DefaultBioTrajectoryIndexProcessor() {
         super(
                 "Bio-Trajectory directory file of the Argo Global Data Assembly Center",
                 "The directory file describes all individual bio-trajectory files of the ARGO GDAC data store.",
@@ -19,8 +19,7 @@ public class DefaultBioTrajIndexProcessor extends BaseIndexProcessor {
 
     @Override
     protected MetadataRecordPage queryPage(MetadataStore metadataStore, IndexPageRequest indexPageRequest) {
-        return metadataStore.getBioTrajIndexPage(indexPageRequest);
-//                .getBioProfileIndexPage(indexPageRequest);
+        return metadataStore.getBioTrajectoryIndexPage(indexPageRequest);
     }
 
     @Override
