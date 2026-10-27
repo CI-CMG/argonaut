@@ -21,6 +21,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Map;
 import java.util.Optional;
 import java.util.TreeMap;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Supplier;
 import java.util.zip.GZIPOutputStream;
 import org.apache.commons.csv.CSVFormat;
@@ -39,6 +40,7 @@ public abstract class BaseIndexProcessor implements IndexProcessor {
   private final String title;
   private final String description;
   private final String fileNameBase;
+  private final ReentrantLock lock = new ReentrantLock();
 
   private String project = "ARGO";
   private String formatVersion = "2.2";
@@ -190,50 +192,60 @@ public abstract class BaseIndexProcessor implements IndexProcessor {
   @Override
   public void generateIndex() {
     if (enabled) {
-      long start = System.currentTimeMillis();
-      LOGGER.info("Updating " + fileNameBase);
-      String textFileName = fileNameBase + ".txt";
-      Path dir = createTempDirectory();
-      try {
-        Path textFile = dir.resolve(textFileName);
-        try (
-            Writer writer = Files.newBufferedWriter(textFile, StandardCharsets.UTF_8);
-            CSVPrinter printer = new CSVPrinter(writer, CSVFormat.RFC4180.builder().setCommentMarker('#').setTrim(true).get())
-        ) {
-          writeHeader(printer);
-          writeColumnHeadersInternal(printer);
-          MetadataRecordPage page = queryPage(metadataStore, DefaultIndexPageRequest.builder().withPageNumber(1).withPageSize(pageSize).build());
-          LOGGER.info("Index page {} #{} pageSize={} totalRecords={} recordsInPage={}", fileNameBase, page.getPageNumber(), page.getPageSize(), page.getTotalRecords(), page.getPage().size());
-          writePage(printer, page);
-          Optional<IndexPageRequest> maybeNextPage = page.getNextPage();
-          while (maybeNextPage.isPresent()) {
-            page = queryPage(metadataStore, DefaultIndexPageRequest.builder(maybeNextPage.get()).build());
-            LOGGER.info("Index page {} #{} pageSize={} totalRecords={} recordsInPage={}", fileNameBase, page.getPageNumber(), page.getPageSize(), page.getTotalRecords(), page.getPage().size());
-            writePage(printer, page);
-            maybeNextPage = page.getNextPage();
-          }
-        } catch (IOException e) {
-          throw new RuntimeException("Unable to open index file for writing", e);
-        }
-
+      if (lock.tryLock()) {
         try {
-          String path = outputFileStore.appendToPath(outputFileStore.getRoot(), textFileName);
-          outputFileStore.uploadLocalFile(textFile, path);
-          try (InputStream in = Files.newInputStream(textFile);
-              OutputStream out = new GZIPOutputStream(outputFileStore.getOutputStream(path + ".gz"))) {
-            IOUtils.copy(in, out);
-          }
-        } catch (IOException e) {
-          throw new RuntimeException("Unable to upload index file", e);
-        }
+          long start = System.currentTimeMillis();
+          LOGGER.info("Updating {}", fileNameBase);
+          String textFileName = fileNameBase + ".txt";
+          Path dir = createTempDirectory();
+          try {
+            Path textFile = dir.resolve(textFileName);
+            try (
+                Writer writer = Files.newBufferedWriter(textFile, StandardCharsets.UTF_8);
+                CSVPrinter printer = new CSVPrinter(writer, CSVFormat.RFC4180.builder().setCommentMarker('#').setTrim(true).get())
+            ) {
+              writeHeader(printer);
+              writeColumnHeadersInternal(printer);
+              MetadataRecordPage page = queryPage(metadataStore, DefaultIndexPageRequest.builder().withPageNumber(1).withPageSize(pageSize).build());
+              LOGGER.info("Index page {} #{} pageSize={} totalRecords={} recordsInPage={}", fileNameBase, page.getPageNumber(), page.getPageSize(),
+                  page.getTotalRecords(), page.getPage().size());
+              writePage(printer, page);
+              Optional<IndexPageRequest> maybeNextPage = page.getNextPage();
+              while (maybeNextPage.isPresent()) {
+                page = queryPage(metadataStore, DefaultIndexPageRequest.builder(maybeNextPage.get()).build());
+                LOGGER.info("Index page {} #{} pageSize={} totalRecords={} recordsInPage={}", fileNameBase, page.getPageNumber(), page.getPageSize(),
+                    page.getTotalRecords(), page.getPage().size());
+                writePage(printer, page);
+                maybeNextPage = page.getNextPage();
+              }
+            } catch (IOException e) {
+              throw new RuntimeException("Unable to open index file for writing", e);
+            }
 
-      } finally {
-        FileUtils.deleteQuietly(dir.toFile());
+            try {
+              String path = outputFileStore.appendToPath(outputFileStore.getRoot(), textFileName);
+              outputFileStore.uploadLocalFile(textFile, path);
+              try (InputStream in = Files.newInputStream(textFile);
+                  OutputStream out = new GZIPOutputStream(outputFileStore.getOutputStream(path + ".gz"))) {
+                IOUtils.copy(in, out);
+              }
+            } catch (IOException e) {
+              throw new RuntimeException("Unable to upload index file", e);
+            }
+
+          } finally {
+            FileUtils.deleteQuietly(dir.toFile());
+          }
+          long end = System.currentTimeMillis();
+          long ms = end - start;
+          int seconds = (int) ((double) ms / 1000d);
+          LOGGER.info("Finished Updating {} in {} seconds", fileNameBase, seconds);
+        } finally {
+          lock.unlock();
+        }
+      } else {
+        LOGGER.info("Index {} generation in progress, skipping", fileNameBase);
       }
-      long end = System.currentTimeMillis();
-      long ms = end - start;
-      int seconds = (int) ((double) ms / 1000d);
-      LOGGER.info("Finished Updating {} in {} seconds", fileNameBase, seconds);
     }
   }
 }
