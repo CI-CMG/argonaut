@@ -7,6 +7,7 @@ import edu.colorado.cires.argonaut.core.util.NetCdfReadUtils;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import ucar.nc2.NetcdfFile;
 
 public class NetCdfTiedArgoProfileV31 implements ArgoProfileV31 {
@@ -317,7 +318,8 @@ public class NetCdfTiedArgoProfileV31 implements ArgoProfileV31 {
     if (index < 0) {
       throw new IllegalArgumentException("Parameter " + parameterName + " not found");
     }
-    return new NetCdfTiedArgoProfileV31Parameter(this, parameterName, index);
+
+    return parameters.get(index);
   }
 
   @Override

@@ -1,0 +1,3 @@
+001/002 5903712
+   01/01: Float #5903712 Cycle #149
+S-PROF_WARNING: File BD5903712_149.nc: Found b-parameter(s) DOXY NITRATE, but without any PRES_QC=0..3 and non-FillValue BGC data. Create synthetic profile only with available core data.

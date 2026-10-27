@@ -1,5 +1,6 @@
 package edu.colorado.cires.argonaut.core.merge.synthetic;
 
+import com.google.common.collect.Streams;
 import edu.colorado.cires.argonaut.core.merge.synthetic.PressureIndexer.QcIndexMap;
 import edu.colorado.cires.argonaut.core.netcdf.metadata.v31.ArgoMetadataV31;
 import edu.colorado.cires.argonaut.core.netcdf.metadata.v31.ArgoMetadataV31Reader;
@@ -16,6 +17,7 @@ import edu.colorado.cires.argonaut.core.netcdf.synthprofile.v13.impl.ArgoSynthet
 import edu.colorado.cires.argonaut.core.util.SoftwareVersion;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
@@ -30,12 +32,15 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
-import org.apache.commons.math3.analysis.interpolation.LinearInterpolator;
-import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
-import org.apache.commons.math3.exception.OutOfRangeException;
+import java.util.function.BiFunction;
+import java.util.stream.Collectors;
+import org.apache.commons.lang3.tuple.Pair;
+import org.apache.commons.lang3.tuple.Triple;
 import ucar.ma2.InvalidRangeException;
 
 public class DefaultSyntheticProfileMerger implements SyntheticProfileMerger {
@@ -48,7 +53,7 @@ public class DefaultSyntheticProfileMerger implements SyntheticProfileMerger {
     try (
         ArgoMetadataV31Reader metaReader = new ArgoMetadataV31Reader(metaPath);
         ArgoProfileV31Reader cReader = new ArgoProfileV31Reader(cProfilePath);
-        ArgoProfileV31Reader bReader = new ArgoProfileV31Reader(bProfilePath);
+        ArgoProfileV31Reader bReader = new ArgoProfileV31Reader(bProfilePath)
     ) {
       ArgoMultiProfileV31 multiCProfile = cReader.getMultiProfile();
       ArgoMultiProfileV31 multiBProfile = bReader.getMultiProfile();
@@ -63,18 +68,158 @@ public class DefaultSyntheticProfileMerger implements SyntheticProfileMerger {
       Map<Integer, Set<Integer>> validIndexes = qcIndexMap.getValidIndexes();
       String pressureQc = qcIndexMap.getPressureQc();
 
-      Map<Long, SynthRow> bRows = populateBProfileRows(bProfiles, validIndexes);
+      Map<Long, SynthRow> bRows = populateBProfileRows(bProfiles, validIndexes, metadata);
       Map<Long, SynthRow> cRows = populateCProfileRows(cProfiles, validIndexes);
-      List<Long> syntheticPressures = calculateSyntheticPressures(filterPopulatedRows(bRows));
 
       List<String> bParameters = stationParameters.stream().filter(BioParameterFilter::isSupportedParameter).toList();
       List<String> cParameters = stationParameters.stream().filter(CoreParameterFilter::isSupportedParameter).toList();
 
+      Map<Integer, Map<String, List<Long>>> inPres = bProfiles.stream()
+        .map(profile -> {
+          List<Float> maskedPressures = Streams.zip(
+            profile.getParameter("PRES").getLevels().stream(),
+            cProfiles.get(profile.getProfileIndex()).getParameter("PRES").getLevels().stream(),
+            (b, c) -> c.getQc() == null || Integer.parseInt(c.getQc()) > 3 ? null : b.getValue()
+          ).toList();
+          return Pair.of(profile.getProfileIndex(),
+            bParameters.stream()
+              .filter(name -> {
+                try {
+                  profile.getParameter(name);
+                  return true;
+                } catch (Exception e) {
+                  return false;
+                }
+              })
+              .map(name -> {
+                List<Long> list = maskedPressures.stream()
+                  .map(value -> value == null ? null
+                    : BigDecimal.valueOf(value).multiply(new BigDecimal("1000")))
+                  .map(value -> value == null ? value
+                    : Optional.ofNullable(metadata.getPressureOffset(name))
+                      .or(() -> Optional.of(0d))
+                      .map(BigDecimal::valueOf)
+                      .map(offset -> offset.multiply(new BigDecimal("1000")))
+                      .map(
+                        offset -> value.add(offset).setScale(0, RoundingMode.HALF_EVEN).longValue())
+                      .get()
+                  ).map(Long.class::cast)
+                  .toList();
+
+                return Pair.of(name, list);
+              })
+              .collect(Collectors.toMap(Pair::getLeft, Pair::getRight))
+          );
+        }).filter(pair -> !pair.getRight().isEmpty())
+        .collect(Collectors.toMap(Pair::getLeft, Pair::getRight));
+
+      Set<Long> uPres = inPres.values().stream()
+        .flatMap(m -> m.values().stream())
+        .flatMap(Collection::stream)
+        .filter(Objects::nonNull)
+        .collect(Collectors.toCollection(TreeSet::new));
+
+      Map<Integer, Map<String, Map<Long, Long>>> dPres = inPres.entrySet().stream()
+        .flatMap(profileEntry -> profileEntry.getValue().entrySet().stream()
+          .map(sensorEntry -> {
+            List<Long> pressures = sensorEntry.getValue().stream().filter(Objects::nonNull).toList();
+
+            Map<Long, Long> pDiffs = new HashMap<>();
+
+            int size = pressures.size();
+
+            if (size > 1) {
+              for (int i = 0; i < size; i++) {
+                long current = pressures.get(i);
+                long minDiff;
+
+                if (i == 0) {
+                  minDiff = Math.abs(pressures.get(1) - current);
+                } else if (i == size - 1) {
+                  minDiff = Math.abs(current - pressures.get(size - 2));
+                } else {
+                  long diffUp = Math.abs(current - pressures.get(i - 1));
+                  long diffDown = Math.abs(pressures.get(i + 1) - current);
+                  minDiff = Math.min(diffUp, diffDown);
+                }
+                pDiffs.put(current, minDiff);
+              }
+            }
+            return Triple.of(profileEntry.getKey(), sensorEntry.getKey(), pDiffs);
+          })
+        ).collect(Collectors.groupingBy(
+          Triple::getLeft,
+          Collectors.toMap(Triple::getMiddle, Triple::getRight)
+        ));
+
+      List<Long> syntheticPressures = calculateSyntheticAxis(uPres, dPres);
+
+      Set<Long> corePressures = new TreeSet<>();
+      List<String> coreParams = Arrays.asList("TEMP", "PSAL");
+
+      for (String paramName : coreParams) {
+        Long overallMin = null;
+        Long overallMax = null;
+
+        for (int profIdx : profilePriority) {
+          ArgoProfileV31 cProfile = cProfiles.get(profIdx);
+          if (cProfile == null) continue;
+
+          ArgoProfileV31Parameter cParam;
+          try {
+            cParam = cProfile.getParameter(paramName);
+          } catch (Exception e) {
+            continue;
+          }
+
+          ArgoProfileV31Parameter cPres = cProfile.getParameter("PRES");
+          List<ArgoProfileV31Level> paramLevels = cParam.getLevels();
+          List<ArgoProfileV31Level> presLevels = cPres.getLevels();
+
+          Long currentProfMin = null;
+          Long currentProfMax = null;
+          List<Long> keptPressures = new ArrayList<>();
+
+          for (int i = 0; i < presLevels.size(); i++) {
+            Float pVal = presLevels.get(i).getValue();
+            Float yVal = paramLevels.get(i).getValue();
+
+            if (pVal == null || yVal == null) continue;
+
+            String pQc = presLevels.get(i).getQc();
+            if (pQc != null && pQc.trim().equals("4")) continue;
+
+            String yQc = paramLevels.get(i).getQc();
+            int qcVal = (yQc == null || yQc.trim().isEmpty()) ? 0 : Integer.parseInt(yQc.trim());
+            if (qcVal < 0 || qcVal > 5) continue;
+
+            long pNorm = BigDecimal.valueOf(pVal)
+              .multiply(new BigDecimal("1000"))
+              .setScale(0, RoundingMode.HALF_EVEN)
+              .longValue();
+
+            if (currentProfMin == null || pNorm < currentProfMin) currentProfMin = pNorm;
+            if (currentProfMax == null || pNorm > currentProfMax) currentProfMax = pNorm;
+
+            if (overallMin == null || pNorm < overallMin || pNorm > overallMax) {
+              keptPressures.add(pNorm);
+            }
+          }
+
+          corePressures.addAll(keptPressures);
+
+          if (currentProfMin != null) {
+            if (overallMin == null || currentProfMin < overallMin) overallMin = currentProfMin;
+            if (overallMax == null || currentProfMax > overallMax) overallMax = currentProfMax;
+          }
+        }
+      }
+
+      Set<Long> resultPressures = new TreeSet<>(syntheticPressures);
+      resultPressures.addAll(corePressures);
+
       Map<Long, SynthRow> singleCRows = resolveSingleProfileParameters(cRows, profilePriority, cParameters);
       Map<Long, SynthRow> singleBRows = resolveSingleProfileParameters(bRows, profilePriority, bParameters);
-
-      Set<Long> resultPressures = new TreeSet<>(singleCRows.keySet());
-      resultPressures.addAll(syntheticPressures);
 
       QcStrategy cQcStrategy = new QcStrategy8();
       QcStrategy bQcStrategy = new QcStrategyMax();
@@ -101,47 +246,131 @@ public class DefaultSyntheticProfileMerger implements SyntheticProfileMerger {
 
   }
 
-  private static class FloatQc {
+  private static List<Long> calculateSyntheticAxis(Set<Long> uPresSet, Map<Integer, Map<String, Map<Long, Long>>> dPres) {
+    List<Long> upres = new ArrayList<>(uPresSet);
 
-    private final float value;
-    private final String qc;
-    private final Float pressureDisplacement;
-
-    // TODO these need to be calculated.  First example does not use this.
-    private final Float adjustedValue = null;
-    private final Float adjustedError = null;
-    private final String adjustedQc = null;
-
-    private FloatQc(float value, String qc, Float pressureDisplacement) {
-      this.value = value;
-      this.qc = qc;
-      this.pressureDisplacement = pressureDisplacement;
+    if (upres.isEmpty()) {
+      return new ArrayList<>();
     }
 
-    public float getValue() {
-      return value;
+    boolean allNaN = true;
+    for (Map<String, Map<Long, Long>> profileParams : dPres.values()) {
+      for (Map<Long, Long> pDiffs : profileParams.values()) {
+        if (!pDiffs.isEmpty()) {
+          allNaN = false;
+          break;
+        }
+      }
+      if (!allNaN) break;
     }
 
-    public String getQc() {
-      return qc;
+    if (allNaN) {
+      return new ArrayList<>(Collections.singletonList(upres.get(upres.size() - 1)));
     }
 
-    public Float getPressureDisplacement() {
-      return pressureDisplacement;
+    List<Long> syntheticAxis = new ArrayList<>();
+    int i = upres.size() - 1;
+    int niter = 0;
+    int nitermax = upres.size() + 1;
+
+    while (i >= 0) {
+      niter++;
+      if (niter > nitermax) {
+        System.err.println("S-PROF_WARNING: Exceeded maximum number of iterations.");
+        return new ArrayList<>();
+      }
+
+      long currentPres = upres.get(i);
+      syntheticAxis.add(currentPres);
+
+      Long minValdp = null;
+      for (Map<String, Map<Long, Long>> profileParams : dPres.values()) {
+        for (Map<Long, Long> pDiffs : profileParams.values()) {
+          Long dp = pDiffs.get(currentPres);
+          if (dp != null) {
+            if (minValdp == null || dp < minValdp) {
+              minValdp = dp;
+            }
+          }
+        }
+      }
+
+      if (minValdp != null) {
+        long windowBottom = currentPres - minValdp;
+
+        int deepestSecondObsIndex = -1;
+        boolean denserSampling = false;
+
+        for (Map<String, Map<Long, Long>> profileParams : dPres.values()) {
+          for (Map<Long, Long> pDiffs : profileParams.values()) {
+            int obsCount = 0;
+            int colDeepestSecondIdx = -1;
+
+            for (int j = i; j >= 0; j--) {
+              long checkP = upres.get(j);
+              if (checkP <= windowBottom) break;
+
+              if (pDiffs.containsKey(checkP)) {
+                obsCount++;
+                if (obsCount == 2) {
+                  colDeepestSecondIdx = j;
+                  break;
+                }
+              }
+            }
+
+            if (obsCount >= 2 && colDeepestSecondIdx > deepestSecondObsIndex) {
+              deepestSecondObsIndex = colDeepestSecondIdx;
+              denserSampling = true;
+            }
+          }
+        }
+
+        if (denserSampling) {
+          i = deepestSecondObsIndex;
+        } else {
+          boolean jumped = false;
+          for (int j = i - 1; j >= 0; j--) {
+            if (upres.get(j) <= windowBottom) {
+              i = j;
+              jumped = true;
+              break;
+            }
+          }
+          if (!jumped) break;
+        }
+      } else {
+        boolean jumped = false;
+        for (int j = i - 1; j >= 0; j--) {
+          long checkP = upres.get(j);
+          boolean hasValid = false;
+
+          for (Map<String, Map<Long, Long>> profileParams : dPres.values()) {
+            for (Map<Long, Long> pDiffs : profileParams.values()) {
+              if (pDiffs.containsKey(checkP)) {
+                hasValid = true;
+                break;
+              }
+            }
+            if (hasValid) break;
+          }
+
+          if (hasValid) {
+            i = j;
+            jumped = true;
+            break;
+          }
+        }
+        if (!jumped) break;
+      }
     }
 
-    public Float getAdjustedValue() {
-      return adjustedValue;
-    }
-
-    public String getAdjustedQc() {
-      return adjustedQc;
-    }
-
-    public Float getAdjustedError() {
-      return adjustedError;
-    }
+    Collections.reverse(syntheticAxis);
+    return syntheticAxis;
   }
+
+  private record FloatQc(float value, String qc, Float pressureDisplacement,
+                         Float adjustedValue, Float adjustedError, String adjustedQc) {}
 
   private static Map<Long, FloatQc> keepNearestInterpolatedValues(String parameterName, Map<Long, FloatQc> known, Map<Long, SynthRow> singleBRows,
       Map<Long, FloatQc> interpolated) {
@@ -155,7 +384,7 @@ public class DefaultSyntheticProfileMerger implements SyntheticProfileMerger {
       Long pressure = entry.getKey();
       SynthRow row = entry.getValue();
       for (SynthProfile profile : row.getProfiles()) {
-        if (profile.getParameters().get(parameterName) != null) {
+        if (profile.parameters().get(parameterName) != null) {
           filtered.add(pressure);
         }
       }
@@ -237,7 +466,7 @@ public class DefaultSyntheticProfileMerger implements SyntheticProfileMerger {
     for (Entry<Long, SynthRow> entry : rows.entrySet()) {
       long checkPressure = entry.getKey();
       SynthRow row = entry.getValue();
-      if (row.getProfiles().stream().anyMatch(profile -> profile.getParameters().get(parameterName) != null && profile.getParameters().get(parameterName).getValue() != null)) {
+      if (row.getProfiles().stream().anyMatch(profile -> profile.parameters().get(parameterName) != null && profile.parameters().get(parameterName).value() != null)) {
         if (checkPressure >= pressure) {
           deepestPressure = checkPressure;
           break;
@@ -278,7 +507,12 @@ public class DefaultSyntheticProfileMerger implements SyntheticProfileMerger {
         if (currentValue != null) {
           valueToSet = currentValue;
         } else if (isSingleGap(i, pressures, nearest)) {
-          valueToSet = new FloatQc(interpolated.get(pressure).getValue(), "8", resolvePressureDisplacement(pressure, parameterName, rows));
+          valueToSet = new FloatQc(
+            interpolated.get(pressure).value(),
+            "8",
+            resolvePressureDisplacement(pressure, parameterName, rows),
+            null, null, null
+          );
         }
         result.put(pressure, valueToSet);
       }
@@ -323,7 +557,7 @@ public class DefaultSyntheticProfileMerger implements SyntheticProfileMerger {
     int good = 0;
     for(FloatQc floatQc : values.values()) {
       if (floatQc != null) {
-        String qc = floatQc.getQc();
+        String qc = floatQc.qc();
         if (GOOD_QC_8.contains(qc)) {
           good++;
           total++;
@@ -437,12 +671,12 @@ public class DefaultSyntheticProfileMerger implements SyntheticProfileMerger {
         ArgoSyntheticProfileV13LevelBean levelBean = new ArgoSyntheticProfileV13LevelBean();
         FloatQc floatQc = entry.getValue();
         if (floatQc != null) {
-          levelBean.setOriginalValue(floatQc.getValue());
-          levelBean.setQc(floatQc.getQc());
-          levelBean.setPressureDisplacement(floatQc.getPressureDisplacement());
-          levelBean.setAdjustedValue(floatQc.getAdjustedValue());
-          levelBean.setAdjustedQc(floatQc.getAdjustedQc());
-          levelBean.setAdjustedError(floatQc.getAdjustedError());
+          levelBean.setOriginalValue(floatQc.value());
+          levelBean.setQc(floatQc.qc());
+          levelBean.setPressureDisplacement(floatQc.pressureDisplacement());
+          levelBean.setAdjustedValue(floatQc.adjustedValue());
+          levelBean.setAdjustedQc(floatQc.adjustedQc());
+          levelBean.setAdjustedError(floatQc.adjustedError());
         }
         levels.add(levelBean);
       }
@@ -471,63 +705,63 @@ public class DefaultSyntheticProfileMerger implements SyntheticProfileMerger {
       if (row != null) {
         FloatQc temp = getSingleRowParameterValue(row, "PRES", null);
         if (temp != null) {
-          value = new FloatQc(temp.getValue(), pressureQc, null);
+          value = new FloatQc(temp.value(), pressureQc, null, temp.adjustedValue(), temp.adjustedError(), temp.adjustedQc());
         }
       }
       if (value == null) {
-        value = new FloatQc((float) ((double) normalizedPressure / 1000d), pressureQc, null);
-      }
+        float pressure = (float) ((double) normalizedPressure / 1000d);
+        value = new FloatQc(pressure, pressureQc, null, pressure, null, pressureQc);
+      };
+
       result.put(normalizedPressure, value);
     }
     return result;
   }
 
+  private static Float calculateInterpolatedError(Long targetPres, List<Long> knownPressures, Map<Long, SynthRow> singleCRows) {
+    Long upperPres = null;
+    Long lowerPres = null;
+
+    // Find bounding core pressures
+    for (Long p : knownPressures) {
+      if (p < targetPres) upperPres = p;
+      if (p > targetPres && lowerPres == null) {
+        lowerPres = p;
+        break;
+      }
+    }
+
+    if (upperPres == null || lowerPres == null) return null; // Extrapolation edge case (use nearest or null depending on your specific strictness)
+
+    FloatQc upperVal = getSingleRowParameterValue(singleCRows.get(upperPres), "PRES", null);
+    FloatQc lowerVal = getSingleRowParameterValue(singleCRows.get(lowerPres), "PRES", null);
+
+    if (upperVal == null || lowerVal == null || upperVal.adjustedError() == null || lowerVal.adjustedError() == null) {
+      return null;
+    }
+
+    // Standard linear interpolation formula
+    double pRatio = (double) (targetPres - upperPres) / (lowerPres - upperPres);
+    double errDiff = lowerVal.adjustedError() - upperVal.adjustedError();
+
+    return (float) (upperVal.adjustedError() + (pRatio * errDiff));
+  }
+
   private static FloatQc getSingleRowParameterValue(SynthRow row, String parameterName, Float pressureDisplacement) {
     for (SynthProfile profile : row.getProfiles()) {
-      SynthParameter parameter = profile.getParameters().get(parameterName);
-      if (parameter != null) {
-        Float value = parameter.getValue();
-        String qc = parameter.getQc();
-        if (value != null) {
-          return new FloatQc(value, qc, pressureDisplacement);
-        }
+      Optional<FloatQc> maybeFloatQc = profile.getParameter(parameterName)
+        .flatMap(parameter -> Optional.ofNullable(parameter.value())
+          .map(value -> new FloatQc(value, parameter.qc(), pressureDisplacement, parameter.adjustedValue(), parameter.adjustedError(), parameter.adjustedQc()))
+        );
+
+      if (maybeFloatQc.isPresent()) {
+        return maybeFloatQc.get();
       }
     }
     return null;
   }
 
-  private static class Knot {
-
-    private final float x;
-    private final float y;
-    private final String qc;
-
-    public Knot(float x, float y, String qc) {
-      this.x = x;
-      this.y = y;
-      this.qc = qc;
-    }
-
-    public float getX() {
-      return x;
-    }
-
-    public float getY() {
-      return y;
-    }
-
-    public String getQc() {
-      return qc;
-    }
-
-    @Override
-    public String toString() {
-      return "Knot{" +
-          "x=" + x +
-          ", y=" + y +
-          '}';
-    }
-  }
+  private record Knot(float x, float y, String qc, Float adjustedValue, Float adjustedError, String adjustedQc) {}
 
   private static Map<Long, FloatQc> knownValues(String parameterName, Map<Long, SynthRow> singleRows, Collection<Long> resultPressures) {
     Map<Long, Knot> knots = new LinkedHashMap<>();
@@ -536,7 +770,7 @@ public class DefaultSyntheticProfileMerger implements SyntheticProfileMerger {
       float pressure = (float) ((double) row.getPressure() / 1000d);
       FloatQc value = getSingleRowParameterValue(row, parameterName, 0F);
       if (value != null) {
-        Knot knot = new Knot(pressure, value.getValue(), value.getQc());
+        Knot knot = new Knot(pressure, value.value(), value.qc(), value.adjustedValue(), value.adjustedError(), value.adjustedQc());
         knots.put(row.getPressure(), knot);
       }
     }
@@ -545,7 +779,7 @@ public class DefaultSyntheticProfileMerger implements SyntheticProfileMerger {
     for (Long normalizedPressure : resultPressures) {
       Knot knot = knots.get(normalizedPressure);
       if (knot != null) {
-        result.put(normalizedPressure, new FloatQc(knot.getY(), knot.getQc(), 0F));
+        result.put(normalizedPressure, new FloatQc(knot.y(), knot.qc(), 0F, knot.adjustedValue(), knot.adjustedError(), knot.adjustedQc()));
       } else {
         result.put(normalizedPressure, null);
       }
@@ -580,80 +814,71 @@ public class DefaultSyntheticProfileMerger implements SyntheticProfileMerger {
   }
 
   private static Map<Long, FloatQc> interpolate(String parameterName, Map<Long, SynthRow> singleRows, Collection<Long> resultPressures, QcStrategy qcStrategy) {
-    Map<Long, Knot> knots = new LinkedHashMap<>();
+    TreeMap<Long, Knot> knots = new TreeMap<>();
 
     for (SynthRow row : singleRows.values()) {
-      float pressure = (float) ((double) row.getPressure() / 1000d);
       FloatQc value = getSingleRowParameterValue(row, parameterName, 0F);
       if (value != null) {
-        Knot knot = new Knot(pressure, value.getValue(), value.getQc());
+        Knot knot = new Knot(row.getPressure(), value.value(), value.qc(), value.adjustedValue(), value.adjustedError(), value.adjustedQc());
         knots.put(row.getPressure(), knot);
       }
     }
-    double[] x = new double[knots.size()];
-    double[] y = new double[knots.size()];
-    int i = 0;
-    for (Knot knot : knots.values()) {
-      x[i] = knot.getX();
-      y[i] = knot.getY();
-      i++;
-    }
 
-    PolynomialSplineFunction f = new LinearInterpolator().interpolate(x, y);
     Map<Long, FloatQc> result = new TreeMap<>();
     for (Long normalizedPressure : resultPressures) {
-      Knot knot = knots.get(normalizedPressure);
-      if (knot != null) {
-        result.put(normalizedPressure, new FloatQc(knot.getY(), knot.getQc(), 0F));
-      } else {
-        double pressure = (double) normalizedPressure / 1000d;
-        try {
-          double interpolatedValue = f.value(pressure);
-          result.put(normalizedPressure, new FloatQc((float) interpolatedValue, null, resolvePressureDisplacement(normalizedPressure, parameterName, singleRows)));
-        } catch (OutOfRangeException e) {
-          //TODO extrapolate?
-          result.put(normalizedPressure, null);
-        }
+      if (knots.containsKey(normalizedPressure)) {
+        Knot knot = knots.get(normalizedPressure);
+        result.put(normalizedPressure, new FloatQc(knot.y(), knot.qc(), 0F, knot.adjustedValue(), knot.adjustedError(), knot.adjustedQc()));
+        continue;
       }
-    }
 
-    List<Long> pressures = new ArrayList<>(result.keySet());
-    int index = 0;
-    String previousKnotQc = null;
-    while (index < pressures.size()) {
-      Long pressure = pressures.get(index);
-      FloatQc floatQc = result.get(pressure);
-      if (floatQc == null) {
-        index++;
-      } else if (floatQc.getQc() != null) {
-        previousKnotQc = floatQc.getQc();
-        index++;
-      } else {
-        int searchIndex = index + 1;
-        String nextknotQc = null;
-        while (nextknotQc == null && searchIndex < pressures.size()) {
-          FloatQc check = result.get(pressures.get(searchIndex));
-          if (check == null) {
-            searchIndex++;
-          } else if (check.getQc() != null) {
-            nextknotQc = check.getQc();
-          } else {
-            searchIndex++;
-          }
+      Entry<Long, Knot> floorEntry = knots.floorEntry(normalizedPressure);
+      Entry<Long, Knot> ceilingEntry = knots.ceilingEntry(normalizedPressure);
+
+      Optional<Pair<Float, String>> values = Optional.empty();
+
+      BiFunction<Entry<Long, Knot>, Long, Optional<Pair<Float, String>>> valueConsumer = (entry, threshold) -> {
+        Long pressure = entry.getKey();
+        if ((normalizedPressure - pressure) <= threshold) {
+         return Optional.of(Pair.of(entry.getValue().y(), entry.getValue().qc()));
         }
-        String qc = qcStrategy.getQc(previousKnotQc, nextknotQc);
-        for (int j = index; j < searchIndex; j++) {
-          Long updatePressure = pressures.get(j);
-          FloatQc update = result.get(updatePressure);
-          result.put(updatePressure, new FloatQc(update.getValue(), qc, update.getPressureDisplacement()));
-        }
-        previousKnotQc = null;
-        index++;
+
+        return Optional.empty();
+      };
+
+      if (ceilingEntry == null && floorEntry != null) { // known deeper value -> extrapolate downward
+        values = valueConsumer.apply(floorEntry, 2000L);
+      } else if (floorEntry == null && ceilingEntry != null) { // known shallower value -> extrapolate upward
+        values = valueConsumer.apply(ceilingEntry, 1000L);
+      } else if (floorEntry != null) { // known shallower and deeper value -> linear interpolation
+        BigDecimal x0 = BigDecimal.valueOf(floorEntry.getKey());
+        BigDecimal y0 = BigDecimal.valueOf(floorEntry.getValue().y());
+        String qc0 = floorEntry.getValue().qc();
+
+        BigDecimal x1 = BigDecimal.valueOf(ceilingEntry.getKey());
+        BigDecimal y1 = BigDecimal.valueOf(ceilingEntry.getValue().y());
+        String qc1 = ceilingEntry.getValue().qc();
+
+        float v = y0.add(
+          BigDecimal.valueOf(normalizedPressure).subtract(x0)
+            .multiply(y1.subtract(y0))
+            .divide(x1.subtract(x0), RoundingMode.FLOOR)
+        ).floatValue();
+
+        values = Optional.of(Pair.of(
+          v,
+          qcStrategy.getQc(qc0, qc1)
+        ));
       }
+
+      values.ifPresentOrElse(
+        pair -> result.put(normalizedPressure, new FloatQc(pair.getLeft(), pair.getRight(), resolvePressureDisplacement(normalizedPressure, parameterName, singleRows), null, null, null)),
+        () -> result.put(normalizedPressure, null)
+      );
+
     }
 
     return result;
-
   }
 
   private static class Plan {
@@ -713,8 +938,8 @@ public class DefaultSyntheticProfileMerger implements SyntheticProfileMerger {
           SynthRow row = rows.get(i);
           SynthProfile profile = row.getProfiles().get(profileIndex);
           if (profile != null) {
-            SynthParameter parameter = profile.getParameters().get(parameterName);
-            if (parameter != null) {
+            Optional<SynthParameter> maybeParameter = profile.getParameter(parameterName);
+            if (maybeParameter.isPresent()) {
               if (min == null || i < min) {
                 min = i;
               }
@@ -758,16 +983,17 @@ public class DefaultSyntheticProfileMerger implements SyntheticProfileMerger {
 
     Map<Long, SynthRow> result = new TreeMap<>();
     for (Plan plan : plans) {
+      String parameterName = plan.getParameterName();
       for (MinMax minMax : plan.getSections()) {
         for (int i = minMax.getMin(); i < minMax.getMax(); i++) {
           SynthRow row = rows.get(i);
           SynthProfile profile = row.getProfiles().get(plan.getProfileIndex());
           if (profile != null) {
-            SynthParameter parameter = profile.getParameters().get(plan.getParameterName());
-            if (parameter != null) {
-              SynthProfile copyProfile = new SynthProfile();
-              copyProfile.setIndex(profile.getIndex());
-              copyProfile.getParameters().put(parameter.getParameterName(), parameter);
+            profile.getParameter(parameterName)
+              .filter(synthParameter -> synthParameter.adjustedQc() != null)
+              .ifPresent(parameter -> {
+              SynthProfile copyProfile = new SynthProfile(profile.index(), new HashMap<>(0), new ArrayList<>(0));
+              copyProfile.putParameter(parameter);
 
               SynthRow copyRow = result.get(row.getPressure());
               if (copyRow == null) {
@@ -777,7 +1003,7 @@ public class DefaultSyntheticProfileMerger implements SyntheticProfileMerger {
               }
 
               copyRow.getProfiles().add(copyProfile);
-            }
+            });
           }
         }
       }
@@ -841,14 +1067,16 @@ public class DefaultSyntheticProfileMerger implements SyntheticProfileMerger {
             pressureLevel,
             (parameter, level) -> level.getValue() != null && CoreParameterFilter.isSupportedParameter(parameter, level),
             (row, rowProfile, rowParameter) -> {
-            });
+            },
+            (rawValue, parameterName) -> rawValue
+        );
       }
     }
     return rows;
   }
 
 
-  private static Map<Long, SynthRow> populateBProfileRows(List<ArgoProfileV31> bProfiles, Map<Integer, Set<Integer>> validIndexesForProfile) {
+  private static Map<Long, SynthRow> populateBProfileRows(List<ArgoProfileV31> bProfiles, Map<Integer, Set<Integer>> validIndexesForProfile, ArgoMetadataV31 metadata) {
     Map<Long, SynthRow> rows = new TreeMap<>();
     for (ArgoProfileV31 bProfile : bProfiles) {
       Set<Integer> validIndexes = validIndexesForProfile.get(bProfile.getProfileIndex());
@@ -864,14 +1092,21 @@ public class DefaultSyntheticProfileMerger implements SyntheticProfileMerger {
             pressureLevel,
             (parameter, level) -> level.getValue() != null && BioParameterFilter.isSupportedParameter(parameter),
             (row, rowProfile, rowParameter) -> {
-              String parameterName = rowParameter.getParameterName();
-              SynthRow lastRow = lastPressures.get(parameterName);
+              String parameterName = rowParameter.parameterName();
+              String pressureIdentifier = "%d_%s".formatted(rowProfile.index(), parameterName);
+              SynthRow lastRow = lastPressures.get(pressureIdentifier);
               if (lastRow != null) {
-                long upwardPDiff = updateMinimumRowPressureDiff(lastRow, rowProfile.getIndex(), parameterName, row.getPressure());
-                rowParameter.setpDiff(upwardPDiff);
+                long upwardPDiff = updateMinimumRowPressureDiff(lastRow, rowProfile.index(), parameterName, row.getPressure());
+                rowParameter = rowParameter.withPDiff(upwardPDiff);
+                rowProfile.putParameter(rowParameter);
               }
-              lastPressures.put(parameterName, row);
-            });
+              lastPressures.put(pressureIdentifier, row);
+            },
+            (rawValue, parameterName) -> Optional.ofNullable(metadata.getPressureOffset(parameterName))
+              .map(offset -> new BigDecimal(Double.toString(offset)))
+              .map(rawValue::add)
+              .orElse(rawValue)
+        );
 
       }
     }
@@ -884,50 +1119,47 @@ public class DefaultSyntheticProfileMerger implements SyntheticProfileMerger {
       ArgoProfileV31 profile,
       ArgoProfileV31Level pressureLevel,
       ParameterFilter parameterFilter,
-      ParameterCreateVisitor onParameterCreate
+      ParameterCreateVisitor onParameterCreate,
+      BiFunction<BigDecimal, String, BigDecimal> addOffset
   ) {
     int profileIndex = profile.getProfileIndex();
     int levelIndex = pressureLevel.getLevelIndex();
     Float actualPressure = pressureLevel.getValue();
     if (actualPressure != null) {
-      // need to use BigDecimal math to prevent rounding errors causing strange errors with keys
-      long normalizedPressure = new BigDecimal(Float.toString(actualPressure)).multiply(new BigDecimal("1000")).longValue();
-
-      SynthRow row = rows.get(normalizedPressure);
-      if (row == null) {
-        row = new SynthRow();
-        row.setPressure(normalizedPressure);
-        rows.put(normalizedPressure, row);
-      }
-
-      List<SynthProfile> rowProfiles = row.getProfiles();
-      if (rowProfiles.isEmpty()) {
-        for (int i = 0; i < numProfiles; i++) {
-          rowProfiles.add(null);
-        }
-      }
-
-      SynthProfile rowProfile = rowProfiles.get(profileIndex);
-      if (rowProfile == null) {
-        rowProfile = new SynthProfile();
-        rowProfile.setIndex(profileIndex);
-        rowProfile.getSupportedParameters().addAll(profile.getStationParameters());
-        rowProfiles.set(profileIndex, rowProfile);
-      }
-
       for (ArgoProfileV31Parameter parameter : profile.getParameters()) {
         ArgoProfileV31Level level = parameter.getLevels().get(levelIndex);
         if (parameterFilter.doAllow(parameter, level)) {
+          // need to use BigDecimal math to prevent rounding errors causing strange errors with keys
+          long normalizedPressure = addOffset.apply(new BigDecimal(Float.toString(actualPressure)), parameter.getParameterName())
+            .multiply(new BigDecimal("1000")).longValue();
+
+          SynthRow row = rows.get(normalizedPressure);
+          if (row == null) {
+            row = new SynthRow();
+            row.setPressure(normalizedPressure);
+            rows.put(normalizedPressure, row);
+          }
+
+          List<SynthProfile> rowProfiles = row.getProfiles();
+          if (rowProfiles.isEmpty()) {
+            for (int i = 0; i < numProfiles; i++) {
+              rowProfiles.add(null);
+            }
+          }
+
+          SynthProfile rowProfile = rowProfiles.get(profileIndex);
+          if (rowProfile == null) {
+            rowProfile = new SynthProfile(profileIndex, new HashMap<>(0), profile.getStationParameters());
+            rowProfiles.set(profileIndex, rowProfile);
+          }
+
           String parameterName = parameter.getParameterName();
 
-          SynthParameter rowParameter = new SynthParameter();
-          rowParameter.setParameterName(parameterName);
-          rowParameter.setValue(level.getValue());
-          rowParameter.setQc(level.getQc());
+          SynthParameter rowParameter = new SynthParameter(parameterName, level.getValue(), null, level.getQc(), level.getAdjustedValue(), level.getAdjustedErrorValue(), level.getAdjustedQc());
 
           onParameterCreate.onParameterCreate(row, rowProfile, rowParameter);
 
-          rowProfile.getParameters().put(parameterName, rowParameter);
+          rowProfile.putParameter(rowParameter);
         }
       }
 
@@ -949,12 +1181,20 @@ public class DefaultSyntheticProfileMerger implements SyntheticProfileMerger {
   private static long updateMinimumRowPressureDiff(SynthRow lastRow, int profileIndex, String parameterName, long currentPressure) {
     long lastPressure = lastRow.getPressure();
     long upwardPDiff = currentPressure - lastPressure;
-    SynthParameter lastRowParameter = lastRow.getProfiles().get(profileIndex).getParameters().get(parameterName);
-    if (lastRowParameter.getpDiff() == null) {
-      lastRowParameter.setpDiff(upwardPDiff);
-    } else {
-      lastRowParameter.setpDiff(Math.min(lastRowParameter.getpDiff(), upwardPDiff));
+    SynthProfile synthProfile = lastRow.getProfiles().get(profileIndex);
+
+    Optional<SynthParameter> maybeLastRowParameter = synthProfile.getParameter(parameterName);
+    if (maybeLastRowParameter.isPresent()) {
+      SynthParameter lastRowParameter = maybeLastRowParameter.get();
+      if (lastRowParameter.pDiff() == null) {
+        lastRowParameter = lastRowParameter.withPDiff(upwardPDiff);
+      } else {
+        lastRowParameter = lastRowParameter.withPDiff(Math.min(lastRowParameter.pDiff(), upwardPDiff));
+      }
+
+      synthProfile.putParameter(lastRowParameter);
     }
+
     return upwardPDiff;
   }
 
@@ -962,8 +1202,8 @@ public class DefaultSyntheticProfileMerger implements SyntheticProfileMerger {
     return rows.values().stream().filter(row -> {
       for (SynthProfile profile : row.getProfiles()) {
         if (profile != null) {
-          for (SynthParameter parameter : profile.getParameters().values()) {
-            if (parameter.getValue() != null) {
+          for (SynthParameter parameter : profile.parameters().values()) {
+            if (parameter.value() != null) {
               return true;
             }
           }
@@ -973,62 +1213,20 @@ public class DefaultSyntheticProfileMerger implements SyntheticProfileMerger {
     }).toList();
   }
 
-  private static long getMinimumPressureDifference(SynthRow row) {
+  private static Long getMinimumPressureDifference(SynthRow row) {
     Long minDPres = null;
     for (SynthProfile profile : row.getProfiles()) {
       if (profile != null) {
-        for (SynthParameter parameter : profile.getParameters().values()) {
-          if (parameter.getpDiff() != null) {
-            if (minDPres == null || parameter.getpDiff() < minDPres) {
-              minDPres = parameter.getpDiff();
+        for (SynthParameter parameter : profile.parameters().values()) {
+          if (parameter.pDiff() != null) {
+            if (minDPres == null || parameter.pDiff() < minDPres) {
+              minDPres = parameter.pDiff();
             }
           }
         }
       }
     }
     return minDPres;
-  }
-
-  private static List<Long> calculateSyntheticPressures(List<SynthRow> bProfileRows) {
-    List<Long> syntheticPressures = new ArrayList<>();
-    int rowIndex = bProfileRows.size() - 1;
-    while (rowIndex >= 0) {
-      SynthRow row = bProfileRows.get(rowIndex);
-      syntheticPressures.add(row.getPressure());
-
-      if (rowIndex == 0) {
-        break;
-      }
-
-      long minDPres = getMinimumPressureDifference(row);
-
-      long minPressure = row.getPressure() - minDPres;
-      ProfileCounter counter = new ProfileCounter(row.getProfiles().size());
-      counter.updateCounter(rowIndex, row);
-
-      for (int checkRowIndex = rowIndex - 1; checkRowIndex >= -1; checkRowIndex--) {
-        if (checkRowIndex == -1) {
-          rowIndex = 0;
-          break;
-        }
-
-        SynthRow checkRow = bProfileRows.get(checkRowIndex);
-        long checkPressure = checkRow.getPressure();
-        if (checkPressure <= minPressure) {
-          // ‘Jump’ to the next (shallower) pressure level outside the range.
-          rowIndex = checkRowIndex;
-          break;
-        }
-        counter.updateCounter(checkRowIndex, checkRow);
-        if (counter.getMaxCount() > 1) {
-          // ‘Jump’ to the deepest 2nd observation of the same N_PROF inside this range
-          rowIndex = counter.getDeepestSecondObservation();
-          break;
-        }
-      }
-    }
-    Collections.reverse(syntheticPressures);
-    return syntheticPressures;
   }
 
 }

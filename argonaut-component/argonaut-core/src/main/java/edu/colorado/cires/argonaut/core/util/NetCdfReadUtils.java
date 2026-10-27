@@ -9,6 +9,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Function;
 import ucar.ma2.Array;
 import ucar.ma2.InvalidRangeException;
@@ -326,5 +327,17 @@ public final class NetCdfReadUtils {
       return null;
     }
     return LocalDateTime.parse(value, DATE_TIME_FORMATTER).atZone(ZoneId.of("UTC")).toInstant();
+  }
+
+  public static Optional<double[]> read1DDoubleArray(String variableName,
+    NetcdfFile netcdf) {
+    return Optional.ofNullable(netcdf.findVariable(variableName))
+      .map(variable -> {
+        try {
+          return (double[]) variable.read().copyTo1DJavaArray();
+        } catch (IOException e) {
+          throw new RuntimeException("failed to read %s".formatted(variableName), e);
+        }
+      });
   }
 }

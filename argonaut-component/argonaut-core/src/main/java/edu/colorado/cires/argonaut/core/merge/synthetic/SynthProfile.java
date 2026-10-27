@@ -1,29 +1,15 @@
 package edu.colorado.cires.argonaut.core.merge.synthetic;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
+import java.util.Optional;
 
-class SynthProfile {
-
-  private int index;
-  private Map<String, SynthParameter> parameters = new TreeMap<>();
-  private List<String> supportedParameters = new ArrayList<>();
-
-  public int getIndex() {
-    return index;
+record SynthProfile(int index, Map<String, SynthParameter> parameters, List<String> supportedParameters) {
+  public void putParameter(SynthParameter parameter) {
+    parameters.put(parameter.parameterName(), parameter);
   }
 
-  public void setIndex(int index) {
-    this.index = index;
-  }
-
-  public Map<String, SynthParameter> getParameters() {
-    return parameters;
-  }
-
-  public List<String> getSupportedParameters() {
-    return supportedParameters;
+  public Optional<SynthParameter> getParameter(String parameterName) {
+    return Optional.ofNullable(parameters.get(parameterName));
   }
 }

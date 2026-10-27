@@ -18,6 +18,65 @@ public final class CommonParameterAttributes {
   private static final Pattern DOWN_IRRADIANCE_REGEX = Pattern.compile("DOWN_IRRADIANCE([0-9]+)");
   private static final Pattern UP_RADIANCE_REGEX = Pattern.compile("UP_RADIANCE([0-9]+)");
 
+  private static final ParameterAttributes<Float> CDOM_PARAM_ATTR = new ParameterAttributes<>() {
+    @Override
+    public String getLongName() {
+      return "Concentration of coloured dissolved organic matter in sea water";
+    }
+
+    @Override
+    public String getUnits() {
+      return "ppb";
+    }
+
+    @Override
+    public String getCFormat() {
+      return "%.3f";
+    }
+
+    @Override
+    public String getFortranFormat() {
+      return "F.3";
+    }
+
+    @Override
+    public Float getResolution() {
+      return 0.001f;
+    }
+  };
+
+  private static final ParameterAttributes<Float> CHLA_PARAM_ATTR = new ParameterAttributes<>() {
+
+    @Override
+    public String getLongName() {
+      return "Chlorophyll-A";
+    }
+
+    @Override
+    public String getStandardName() {
+      return "mass_concentration_of_chlorophyll_a_in_sea_water";
+    }
+
+    @Override
+    public String getUnits() {
+      return "mg/m3";
+    }
+
+    @Override
+    public String getCFormat() {
+      return "%.3f";
+    }
+
+    @Override
+    public String getFortranFormat() {
+      return "F.3";
+    }
+
+    @Override
+    public Float getResolution() {
+      return 0.025f;
+    }
+  };
 
   private static final ParameterAttributes<Float> PRESS_PARAM_ATTR = new ParameterAttributes<>() {
     @Override
@@ -3380,11 +3439,11 @@ public final class CommonParameterAttributes {
     }
     if ("CDOM".equals(parameterName)) {
       //TODO
-      return null;
+      return CDOM_PARAM_ATTR;
     }
     if ("CHLA".equals(parameterName)) {
       //TODO
-      return null;
+      return CHLA_PARAM_ATTR;
     }
     if ("BISULFIDE".equals(parameterName)) {
       //TODO
@@ -3437,8 +3496,33 @@ public final class CommonParameterAttributes {
 
     matcher = BBP_REGEX.matcher(parameterName);
     if (matcher.matches()) {
-      // TODO
-      throw new UnsupportedOperationException("BBP regular expression not supported");
+      String diNum = matcher.group(1);
+      return new ParameterAttributes<>() {
+        @Override
+        public String getLongName() {
+          return "Particle backscattering at " + diNum + " nanometers";
+        }
+
+        @Override
+        public String getUnits() {
+          return "m-1";
+        }
+
+        @Override
+        public String getCFormat() {
+          return "%.3f";
+        }
+
+        @Override
+        public String getFortranFormat() {
+          return "F.3";
+        }
+
+        @Override
+        public Float getResolution() {
+          return 0.001f;
+        }
+      };
     }
 
     matcher = CP_REGEX.matcher(parameterName);

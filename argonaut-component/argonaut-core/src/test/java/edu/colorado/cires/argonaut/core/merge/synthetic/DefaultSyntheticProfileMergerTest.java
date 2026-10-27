@@ -15,12 +15,14 @@ import java.nio.file.Paths;
 import java.util.List;
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Named;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
-public class DefaultSyntheticProfileMergerTest {
+class DefaultSyntheticProfileMergerTest {
 
   @BeforeEach
-  public void setup() {
+  void setup() {
     FileUtils.deleteQuietly(Paths.get("target/output").toFile());
   }
 
@@ -45,20 +47,43 @@ public class DefaultSyntheticProfileMergerTest {
     assertEquals(expected.getParameterName(), actual.getParameterName());
   }
 
-  @Test
-  public void test() throws Exception {
+  private record TestCase(String cProfilePath, String bProfilePath, String metaPath, String expectedPath) {}
 
-    Path cProfilePath = Paths.get("src/test/resources/dac/meds/4902691/profiles/R4902691_034.nc");
-    Path bProfilePath = Paths.get("src/test/resources/dac/meds/4902691/profiles/BR4902691_034.nc");
-    Path metaPath = Paths.get("src/test/resources/dac/meds/4902691/4902691_meta.nc");
-    Path outputPath = Paths.get("target/output/dac/meds/4902691/profiles/SR4902691_034.nc");
-    Path expectedPath = Paths.get("src/test/resources/dac/meds/4902691/profiles/SR4902691_034.nc");
+  private static List<Named<TestCase>> testCases() {
+    return List.of(
+      Named.of("happy path", new TestCase("src/test/resources/dac/meds/4902691/profiles/R4902691_034.nc",
+        "src/test/resources/dac/meds/4902691/profiles/BR4902691_034.nc",
+        "src/test/resources/dac/meds/4902691/4902691_meta.nc",
+        "src/test/resources/dac/meds/4902691/profiles/SR4902691_034.nc")),
+      Named.of("extrapolate out of bounds 1", new TestCase("src/test/resources/dac/coriolis/6901486/profiles/D6901486_037.nc",
+        "src/test/resources/dac/coriolis/6901486/profiles/BD6901486_037.nc",
+        "src/test/resources/dac/coriolis/6901486/6901486_meta.nc",
+        "src/test/resources/dac/coriolis/6901486/profiles/SD6901486_037.nc")),
+      Named.of("extrapolate out of bounds 2", new TestCase("src/test/resources/dac/bdoc/6901174/profiles/D6901174_143.nc",
+        "src/test/resources/dac/bdoc/6901174/profiles/BD6901174_143.nc",
+        "src/test/resources/dac/bdoc/6901174/6901174_meta.nc",
+        "src/test/resources/out/6901174/profiles/SD6901174_143.nc")),
+      Named.of("core-only result", new TestCase("src/test/resources/dac/aoml/5903712/profiles/D5903712_149.nc",
+        "src/test/resources/dac/aoml/5903712/profiles/BD5903712_149.nc",
+        "src/test/resources/dac/aoml/5903712/5903712_meta.nc",
+        "src/test/resources/dac/aoml/5903712/profiles/SD5903712_149.nc"))
+    );
+  }
+
+  @ParameterizedTest
+  @MethodSource("testCases")
+  void test(TestCase testCase) throws Exception {
+    Path cProfilePath = Paths.get(testCase.cProfilePath);
+    Path bProfilePath = Paths.get(testCase.bProfilePath);
+    Path metaPath = Paths.get(testCase.metaPath);
+    Path outputPath = Paths.get("target/output/output.nc");
+    Path expectedPath = Paths.get(testCase.expectedPath);
     DefaultSyntheticProfileMerger syntheticProfileMerger = new DefaultSyntheticProfileMerger();
     syntheticProfileMerger.mergeProfiles(cProfilePath, bProfilePath, metaPath, outputPath);
 
     try (
         ArgoSyntheticProfileV13Reader reader = new ArgoSyntheticProfileV13Reader(outputPath);
-        ArgoSyntheticProfileV13Reader expectedReader = new ArgoSyntheticProfileV13Reader(expectedPath);
+        ArgoSyntheticProfileV13Reader expectedReader = new ArgoSyntheticProfileV13Reader(expectedPath)
     ) {
 
 
@@ -66,8 +91,8 @@ public class DefaultSyntheticProfileMergerTest {
       List<ArgoSyntheticProfileV13> expectedProfiles = expectedReader.getMultiProfile().getProfiles();
       assertEquals(1, profiles.size());
       assertEquals(1, expectedProfiles.size());
-      ArgoSyntheticProfileV13 profile = profiles.get(0);
-      ArgoSyntheticProfileV13 expectedProfile = expectedProfiles.get(0);
+      ArgoSyntheticProfileV13 profile = profiles.getFirst();
+      ArgoSyntheticProfileV13 expectedProfile = expectedProfiles.getFirst();
 
       assertEquals(expectedProfile.getTitle(), profile.getTitle());
       assertEquals(expectedProfile.getInstitution(), profile.getInstitution());
@@ -178,28 +203,28 @@ public class DefaultSyntheticProfileMergerTest {
     float[] expected = fromList(expectedParam.getLevels().stream().map(ArgoSyntheticProfileV13Level::getValue).toList(),
         Float.MAX_VALUE - 1f);
     float[] actual = fromList(actualParam.getLevels().stream().map(ArgoSyntheticProfileV13Level::getValue).toList(), Float.MAX_VALUE - 1f);
-    assertArrayEquals(expected, actual, 0.0001f);
+    assertArrayEquals(expected, actual, 0.0001f, "%s values not equal".formatted(expectedParam.getParameterName()));
   }
 
   private static void assertAdjustedParametersEqual(ArgoSyntheticProfileV13Parameter expectedParam, ArgoSyntheticProfileV13Parameter actualParam) {
     float[] expected = fromList(expectedParam.getLevels().stream().map(ArgoSyntheticProfileV13Level::getAdjustedValue).toList(),
         Float.MAX_VALUE - 1f);
     float[] actual = fromList(actualParam.getLevels().stream().map(ArgoSyntheticProfileV13Level::getAdjustedValue).toList(), Float.MAX_VALUE - 1f);
-    assertArrayEquals(expected, actual, 0.0001f);
+    assertArrayEquals(expected, actual);
   }
 
   private static void assertAdjustedErrorEqual(ArgoSyntheticProfileV13Parameter expectedParam, ArgoSyntheticProfileV13Parameter actualParam) {
     float[] expected = fromList(expectedParam.getLevels().stream().map(ArgoSyntheticProfileV13Level::getAdjustedErrorValue).toList(),
         Float.MAX_VALUE - 1f);
     float[] actual = fromList(actualParam.getLevels().stream().map(ArgoSyntheticProfileV13Level::getAdjustedErrorValue).toList(), Float.MAX_VALUE - 1f);
-    assertArrayEquals(expected, actual, 0.0001f);
+    assertArrayEquals(expected, actual);
   }
 
   private static void assertDPressEqual(ArgoSyntheticProfileV13Parameter expectedParam, ArgoSyntheticProfileV13Parameter actualParam) {
     float[] expected = fromList(expectedParam.getLevels().stream().map(ArgoSyntheticProfileV13Level::getPressureDisplacement).toList(),
         Float.MAX_VALUE - 1f);
     float[] actual = fromList(actualParam.getLevels().stream().map(ArgoSyntheticProfileV13Level::getPressureDisplacement).toList(), Float.MAX_VALUE - 1f);
-    assertArrayEquals(expected, actual, 0.0001f);
+    assertArrayEquals(expected, actual);
   }
 
   private static void assertQcEqual(ArgoSyntheticProfileV13Parameter expectedParam, ArgoSyntheticProfileV13Parameter actualParam) {
@@ -211,7 +236,7 @@ public class DefaultSyntheticProfileMergerTest {
   private static void assertAdjustedQcEqual(ArgoSyntheticProfileV13Parameter expectedParam, ArgoSyntheticProfileV13Parameter actualParam) {
     List<String> expected = expectedParam.getLevels().stream().map(ArgoSyntheticProfileV13Level::getAdjustedQc).toList();
     List<String> actual = actualParam.getLevels().stream().map(ArgoSyntheticProfileV13Level::getAdjustedQc).toList();
-    assertEquals(expected, actual);
+    assertEquals(expected, actual, "%s adjusted QC values not equal".formatted(expectedParam.getParameterName()));
   }
 
   private static float[] fromList(List<Float> list, float fillValue) {

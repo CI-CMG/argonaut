@@ -27,18 +27,19 @@ public final class BioParameterFilter {
   }
 
   private static final List<Pattern> B_PARAM_PATTERNS = Arrays.asList(
-      Pattern.compile("BBP[0-9]+"),
-      Pattern.compile("BISULFIDE"),
-      Pattern.compile("CDOM"),
-      Pattern.compile("CHLA"),
-      Pattern.compile("CP[0-9]+"),
-      Pattern.compile("DOWN_IRRADIANCE[0-9]+"),
-      Pattern.compile("DOWNWELLING_PAR"),
-      Pattern.compile("DOXY"),
-      Pattern.compile("NITRATE"),
-      Pattern.compile("PH_IN_SITU_TOTAL"),
-      Pattern.compile("TURBIDITY"),
-      Pattern.compile("UP_RADIANCE[0-9]+")
+    Pattern.compile("BBP\\d+(?:_?\\d+)?"),
+    Pattern.compile("BISULFIDE(?:_?\\d+)?"),
+    Pattern.compile("CDOM(?:_?\\d+)?"),
+    Pattern.compile("CHLA(?:_?\\d+)?"),
+    Pattern.compile("CHLA_FLUORESCENCE(?:_?\\d+)?"),
+    Pattern.compile("CP\\d+(?:_?\\d+)?"),
+    Pattern.compile("DOWN_IRRADIANCE\\d+(?:_?\\d+)?"),
+    Pattern.compile("DOWNWELLING_PAR(?:_?\\d+)?"),
+    Pattern.compile("DOXY(?:_?\\d+)?"),
+    Pattern.compile("NITRATE(?:_?\\d+)?"),
+    Pattern.compile("PH_IN_SITU_TOTAL(?:_?\\d+)?"),
+    Pattern.compile("TURBIDITY(?:_?\\d+)?"),
+    Pattern.compile("UP_RADIANCE\\d+(?:_?\\d+)?")
   );
 
 }

@@ -1,0 +1,1381 @@
+<PAMDataset>
+  <Subdataset name="BBP700">
+    <PAMDataset>
+      <Metadata>
+        <MDI key="BBP700#C_format">%.7f</MDI>
+        <MDI key="BBP700#FORTRAN_format">F.7</MDI>
+        <MDI key="BBP700#long_name">Particle backscattering at 700 nanometers</MDI>
+        <MDI key="BBP700#resolution">1e-07</MDI>
+        <MDI key="BBP700#units">m-1</MDI>
+        <MDI key="BBP700#_FillValue">99999</MDI>
+        <MDI key="NC_GLOBAL#Conventions">Argo-3.1 CF-1.6</MDI>
+        <MDI key="NC_GLOBAL#featureType">trajectoryProfile</MDI>
+        <MDI key="NC_GLOBAL#history">2026-08-09T07:27:35Z creation (software version 1.22 (version 12.05.2025 for ARGO_simplified_profile))</MDI>
+        <MDI key="NC_GLOBAL#id">https://doi.org/10.17882/42182</MDI>
+        <MDI key="NC_GLOBAL#institution">CORIOLIS</MDI>
+        <MDI key="NC_GLOBAL#references">http://www.argodatamgt.org/Documentation</MDI>
+        <MDI key="NC_GLOBAL#software_version">1.22 (version 12.05.2025 for ARGO_simplified_profile)</MDI>
+        <MDI key="NC_GLOBAL#source">Argo float</MDI>
+        <MDI key="NC_GLOBAL#title">Argo float vertical profile</MDI>
+        <MDI key="NC_GLOBAL#user_manual_version">1.0</MDI>
+      </Metadata>
+      <PAMRasterBand band="1">
+        <Metadata>
+          <MDI key="STATISTICS_MINIMUM">0.00020780171325896</MDI>
+          <MDI key="STATISTICS_MAXIMUM">0.003854789538309</MDI>
+          <MDI key="STATISTICS_MEAN">0.00060511416294628</MDI>
+          <MDI key="STATISTICS_STDDEV">0.00053612361093455</MDI>
+        </Metadata>
+      </PAMRasterBand>
+    </PAMDataset>
+  </Subdataset>
+  <Subdataset name="BBP700_ADJUSTED">
+    <PAMDataset>
+      <Metadata>
+        <MDI key="BBP700_ADJUSTED#C_format">%.7f</MDI>
+        <MDI key="BBP700_ADJUSTED#FORTRAN_format">F.7</MDI>
+        <MDI key="BBP700_ADJUSTED#long_name">Particle backscattering at 700 nanometers</MDI>
+        <MDI key="BBP700_ADJUSTED#resolution">1e-07</MDI>
+        <MDI key="BBP700_ADJUSTED#units">m-1</MDI>
+        <MDI key="BBP700_ADJUSTED#_FillValue">99999</MDI>
+        <MDI key="NC_GLOBAL#Conventions">Argo-3.1 CF-1.6</MDI>
+        <MDI key="NC_GLOBAL#featureType">trajectoryProfile</MDI>
+        <MDI key="NC_GLOBAL#history">2026-08-09T07:27:35Z creation (software version 1.22 (version 12.05.2025 for ARGO_simplified_profile))</MDI>
+        <MDI key="NC_GLOBAL#id">https://doi.org/10.17882/42182</MDI>
+        <MDI key="NC_GLOBAL#institution">CORIOLIS</MDI>
+        <MDI key="NC_GLOBAL#references">http://www.argodatamgt.org/Documentation</MDI>
+        <MDI key="NC_GLOBAL#software_version">1.22 (version 12.05.2025 for ARGO_simplified_profile)</MDI>
+        <MDI key="NC_GLOBAL#source">Argo float</MDI>
+        <MDI key="NC_GLOBAL#title">Argo float vertical profile</MDI>
+        <MDI key="NC_GLOBAL#user_manual_version">1.0</MDI>
+      </Metadata>
+      <PAMRasterBand band="1">
+        <Metadata>
+          <MDI key="STATISTICS_MINIMUM">0.00020780171325896</MDI>
+          <MDI key="STATISTICS_MAXIMUM">0.003854789538309</MDI>
+          <MDI key="STATISTICS_MEAN">0.00060511416294628</MDI>
+          <MDI key="STATISTICS_STDDEV">0.00053612361093455</MDI>
+        </Metadata>
+      </PAMRasterBand>
+    </PAMDataset>
+  </Subdataset>
+  <Subdataset name="BBP700_ADJUSTED_ERROR">
+    <PAMDataset>
+      <Metadata>
+        <MDI key="BBP700_ADJUSTED_ERROR#C_format">%.7f</MDI>
+        <MDI key="BBP700_ADJUSTED_ERROR#FORTRAN_format">F.7</MDI>
+        <MDI key="BBP700_ADJUSTED_ERROR#long_name">Contains the error on the adjusted values as determined by the delayed mode QC process</MDI>
+        <MDI key="BBP700_ADJUSTED_ERROR#resolution">1e-07</MDI>
+        <MDI key="BBP700_ADJUSTED_ERROR#units">m-1</MDI>
+        <MDI key="BBP700_ADJUSTED_ERROR#_FillValue">99999</MDI>
+        <MDI key="NC_GLOBAL#Conventions">Argo-3.1 CF-1.6</MDI>
+        <MDI key="NC_GLOBAL#featureType">trajectoryProfile</MDI>
+        <MDI key="NC_GLOBAL#history">2026-08-09T07:27:35Z creation (software version 1.22 (version 12.05.2025 for ARGO_simplified_profile))</MDI>
+        <MDI key="NC_GLOBAL#id">https://doi.org/10.17882/42182</MDI>
+        <MDI key="NC_GLOBAL#institution">CORIOLIS</MDI>
+        <MDI key="NC_GLOBAL#references">http://www.argodatamgt.org/Documentation</MDI>
+        <MDI key="NC_GLOBAL#software_version">1.22 (version 12.05.2025 for ARGO_simplified_profile)</MDI>
+        <MDI key="NC_GLOBAL#source">Argo float</MDI>
+        <MDI key="NC_GLOBAL#title">Argo float vertical profile</MDI>
+        <MDI key="NC_GLOBAL#user_manual_version">1.0</MDI>
+      </Metadata>
+      <PAMRasterBand band="1">
+        <Metadata>
+          <MDI key="STATISTICS_MINIMUM">4.1560342651792e-05</MDI>
+          <MDI key="STATISTICS_MAXIMUM">0.0007709579076618</MDI>
+          <MDI key="STATISTICS_MEAN">0.0001210228328027</MDI>
+          <MDI key="STATISTICS_STDDEV">0.00010722472224514</MDI>
+        </Metadata>
+      </PAMRasterBand>
+    </PAMDataset>
+  </Subdataset>
+  <Subdataset name="BBP700_dPRES">
+    <PAMDataset>
+      <Metadata>
+        <MDI key="BBP700_dPRES#long_name">BBP700 pressure displacement from original sampled value</MDI>
+        <MDI key="BBP700_dPRES#units">decibar</MDI>
+        <MDI key="BBP700_dPRES#_FillValue">99999</MDI>
+        <MDI key="NC_GLOBAL#Conventions">Argo-3.1 CF-1.6</MDI>
+        <MDI key="NC_GLOBAL#featureType">trajectoryProfile</MDI>
+        <MDI key="NC_GLOBAL#history">2026-08-09T07:27:35Z creation (software version 1.22 (version 12.05.2025 for ARGO_simplified_profile))</MDI>
+        <MDI key="NC_GLOBAL#id">https://doi.org/10.17882/42182</MDI>
+        <MDI key="NC_GLOBAL#institution">CORIOLIS</MDI>
+        <MDI key="NC_GLOBAL#references">http://www.argodatamgt.org/Documentation</MDI>
+        <MDI key="NC_GLOBAL#software_version">1.22 (version 12.05.2025 for ARGO_simplified_profile)</MDI>
+        <MDI key="NC_GLOBAL#source">Argo float</MDI>
+        <MDI key="NC_GLOBAL#title">Argo float vertical profile</MDI>
+        <MDI key="NC_GLOBAL#user_manual_version">1.0</MDI>
+      </Metadata>
+      <PAMRasterBand band="1">
+        <Metadata>
+          <MDI key="STATISTICS_MINIMUM">-0.14000000059605</MDI>
+          <MDI key="STATISTICS_MAXIMUM">0.18000000715256</MDI>
+          <MDI key="STATISTICS_MEAN">-0.012190287295873</MDI>
+          <MDI key="STATISTICS_STDDEV">0.032910658866975</MDI>
+        </Metadata>
+      </PAMRasterBand>
+    </PAMDataset>
+  </Subdataset>
+  <Subdataset name="CDOM">
+    <PAMDataset>
+      <Metadata>
+        <MDI key="CDOM#C_format">%.3f</MDI>
+        <MDI key="CDOM#FORTRAN_format">F.3</MDI>
+        <MDI key="CDOM#long_name">Concentration of coloured dissolved organic matter in sea water</MDI>
+        <MDI key="CDOM#resolution">0.001</MDI>
+        <MDI key="CDOM#units">ppb</MDI>
+        <MDI key="CDOM#_FillValue">99999</MDI>
+        <MDI key="NC_GLOBAL#Conventions">Argo-3.1 CF-1.6</MDI>
+        <MDI key="NC_GLOBAL#featureType">trajectoryProfile</MDI>
+        <MDI key="NC_GLOBAL#history">2026-08-09T07:27:35Z creation (software version 1.22 (version 12.05.2025 for ARGO_simplified_profile))</MDI>
+        <MDI key="NC_GLOBAL#id">https://doi.org/10.17882/42182</MDI>
+        <MDI key="NC_GLOBAL#institution">CORIOLIS</MDI>
+        <MDI key="NC_GLOBAL#references">http://www.argodatamgt.org/Documentation</MDI>
+        <MDI key="NC_GLOBAL#software_version">1.22 (version 12.05.2025 for ARGO_simplified_profile)</MDI>
+        <MDI key="NC_GLOBAL#source">Argo float</MDI>
+        <MDI key="NC_GLOBAL#title">Argo float vertical profile</MDI>
+        <MDI key="NC_GLOBAL#user_manual_version">1.0</MDI>
+      </Metadata>
+      <PAMRasterBand band="1">
+        <Metadata>
+          <MDI key="STATISTICS_MINIMUM">1.8020000457764</MDI>
+          <MDI key="STATISTICS_MAXIMUM">2.612900018692</MDI>
+          <MDI key="STATISTICS_MEAN">2.2435293416202</MDI>
+          <MDI key="STATISTICS_STDDEV">0.12821614963808</MDI>
+        </Metadata>
+      </PAMRasterBand>
+    </PAMDataset>
+  </Subdataset>
+  <Subdataset name="CDOM_ADJUSTED">
+    <PAMDataset>
+      <Metadata>
+        <MDI key="CDOM_ADJUSTED#C_format">%.3f</MDI>
+        <MDI key="CDOM_ADJUSTED#FORTRAN_format">F.3</MDI>
+        <MDI key="CDOM_ADJUSTED#long_name">Concentration of coloured dissolved organic matter in sea water</MDI>
+        <MDI key="CDOM_ADJUSTED#resolution">0.001</MDI>
+        <MDI key="CDOM_ADJUSTED#units">ppb</MDI>
+        <MDI key="CDOM_ADJUSTED#_FillValue">99999</MDI>
+        <MDI key="NC_GLOBAL#Conventions">Argo-3.1 CF-1.6</MDI>
+        <MDI key="NC_GLOBAL#featureType">trajectoryProfile</MDI>
+        <MDI key="NC_GLOBAL#history">2026-08-09T07:27:35Z creation (software version 1.22 (version 12.05.2025 for ARGO_simplified_profile))</MDI>
+        <MDI key="NC_GLOBAL#id">https://doi.org/10.17882/42182</MDI>
+        <MDI key="NC_GLOBAL#institution">CORIOLIS</MDI>
+        <MDI key="NC_GLOBAL#references">http://www.argodatamgt.org/Documentation</MDI>
+        <MDI key="NC_GLOBAL#software_version">1.22 (version 12.05.2025 for ARGO_simplified_profile)</MDI>
+        <MDI key="NC_GLOBAL#source">Argo float</MDI>
+        <MDI key="NC_GLOBAL#title">Argo float vertical profile</MDI>
+        <MDI key="NC_GLOBAL#user_manual_version">1.0</MDI>
+      </Metadata>
+    </PAMDataset>
+  </Subdataset>
+  <Subdataset name="CDOM_ADJUSTED_ERROR">
+    <PAMDataset>
+      <Metadata>
+        <MDI key="CDOM_ADJUSTED_ERROR#C_format">%.3f</MDI>
+        <MDI key="CDOM_ADJUSTED_ERROR#FORTRAN_format">F.3</MDI>
+        <MDI key="CDOM_ADJUSTED_ERROR#long_name">Contains the error on the adjusted values as determined by the delayed mode QC process</MDI>
+        <MDI key="CDOM_ADJUSTED_ERROR#resolution">0.001</MDI>
+        <MDI key="CDOM_ADJUSTED_ERROR#units">ppb</MDI>
+        <MDI key="CDOM_ADJUSTED_ERROR#_FillValue">99999</MDI>
+        <MDI key="NC_GLOBAL#Conventions">Argo-3.1 CF-1.6</MDI>
+        <MDI key="NC_GLOBAL#featureType">trajectoryProfile</MDI>
+        <MDI key="NC_GLOBAL#history">2026-08-09T07:27:35Z creation (software version 1.22 (version 12.05.2025 for ARGO_simplified_profile))</MDI>
+        <MDI key="NC_GLOBAL#id">https://doi.org/10.17882/42182</MDI>
+        <MDI key="NC_GLOBAL#institution">CORIOLIS</MDI>
+        <MDI key="NC_GLOBAL#references">http://www.argodatamgt.org/Documentation</MDI>
+        <MDI key="NC_GLOBAL#software_version">1.22 (version 12.05.2025 for ARGO_simplified_profile)</MDI>
+        <MDI key="NC_GLOBAL#source">Argo float</MDI>
+        <MDI key="NC_GLOBAL#title">Argo float vertical profile</MDI>
+        <MDI key="NC_GLOBAL#user_manual_version">1.0</MDI>
+      </Metadata>
+    </PAMDataset>
+  </Subdataset>
+  <Subdataset name="CDOM_dPRES">
+    <PAMDataset>
+      <Metadata>
+        <MDI key="CDOM_dPRES#long_name">CDOM pressure displacement from original sampled value</MDI>
+        <MDI key="CDOM_dPRES#units">decibar</MDI>
+        <MDI key="CDOM_dPRES#_FillValue">99999</MDI>
+        <MDI key="NC_GLOBAL#Conventions">Argo-3.1 CF-1.6</MDI>
+        <MDI key="NC_GLOBAL#featureType">trajectoryProfile</MDI>
+        <MDI key="NC_GLOBAL#history">2026-08-09T07:27:35Z creation (software version 1.22 (version 12.05.2025 for ARGO_simplified_profile))</MDI>
+        <MDI key="NC_GLOBAL#id">https://doi.org/10.17882/42182</MDI>
+        <MDI key="NC_GLOBAL#institution">CORIOLIS</MDI>
+        <MDI key="NC_GLOBAL#references">http://www.argodatamgt.org/Documentation</MDI>
+        <MDI key="NC_GLOBAL#software_version">1.22 (version 12.05.2025 for ARGO_simplified_profile)</MDI>
+        <MDI key="NC_GLOBAL#source">Argo float</MDI>
+        <MDI key="NC_GLOBAL#title">Argo float vertical profile</MDI>
+        <MDI key="NC_GLOBAL#user_manual_version">1.0</MDI>
+      </Metadata>
+      <PAMRasterBand band="1">
+        <Metadata>
+          <MDI key="STATISTICS_MINIMUM">-0.14000000059605</MDI>
+          <MDI key="STATISTICS_MAXIMUM">0.18000000715256</MDI>
+          <MDI key="STATISTICS_MEAN">-0.012190287295873</MDI>
+          <MDI key="STATISTICS_STDDEV">0.032910658866975</MDI>
+        </Metadata>
+      </PAMRasterBand>
+    </PAMDataset>
+  </Subdataset>
+  <Subdataset name="CHLA">
+    <PAMDataset>
+      <Metadata>
+        <MDI key="CHLA#C_format">%.4f</MDI>
+        <MDI key="CHLA#FORTRAN_format">F.4</MDI>
+        <MDI key="CHLA#long_name">Chlorophyll-A</MDI>
+        <MDI key="CHLA#resolution">0.025</MDI>
+        <MDI key="CHLA#standard_name">mass_concentration_of_chlorophyll_a_in_sea_water</MDI>
+        <MDI key="CHLA#units">mg/m3</MDI>
+        <MDI key="CHLA#_FillValue">99999</MDI>
+        <MDI key="NC_GLOBAL#Conventions">Argo-3.1 CF-1.6</MDI>
+        <MDI key="NC_GLOBAL#featureType">trajectoryProfile</MDI>
+        <MDI key="NC_GLOBAL#history">2026-08-09T07:27:35Z creation (software version 1.22 (version 12.05.2025 for ARGO_simplified_profile))</MDI>
+        <MDI key="NC_GLOBAL#id">https://doi.org/10.17882/42182</MDI>
+        <MDI key="NC_GLOBAL#institution">CORIOLIS</MDI>
+        <MDI key="NC_GLOBAL#references">http://www.argodatamgt.org/Documentation</MDI>
+        <MDI key="NC_GLOBAL#software_version">1.22 (version 12.05.2025 for ARGO_simplified_profile)</MDI>
+        <MDI key="NC_GLOBAL#source">Argo float</MDI>
+        <MDI key="NC_GLOBAL#title">Argo float vertical profile</MDI>
+        <MDI key="NC_GLOBAL#user_manual_version">1.0</MDI>
+      </Metadata>
+      <PAMRasterBand band="1">
+        <Metadata>
+          <MDI key="STATISTICS_MINIMUM">0.014600000344217</MDI>
+          <MDI key="STATISTICS_MAXIMUM">2.6420691013336</MDI>
+          <MDI key="STATISTICS_MEAN">0.24183995600114</MDI>
+          <MDI key="STATISTICS_STDDEV">0.62446145147673</MDI>
+        </Metadata>
+      </PAMRasterBand>
+    </PAMDataset>
+  </Subdataset>
+  <Subdataset name="CHLA_ADJUSTED_ERROR">
+    <PAMDataset>
+      <Metadata>
+        <MDI key="CHLA_ADJUSTED_ERROR#C_format">%.4f</MDI>
+        <MDI key="CHLA_ADJUSTED_ERROR#FORTRAN_format">F.4</MDI>
+        <MDI key="CHLA_ADJUSTED_ERROR#long_name">Contains the error on the adjusted values as determined by the delayed mode QC process</MDI>
+        <MDI key="CHLA_ADJUSTED_ERROR#resolution">0.025</MDI>
+        <MDI key="CHLA_ADJUSTED_ERROR#units">mg/m3</MDI>
+        <MDI key="CHLA_ADJUSTED_ERROR#_FillValue">99999</MDI>
+        <MDI key="NC_GLOBAL#Conventions">Argo-3.1 CF-1.6</MDI>
+        <MDI key="NC_GLOBAL#featureType">trajectoryProfile</MDI>
+        <MDI key="NC_GLOBAL#history">2026-08-09T07:27:35Z creation (software version 1.22 (version 12.05.2025 for ARGO_simplified_profile))</MDI>
+        <MDI key="NC_GLOBAL#id">https://doi.org/10.17882/42182</MDI>
+        <MDI key="NC_GLOBAL#institution">CORIOLIS</MDI>
+        <MDI key="NC_GLOBAL#references">http://www.argodatamgt.org/Documentation</MDI>
+        <MDI key="NC_GLOBAL#software_version">1.22 (version 12.05.2025 for ARGO_simplified_profile)</MDI>
+        <MDI key="NC_GLOBAL#source">Argo float</MDI>
+        <MDI key="NC_GLOBAL#title">Argo float vertical profile</MDI>
+        <MDI key="NC_GLOBAL#user_manual_version">1.0</MDI>
+      </Metadata>
+    </PAMDataset>
+  </Subdataset>
+  <Subdataset name="CHLA_ADJUSTED">
+    <PAMDataset>
+      <Metadata>
+        <MDI key="CHLA_ADJUSTED#C_format">%.4f</MDI>
+        <MDI key="CHLA_ADJUSTED#FORTRAN_format">F.4</MDI>
+        <MDI key="CHLA_ADJUSTED#long_name">Chlorophyll-A</MDI>
+        <MDI key="CHLA_ADJUSTED#resolution">0.025</MDI>
+        <MDI key="CHLA_ADJUSTED#standard_name">mass_concentration_of_chlorophyll_a_in_sea_water</MDI>
+        <MDI key="CHLA_ADJUSTED#units">mg/m3</MDI>
+        <MDI key="CHLA_ADJUSTED#_FillValue">99999</MDI>
+        <MDI key="NC_GLOBAL#Conventions">Argo-3.1 CF-1.6</MDI>
+        <MDI key="NC_GLOBAL#featureType">trajectoryProfile</MDI>
+        <MDI key="NC_GLOBAL#history">2026-08-09T07:27:35Z creation (software version 1.22 (version 12.05.2025 for ARGO_simplified_profile))</MDI>
+        <MDI key="NC_GLOBAL#id">https://doi.org/10.17882/42182</MDI>
+        <MDI key="NC_GLOBAL#institution">CORIOLIS</MDI>
+        <MDI key="NC_GLOBAL#references">http://www.argodatamgt.org/Documentation</MDI>
+        <MDI key="NC_GLOBAL#software_version">1.22 (version 12.05.2025 for ARGO_simplified_profile)</MDI>
+        <MDI key="NC_GLOBAL#source">Argo float</MDI>
+        <MDI key="NC_GLOBAL#title">Argo float vertical profile</MDI>
+        <MDI key="NC_GLOBAL#user_manual_version">1.0</MDI>
+      </Metadata>
+      <PAMRasterBand band="1">
+        <Metadata>
+          <MDI key="STATISTICS_MINIMUM">0</MDI>
+          <MDI key="STATISTICS_MAXIMUM">1.0419290065765</MDI>
+          <MDI key="STATISTICS_MEAN">0.096210747798673</MDI>
+          <MDI key="STATISTICS_STDDEV">0.26721719716433</MDI>
+        </Metadata>
+      </PAMRasterBand>
+    </PAMDataset>
+  </Subdataset>
+  <Subdataset name="CHLA_FLUORESCENCE_ADJUSTED">
+    <PAMDataset>
+      <Metadata>
+        <MDI key="CHLA_FLUORESCENCE_ADJUSTED#C_format">%.4f</MDI>
+        <MDI key="CHLA_FLUORESCENCE_ADJUSTED#FORTRAN_format">F.4</MDI>
+        <MDI key="CHLA_FLUORESCENCE_ADJUSTED#long_name">Chlorophyll fluorescence with factory calibration</MDI>
+        <MDI key="CHLA_FLUORESCENCE_ADJUSTED#resolution">0.025</MDI>
+        <MDI key="CHLA_FLUORESCENCE_ADJUSTED#units">ru</MDI>
+        <MDI key="CHLA_FLUORESCENCE_ADJUSTED#valid_max">100</MDI>
+        <MDI key="CHLA_FLUORESCENCE_ADJUSTED#valid_min">-0.2</MDI>
+        <MDI key="CHLA_FLUORESCENCE_ADJUSTED#_FillValue">99999</MDI>
+        <MDI key="NC_GLOBAL#Conventions">Argo-3.1 CF-1.6</MDI>
+        <MDI key="NC_GLOBAL#featureType">trajectoryProfile</MDI>
+        <MDI key="NC_GLOBAL#history">2026-08-09T07:27:35Z creation (software version 1.22 (version 12.05.2025 for ARGO_simplified_profile))</MDI>
+        <MDI key="NC_GLOBAL#id">https://doi.org/10.17882/42182</MDI>
+        <MDI key="NC_GLOBAL#institution">CORIOLIS</MDI>
+        <MDI key="NC_GLOBAL#references">http://www.argodatamgt.org/Documentation</MDI>
+        <MDI key="NC_GLOBAL#software_version">1.22 (version 12.05.2025 for ARGO_simplified_profile)</MDI>
+        <MDI key="NC_GLOBAL#source">Argo float</MDI>
+        <MDI key="NC_GLOBAL#title">Argo float vertical profile</MDI>
+        <MDI key="NC_GLOBAL#user_manual_version">1.0</MDI>
+      </Metadata>
+      <PAMRasterBand band="1">
+        <Metadata>
+          <MDI key="STATISTICS_MINIMUM">0</MDI>
+          <MDI key="STATISTICS_MAXIMUM">2.6274690628052</MDI>
+          <MDI key="STATISTICS_MEAN">0.22723995539115</MDI>
+          <MDI key="STATISTICS_STDDEV">0.62446144895515</MDI>
+        </Metadata>
+      </PAMRasterBand>
+    </PAMDataset>
+  </Subdataset>
+  <Subdataset name="CHLA_FLUORESCENCE_ADJUSTED_ERROR">
+    <PAMDataset>
+      <Metadata>
+        <MDI key="CHLA_FLUORESCENCE_ADJUSTED_ERROR#C_format">%.4f</MDI>
+        <MDI key="CHLA_FLUORESCENCE_ADJUSTED_ERROR#FORTRAN_format">F.4</MDI>
+        <MDI key="CHLA_FLUORESCENCE_ADJUSTED_ERROR#long_name">Contains the error on the adjusted values as determined by the delayed mode QC process</MDI>
+        <MDI key="CHLA_FLUORESCENCE_ADJUSTED_ERROR#resolution">0.025</MDI>
+        <MDI key="CHLA_FLUORESCENCE_ADJUSTED_ERROR#units">ru</MDI>
+        <MDI key="CHLA_FLUORESCENCE_ADJUSTED_ERROR#_FillValue">99999</MDI>
+        <MDI key="NC_GLOBAL#Conventions">Argo-3.1 CF-1.6</MDI>
+        <MDI key="NC_GLOBAL#featureType">trajectoryProfile</MDI>
+        <MDI key="NC_GLOBAL#history">2026-08-09T07:27:35Z creation (software version 1.22 (version 12.05.2025 for ARGO_simplified_profile))</MDI>
+        <MDI key="NC_GLOBAL#id">https://doi.org/10.17882/42182</MDI>
+        <MDI key="NC_GLOBAL#institution">CORIOLIS</MDI>
+        <MDI key="NC_GLOBAL#references">http://www.argodatamgt.org/Documentation</MDI>
+        <MDI key="NC_GLOBAL#software_version">1.22 (version 12.05.2025 for ARGO_simplified_profile)</MDI>
+        <MDI key="NC_GLOBAL#source">Argo float</MDI>
+        <MDI key="NC_GLOBAL#title">Argo float vertical profile</MDI>
+        <MDI key="NC_GLOBAL#user_manual_version">1.0</MDI>
+      </Metadata>
+    </PAMDataset>
+  </Subdataset>
+  <Subdataset name="CHLA_FLUORESCENCE">
+    <PAMDataset>
+      <Metadata>
+        <MDI key="CHLA_FLUORESCENCE#C_format">%.4f</MDI>
+        <MDI key="CHLA_FLUORESCENCE#FORTRAN_format">F.4</MDI>
+        <MDI key="CHLA_FLUORESCENCE#long_name">Chlorophyll fluorescence with factory calibration</MDI>
+        <MDI key="CHLA_FLUORESCENCE#resolution">0.025</MDI>
+        <MDI key="CHLA_FLUORESCENCE#units">ru</MDI>
+        <MDI key="CHLA_FLUORESCENCE#valid_max">100</MDI>
+        <MDI key="CHLA_FLUORESCENCE#valid_min">-0.2</MDI>
+        <MDI key="CHLA_FLUORESCENCE#_FillValue">99999</MDI>
+        <MDI key="NC_GLOBAL#Conventions">Argo-3.1 CF-1.6</MDI>
+        <MDI key="NC_GLOBAL#featureType">trajectoryProfile</MDI>
+        <MDI key="NC_GLOBAL#history">2026-08-09T07:27:35Z creation (software version 1.22 (version 12.05.2025 for ARGO_simplified_profile))</MDI>
+        <MDI key="NC_GLOBAL#id">https://doi.org/10.17882/42182</MDI>
+        <MDI key="NC_GLOBAL#institution">CORIOLIS</MDI>
+        <MDI key="NC_GLOBAL#references">http://www.argodatamgt.org/Documentation</MDI>
+        <MDI key="NC_GLOBAL#software_version">1.22 (version 12.05.2025 for ARGO_simplified_profile)</MDI>
+        <MDI key="NC_GLOBAL#source">Argo float</MDI>
+        <MDI key="NC_GLOBAL#title">Argo float vertical profile</MDI>
+        <MDI key="NC_GLOBAL#user_manual_version">1.0</MDI>
+      </Metadata>
+      <PAMRasterBand band="1">
+        <Metadata>
+          <MDI key="STATISTICS_MINIMUM">0.014600000344217</MDI>
+          <MDI key="STATISTICS_MAXIMUM">2.6420691013336</MDI>
+          <MDI key="STATISTICS_MEAN">0.24183995600114</MDI>
+          <MDI key="STATISTICS_STDDEV">0.62446145147673</MDI>
+        </Metadata>
+      </PAMRasterBand>
+    </PAMDataset>
+  </Subdataset>
+  <Subdataset name="CHLA_FLUORESCENCE_dPRES">
+    <PAMDataset>
+      <Metadata>
+        <MDI key="CHLA_FLUORESCENCE_dPRES#long_name">CHLA_FLUORESCENCE pressure displacement from original sampled value</MDI>
+        <MDI key="CHLA_FLUORESCENCE_dPRES#units">decibar</MDI>
+        <MDI key="CHLA_FLUORESCENCE_dPRES#_FillValue">99999</MDI>
+        <MDI key="NC_GLOBAL#Conventions">Argo-3.1 CF-1.6</MDI>
+        <MDI key="NC_GLOBAL#featureType">trajectoryProfile</MDI>
+        <MDI key="NC_GLOBAL#history">2026-08-09T07:27:35Z creation (software version 1.22 (version 12.05.2025 for ARGO_simplified_profile))</MDI>
+        <MDI key="NC_GLOBAL#id">https://doi.org/10.17882/42182</MDI>
+        <MDI key="NC_GLOBAL#institution">CORIOLIS</MDI>
+        <MDI key="NC_GLOBAL#references">http://www.argodatamgt.org/Documentation</MDI>
+        <MDI key="NC_GLOBAL#software_version">1.22 (version 12.05.2025 for ARGO_simplified_profile)</MDI>
+        <MDI key="NC_GLOBAL#source">Argo float</MDI>
+        <MDI key="NC_GLOBAL#title">Argo float vertical profile</MDI>
+        <MDI key="NC_GLOBAL#user_manual_version">1.0</MDI>
+      </Metadata>
+      <PAMRasterBand band="1">
+        <Metadata>
+          <MDI key="STATISTICS_MINIMUM">-0.14000000059605</MDI>
+          <MDI key="STATISTICS_MAXIMUM">0.18000000715256</MDI>
+          <MDI key="STATISTICS_MEAN">-0.012190287295873</MDI>
+          <MDI key="STATISTICS_STDDEV">0.032910658866975</MDI>
+        </Metadata>
+      </PAMRasterBand>
+    </PAMDataset>
+  </Subdataset>
+  <Subdataset name="CHLA_dPRES">
+    <PAMDataset>
+      <Metadata>
+        <MDI key="CHLA_dPRES#long_name">CHLA pressure displacement from original sampled value</MDI>
+        <MDI key="CHLA_dPRES#units">decibar</MDI>
+        <MDI key="CHLA_dPRES#_FillValue">99999</MDI>
+        <MDI key="NC_GLOBAL#Conventions">Argo-3.1 CF-1.6</MDI>
+        <MDI key="NC_GLOBAL#featureType">trajectoryProfile</MDI>
+        <MDI key="NC_GLOBAL#history">2026-08-09T07:27:35Z creation (software version 1.22 (version 12.05.2025 for ARGO_simplified_profile))</MDI>
+        <MDI key="NC_GLOBAL#id">https://doi.org/10.17882/42182</MDI>
+        <MDI key="NC_GLOBAL#institution">CORIOLIS</MDI>
+        <MDI key="NC_GLOBAL#references">http://www.argodatamgt.org/Documentation</MDI>
+        <MDI key="NC_GLOBAL#software_version">1.22 (version 12.05.2025 for ARGO_simplified_profile)</MDI>
+        <MDI key="NC_GLOBAL#source">Argo float</MDI>
+        <MDI key="NC_GLOBAL#title">Argo float vertical profile</MDI>
+        <MDI key="NC_GLOBAL#user_manual_version">1.0</MDI>
+      </Metadata>
+      <PAMRasterBand band="1">
+        <Metadata>
+          <MDI key="STATISTICS_MINIMUM">-0.14000000059605</MDI>
+          <MDI key="STATISTICS_MAXIMUM">0.18000000715256</MDI>
+          <MDI key="STATISTICS_MEAN">-0.012190287295873</MDI>
+          <MDI key="STATISTICS_STDDEV">0.032910658866975</MDI>
+        </Metadata>
+      </PAMRasterBand>
+    </PAMDataset>
+  </Subdataset>
+  <Subdataset name="DOWNWELLING_PAR_ADJUSTED_ERROR">
+    <PAMDataset>
+      <Metadata>
+        <MDI key="DOWNWELLING_PAR_ADJUSTED_ERROR#C_format">%.3f</MDI>
+        <MDI key="DOWNWELLING_PAR_ADJUSTED_ERROR#FORTRAN_format">F.3</MDI>
+        <MDI key="DOWNWELLING_PAR_ADJUSTED_ERROR#long_name">Contains the error on the adjusted values as determined by the delayed mode QC process</MDI>
+        <MDI key="DOWNWELLING_PAR_ADJUSTED_ERROR#resolution">0.001</MDI>
+        <MDI key="DOWNWELLING_PAR_ADJUSTED_ERROR#units">microMoleQuanta/m^2/sec</MDI>
+        <MDI key="DOWNWELLING_PAR_ADJUSTED_ERROR#_FillValue">99999</MDI>
+        <MDI key="NC_GLOBAL#Conventions">Argo-3.1 CF-1.6</MDI>
+        <MDI key="NC_GLOBAL#featureType">trajectoryProfile</MDI>
+        <MDI key="NC_GLOBAL#history">2026-08-09T07:27:35Z creation (software version 1.22 (version 12.05.2025 for ARGO_simplified_profile))</MDI>
+        <MDI key="NC_GLOBAL#id">https://doi.org/10.17882/42182</MDI>
+        <MDI key="NC_GLOBAL#institution">CORIOLIS</MDI>
+        <MDI key="NC_GLOBAL#references">http://www.argodatamgt.org/Documentation</MDI>
+        <MDI key="NC_GLOBAL#software_version">1.22 (version 12.05.2025 for ARGO_simplified_profile)</MDI>
+        <MDI key="NC_GLOBAL#source">Argo float</MDI>
+        <MDI key="NC_GLOBAL#title">Argo float vertical profile</MDI>
+        <MDI key="NC_GLOBAL#user_manual_version">1.0</MDI>
+      </Metadata>
+      <PAMRasterBand band="1">
+        <Metadata>
+          <MDI key="STATISTICS_MINIMUM">0.029999999329448</MDI>
+          <MDI key="STATISTICS_MAXIMUM">4.2243914604187</MDI>
+          <MDI key="STATISTICS_MEAN">0.18639932743901</MDI>
+          <MDI key="STATISTICS_STDDEV">0.59302788372295</MDI>
+        </Metadata>
+      </PAMRasterBand>
+    </PAMDataset>
+  </Subdataset>
+  <Subdataset name="DOWNWELLING_PAR_ADJUSTED">
+    <PAMDataset>
+      <Metadata>
+        <MDI key="DOWNWELLING_PAR_ADJUSTED#C_format">%.3f</MDI>
+        <MDI key="DOWNWELLING_PAR_ADJUSTED#FORTRAN_format">F.3</MDI>
+        <MDI key="DOWNWELLING_PAR_ADJUSTED#long_name">Downwelling photosynthetic available radiation</MDI>
+        <MDI key="DOWNWELLING_PAR_ADJUSTED#resolution">0.001</MDI>
+        <MDI key="DOWNWELLING_PAR_ADJUSTED#standard_name">downwelling_photosynthetic_photon_flux_in_sea_water</MDI>
+        <MDI key="DOWNWELLING_PAR_ADJUSTED#units">microMoleQuanta/m^2/sec</MDI>
+        <MDI key="DOWNWELLING_PAR_ADJUSTED#_FillValue">99999</MDI>
+        <MDI key="NC_GLOBAL#Conventions">Argo-3.1 CF-1.6</MDI>
+        <MDI key="NC_GLOBAL#featureType">trajectoryProfile</MDI>
+        <MDI key="NC_GLOBAL#history">2026-08-09T07:27:35Z creation (software version 1.22 (version 12.05.2025 for ARGO_simplified_profile))</MDI>
+        <MDI key="NC_GLOBAL#id">https://doi.org/10.17882/42182</MDI>
+        <MDI key="NC_GLOBAL#institution">CORIOLIS</MDI>
+        <MDI key="NC_GLOBAL#references">http://www.argodatamgt.org/Documentation</MDI>
+        <MDI key="NC_GLOBAL#software_version">1.22 (version 12.05.2025 for ARGO_simplified_profile)</MDI>
+        <MDI key="NC_GLOBAL#source">Argo float</MDI>
+        <MDI key="NC_GLOBAL#title">Argo float vertical profile</MDI>
+        <MDI key="NC_GLOBAL#user_manual_version">1.0</MDI>
+      </Metadata>
+      <PAMRasterBand band="1">
+        <Metadata>
+          <MDI key="STATISTICS_MINIMUM">-0.0041214530356228</MDI>
+          <MDI key="STATISTICS_MAXIMUM">84.487823486328</MDI>
+          <MDI key="STATISTICS_MEAN">3.2750484201746</MDI>
+          <MDI key="STATISTICS_STDDEV">11.981629519454</MDI>
+        </Metadata>
+      </PAMRasterBand>
+    </PAMDataset>
+  </Subdataset>
+  <Subdataset name="DOWNWELLING_PAR_dPRES">
+    <PAMDataset>
+      <Metadata>
+        <MDI key="DOWNWELLING_PAR_dPRES#long_name">DOWNWELLING_PAR pressure displacement from original sampled value</MDI>
+        <MDI key="DOWNWELLING_PAR_dPRES#units">decibar</MDI>
+        <MDI key="DOWNWELLING_PAR_dPRES#_FillValue">99999</MDI>
+        <MDI key="NC_GLOBAL#Conventions">Argo-3.1 CF-1.6</MDI>
+        <MDI key="NC_GLOBAL#featureType">trajectoryProfile</MDI>
+        <MDI key="NC_GLOBAL#history">2026-08-09T07:27:35Z creation (software version 1.22 (version 12.05.2025 for ARGO_simplified_profile))</MDI>
+        <MDI key="NC_GLOBAL#id">https://doi.org/10.17882/42182</MDI>
+        <MDI key="NC_GLOBAL#institution">CORIOLIS</MDI>
+        <MDI key="NC_GLOBAL#references">http://www.argodatamgt.org/Documentation</MDI>
+        <MDI key="NC_GLOBAL#software_version">1.22 (version 12.05.2025 for ARGO_simplified_profile)</MDI>
+        <MDI key="NC_GLOBAL#source">Argo float</MDI>
+        <MDI key="NC_GLOBAL#title">Argo float vertical profile</MDI>
+        <MDI key="NC_GLOBAL#user_manual_version">1.0</MDI>
+      </Metadata>
+      <PAMRasterBand band="1">
+        <Metadata>
+          <MDI key="STATISTICS_MINIMUM">-0.079999998211861</MDI>
+          <MDI key="STATISTICS_MAXIMUM">0.5799999833107</MDI>
+          <MDI key="STATISTICS_MEAN">0.36293876960265</MDI>
+          <MDI key="STATISTICS_STDDEV">0.10317973065233</MDI>
+        </Metadata>
+      </PAMRasterBand>
+    </PAMDataset>
+  </Subdataset>
+  <Subdataset name="DOWNWELLING_PAR">
+    <PAMDataset>
+      <Metadata>
+        <MDI key="DOWNWELLING_PAR#C_format">%.3f</MDI>
+        <MDI key="DOWNWELLING_PAR#FORTRAN_format">F.3</MDI>
+        <MDI key="DOWNWELLING_PAR#long_name">Downwelling photosynthetic available radiation</MDI>
+        <MDI key="DOWNWELLING_PAR#resolution">0.001</MDI>
+        <MDI key="DOWNWELLING_PAR#standard_name">downwelling_photosynthetic_photon_flux_in_sea_water</MDI>
+        <MDI key="DOWNWELLING_PAR#units">microMoleQuanta/m^2/sec</MDI>
+        <MDI key="DOWNWELLING_PAR#_FillValue">99999</MDI>
+        <MDI key="NC_GLOBAL#Conventions">Argo-3.1 CF-1.6</MDI>
+        <MDI key="NC_GLOBAL#featureType">trajectoryProfile</MDI>
+        <MDI key="NC_GLOBAL#history">2026-08-09T07:27:35Z creation (software version 1.22 (version 12.05.2025 for ARGO_simplified_profile))</MDI>
+        <MDI key="NC_GLOBAL#id">https://doi.org/10.17882/42182</MDI>
+        <MDI key="NC_GLOBAL#institution">CORIOLIS</MDI>
+        <MDI key="NC_GLOBAL#references">http://www.argodatamgt.org/Documentation</MDI>
+        <MDI key="NC_GLOBAL#software_version">1.22 (version 12.05.2025 for ARGO_simplified_profile)</MDI>
+        <MDI key="NC_GLOBAL#source">Argo float</MDI>
+        <MDI key="NC_GLOBAL#title">Argo float vertical profile</MDI>
+        <MDI key="NC_GLOBAL#user_manual_version">1.0</MDI>
+      </Metadata>
+      <PAMRasterBand band="1">
+        <Metadata>
+          <MDI key="STATISTICS_MINIMUM">0.030540267005563</MDI>
+          <MDI key="STATISTICS_MAXIMUM">84.564094543457</MDI>
+          <MDI key="STATISTICS_MEAN">3.3332254165669</MDI>
+          <MDI key="STATISTICS_STDDEV">11.986570008211</MDI>
+        </Metadata>
+      </PAMRasterBand>
+    </PAMDataset>
+  </Subdataset>
+  <Subdataset name="DOWN_IRRADIANCE380">
+    <PAMDataset>
+      <Metadata>
+        <MDI key="DOWN_IRRADIANCE380#C_format">%.6f</MDI>
+        <MDI key="DOWN_IRRADIANCE380#FORTRAN_format">F.6</MDI>
+        <MDI key="DOWN_IRRADIANCE380#long_name">Downwelling irradiance at 380 nanometers</MDI>
+        <MDI key="DOWN_IRRADIANCE380#resolution">1e-06</MDI>
+        <MDI key="DOWN_IRRADIANCE380#units">W/m^2/nm</MDI>
+        <MDI key="DOWN_IRRADIANCE380#_FillValue">99999</MDI>
+        <MDI key="NC_GLOBAL#Conventions">Argo-3.1 CF-1.6</MDI>
+        <MDI key="NC_GLOBAL#featureType">trajectoryProfile</MDI>
+        <MDI key="NC_GLOBAL#history">2026-08-09T07:27:35Z creation (software version 1.22 (version 12.05.2025 for ARGO_simplified_profile))</MDI>
+        <MDI key="NC_GLOBAL#id">https://doi.org/10.17882/42182</MDI>
+        <MDI key="NC_GLOBAL#institution">CORIOLIS</MDI>
+        <MDI key="NC_GLOBAL#references">http://www.argodatamgt.org/Documentation</MDI>
+        <MDI key="NC_GLOBAL#software_version">1.22 (version 12.05.2025 for ARGO_simplified_profile)</MDI>
+        <MDI key="NC_GLOBAL#source">Argo float</MDI>
+        <MDI key="NC_GLOBAL#title">Argo float vertical profile</MDI>
+        <MDI key="NC_GLOBAL#user_manual_version">1.0</MDI>
+      </Metadata>
+      <PAMRasterBand band="1">
+        <Metadata>
+          <MDI key="STATISTICS_MINIMUM">0.00015779129171278</MDI>
+          <MDI key="STATISTICS_MAXIMUM">0.03785153850913</MDI>
+          <MDI key="STATISTICS_MEAN">0.0014442597786131</MDI>
+          <MDI key="STATISTICS_STDDEV">0.0053550766710448</MDI>
+        </Metadata>
+      </PAMRasterBand>
+    </PAMDataset>
+  </Subdataset>
+  <Subdataset name="DOWN_IRRADIANCE380_ADJUSTED">
+    <PAMDataset>
+      <Metadata>
+        <MDI key="DOWN_IRRADIANCE380_ADJUSTED#C_format">%.6f</MDI>
+        <MDI key="DOWN_IRRADIANCE380_ADJUSTED#FORTRAN_format">F.6</MDI>
+        <MDI key="DOWN_IRRADIANCE380_ADJUSTED#long_name">Downwelling irradiance at 380 nanometers</MDI>
+        <MDI key="DOWN_IRRADIANCE380_ADJUSTED#resolution">1e-06</MDI>
+        <MDI key="DOWN_IRRADIANCE380_ADJUSTED#units">W/m^2/nm</MDI>
+        <MDI key="DOWN_IRRADIANCE380_ADJUSTED#_FillValue">99999</MDI>
+        <MDI key="NC_GLOBAL#Conventions">Argo-3.1 CF-1.6</MDI>
+        <MDI key="NC_GLOBAL#featureType">trajectoryProfile</MDI>
+        <MDI key="NC_GLOBAL#history">2026-08-09T07:27:35Z creation (software version 1.22 (version 12.05.2025 for ARGO_simplified_profile))</MDI>
+        <MDI key="NC_GLOBAL#id">https://doi.org/10.17882/42182</MDI>
+        <MDI key="NC_GLOBAL#institution">CORIOLIS</MDI>
+        <MDI key="NC_GLOBAL#references">http://www.argodatamgt.org/Documentation</MDI>
+        <MDI key="NC_GLOBAL#software_version">1.22 (version 12.05.2025 for ARGO_simplified_profile)</MDI>
+        <MDI key="NC_GLOBAL#source">Argo float</MDI>
+        <MDI key="NC_GLOBAL#title">Argo float vertical profile</MDI>
+        <MDI key="NC_GLOBAL#user_manual_version">1.0</MDI>
+      </Metadata>
+      <PAMRasterBand band="1">
+        <Metadata>
+          <MDI key="STATISTICS_MINIMUM">3.9013111745589e-06</MDI>
+          <MDI key="STATISTICS_MAXIMUM">0.037707541137934</MDI>
+          <MDI key="STATISTICS_MEAN">0.0012891250918983</MDI>
+          <MDI key="STATISTICS_STDDEV">0.0053577285257382</MDI>
+        </Metadata>
+      </PAMRasterBand>
+    </PAMDataset>
+  </Subdataset>
+  <Subdataset name="DOWN_IRRADIANCE380_ADJUSTED_ERROR">
+    <PAMDataset>
+      <Metadata>
+        <MDI key="DOWN_IRRADIANCE380_ADJUSTED_ERROR#C_format">%.6f</MDI>
+        <MDI key="DOWN_IRRADIANCE380_ADJUSTED_ERROR#FORTRAN_format">F.6</MDI>
+        <MDI key="DOWN_IRRADIANCE380_ADJUSTED_ERROR#long_name">Contains the error on the adjusted values as determined by the delayed mode QC process</MDI>
+        <MDI key="DOWN_IRRADIANCE380_ADJUSTED_ERROR#resolution">1e-06</MDI>
+        <MDI key="DOWN_IRRADIANCE380_ADJUSTED_ERROR#units">W/m^2/nm</MDI>
+        <MDI key="DOWN_IRRADIANCE380_ADJUSTED_ERROR#_FillValue">99999</MDI>
+        <MDI key="NC_GLOBAL#Conventions">Argo-3.1 CF-1.6</MDI>
+        <MDI key="NC_GLOBAL#featureType">trajectoryProfile</MDI>
+        <MDI key="NC_GLOBAL#history">2026-08-09T07:27:35Z creation (software version 1.22 (version 12.05.2025 for ARGO_simplified_profile))</MDI>
+        <MDI key="NC_GLOBAL#id">https://doi.org/10.17882/42182</MDI>
+        <MDI key="NC_GLOBAL#institution">CORIOLIS</MDI>
+        <MDI key="NC_GLOBAL#references">http://www.argodatamgt.org/Documentation</MDI>
+        <MDI key="NC_GLOBAL#software_version">1.22 (version 12.05.2025 for ARGO_simplified_profile)</MDI>
+        <MDI key="NC_GLOBAL#source">Argo float</MDI>
+        <MDI key="NC_GLOBAL#title">Argo float vertical profile</MDI>
+        <MDI key="NC_GLOBAL#user_manual_version">1.0</MDI>
+      </Metadata>
+      <PAMRasterBand band="1">
+        <Metadata>
+          <MDI key="STATISTICS_MINIMUM">2.4999999368447e-05</MDI>
+          <MDI key="STATISTICS_MAXIMUM">0.00075415085302666</MDI>
+          <MDI key="STATISTICS_MEAN">4.776418576586e-05</MDI>
+          <MDI key="STATISTICS_STDDEV">0.00010211396012097</MDI>
+        </Metadata>
+      </PAMRasterBand>
+    </PAMDataset>
+  </Subdataset>
+  <Subdataset name="DOWN_IRRADIANCE380_dPRES">
+    <PAMDataset>
+      <Metadata>
+        <MDI key="DOWN_IRRADIANCE380_dPRES#long_name">DOWN_IRRADIANCE380 pressure displacement from original sampled value</MDI>
+        <MDI key="DOWN_IRRADIANCE380_dPRES#units">decibar</MDI>
+        <MDI key="DOWN_IRRADIANCE380_dPRES#_FillValue">99999</MDI>
+        <MDI key="NC_GLOBAL#Conventions">Argo-3.1 CF-1.6</MDI>
+        <MDI key="NC_GLOBAL#featureType">trajectoryProfile</MDI>
+        <MDI key="NC_GLOBAL#history">2026-08-09T07:27:35Z creation (software version 1.22 (version 12.05.2025 for ARGO_simplified_profile))</MDI>
+        <MDI key="NC_GLOBAL#id">https://doi.org/10.17882/42182</MDI>
+        <MDI key="NC_GLOBAL#institution">CORIOLIS</MDI>
+        <MDI key="NC_GLOBAL#references">http://www.argodatamgt.org/Documentation</MDI>
+        <MDI key="NC_GLOBAL#software_version">1.22 (version 12.05.2025 for ARGO_simplified_profile)</MDI>
+        <MDI key="NC_GLOBAL#source">Argo float</MDI>
+        <MDI key="NC_GLOBAL#title">Argo float vertical profile</MDI>
+        <MDI key="NC_GLOBAL#user_manual_version">1.0</MDI>
+      </Metadata>
+      <PAMRasterBand band="1">
+        <Metadata>
+          <MDI key="STATISTICS_MINIMUM">-0.079999998211861</MDI>
+          <MDI key="STATISTICS_MAXIMUM">0.5799999833107</MDI>
+          <MDI key="STATISTICS_MEAN">0.36293876960265</MDI>
+          <MDI key="STATISTICS_STDDEV">0.10317973065233</MDI>
+        </Metadata>
+      </PAMRasterBand>
+    </PAMDataset>
+  </Subdataset>
+  <Subdataset name="DOWN_IRRADIANCE412">
+    <PAMDataset>
+      <Metadata>
+        <MDI key="DOWN_IRRADIANCE412#C_format">%.6f</MDI>
+        <MDI key="DOWN_IRRADIANCE412#FORTRAN_format">F.6</MDI>
+        <MDI key="DOWN_IRRADIANCE412#long_name">Downwelling irradiance at 412 nanometers</MDI>
+        <MDI key="DOWN_IRRADIANCE412#resolution">1e-06</MDI>
+        <MDI key="DOWN_IRRADIANCE412#units">W/m^2/nm</MDI>
+        <MDI key="DOWN_IRRADIANCE412#_FillValue">99999</MDI>
+        <MDI key="NC_GLOBAL#Conventions">Argo-3.1 CF-1.6</MDI>
+        <MDI key="NC_GLOBAL#featureType">trajectoryProfile</MDI>
+        <MDI key="NC_GLOBAL#history">2026-08-09T07:27:35Z creation (software version 1.22 (version 12.05.2025 for ARGO_simplified_profile))</MDI>
+        <MDI key="NC_GLOBAL#id">https://doi.org/10.17882/42182</MDI>
+        <MDI key="NC_GLOBAL#institution">CORIOLIS</MDI>
+        <MDI key="NC_GLOBAL#references">http://www.argodatamgt.org/Documentation</MDI>
+        <MDI key="NC_GLOBAL#software_version">1.22 (version 12.05.2025 for ARGO_simplified_profile)</MDI>
+        <MDI key="NC_GLOBAL#source">Argo float</MDI>
+        <MDI key="NC_GLOBAL#title">Argo float vertical profile</MDI>
+        <MDI key="NC_GLOBAL#user_manual_version">1.0</MDI>
+      </Metadata>
+      <PAMRasterBand band="1">
+        <Metadata>
+          <MDI key="STATISTICS_MINIMUM">-0.0001262798323296</MDI>
+          <MDI key="STATISTICS_MAXIMUM">0.062676392495632</MDI>
+          <MDI key="STATISTICS_MEAN">0.0023510421640817</MDI>
+          <MDI key="STATISTICS_STDDEV">0.0094958188634569</MDI>
+        </Metadata>
+      </PAMRasterBand>
+    </PAMDataset>
+  </Subdataset>
+  <Subdataset name="DOWN_IRRADIANCE412_ADJUSTED_ERROR">
+    <PAMDataset>
+      <Metadata>
+        <MDI key="DOWN_IRRADIANCE412_ADJUSTED_ERROR#C_format">%.6f</MDI>
+        <MDI key="DOWN_IRRADIANCE412_ADJUSTED_ERROR#FORTRAN_format">F.6</MDI>
+        <MDI key="DOWN_IRRADIANCE412_ADJUSTED_ERROR#long_name">Contains the error on the adjusted values as determined by the delayed mode QC process</MDI>
+        <MDI key="DOWN_IRRADIANCE412_ADJUSTED_ERROR#resolution">1e-06</MDI>
+        <MDI key="DOWN_IRRADIANCE412_ADJUSTED_ERROR#units">W/m^2/nm</MDI>
+        <MDI key="DOWN_IRRADIANCE412_ADJUSTED_ERROR#_FillValue">99999</MDI>
+        <MDI key="NC_GLOBAL#Conventions">Argo-3.1 CF-1.6</MDI>
+        <MDI key="NC_GLOBAL#featureType">trajectoryProfile</MDI>
+        <MDI key="NC_GLOBAL#history">2026-08-09T07:27:35Z creation (software version 1.22 (version 12.05.2025 for ARGO_simplified_profile))</MDI>
+        <MDI key="NC_GLOBAL#id">https://doi.org/10.17882/42182</MDI>
+        <MDI key="NC_GLOBAL#institution">CORIOLIS</MDI>
+        <MDI key="NC_GLOBAL#references">http://www.argodatamgt.org/Documentation</MDI>
+        <MDI key="NC_GLOBAL#software_version">1.22 (version 12.05.2025 for ARGO_simplified_profile)</MDI>
+        <MDI key="NC_GLOBAL#source">Argo float</MDI>
+        <MDI key="NC_GLOBAL#title">Argo float vertical profile</MDI>
+        <MDI key="NC_GLOBAL#user_manual_version">1.0</MDI>
+      </Metadata>
+      <PAMRasterBand band="1">
+        <Metadata>
+          <MDI key="STATISTICS_MINIMUM">2.4999999368447e-05</MDI>
+          <MDI key="STATISTICS_MAXIMUM">0.0012556110741571</MDI>
+          <MDI key="STATISTICS_MEAN">7.0640027843183e-05</MDI>
+          <MDI key="STATISTICS_STDDEV">0.00018448000375867</MDI>
+        </Metadata>
+      </PAMRasterBand>
+    </PAMDataset>
+  </Subdataset>
+  <Subdataset name="DOWN_IRRADIANCE412_ADJUSTED">
+    <PAMDataset>
+      <Metadata>
+        <MDI key="DOWN_IRRADIANCE412_ADJUSTED#C_format">%.6f</MDI>
+        <MDI key="DOWN_IRRADIANCE412_ADJUSTED#FORTRAN_format">F.6</MDI>
+        <MDI key="DOWN_IRRADIANCE412_ADJUSTED#long_name">Downwelling irradiance at 412 nanometers</MDI>
+        <MDI key="DOWN_IRRADIANCE412_ADJUSTED#resolution">1e-06</MDI>
+        <MDI key="DOWN_IRRADIANCE412_ADJUSTED#units">W/m^2/nm</MDI>
+        <MDI key="DOWN_IRRADIANCE412_ADJUSTED#_FillValue">99999</MDI>
+        <MDI key="NC_GLOBAL#Conventions">Argo-3.1 CF-1.6</MDI>
+        <MDI key="NC_GLOBAL#featureType">trajectoryProfile</MDI>
+        <MDI key="NC_GLOBAL#history">2026-08-09T07:27:35Z creation (software version 1.22 (version 12.05.2025 for ARGO_simplified_profile))</MDI>
+        <MDI key="NC_GLOBAL#id">https://doi.org/10.17882/42182</MDI>
+        <MDI key="NC_GLOBAL#institution">CORIOLIS</MDI>
+        <MDI key="NC_GLOBAL#references">http://www.argodatamgt.org/Documentation</MDI>
+        <MDI key="NC_GLOBAL#software_version">1.22 (version 12.05.2025 for ARGO_simplified_profile)</MDI>
+        <MDI key="NC_GLOBAL#source">Argo float</MDI>
+        <MDI key="NC_GLOBAL#title">Argo float vertical profile</MDI>
+        <MDI key="NC_GLOBAL#user_manual_version">1.0</MDI>
+      </Metadata>
+      <PAMRasterBand band="1">
+        <Metadata>
+          <MDI key="STATISTICS_MINIMUM">-1.2809598956665e-05</MDI>
+          <MDI key="STATISTICS_MAXIMUM">0.062780559062958</MDI>
+          <MDI key="STATISTICS_MEAN">0.0024605375854024</MDI>
+          <MDI key="STATISTICS_STDDEV">0.0094944317715054</MDI>
+        </Metadata>
+      </PAMRasterBand>
+    </PAMDataset>
+  </Subdataset>
+  <Subdataset name="DOWN_IRRADIANCE412_dPRES">
+    <PAMDataset>
+      <Metadata>
+        <MDI key="DOWN_IRRADIANCE412_dPRES#long_name">DOWN_IRRADIANCE412 pressure displacement from original sampled value</MDI>
+        <MDI key="DOWN_IRRADIANCE412_dPRES#units">decibar</MDI>
+        <MDI key="DOWN_IRRADIANCE412_dPRES#_FillValue">99999</MDI>
+        <MDI key="NC_GLOBAL#Conventions">Argo-3.1 CF-1.6</MDI>
+        <MDI key="NC_GLOBAL#featureType">trajectoryProfile</MDI>
+        <MDI key="NC_GLOBAL#history">2026-08-09T07:27:35Z creation (software version 1.22 (version 12.05.2025 for ARGO_simplified_profile))</MDI>
+        <MDI key="NC_GLOBAL#id">https://doi.org/10.17882/42182</MDI>
+        <MDI key="NC_GLOBAL#institution">CORIOLIS</MDI>
+        <MDI key="NC_GLOBAL#references">http://www.argodatamgt.org/Documentation</MDI>
+        <MDI key="NC_GLOBAL#software_version">1.22 (version 12.05.2025 for ARGO_simplified_profile)</MDI>
+        <MDI key="NC_GLOBAL#source">Argo float</MDI>
+        <MDI key="NC_GLOBAL#title">Argo float vertical profile</MDI>
+        <MDI key="NC_GLOBAL#user_manual_version">1.0</MDI>
+      </Metadata>
+      <PAMRasterBand band="1">
+        <Metadata>
+          <MDI key="STATISTICS_MINIMUM">-0.079999998211861</MDI>
+          <MDI key="STATISTICS_MAXIMUM">0.5799999833107</MDI>
+          <MDI key="STATISTICS_MEAN">0.36293876960265</MDI>
+          <MDI key="STATISTICS_STDDEV">0.10317973065233</MDI>
+        </Metadata>
+      </PAMRasterBand>
+    </PAMDataset>
+  </Subdataset>
+  <Subdataset name="DOWN_IRRADIANCE490">
+    <PAMDataset>
+      <Metadata>
+        <MDI key="DOWN_IRRADIANCE490#C_format">%.6f</MDI>
+        <MDI key="DOWN_IRRADIANCE490#FORTRAN_format">F.6</MDI>
+        <MDI key="DOWN_IRRADIANCE490#long_name">Downwelling irradiance at 490 nanometers</MDI>
+        <MDI key="DOWN_IRRADIANCE490#resolution">1e-06</MDI>
+        <MDI key="DOWN_IRRADIANCE490#units">W/m^2/nm</MDI>
+        <MDI key="DOWN_IRRADIANCE490#_FillValue">99999</MDI>
+        <MDI key="NC_GLOBAL#Conventions">Argo-3.1 CF-1.6</MDI>
+        <MDI key="NC_GLOBAL#featureType">trajectoryProfile</MDI>
+        <MDI key="NC_GLOBAL#history">2026-08-09T07:27:35Z creation (software version 1.22 (version 12.05.2025 for ARGO_simplified_profile))</MDI>
+        <MDI key="NC_GLOBAL#id">https://doi.org/10.17882/42182</MDI>
+        <MDI key="NC_GLOBAL#institution">CORIOLIS</MDI>
+        <MDI key="NC_GLOBAL#references">http://www.argodatamgt.org/Documentation</MDI>
+        <MDI key="NC_GLOBAL#software_version">1.22 (version 12.05.2025 for ARGO_simplified_profile)</MDI>
+        <MDI key="NC_GLOBAL#source">Argo float</MDI>
+        <MDI key="NC_GLOBAL#title">Argo float vertical profile</MDI>
+        <MDI key="NC_GLOBAL#user_manual_version">1.0</MDI>
+      </Metadata>
+      <PAMRasterBand band="1">
+        <Metadata>
+          <MDI key="STATISTICS_MINIMUM">2.50275718372e-07</MDI>
+          <MDI key="STATISTICS_MAXIMUM">0.070209972560406</MDI>
+          <MDI key="STATISTICS_MEAN">0.003895734361088</MDI>
+          <MDI key="STATISTICS_STDDEV">0.012197534426386</MDI>
+        </Metadata>
+      </PAMRasterBand>
+    </PAMDataset>
+  </Subdataset>
+  <Subdataset name="DOWN_IRRADIANCE490_ADJUSTED">
+    <PAMDataset>
+      <Metadata>
+        <MDI key="DOWN_IRRADIANCE490_ADJUSTED#C_format">%.6f</MDI>
+        <MDI key="DOWN_IRRADIANCE490_ADJUSTED#FORTRAN_format">F.6</MDI>
+        <MDI key="DOWN_IRRADIANCE490_ADJUSTED#long_name">Downwelling irradiance at 490 nanometers</MDI>
+        <MDI key="DOWN_IRRADIANCE490_ADJUSTED#resolution">1e-06</MDI>
+        <MDI key="DOWN_IRRADIANCE490_ADJUSTED#units">W/m^2/nm</MDI>
+        <MDI key="DOWN_IRRADIANCE490_ADJUSTED#_FillValue">99999</MDI>
+        <MDI key="NC_GLOBAL#Conventions">Argo-3.1 CF-1.6</MDI>
+        <MDI key="NC_GLOBAL#featureType">trajectoryProfile</MDI>
+        <MDI key="NC_GLOBAL#history">2026-08-09T07:27:35Z creation (software version 1.22 (version 12.05.2025 for ARGO_simplified_profile))</MDI>
+        <MDI key="NC_GLOBAL#id">https://doi.org/10.17882/42182</MDI>
+        <MDI key="NC_GLOBAL#institution">CORIOLIS</MDI>
+        <MDI key="NC_GLOBAL#references">http://www.argodatamgt.org/Documentation</MDI>
+        <MDI key="NC_GLOBAL#software_version">1.22 (version 12.05.2025 for ARGO_simplified_profile)</MDI>
+        <MDI key="NC_GLOBAL#source">Argo float</MDI>
+        <MDI key="NC_GLOBAL#title">Argo float vertical profile</MDI>
+        <MDI key="NC_GLOBAL#user_manual_version">1.0</MDI>
+      </Metadata>
+      <PAMRasterBand band="1">
+        <Metadata>
+          <MDI key="STATISTICS_MINIMUM">-7.779679435771e-06</MDI>
+          <MDI key="STATISTICS_MAXIMUM">0.070208437740803</MDI>
+          <MDI key="STATISTICS_MEAN">0.003891316366896</MDI>
+          <MDI key="STATISTICS_STDDEV">0.012198450766799</MDI>
+        </Metadata>
+      </PAMRasterBand>
+    </PAMDataset>
+  </Subdataset>
+  <Subdataset name="DOWN_IRRADIANCE490_ADJUSTED_ERROR">
+    <PAMDataset>
+      <Metadata>
+        <MDI key="DOWN_IRRADIANCE490_ADJUSTED_ERROR#C_format">%.6f</MDI>
+        <MDI key="DOWN_IRRADIANCE490_ADJUSTED_ERROR#FORTRAN_format">F.6</MDI>
+        <MDI key="DOWN_IRRADIANCE490_ADJUSTED_ERROR#long_name">Contains the error on the adjusted values as determined by the delayed mode QC process</MDI>
+        <MDI key="DOWN_IRRADIANCE490_ADJUSTED_ERROR#resolution">1e-06</MDI>
+        <MDI key="DOWN_IRRADIANCE490_ADJUSTED_ERROR#units">W/m^2/nm</MDI>
+        <MDI key="DOWN_IRRADIANCE490_ADJUSTED_ERROR#_FillValue">99999</MDI>
+        <MDI key="NC_GLOBAL#Conventions">Argo-3.1 CF-1.6</MDI>
+        <MDI key="NC_GLOBAL#featureType">trajectoryProfile</MDI>
+        <MDI key="NC_GLOBAL#history">2026-08-09T07:27:35Z creation (software version 1.22 (version 12.05.2025 for ARGO_simplified_profile))</MDI>
+        <MDI key="NC_GLOBAL#id">https://doi.org/10.17882/42182</MDI>
+        <MDI key="NC_GLOBAL#institution">CORIOLIS</MDI>
+        <MDI key="NC_GLOBAL#references">http://www.argodatamgt.org/Documentation</MDI>
+        <MDI key="NC_GLOBAL#software_version">1.22 (version 12.05.2025 for ARGO_simplified_profile)</MDI>
+        <MDI key="NC_GLOBAL#source">Argo float</MDI>
+        <MDI key="NC_GLOBAL#title">Argo float vertical profile</MDI>
+        <MDI key="NC_GLOBAL#user_manual_version">1.0</MDI>
+      </Metadata>
+      <PAMRasterBand band="1">
+        <Metadata>
+          <MDI key="STATISTICS_MINIMUM">2.4999999368447e-05</MDI>
+          <MDI key="STATISTICS_MAXIMUM">0.0014041687827557</MDI>
+          <MDI key="STATISTICS_MEAN">9.647162410054e-05</MDI>
+          <MDI key="STATISTICS_STDDEV">0.00023824979486186</MDI>
+        </Metadata>
+      </PAMRasterBand>
+    </PAMDataset>
+  </Subdataset>
+  <Subdataset name="DOWN_IRRADIANCE490_dPRES">
+    <PAMDataset>
+      <Metadata>
+        <MDI key="DOWN_IRRADIANCE490_dPRES#long_name">DOWN_IRRADIANCE490 pressure displacement from original sampled value</MDI>
+        <MDI key="DOWN_IRRADIANCE490_dPRES#units">decibar</MDI>
+        <MDI key="DOWN_IRRADIANCE490_dPRES#_FillValue">99999</MDI>
+        <MDI key="NC_GLOBAL#Conventions">Argo-3.1 CF-1.6</MDI>
+        <MDI key="NC_GLOBAL#featureType">trajectoryProfile</MDI>
+        <MDI key="NC_GLOBAL#history">2026-08-09T07:27:35Z creation (software version 1.22 (version 12.05.2025 for ARGO_simplified_profile))</MDI>
+        <MDI key="NC_GLOBAL#id">https://doi.org/10.17882/42182</MDI>
+        <MDI key="NC_GLOBAL#institution">CORIOLIS</MDI>
+        <MDI key="NC_GLOBAL#references">http://www.argodatamgt.org/Documentation</MDI>
+        <MDI key="NC_GLOBAL#software_version">1.22 (version 12.05.2025 for ARGO_simplified_profile)</MDI>
+        <MDI key="NC_GLOBAL#source">Argo float</MDI>
+        <MDI key="NC_GLOBAL#title">Argo float vertical profile</MDI>
+        <MDI key="NC_GLOBAL#user_manual_version">1.0</MDI>
+      </Metadata>
+      <PAMRasterBand band="1">
+        <Metadata>
+          <MDI key="STATISTICS_MINIMUM">-0.079999998211861</MDI>
+          <MDI key="STATISTICS_MAXIMUM">0.5799999833107</MDI>
+          <MDI key="STATISTICS_MEAN">0.36293876960265</MDI>
+          <MDI key="STATISTICS_STDDEV">0.10317973065233</MDI>
+        </Metadata>
+      </PAMRasterBand>
+    </PAMDataset>
+  </Subdataset>
+  <Subdataset name="DOXY">
+    <PAMDataset>
+      <Metadata>
+        <MDI key="DOXY#C_format">%.3f</MDI>
+        <MDI key="DOXY#FORTRAN_format">F.3</MDI>
+        <MDI key="DOXY#long_name">Dissolved oxygen</MDI>
+        <MDI key="DOXY#resolution">0.001</MDI>
+        <MDI key="DOXY#standard_name">moles_of_oxygen_per_unit_mass_in_sea_water</MDI>
+        <MDI key="DOXY#units">micromole/kg</MDI>
+        <MDI key="DOXY#valid_max">600</MDI>
+        <MDI key="DOXY#valid_min">-5</MDI>
+        <MDI key="DOXY#_FillValue">99999</MDI>
+        <MDI key="NC_GLOBAL#Conventions">Argo-3.1 CF-1.6</MDI>
+        <MDI key="NC_GLOBAL#featureType">trajectoryProfile</MDI>
+        <MDI key="NC_GLOBAL#history">2026-08-09T07:27:35Z creation (software version 1.22 (version 12.05.2025 for ARGO_simplified_profile))</MDI>
+        <MDI key="NC_GLOBAL#id">https://doi.org/10.17882/42182</MDI>
+        <MDI key="NC_GLOBAL#institution">CORIOLIS</MDI>
+        <MDI key="NC_GLOBAL#references">http://www.argodatamgt.org/Documentation</MDI>
+        <MDI key="NC_GLOBAL#software_version">1.22 (version 12.05.2025 for ARGO_simplified_profile)</MDI>
+        <MDI key="NC_GLOBAL#source">Argo float</MDI>
+        <MDI key="NC_GLOBAL#title">Argo float vertical profile</MDI>
+        <MDI key="NC_GLOBAL#user_manual_version">1.0</MDI>
+      </Metadata>
+      <PAMRasterBand band="1">
+        <Metadata>
+          <MDI key="STATISTICS_MINIMUM">268.43368530273</MDI>
+          <MDI key="STATISTICS_MAXIMUM">292.69497680664</MDI>
+          <MDI key="STATISTICS_MEAN">276.85396006138</MDI>
+          <MDI key="STATISTICS_STDDEV">6.8624625087326</MDI>
+        </Metadata>
+      </PAMRasterBand>
+    </PAMDataset>
+  </Subdataset>
+  <Subdataset name="DOXY_ADJUSTED">
+    <PAMDataset>
+      <Metadata>
+        <MDI key="DOXY_ADJUSTED#C_format">%.3f</MDI>
+        <MDI key="DOXY_ADJUSTED#FORTRAN_format">F.3</MDI>
+        <MDI key="DOXY_ADJUSTED#long_name">Dissolved oxygen</MDI>
+        <MDI key="DOXY_ADJUSTED#resolution">0.001</MDI>
+        <MDI key="DOXY_ADJUSTED#standard_name">moles_of_oxygen_per_unit_mass_in_sea_water</MDI>
+        <MDI key="DOXY_ADJUSTED#units">micromole/kg</MDI>
+        <MDI key="DOXY_ADJUSTED#valid_max">600</MDI>
+        <MDI key="DOXY_ADJUSTED#valid_min">-5</MDI>
+        <MDI key="DOXY_ADJUSTED#_FillValue">99999</MDI>
+        <MDI key="NC_GLOBAL#Conventions">Argo-3.1 CF-1.6</MDI>
+        <MDI key="NC_GLOBAL#featureType">trajectoryProfile</MDI>
+        <MDI key="NC_GLOBAL#history">2026-08-09T07:27:35Z creation (software version 1.22 (version 12.05.2025 for ARGO_simplified_profile))</MDI>
+        <MDI key="NC_GLOBAL#id">https://doi.org/10.17882/42182</MDI>
+        <MDI key="NC_GLOBAL#institution">CORIOLIS</MDI>
+        <MDI key="NC_GLOBAL#references">http://www.argodatamgt.org/Documentation</MDI>
+        <MDI key="NC_GLOBAL#software_version">1.22 (version 12.05.2025 for ARGO_simplified_profile)</MDI>
+        <MDI key="NC_GLOBAL#source">Argo float</MDI>
+        <MDI key="NC_GLOBAL#title">Argo float vertical profile</MDI>
+        <MDI key="NC_GLOBAL#user_manual_version">1.0</MDI>
+      </Metadata>
+      <PAMRasterBand band="1">
+        <Metadata>
+          <MDI key="STATISTICS_MINIMUM">265.40924072266</MDI>
+          <MDI key="STATISTICS_MAXIMUM">289.3971862793</MDI>
+          <MDI key="STATISTICS_MEAN">273.73748072064</MDI>
+          <MDI key="STATISTICS_STDDEV">6.7957175403195</MDI>
+        </Metadata>
+      </PAMRasterBand>
+    </PAMDataset>
+  </Subdataset>
+  <Subdataset name="DOXY_ADJUSTED_ERROR">
+    <PAMDataset>
+      <Metadata>
+        <MDI key="DOXY_ADJUSTED_ERROR#C_format">%.3f</MDI>
+        <MDI key="DOXY_ADJUSTED_ERROR#FORTRAN_format">F.3</MDI>
+        <MDI key="DOXY_ADJUSTED_ERROR#long_name">Contains the error on the adjusted values as determined by the delayed mode QC process</MDI>
+        <MDI key="DOXY_ADJUSTED_ERROR#resolution">0.001</MDI>
+        <MDI key="DOXY_ADJUSTED_ERROR#units">micromole/kg</MDI>
+        <MDI key="DOXY_ADJUSTED_ERROR#_FillValue">99999</MDI>
+        <MDI key="NC_GLOBAL#Conventions">Argo-3.1 CF-1.6</MDI>
+        <MDI key="NC_GLOBAL#featureType">trajectoryProfile</MDI>
+        <MDI key="NC_GLOBAL#history">2026-08-09T07:27:35Z creation (software version 1.22 (version 12.05.2025 for ARGO_simplified_profile))</MDI>
+        <MDI key="NC_GLOBAL#id">https://doi.org/10.17882/42182</MDI>
+        <MDI key="NC_GLOBAL#institution">CORIOLIS</MDI>
+        <MDI key="NC_GLOBAL#references">http://www.argodatamgt.org/Documentation</MDI>
+        <MDI key="NC_GLOBAL#software_version">1.22 (version 12.05.2025 for ARGO_simplified_profile)</MDI>
+        <MDI key="NC_GLOBAL#source">Argo float</MDI>
+        <MDI key="NC_GLOBAL#title">Argo float vertical profile</MDI>
+        <MDI key="NC_GLOBAL#user_manual_version">1.0</MDI>
+      </Metadata>
+      <PAMRasterBand band="1">
+        <Metadata>
+          <MDI key="STATISTICS_MINIMUM">13.020328521729</MDI>
+          <MDI key="STATISTICS_MAXIMUM">13.874645233154</MDI>
+          <MDI key="STATISTICS_MEAN">13.706091986762</MDI>
+          <MDI key="STATISTICS_STDDEV">0.15725401150672</MDI>
+        </Metadata>
+      </PAMRasterBand>
+    </PAMDataset>
+  </Subdataset>
+  <Subdataset name="DOXY_dPRES">
+    <PAMDataset>
+      <Metadata>
+        <MDI key="DOXY_dPRES#long_name">DOXY pressure displacement from original sampled value</MDI>
+        <MDI key="DOXY_dPRES#units">decibar</MDI>
+        <MDI key="DOXY_dPRES#_FillValue">99999</MDI>
+        <MDI key="NC_GLOBAL#Conventions">Argo-3.1 CF-1.6</MDI>
+        <MDI key="NC_GLOBAL#featureType">trajectoryProfile</MDI>
+        <MDI key="NC_GLOBAL#history">2026-08-09T07:27:35Z creation (software version 1.22 (version 12.05.2025 for ARGO_simplified_profile))</MDI>
+        <MDI key="NC_GLOBAL#id">https://doi.org/10.17882/42182</MDI>
+        <MDI key="NC_GLOBAL#institution">CORIOLIS</MDI>
+        <MDI key="NC_GLOBAL#references">http://www.argodatamgt.org/Documentation</MDI>
+        <MDI key="NC_GLOBAL#software_version">1.22 (version 12.05.2025 for ARGO_simplified_profile)</MDI>
+        <MDI key="NC_GLOBAL#source">Argo float</MDI>
+        <MDI key="NC_GLOBAL#title">Argo float vertical profile</MDI>
+        <MDI key="NC_GLOBAL#user_manual_version">1.0</MDI>
+      </Metadata>
+      <PAMRasterBand band="1">
+        <Metadata>
+          <MDI key="STATISTICS_MINIMUM">-0.15999999642372</MDI>
+          <MDI key="STATISTICS_MAXIMUM">0.23999999463558</MDI>
+          <MDI key="STATISTICS_MEAN">-0.00101265802838</MDI>
+          <MDI key="STATISTICS_STDDEV">0.046812172973639</MDI>
+        </Metadata>
+      </PAMRasterBand>
+    </PAMDataset>
+  </Subdataset>
+  <Subdataset name="PRES">
+    <PAMDataset>
+      <Metadata>
+        <MDI key="NC_GLOBAL#Conventions">Argo-3.1 CF-1.6</MDI>
+        <MDI key="NC_GLOBAL#featureType">trajectoryProfile</MDI>
+        <MDI key="NC_GLOBAL#history">2026-08-09T07:27:35Z creation (software version 1.22 (version 12.05.2025 for ARGO_simplified_profile))</MDI>
+        <MDI key="NC_GLOBAL#id">https://doi.org/10.17882/42182</MDI>
+        <MDI key="NC_GLOBAL#institution">CORIOLIS</MDI>
+        <MDI key="NC_GLOBAL#references">http://www.argodatamgt.org/Documentation</MDI>
+        <MDI key="NC_GLOBAL#software_version">1.22 (version 12.05.2025 for ARGO_simplified_profile)</MDI>
+        <MDI key="NC_GLOBAL#source">Argo float</MDI>
+        <MDI key="NC_GLOBAL#title">Argo float vertical profile</MDI>
+        <MDI key="NC_GLOBAL#user_manual_version">1.0</MDI>
+        <MDI key="PRES#axis">Z</MDI>
+        <MDI key="PRES#C_format">%.3f</MDI>
+        <MDI key="PRES#FORTRAN_format">F.3</MDI>
+        <MDI key="PRES#long_name">Sea water pressure, equals 0 at sea-level</MDI>
+        <MDI key="PRES#resolution">0.001</MDI>
+        <MDI key="PRES#standard_name">sea_water_pressure</MDI>
+        <MDI key="PRES#units">decibar</MDI>
+        <MDI key="PRES#valid_max">12000</MDI>
+        <MDI key="PRES#valid_min">0</MDI>
+        <MDI key="PRES#_FillValue">99999</MDI>
+      </Metadata>
+      <PAMRasterBand band="1">
+        <Metadata>
+          <MDI key="STATISTICS_MINIMUM">0.5</MDI>
+          <MDI key="STATISTICS_MAXIMUM">1008</MDI>
+          <MDI key="STATISTICS_MEAN">409.18607414802</MDI>
+          <MDI key="STATISTICS_STDDEV">299.74660731697</MDI>
+        </Metadata>
+      </PAMRasterBand>
+    </PAMDataset>
+  </Subdataset>
+  <Subdataset name="PRES_ADJUSTED">
+    <PAMDataset>
+      <Metadata>
+        <MDI key="NC_GLOBAL#Conventions">Argo-3.1 CF-1.6</MDI>
+        <MDI key="NC_GLOBAL#featureType">trajectoryProfile</MDI>
+        <MDI key="NC_GLOBAL#history">2026-08-09T07:27:35Z creation (software version 1.22 (version 12.05.2025 for ARGO_simplified_profile))</MDI>
+        <MDI key="NC_GLOBAL#id">https://doi.org/10.17882/42182</MDI>
+        <MDI key="NC_GLOBAL#institution">CORIOLIS</MDI>
+        <MDI key="NC_GLOBAL#references">http://www.argodatamgt.org/Documentation</MDI>
+        <MDI key="NC_GLOBAL#software_version">1.22 (version 12.05.2025 for ARGO_simplified_profile)</MDI>
+        <MDI key="NC_GLOBAL#source">Argo float</MDI>
+        <MDI key="NC_GLOBAL#title">Argo float vertical profile</MDI>
+        <MDI key="NC_GLOBAL#user_manual_version">1.0</MDI>
+        <MDI key="PRES_ADJUSTED#axis">Z</MDI>
+        <MDI key="PRES_ADJUSTED#C_format">%.3f</MDI>
+        <MDI key="PRES_ADJUSTED#FORTRAN_format">F.3</MDI>
+        <MDI key="PRES_ADJUSTED#long_name">Sea water pressure, equals 0 at sea-level</MDI>
+        <MDI key="PRES_ADJUSTED#resolution">0.001</MDI>
+        <MDI key="PRES_ADJUSTED#standard_name">sea_water_pressure</MDI>
+        <MDI key="PRES_ADJUSTED#units">decibar</MDI>
+        <MDI key="PRES_ADJUSTED#valid_max">12000</MDI>
+        <MDI key="PRES_ADJUSTED#valid_min">0</MDI>
+        <MDI key="PRES_ADJUSTED#_FillValue">99999</MDI>
+      </Metadata>
+      <PAMRasterBand band="1">
+        <Metadata>
+          <MDI key="STATISTICS_MINIMUM">0.49999618530273</MDI>
+          <MDI key="STATISTICS_MAXIMUM">1008</MDI>
+          <MDI key="STATISTICS_MEAN">409.18607441359</MDI>
+          <MDI key="STATISTICS_STDDEV">299.74660769173</MDI>
+        </Metadata>
+      </PAMRasterBand>
+    </PAMDataset>
+  </Subdataset>
+  <Subdataset name="PRES_ADJUSTED_ERROR">
+    <PAMDataset>
+      <Metadata>
+        <MDI key="NC_GLOBAL#Conventions">Argo-3.1 CF-1.6</MDI>
+        <MDI key="NC_GLOBAL#featureType">trajectoryProfile</MDI>
+        <MDI key="NC_GLOBAL#history">2026-08-09T07:27:35Z creation (software version 1.22 (version 12.05.2025 for ARGO_simplified_profile))</MDI>
+        <MDI key="NC_GLOBAL#id">https://doi.org/10.17882/42182</MDI>
+        <MDI key="NC_GLOBAL#institution">CORIOLIS</MDI>
+        <MDI key="NC_GLOBAL#references">http://www.argodatamgt.org/Documentation</MDI>
+        <MDI key="NC_GLOBAL#software_version">1.22 (version 12.05.2025 for ARGO_simplified_profile)</MDI>
+        <MDI key="NC_GLOBAL#source">Argo float</MDI>
+        <MDI key="NC_GLOBAL#title">Argo float vertical profile</MDI>
+        <MDI key="NC_GLOBAL#user_manual_version">1.0</MDI>
+        <MDI key="PRES_ADJUSTED_ERROR#C_format">%.3f</MDI>
+        <MDI key="PRES_ADJUSTED_ERROR#FORTRAN_format">F.3</MDI>
+        <MDI key="PRES_ADJUSTED_ERROR#long_name">Contains the error on the adjusted values as determined by the delayed mode QC process</MDI>
+        <MDI key="PRES_ADJUSTED_ERROR#resolution">0.001</MDI>
+        <MDI key="PRES_ADJUSTED_ERROR#units">decibar</MDI>
+        <MDI key="PRES_ADJUSTED_ERROR#_FillValue">99999</MDI>
+      </Metadata>
+      <PAMRasterBand band="1">
+        <Metadata>
+          <MDI key="STATISTICS_MINIMUM">2.4000000953674</MDI>
+          <MDI key="STATISTICS_MAXIMUM">2.4000000953674</MDI>
+          <MDI key="STATISTICS_MEAN">2.4000000953674</MDI>
+          <MDI key="STATISTICS_STDDEV">0</MDI>
+        </Metadata>
+      </PAMRasterBand>
+    </PAMDataset>
+  </Subdataset>
+  <Subdataset name="PSAL_ADJUSTED">
+    <PAMDataset>
+      <Metadata>
+        <MDI key="NC_GLOBAL#Conventions">Argo-3.1 CF-1.6</MDI>
+        <MDI key="NC_GLOBAL#featureType">trajectoryProfile</MDI>
+        <MDI key="NC_GLOBAL#history">2026-08-09T07:27:35Z creation (software version 1.22 (version 12.05.2025 for ARGO_simplified_profile))</MDI>
+        <MDI key="NC_GLOBAL#id">https://doi.org/10.17882/42182</MDI>
+        <MDI key="NC_GLOBAL#institution">CORIOLIS</MDI>
+        <MDI key="NC_GLOBAL#references">http://www.argodatamgt.org/Documentation</MDI>
+        <MDI key="NC_GLOBAL#software_version">1.22 (version 12.05.2025 for ARGO_simplified_profile)</MDI>
+        <MDI key="NC_GLOBAL#source">Argo float</MDI>
+        <MDI key="NC_GLOBAL#title">Argo float vertical profile</MDI>
+        <MDI key="NC_GLOBAL#user_manual_version">1.0</MDI>
+        <MDI key="PSAL_ADJUSTED#C_format">%.4f</MDI>
+        <MDI key="PSAL_ADJUSTED#FORTRAN_format">F.4</MDI>
+        <MDI key="PSAL_ADJUSTED#long_name">Practical salinity</MDI>
+        <MDI key="PSAL_ADJUSTED#resolution">9.9999997e-05</MDI>
+        <MDI key="PSAL_ADJUSTED#standard_name">sea_water_salinity</MDI>
+        <MDI key="PSAL_ADJUSTED#units">psu</MDI>
+        <MDI key="PSAL_ADJUSTED#valid_max">41</MDI>
+        <MDI key="PSAL_ADJUSTED#valid_min">2</MDI>
+        <MDI key="PSAL_ADJUSTED#_FillValue">99999</MDI>
+      </Metadata>
+      <PAMRasterBand band="1">
+        <Metadata>
+          <MDI key="STATISTICS_MINIMUM">34.770000457764</MDI>
+          <MDI key="STATISTICS_MAXIMUM">35.046001434326</MDI>
+          <MDI key="STATISTICS_MEAN">34.956955004595</MDI>
+          <MDI key="STATISTICS_STDDEV">0.068800750163967</MDI>
+        </Metadata>
+      </PAMRasterBand>
+    </PAMDataset>
+  </Subdataset>
+  <Subdataset name="PSAL_ADJUSTED_ERROR">
+    <PAMDataset>
+      <Metadata>
+        <MDI key="NC_GLOBAL#Conventions">Argo-3.1 CF-1.6</MDI>
+        <MDI key="NC_GLOBAL#featureType">trajectoryProfile</MDI>
+        <MDI key="NC_GLOBAL#history">2026-08-09T07:27:35Z creation (software version 1.22 (version 12.05.2025 for ARGO_simplified_profile))</MDI>
+        <MDI key="NC_GLOBAL#id">https://doi.org/10.17882/42182</MDI>
+        <MDI key="NC_GLOBAL#institution">CORIOLIS</MDI>
+        <MDI key="NC_GLOBAL#references">http://www.argodatamgt.org/Documentation</MDI>
+        <MDI key="NC_GLOBAL#software_version">1.22 (version 12.05.2025 for ARGO_simplified_profile)</MDI>
+        <MDI key="NC_GLOBAL#source">Argo float</MDI>
+        <MDI key="NC_GLOBAL#title">Argo float vertical profile</MDI>
+        <MDI key="NC_GLOBAL#user_manual_version">1.0</MDI>
+        <MDI key="PSAL_ADJUSTED_ERROR#C_format">%.4f</MDI>
+        <MDI key="PSAL_ADJUSTED_ERROR#FORTRAN_format">F.4</MDI>
+        <MDI key="PSAL_ADJUSTED_ERROR#long_name">Contains the error on the adjusted values as determined by the delayed mode QC process</MDI>
+        <MDI key="PSAL_ADJUSTED_ERROR#resolution">9.9999997e-05</MDI>
+        <MDI key="PSAL_ADJUSTED_ERROR#units">psu</MDI>
+        <MDI key="PSAL_ADJUSTED_ERROR#_FillValue">99999</MDI>
+      </Metadata>
+      <PAMRasterBand band="1">
+        <Metadata>
+          <MDI key="STATISTICS_MINIMUM">0.0099999997764826</MDI>
+          <MDI key="STATISTICS_MAXIMUM">0.0099999997764826</MDI>
+          <MDI key="STATISTICS_MEAN">0.0099999997764826</MDI>
+          <MDI key="STATISTICS_STDDEV">0</MDI>
+        </Metadata>
+      </PAMRasterBand>
+    </PAMDataset>
+  </Subdataset>
+  <Subdataset name="PSAL_dPRES">
+    <PAMDataset>
+      <Metadata>
+        <MDI key="NC_GLOBAL#Conventions">Argo-3.1 CF-1.6</MDI>
+        <MDI key="NC_GLOBAL#featureType">trajectoryProfile</MDI>
+        <MDI key="NC_GLOBAL#history">2026-08-09T07:27:35Z creation (software version 1.22 (version 12.05.2025 for ARGO_simplified_profile))</MDI>
+        <MDI key="NC_GLOBAL#id">https://doi.org/10.17882/42182</MDI>
+        <MDI key="NC_GLOBAL#institution">CORIOLIS</MDI>
+        <MDI key="NC_GLOBAL#references">http://www.argodatamgt.org/Documentation</MDI>
+        <MDI key="NC_GLOBAL#software_version">1.22 (version 12.05.2025 for ARGO_simplified_profile)</MDI>
+        <MDI key="NC_GLOBAL#source">Argo float</MDI>
+        <MDI key="NC_GLOBAL#title">Argo float vertical profile</MDI>
+        <MDI key="NC_GLOBAL#user_manual_version">1.0</MDI>
+        <MDI key="PSAL_dPRES#long_name">PSAL pressure displacement from original sampled value</MDI>
+        <MDI key="PSAL_dPRES#units">decibar</MDI>
+        <MDI key="PSAL_dPRES#_FillValue">99999</MDI>
+      </Metadata>
+      <PAMRasterBand band="1">
+        <Metadata>
+          <MDI key="STATISTICS_MINIMUM">-5</MDI>
+          <MDI key="STATISTICS_MAXIMUM">5.0999999046326</MDI>
+          <MDI key="STATISTICS_MEAN">-0.01133333047507</MDI>
+          <MDI key="STATISTICS_STDDEV">2.1252732102856</MDI>
+        </Metadata>
+      </PAMRasterBand>
+    </PAMDataset>
+  </Subdataset>
+  <Subdataset name="PSAL">
+    <PAMDataset>
+      <Metadata>
+        <MDI key="NC_GLOBAL#Conventions">Argo-3.1 CF-1.6</MDI>
+        <MDI key="NC_GLOBAL#featureType">trajectoryProfile</MDI>
+        <MDI key="NC_GLOBAL#history">2026-08-09T07:27:35Z creation (software version 1.22 (version 12.05.2025 for ARGO_simplified_profile))</MDI>
+        <MDI key="NC_GLOBAL#id">https://doi.org/10.17882/42182</MDI>
+        <MDI key="NC_GLOBAL#institution">CORIOLIS</MDI>
+        <MDI key="NC_GLOBAL#references">http://www.argodatamgt.org/Documentation</MDI>
+        <MDI key="NC_GLOBAL#software_version">1.22 (version 12.05.2025 for ARGO_simplified_profile)</MDI>
+        <MDI key="NC_GLOBAL#source">Argo float</MDI>
+        <MDI key="NC_GLOBAL#title">Argo float vertical profile</MDI>
+        <MDI key="NC_GLOBAL#user_manual_version">1.0</MDI>
+        <MDI key="PSAL#C_format">%.4f</MDI>
+        <MDI key="PSAL#FORTRAN_format">F.4</MDI>
+        <MDI key="PSAL#long_name">Practical salinity</MDI>
+        <MDI key="PSAL#resolution">9.9999997e-05</MDI>
+        <MDI key="PSAL#standard_name">sea_water_salinity</MDI>
+        <MDI key="PSAL#units">psu</MDI>
+        <MDI key="PSAL#valid_max">41</MDI>
+        <MDI key="PSAL#valid_min">2</MDI>
+        <MDI key="PSAL#_FillValue">99999</MDI>
+      </Metadata>
+      <PAMRasterBand band="1">
+        <Metadata>
+          <MDI key="STATISTICS_MINIMUM">34.76900100708</MDI>
+          <MDI key="STATISTICS_MAXIMUM">35.046001434326</MDI>
+          <MDI key="STATISTICS_MEAN">34.955006739298</MDI>
+          <MDI key="STATISTICS_STDDEV">0.071039968629172</MDI>
+        </Metadata>
+      </PAMRasterBand>
+    </PAMDataset>
+  </Subdataset>
+  <Subdataset name="TEMP">
+    <PAMDataset>
+      <Metadata>
+        <MDI key="NC_GLOBAL#Conventions">Argo-3.1 CF-1.6</MDI>
+        <MDI key="NC_GLOBAL#featureType">trajectoryProfile</MDI>
+        <MDI key="NC_GLOBAL#history">2026-08-09T07:27:35Z creation (software version 1.22 (version 12.05.2025 for ARGO_simplified_profile))</MDI>
+        <MDI key="NC_GLOBAL#id">https://doi.org/10.17882/42182</MDI>
+        <MDI key="NC_GLOBAL#institution">CORIOLIS</MDI>
+        <MDI key="NC_GLOBAL#references">http://www.argodatamgt.org/Documentation</MDI>
+        <MDI key="NC_GLOBAL#software_version">1.22 (version 12.05.2025 for ARGO_simplified_profile)</MDI>
+        <MDI key="NC_GLOBAL#source">Argo float</MDI>
+        <MDI key="NC_GLOBAL#title">Argo float vertical profile</MDI>
+        <MDI key="NC_GLOBAL#user_manual_version">1.0</MDI>
+        <MDI key="TEMP#C_format">%.3f</MDI>
+        <MDI key="TEMP#FORTRAN_format">F.3</MDI>
+        <MDI key="TEMP#long_name">Sea temperature in-situ ITS-90 scale</MDI>
+        <MDI key="TEMP#resolution">0.001</MDI>
+        <MDI key="TEMP#standard_name">sea_water_temperature</MDI>
+        <MDI key="TEMP#units">degree_Celsius</MDI>
+        <MDI key="TEMP#valid_max">40</MDI>
+        <MDI key="TEMP#valid_min">-2.5</MDI>
+        <MDI key="TEMP#_FillValue">99999</MDI>
+      </Metadata>
+      <PAMRasterBand band="1">
+        <Metadata>
+          <MDI key="STATISTICS_MINIMUM">3.9140000343323</MDI>
+          <MDI key="STATISTICS_MAXIMUM">7.5739998817444</MDI>
+          <MDI key="STATISTICS_MEAN">5.5555257933228</MDI>
+          <MDI key="STATISTICS_STDDEV">1.2505541325461</MDI>
+        </Metadata>
+      </PAMRasterBand>
+    </PAMDataset>
+  </Subdataset>
+  <Subdataset name="TEMP_ADJUSTED_ERROR">
+    <PAMDataset>
+      <Metadata>
+        <MDI key="NC_GLOBAL#Conventions">Argo-3.1 CF-1.6</MDI>
+        <MDI key="NC_GLOBAL#featureType">trajectoryProfile</MDI>
+        <MDI key="NC_GLOBAL#history">2026-08-09T07:27:35Z creation (software version 1.22 (version 12.05.2025 for ARGO_simplified_profile))</MDI>
+        <MDI key="NC_GLOBAL#id">https://doi.org/10.17882/42182</MDI>
+        <MDI key="NC_GLOBAL#institution">CORIOLIS</MDI>
+        <MDI key="NC_GLOBAL#references">http://www.argodatamgt.org/Documentation</MDI>
+        <MDI key="NC_GLOBAL#software_version">1.22 (version 12.05.2025 for ARGO_simplified_profile)</MDI>
+        <MDI key="NC_GLOBAL#source">Argo float</MDI>
+        <MDI key="NC_GLOBAL#title">Argo float vertical profile</MDI>
+        <MDI key="NC_GLOBAL#user_manual_version">1.0</MDI>
+        <MDI key="TEMP_ADJUSTED_ERROR#C_format">%.3f</MDI>
+        <MDI key="TEMP_ADJUSTED_ERROR#FORTRAN_format">F.3</MDI>
+        <MDI key="TEMP_ADJUSTED_ERROR#long_name">Contains the error on the adjusted values as determined by the delayed mode QC process</MDI>
+        <MDI key="TEMP_ADJUSTED_ERROR#resolution">0.001</MDI>
+        <MDI key="TEMP_ADJUSTED_ERROR#units">degree_Celsius</MDI>
+        <MDI key="TEMP_ADJUSTED_ERROR#_FillValue">99999</MDI>
+      </Metadata>
+      <PAMRasterBand band="1">
+        <Metadata>
+          <MDI key="STATISTICS_MINIMUM">0.0020000000949949</MDI>
+          <MDI key="STATISTICS_MAXIMUM">0.0020000000949949</MDI>
+          <MDI key="STATISTICS_MEAN">0.0020000000949949</MDI>
+          <MDI key="STATISTICS_STDDEV">0</MDI>
+        </Metadata>
+      </PAMRasterBand>
+    </PAMDataset>
+  </Subdataset>
+  <Subdataset name="TEMP_ADJUSTED">
+    <PAMDataset>
+      <Metadata>
+        <MDI key="NC_GLOBAL#Conventions">Argo-3.1 CF-1.6</MDI>
+        <MDI key="NC_GLOBAL#featureType">trajectoryProfile</MDI>
+        <MDI key="NC_GLOBAL#history">2026-08-09T07:27:35Z creation (software version 1.22 (version 12.05.2025 for ARGO_simplified_profile))</MDI>
+        <MDI key="NC_GLOBAL#id">https://doi.org/10.17882/42182</MDI>
+        <MDI key="NC_GLOBAL#institution">CORIOLIS</MDI>
+        <MDI key="NC_GLOBAL#references">http://www.argodatamgt.org/Documentation</MDI>
+        <MDI key="NC_GLOBAL#software_version">1.22 (version 12.05.2025 for ARGO_simplified_profile)</MDI>
+        <MDI key="NC_GLOBAL#source">Argo float</MDI>
+        <MDI key="NC_GLOBAL#title">Argo float vertical profile</MDI>
+        <MDI key="NC_GLOBAL#user_manual_version">1.0</MDI>
+        <MDI key="TEMP_ADJUSTED#C_format">%.3f</MDI>
+        <MDI key="TEMP_ADJUSTED#FORTRAN_format">F.3</MDI>
+        <MDI key="TEMP_ADJUSTED#long_name">Sea temperature in-situ ITS-90 scale</MDI>
+        <MDI key="TEMP_ADJUSTED#resolution">0.001</MDI>
+        <MDI key="TEMP_ADJUSTED#standard_name">sea_water_temperature</MDI>
+        <MDI key="TEMP_ADJUSTED#units">degree_Celsius</MDI>
+        <MDI key="TEMP_ADJUSTED#valid_max">40</MDI>
+        <MDI key="TEMP_ADJUSTED#valid_min">-2.5</MDI>
+        <MDI key="TEMP_ADJUSTED#_FillValue">99999</MDI>
+      </Metadata>
+      <PAMRasterBand band="1">
+        <Metadata>
+          <MDI key="STATISTICS_MINIMUM">3.9140000343323</MDI>
+          <MDI key="STATISTICS_MAXIMUM">7.5739998817444</MDI>
+          <MDI key="STATISTICS_MEAN">5.5366428010835</MDI>
+          <MDI key="STATISTICS_STDDEV">1.243338388722</MDI>
+        </Metadata>
+      </PAMRasterBand>
+    </PAMDataset>
+  </Subdataset>
+  <Subdataset name="TEMP_dPRES">
+    <PAMDataset>
+      <Metadata>
+        <MDI key="NC_GLOBAL#Conventions">Argo-3.1 CF-1.6</MDI>
+        <MDI key="NC_GLOBAL#featureType">trajectoryProfile</MDI>
+        <MDI key="NC_GLOBAL#history">2026-08-09T07:27:35Z creation (software version 1.22 (version 12.05.2025 for ARGO_simplified_profile))</MDI>
+        <MDI key="NC_GLOBAL#id">https://doi.org/10.17882/42182</MDI>
+        <MDI key="NC_GLOBAL#institution">CORIOLIS</MDI>
+        <MDI key="NC_GLOBAL#references">http://www.argodatamgt.org/Documentation</MDI>
+        <MDI key="NC_GLOBAL#software_version">1.22 (version 12.05.2025 for ARGO_simplified_profile)</MDI>
+        <MDI key="NC_GLOBAL#source">Argo float</MDI>
+        <MDI key="NC_GLOBAL#title">Argo float vertical profile</MDI>
+        <MDI key="NC_GLOBAL#user_manual_version">1.0</MDI>
+        <MDI key="TEMP_dPRES#long_name">TEMP pressure displacement from original sampled value</MDI>
+        <MDI key="TEMP_dPRES#units">decibar</MDI>
+        <MDI key="TEMP_dPRES#_FillValue">99999</MDI>
+      </Metadata>
+      <PAMRasterBand band="1">
+        <Metadata>
+          <MDI key="STATISTICS_MINIMUM">-5</MDI>
+          <MDI key="STATISTICS_MAXIMUM">5.0999999046326</MDI>
+          <MDI key="STATISTICS_MEAN">-0.01133333047507</MDI>
+          <MDI key="STATISTICS_STDDEV">2.1252732102856</MDI>
+        </Metadata>
+      </PAMRasterBand>
+    </PAMDataset>
+  </Subdataset>
+</PAMDataset>

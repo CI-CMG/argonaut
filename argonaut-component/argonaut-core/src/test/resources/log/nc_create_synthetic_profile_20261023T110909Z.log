@@ -1,0 +1,13 @@
+001/002 5903712
+   01/01: Float #5903712 Cycle #149
+S-PROF_WARNING: File BD5903712_149.nc: Found b-parameter(s) DOXY NITRATE, but without any PRES_QC=0..3 and non-FillValue BGC data. Create synthetic profile only with available core data.
+002/002 6901486
+   01/01: Float #6901486 Cycle #37
+ERROR: Float #6901486 Cycle #37: the synthetic profile data processing failed (ARGO_simplified_profile fonction on file BD6901486_037.nc)
+Undefined function 'nanmean' for input arguments of type 'int32'.
+   Line: 248 File: /Users/paytoncain/Documents/projects/work/wod/Coriolis-data-processing-chain-for-Argo-floats/decArgo_soft/soft/util/sub_foreign/consolidator.m (func: consolidator)
+   Line: 1131 File: /Users/paytoncain/Documents/projects/work/wod/Coriolis-data-processing-chain-for-Argo-floats/decArgo_soft/soft/util/sub_foreign/ARGO_simplified_profile.m (func: ARGO_simplified_profile)
+   Line: 1258 File: /Users/paytoncain/Documents/projects/work/wod/Coriolis-data-processing-chain-for-Argo-floats/decArgo_soft/soft/util/sub/nc_create_synthetic_profile_.m (func: process_prof_data)
+   Line:  83 File: /Users/paytoncain/Documents/projects/work/wod/Coriolis-data-processing-chain-for-Argo-floats/decArgo_soft/soft/util/sub/nc_create_synthetic_profile_.m (func: nc_create_synthetic_profile_)
+   Line: 448 File: /Users/paytoncain/Documents/projects/work/wod/Coriolis-data-processing-chain-for-Argo-floats/decArgo_soft/soft/util/nc_create_synthetic_profile.m (func: process_one_float)
+   Line: 295 File: /Users/paytoncain/Documents/projects/work/wod/Coriolis-data-processing-chain-for-Argo-floats/decArgo_soft/soft/util/nc_create_synthetic_profile.m (func: nc_create_synthetic_profile)

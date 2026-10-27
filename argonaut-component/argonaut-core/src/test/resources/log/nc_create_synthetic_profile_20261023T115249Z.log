@@ -1,0 +1,26 @@
+001/002 6901486
+   01/01: Float #6901486 Cycle #37
+{Error using <a href="matlab:matlab.lang.internal.introspective.errorDocCallback('matlab.internal.imagesci.netcdflib')" style="font-weight:bold">matlab.internal.imagesci.netcdflib</a>
+The NetCDF library encountered an error during execution of "putVaraText" function:
+"Start+count exceeds dimension bound (NC_EEDGE)".
+
+Error in <a href="matlab:matlab.lang.internal.introspective.errorDocCallback('netcdf.putVar', '/Applications/MATLAB_R2026b.app/toolbox/matlab/matlab_sci/netcdf/+netcdf/putVar.m', 83)" style="font-weight:bold">netcdf.putVar</a> (<a href="matlab: opentoline('/Applications/MATLAB_R2026b.app/toolbox/matlab/matlab_sci/netcdf/+netcdf/putVar.m',83,0)">line 83</a>)
+matlab.internal.imagesci.netcdflib(funcstr,ncid,varid,varargin{:});
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Error in <a href="matlab:matlab.lang.internal.introspective.errorDocCallback('nc_create_synthetic_profile_>fill_synthetic_mono_profile_file', '/Users/paytoncain/Documents/projects/work/wod/Coriolis-data-processing-chain-for-Argo-floats/decArgo_soft/soft/util/sub/nc_create_synthetic_profile_.m', 2351)" style="font-weight:bold">nc_create_synthetic_profile_>fill_synthetic_mono_profile_file</a> (<a href="matlab: opentoline('/Users/paytoncain/Documents/projects/work/wod/Coriolis-data-processing-chain-for-Argo-floats/decArgo_soft/soft/util/sub/nc_create_synthetic_profile_.m',2351,0)">line 2351</a>)
+            netcdf.putVar(fCdf, scientificCalibDateVarId, ...
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Error in <a href="matlab:matlab.lang.internal.introspective.errorDocCallback('nc_create_synthetic_profile_>create_synthetic_mono_profile_file', '/Users/paytoncain/Documents/projects/work/wod/Coriolis-data-processing-chain-for-Argo-floats/decArgo_soft/soft/util/sub/nc_create_synthetic_profile_.m', 1698)" style="font-weight:bold">nc_create_synthetic_profile_>create_synthetic_mono_profile_file</a> (<a href="matlab: opentoline('/Users/paytoncain/Documents/projects/work/wod/Coriolis-data-processing-chain-for-Argo-floats/decArgo_soft/soft/util/sub/nc_create_synthetic_profile_.m',1698,0)">line 1698</a>)
+fill_synthetic_mono_profile_file(outputFilePathName, a_profData);
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Error in <a href="matlab:matlab.lang.internal.introspective.errorDocCallback('nc_create_synthetic_profile_', '/Users/paytoncain/Documents/projects/work/wod/Coriolis-data-processing-chain-for-Argo-floats/decArgo_soft/soft/util/sub/nc_create_synthetic_profile_.m', 93)" style="font-weight:bold">nc_create_synthetic_profile_</a> (<a href="matlab: opentoline('/Users/paytoncain/Documents/projects/work/wod/Coriolis-data-processing-chain-for-Argo-floats/decArgo_soft/soft/util/sub/nc_create_synthetic_profile_.m',93,0)">line 93</a>)
+      create_synthetic_mono_profile_file(g_cocs_floatNum, syntProfDataStruct, tmpDirName, a_outputDir, a_monoProfRefFile);
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Error in <a href="matlab:matlab.lang.internal.introspective.errorDocCallback('nc_create_synthetic_profile>process_one_float', '/Users/paytoncain/Documents/projects/work/wod/Coriolis-data-processing-chain-for-Argo-floats/decArgo_soft/soft/util/nc_create_synthetic_profile.m', 448)" style="font-weight:bold">nc_create_synthetic_profile>process_one_float</a> (<a href="matlab: opentoline('/Users/paytoncain/Documents/projects/work/wod/Coriolis-data-processing-chain-for-Argo-floats/decArgo_soft/soft/util/nc_create_synthetic_profile.m',448,0)">line 448</a>)
+         nc_create_synthetic_profile_( ...
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Error in <a href="matlab:matlab.lang.internal.introspective.errorDocCallback('nc_create_synthetic_profile', '/Users/paytoncain/Documents/projects/work/wod/Coriolis-data-processing-chain-for-Argo-floats/decArgo_soft/soft/util/nc_create_synthetic_profile.m', 295)" style="font-weight:bold">nc_create_synthetic_profile</a> (<a href="matlab: opentoline('/Users/paytoncain/Documents/projects/work/wod/Coriolis-data-processing-chain-for-Argo-floats/decArgo_soft/soft/util/nc_create_synthetic_profile.m',295,0)">line 295</a>)
+               process_one_float(floatDirPathName, DIR_OUTPUT_NC_FILES, ...
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+} 
+nc_create_synthetic_profile

@@ -6,30 +6,18 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class ProfileCounter {
+public class ParameterCounter {
 
 
-  private final Map<Integer, List<Integer>> counter;
-
-  public ProfileCounter(int numberOfProfiles) {
-    counter = new HashMap<>();
-    for (int i = 0; i < numberOfProfiles; i++) {
-      counter.put(i, new ArrayList<>());
-    }
-  }
+  private final Map<String, List<Integer>> counter = new HashMap<>();
 
   public void updateCounter(int level, SynthRow row) {
     for (SynthProfile profile : row.getProfiles()) {
       if (profile != null) {
-        int profileIndex = profile.getIndex();
-        int count = 0;
-        for(SynthParameter parameter : profile.getParameters().values()){
-          if (parameter.getValue() != null) {
-            count++;
+        for (SynthParameter parameter : profile.parameters().values()) {
+          if (parameter.value() != null) {
+            counter.computeIfAbsent("%d_%s".formatted(profile.index(), parameter.parameterName()), k -> new ArrayList<>()).add(level);
           }
-        }
-        if (count > 0) {
-          counter.get(profileIndex).add(level);
         }
       }
     }
