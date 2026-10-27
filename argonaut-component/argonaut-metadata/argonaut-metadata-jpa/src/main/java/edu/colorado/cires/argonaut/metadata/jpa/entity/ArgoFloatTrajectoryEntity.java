@@ -13,7 +13,8 @@ import java.time.ZonedDateTime;
 
 @Entity
 @Table(name = "argo_float_trajectory", indexes = {
-    @Index(name = "argo_float_trajectory_file_status_idx", columnList = "file_status")
+    @Index(name = "argo_float_trajectory_file_status_idx", columnList = "file_status"),
+    @Index(name = "argo_float_trajectory_argo_float_idx", columnList = "argo_float")
 })
 public class ArgoFloatTrajectoryEntity {
 

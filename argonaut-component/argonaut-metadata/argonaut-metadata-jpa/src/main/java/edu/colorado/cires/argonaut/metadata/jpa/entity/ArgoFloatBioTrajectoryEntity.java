@@ -1,14 +1,20 @@
 package edu.colorado.cires.argonaut.metadata.jpa.entity;
 
-import jakarta.persistence.*;
-
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Index;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.Version;
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 @Entity
 @Table(name = "argo_float_bio_trajectory", indexes = {
-    @Index(name = "argo_float_bio_trajectory_file_status_idx", columnList = "file_status")
+    @Index(name = "argo_float_bio_trajectory_file_status_idx", columnList = "file_status"),
+    @Index(name = "argo_float_bio_trajectory_argo_float_idx", columnList = "argo_float")
 })
 public class ArgoFloatBioTrajectoryEntity {
 

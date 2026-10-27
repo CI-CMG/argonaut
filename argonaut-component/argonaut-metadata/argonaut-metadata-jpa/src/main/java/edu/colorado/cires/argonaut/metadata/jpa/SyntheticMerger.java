@@ -39,7 +39,7 @@ class SyntheticMerger {
             if (metadata != null) {
               for (ArgoFloatProfileEntity profile : profiles) {
                 if (profile != null) {
-                  LOGGER.info("Updating synth merge for " + profile.getFilePath());
+                  LOGGER.debug("Updating synth merge for " + profile.getFilePath());
                   profile.setSyntheticMergeTime(remove ? null : record.getActionTimestamp().atZone(ZoneId.of("UTC")));
                 }
                 List<ArgonautSyntheticMergeMetadataEntity> mds = em.createQuery(
