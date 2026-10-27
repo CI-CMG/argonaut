@@ -126,7 +126,7 @@ public class DefaultFloatMergeProcessor implements FloatMergeProcessor {
   private void removeMergeFile(ProfileOperation message) {
     String outputFile = getOutputFile(message);
     outputFileStore.delete(outputFile);
-    LOGGER.info("Removed multi-cycle merge file: {}", outputFile);
+    LOGGER.debug("Removed multi-cycle merge file: {}", outputFile);
   }
 
   private String getOutputFile(ProfileOperation message) {
@@ -156,7 +156,7 @@ public class DefaultFloatMergeProcessor implements FloatMergeProcessor {
         throw new RuntimeException("Unable to upload merge file " + outputFile, e);
       }
 
-      LOGGER.info("Updated multi-cycle merge file: {}", outputFile);
+      LOGGER.debug("Updated multi-cycle merge file: {}", outputFile);
 
     } finally {
       FileUtils.deleteQuietly(localOutputFile.toFile());
