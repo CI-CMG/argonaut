@@ -31,7 +31,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-public class DefaultBioTrajIndexProcessorTest {
+public class DefaultBioTrajectoryIndexProcessorTest {
 
   private static final Path localTempDir = Paths.get("target/temp");
   private static final Path outputDir = Paths.get("target/output");

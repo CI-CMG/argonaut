@@ -1,15 +1,13 @@
 package edu.colorado.cires.argonaut.metadata.jpa.entity;
 
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Index;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.Version;
 import java.time.ZonedDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "argo_float_bio_trajectory", indexes = {
@@ -24,10 +22,6 @@ public class ArgoFloatBioTrajectoryEntity {
   @Version
   @Column(name = "version", nullable = false)
   private int version;
-
-//  @OneToOne(cascade = {CascadeType.DETACH, CascadeType.REFRESH})
-//  @JoinColumn(name = "argo_float", nullable = false, unique = true)
-//  private ArgoFloatEntity argoFloat;
 
   @Column(name = "profiler_type", length = 4)
   private String profilerType;
@@ -50,11 +44,8 @@ public class ArgoFloatBioTrajectoryEntity {
   @Column(name = "longitude_max")
   private Double longitudeMax;
 
-  // TODO: switch from string to list?
-    @Column(name = "parameters") // TODO: should be a list of parameters
-    private List<String> parameters;
-//  @OneToMany(mappedBy = "ArgoFloatBioTrajectory", cascade = CascadeType.ALL, orphanRemoval = true)
-//  private List<ArgoFloatProfileParameterEntity> parameters = new ArrayList<>();
+  @Column(name = "parameters") // TODO: should be a list of parameters
+  private List<String> parameters;
 
   @Column(name = "last_updated_time", nullable = false)
   private ZonedDateTime lastUpdatedTime;
@@ -77,14 +68,6 @@ public class ArgoFloatBioTrajectoryEntity {
   public void setVersion(int version) {
     this.version = version;
   }
-
-//  public ArgoFloatEntity getArgoFloat() {
-//    return argoFloat;
-//  }
-//
-//  public void setArgoFloat(ArgoFloatEntity floatId) {
-//    this.argoFloat = floatId;
-//  }
 
   public String getProfilerType() {
     return profilerType;
@@ -145,14 +128,6 @@ public class ArgoFloatBioTrajectoryEntity {
   public List<String> getParameters() { return parameters; }
 
   public void setParameters(List<String> parameters) { this.parameters = parameters; }
-
-//  public List<ArgoFloatProfileParameterEntity> getParameters() {
-//    return parameters;
-//  }
-
-//  public void setParameters(List<ArgoFloatProfileParameterEntity> parameters) {
-//    this.parameters = parameters;
-//  }
 
   public ZonedDateTime getLastUpdatedTime() {
     return lastUpdatedTime;

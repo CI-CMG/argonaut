@@ -453,22 +453,18 @@ class Updater {
   }
 
   private void createOrUpdateBioTrajectory(MetadataRecord record) {
-//    file,latitude_max,latitude_min,longitude_max,longitude_min,profiler_type,institution,parameters,date_update
-    String floatId = getFloatId(record);
     String file = Objects.requireNonNull(record.getFile());
+
     try (EntityManager em = entityManagerFactory.createEntityManager()) {
       EntityTransaction tx = em.getTransaction();
       tx.begin();
       try {
-//        ArgoFloatEntity floatEntity = em.find(ArgoFloatEntity.class, floatId);
         ArgoFloatBioTrajectoryEntity entity = em.find(ArgoFloatBioTrajectoryEntity.class, file);
         boolean add = (entity == null);
 
         if (add) {
-          entity = new ArgoFloatBioTrajectoryEntity(); //ArgoFloatTrajectoryEntity();
+          entity = new ArgoFloatBioTrajectoryEntity();
           entity.setFilePath(file);
-//          entity.setFileName(record.getFileName());
-//          entity.setArgoFloat(floatEntity);
         }
 
         entity.setProfilerType(record.getProfilerType());
@@ -483,20 +479,9 @@ class Updater {
 
         entity.setProfilerType(record.getProfilerType());
         entity.setInstitution(record.getInstitution());
-//        entity.setFileType(record.getFileType().toString());
+
         entity.setFileStatus(ACTIVE.toString());
 
-//        List<ArgoFloatProfileParameterEntity> parameters = entity.getParameters();
-//        parameters.clear();
-//        for (int i = 0; i < record.getParameters().size(); i++) {
-//          String parameterName =  record.getParameters().get(i);
-//          ArgoFloatProfileParameterEntity parameter = new ArgoFloatProfileParameterEntity();
-//          parameter.setId(UUID.randomUUID());
-//          parameter.setParameterName(parameterName);
-////          parameter.setArgoFloatProfile(entity); // TODO: what to do here?
-//          parameter.setParameterIndex(i);
-//          parameters.add(parameter);
-//        }
         entity.setParameters(record.getParameters());
 
         entity.setDateUpdate(record.getDateUpdate().atOffset(ZoneOffset.UTC).toZonedDateTime());

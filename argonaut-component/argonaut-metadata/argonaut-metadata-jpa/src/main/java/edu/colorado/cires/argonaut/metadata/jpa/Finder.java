@@ -627,7 +627,6 @@ class Finder {
             .build();
   }
 
-//  private static MetadataRecord fromBioTrajectoryEntity(ArgoFloatProfileEntity profile) {
   private static MetadataRecord fromBioTrajectoryEntity(ArgoFloatBioTrajectoryEntity profile) {
     return MetadataRecord.builder()
             .withFile(profile.getFilePath())
@@ -637,12 +636,6 @@ class Finder {
             .withLongitudeMin(profile.getLongitudeMin())
             .withProfilerType(profile.getProfilerType())
             .withInstitution(profile.getInstitution())
-//            .withParameters(profile.getParameters().stream().sorted(Comparator.comparingInt(ArgoFloatBioTrajectoryEntity::getParameterIndex)).map(
-//                    ArgoFloatBioTrajectoryEntity::getParameterName).toList())
-//            .withParameters(profile.getParameters().stream().sorted(Comparator.comparingInt(ArgoFloatProfileParameterEntity::getParameterIndex)).map(
-//                    ArgoFloatProfileParameterEntity::getParameterName).toList()) // TODO: need to destructure the ParameterEntities?
-//            .withParameters(profile.getParameters().stream().sorted(Comparator.comparingInt(ArgoFloatProfileParameterEntity::getParameterIndex)).map(
-//                    ArgoFloatProfileParameterEntity::getParameterName).toList())
             .withParameters(profile.getParameters())
             .withDateUpdate(profile.getDateUpdate() == null ? null : profile.getDateUpdate().toInstant())
             .build();
