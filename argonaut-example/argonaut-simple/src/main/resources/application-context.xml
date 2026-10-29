@@ -301,7 +301,7 @@
     <property name="enabled" value="${bio-profile-index.enabled}"/>
   </bean>
 
-  <bean id="bioTrajIndexProcessor" class="edu.colorado.cires.argonaut.processor.core.DefaultBioTrajIndexProcessor">
+  <bean id="bioTrajIndexProcessor" class="edu.colorado.cires.argonaut.processor.core.DefaultBioTrajectoryIndexProcessor">
     <property name="outputFileStore" ref="outputFileStore"/>
     <property name="localTempDir" value="${work-directory}"/>
     <property name="metadataStore" ref="metadataStore"/>

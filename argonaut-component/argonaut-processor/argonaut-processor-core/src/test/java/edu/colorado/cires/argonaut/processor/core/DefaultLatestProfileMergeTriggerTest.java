@@ -204,8 +204,12 @@ public class DefaultLatestProfileMergeTriggerTest {
     aggregator.trigger();
 
     List<String> expectedRequests = Arrays.asList(
-        "D20260923", //always request today
-        "R20260923", //always request today
+        "D20260923",
+        "R20260923",
+        "D20260922",
+        "R20260922",
+        "D20260921",
+        "R20260921",
         "D20260920",
         "R20260920"
     );
@@ -256,11 +260,35 @@ public class DefaultLatestProfileMergeTriggerTest {
               .build());
         });
 
-    verify(messageSender, times(1)).sendJson(eq(queue), eq(jsonMapper.writeValueAsString(ProfileOperation.builder()
-        .withFileName("R20260923")
-        .withTraceId(traceId)
-        .withFiles(r20260923Files)
-        .build())));
+    List<MetadataRecord> r20260922Files = new ArrayList<>();
+    groups.stream().filter(s -> s.date().equals(Instant.parse("2026-09-22T00:00:00Z"))).flatMap(s -> s.names().stream())
+        .filter(s -> s.startsWith("R"))
+        .forEach(fileName -> {
+          String floatId = fileName.substring(1, 9);
+          r20260922Files.add(MetadataRecord.builder()
+              .withDac("aoml")
+              .withFloatId(floatId)
+              .withFile("aoml/" + floatId + "/profiles/" + fileName + "_001.nc")
+              .withFileStatus(FileStatus.ACTIVE)
+              .withFileName(fileName + "_001.nc")
+              .withCycleNumber("001")
+              .withActionTimestamp(Instant.parse("2026-09-23T12:00:00Z"))
+              .withDate(Instant.parse("2020-09-23T01:00:00Z"))
+              .withFileType(ArgoFileType.PROFILE_CORE)
+              .build());
+          r20260922Files.add(MetadataRecord.builder()
+              .withDac("bodc")
+              .withFloatId("1" + floatId)
+              .withFile("bodc/1" + floatId + "/profiles/1" + fileName + "_001.nc")
+              .withFileStatus(FileStatus.REMOVED)
+              .withFileName("1" + fileName + "_001.nc")
+              .withCycleNumber("001")
+              .withActionTimestamp(Instant.parse("2026-09-23T12:00:00Z"))
+              .withDate(Instant.parse("2020-09-23T01:00:00Z"))
+              .withFileType(ArgoFileType.PROFILE_CORE)
+              .build());
+        });
+
 
     List<MetadataRecord> d20260920Files = new ArrayList<>();
     groups.stream().filter(s -> s.date().equals(Instant.parse("2026-09-20T00:00:00Z"))).flatMap(s -> s.names().stream())
@@ -290,6 +318,88 @@ public class DefaultLatestProfileMergeTriggerTest {
               .withFileType(ArgoFileType.PROFILE_CORE)
               .build());
         });
+
+    List<MetadataRecord> d20260921Files = new ArrayList<>();
+    groups.stream().filter(s -> s.date().equals(Instant.parse("2026-09-21T00:00:00Z"))).flatMap(s -> s.names().stream())
+        .filter(s -> s.startsWith("D"))
+        .forEach(fileName -> {
+          String floatId = fileName.substring(1, 9);
+          d20260921Files.add(MetadataRecord.builder()
+              .withDac("aoml")
+              .withFloatId(floatId)
+              .withFile("aoml/" + floatId + "/profiles/" + fileName + "_001.nc")
+              .withFileStatus(FileStatus.ACTIVE)
+              .withFileName(fileName + "_001.nc")
+              .withCycleNumber("001")
+              .withActionTimestamp(Instant.parse("2026-09-23T12:00:00Z"))
+              .withDate(Instant.parse("2020-09-23T01:00:00Z"))
+              .withFileType(ArgoFileType.PROFILE_CORE)
+              .build());
+          d20260921Files.add(MetadataRecord.builder()
+              .withDac("bodc")
+              .withFloatId("1" + floatId)
+              .withFile("bodc/1" + floatId + "/profiles/1" + fileName + "_001.nc")
+              .withFileStatus(FileStatus.REMOVED)
+              .withFileName("1" + fileName + "_001.nc")
+              .withCycleNumber("001")
+              .withActionTimestamp(Instant.parse("2026-09-23T12:00:00Z"))
+              .withDate(Instant.parse("2020-09-23T01:00:00Z"))
+              .withFileType(ArgoFileType.PROFILE_CORE)
+              .build());
+        });
+
+    List<MetadataRecord> r20260921Files = new ArrayList<>();
+    groups.stream().filter(s -> s.date().equals(Instant.parse("2026-09-21T00:00:00Z"))).flatMap(s -> s.names().stream())
+        .filter(s -> s.startsWith("R"))
+        .forEach(fileName -> {
+          String floatId = fileName.substring(1, 9);
+          r20260921Files.add(MetadataRecord.builder()
+              .withDac("aoml")
+              .withFloatId(floatId)
+              .withFile("aoml/" + floatId + "/profiles/" + fileName + "_001.nc")
+              .withFileStatus(FileStatus.ACTIVE)
+              .withFileName(fileName + "_001.nc")
+              .withCycleNumber("001")
+              .withActionTimestamp(Instant.parse("2026-09-23T12:00:00Z"))
+              .withDate(Instant.parse("2020-09-23T01:00:00Z"))
+              .withFileType(ArgoFileType.PROFILE_CORE)
+              .build());
+          r20260921Files.add(MetadataRecord.builder()
+              .withDac("bodc")
+              .withFloatId("1" + floatId)
+              .withFile("bodc/1" + floatId + "/profiles/1" + fileName + "_001.nc")
+              .withFileStatus(FileStatus.REMOVED)
+              .withFileName("1" + fileName + "_001.nc")
+              .withCycleNumber("001")
+              .withActionTimestamp(Instant.parse("2026-09-23T12:00:00Z"))
+              .withDate(Instant.parse("2020-09-23T01:00:00Z"))
+              .withFileType(ArgoFileType.PROFILE_CORE)
+              .build());
+        });
+
+    verify(messageSender, times(1)).sendJson(eq(queue), eq(jsonMapper.writeValueAsString(ProfileOperation.builder()
+        .withFileName("R20260921")
+        .withTraceId(traceId)
+        .withFiles(r20260921Files)
+        .build())));
+
+    verify(messageSender, times(1)).sendJson(eq(queue), eq(jsonMapper.writeValueAsString(ProfileOperation.builder()
+        .withFileName("R20260923")
+        .withTraceId(traceId)
+        .withFiles(r20260923Files)
+        .build())));
+
+    verify(messageSender, times(1)).sendJson(eq(queue), eq(jsonMapper.writeValueAsString(ProfileOperation.builder()
+        .withFileName("R20260922")
+        .withTraceId(traceId)
+        .withFiles(r20260922Files)
+        .build())));
+
+    verify(messageSender, times(1)).sendJson(eq(queue), eq(jsonMapper.writeValueAsString(ProfileOperation.builder()
+        .withFileName("D20260921")
+        .withTraceId(traceId)
+        .withFiles(d20260921Files)
+        .build())));
 
     verify(messageSender, times(1)).sendJson(eq(queue), eq(jsonMapper.writeValueAsString(ProfileOperation.builder()
         .withFileName("D20260920")

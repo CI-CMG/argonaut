@@ -2,7 +2,6 @@ package edu.colorado.cires.argonaut.processor.core;
 
 import edu.colorado.cires.argonaut.file.core.FileStore;
 import edu.colorado.cires.argonaut.messaging.core.databind.ArgoFileType;
-import edu.colorado.cires.argonaut.messaging.core.databind.ArgoFileTypeDetails;
 import edu.colorado.cires.argonaut.messaging.core.databind.ProfileMode;
 import edu.colorado.cires.argonaut.messaging.core.databind.ProfileOperation;
 import edu.colorado.cires.argonaut.messaging.core.queue.MessageSender;
@@ -15,12 +14,13 @@ import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.LinkedHashSet;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tools.jackson.databind.json.JsonMapper;
@@ -106,19 +106,10 @@ public class DefaultLatestProfileMergeTrigger implements LatestProfileMergeTrigg
     }
   }
 
-  private static List<String> getExpectedFileNamePrefixes(List<LocalDate> days) {
-    List<String> fileNamePrefixes = new ArrayList<>(days.size() * 2);
-    for (LocalDate day : days) {
-      fileNamePrefixes.add("D" + FORMATTER.format(day) + "_prof_");
-      fileNamePrefixes.add("R" + FORMATTER.format(day) + "_prof_");
-    }
-    return fileNamePrefixes;
-  }
 
   private List<LocalDate> getExpectedDates() {
-    // list will always have the current date
-    List<LocalDate> days = new ArrayList<>(daysBack + 1);
     LocalDate today = ZonedDateTime.ofInstant(nowGenerator.get(), ZoneId.of("UTC")).toLocalDate();
+    List<LocalDate> days = new ArrayList<>(daysBack + 1);
     days.add(today);
     for (int i = 1; i < daysBack + 1; i++) {
       days.add(today.minusDays(i));
@@ -127,40 +118,17 @@ public class DefaultLatestProfileMergeTrigger implements LatestProfileMergeTrigg
 
   }
 
-  private void execute() {
-    LOGGER.info("Triggered Recent Profile Merge Aggregator");
-    String outputDirectory = outputFileStore.appendToPath(outputFileStore.getRoot(), "latest_data");
-    List<String> existingFiles = outputFileStore.listFileNamesInDirectory(outputDirectory);
-    List<LocalDate> expectedDates = getExpectedDates();
+  private void requestRemoval(UUID traceId, String removalFileName) {
+    messageSender.sendJson(mergeQueue, jsonMapper.writeValueAsString(
+        ProfileOperation.builder()
+        .withTraceId(traceId)
+        .withFileName(removalFileName)
+        .build()));
+  }
 
-    List<String> expectedPrefixes = getExpectedFileNamePrefixes(expectedDates);
-
-    Set<String> prefixesToRemove = new LinkedHashSet<>();
-    Set<String> existingPrefixes = new LinkedHashSet<>();
-
-    for (String fileName : existingFiles) {
-      ArgoFileTypeDetails fileType = ArgoFileType.getFileNameDetails(fileName);
-      String fileNamePrefix = fileName.substring(0, 15);
-      if (fileType.getType() == ArgoFileType.LATEST_PROFILE_MERGE) {
-        if (!expectedPrefixes.contains(fileNamePrefix)) {
-          prefixesToRemove.add(fileName.substring(0, 9));
-        } else {
-          existingPrefixes.add(fileNamePrefix);
-        }
-      }
-    }
-
-    // always request today's latest
-    existingPrefixes.remove(expectedPrefixes.get(0));
-    existingPrefixes.remove(expectedPrefixes.get(1));
-    Set<String> toAddPrefixes = new LinkedHashSet<>(expectedPrefixes);
-    toAddPrefixes.removeAll(existingPrefixes);
-
-    UUID traceId = this.traceIdGenerator.get();
-
-    for (String prefix : toAddPrefixes) {
-      ProfileMode profileMode = prefix.substring(0, 1).equals("D") ? ProfileMode.DELAYED_MODE : ProfileMode.REAL_TIME;
-      LocalDate date = LocalDate.parse(prefix.substring(1, 9), FORMATTER);
+  private void requestUpdate(UUID traceId, String datePart) {
+    LocalDate date = LocalDate.parse(datePart, FORMATTER);
+    for (ProfileMode profileMode : Arrays.asList(ProfileMode.DELAYED_MODE, ProfileMode.REAL_TIME)) {
       ProfileOperation result = metadataStore.findUpdatedOrMissingLatestMergeFiles(
           DefaultRecentProfileSearch.builder()
               .withLimit(limit)
@@ -170,15 +138,43 @@ public class DefaultLatestProfileMergeTrigger implements LatestProfileMergeTrigg
               .build());
       if (!result.getFiles().isEmpty()) {
         LOGGER.info("Triggering recent merge {}", result.getFileName());
-        messageSender.sendJson(mergeQueue, jsonMapper.writeValueAsString(ProfileOperation.builder(result).withTraceId(traceId).build()));
+        messageSender.sendJson(mergeQueue, jsonMapper.writeValueAsString(
+            ProfileOperation.builder(result)
+                .withTraceId(traceId)
+                .withFileName(profileMode.getFilePrefix() + datePart)
+                .build()));
       }
     }
+  }
 
-    for (String prefixToRemove : prefixesToRemove) {
-      messageSender.sendJson(mergeQueue, jsonMapper.writeValueAsString(ProfileOperation.builder()
-          .withTraceId(traceId)
-          .withFileName(prefixToRemove)
-          .build()));
-    }
+  private static String filePrefix(String fileName) {
+    return fileName.substring(0, 9);
+  }
+
+  private static String fileDatePart(String prefixOrFileName) {
+    return prefixOrFileName.substring(1, 9);
+  }
+
+  private void execute() {
+    LOGGER.info("Triggered Recent Profile Merge Aggregator");
+    String outputDirectory = outputFileStore.appendToPath(outputFileStore.getRoot(), "latest_data");
+
+
+
+    Set<String> expectedFileDateParts =  getExpectedDates().stream().map(FORMATTER::format).collect(Collectors.toSet());
+    List<String> existingFiles = outputFileStore.listFileNamesInDirectory(outputDirectory).stream()
+        .filter(fileName -> ArgoFileType.getFileNameDetails(fileName).getType() == ArgoFileType.LATEST_PROFILE_MERGE)
+        .toList();
+    Set<String> removalPrefixes = existingFiles.stream()
+        .map(DefaultLatestProfileMergeTrigger::filePrefix)
+        .filter(prefix -> !expectedFileDateParts.contains(fileDatePart(prefix)))
+        .collect(Collectors.toSet());
+
+    UUID traceId = this.traceIdGenerator.get();
+
+    removalPrefixes.forEach(prefixToRemove -> requestRemoval(traceId, prefixToRemove));
+    expectedFileDateParts.forEach(datePart -> requestUpdate(traceId, datePart));
+
+
   }
 }
