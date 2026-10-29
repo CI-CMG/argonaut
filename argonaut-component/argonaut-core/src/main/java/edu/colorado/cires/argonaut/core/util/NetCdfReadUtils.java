@@ -281,9 +281,9 @@ public final class NetCdfReadUtils {
       return null;
     }
     int days = daysSinceRef.intValue();
-    double fractDay = daysSinceRef - (double) days;
-    int fract = (int)(fractDay * (double) MS_DAY);
-    return referenceDateTime.plus(days, ChronoUnit.DAYS).plus(fract, ChronoUnit.MILLIS);
+    double fractDay = daysSinceRef - days;
+    long fractMillis = Math.round(fractDay * MS_DAY);
+    return referenceDateTime.plus(days, ChronoUnit.DAYS).plus(fractMillis, ChronoUnit.MILLIS);
   }
 
   public static Float getLevel2Float(NetcdfFile netcdf, int level1Index, int level2Index, String variableName)  {
@@ -297,7 +297,7 @@ public final class NetCdfReadUtils {
 
   public static Instant getLevel3Instant(NetcdfFile netcdf, int level1Index, int level2Index, int level3Index, String variableName) {
     String value = getLevel3String(netcdf, level1Index, level2Index, level3Index, variableName);
-    if (value == null) {
+    if (value == null || value.equals("none")) {
       return null;
     }
     return LocalDateTime.parse(value, DATE_TIME_FORMATTER).atZone(ZoneId.of("UTC")).toInstant();

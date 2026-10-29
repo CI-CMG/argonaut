@@ -3,6 +3,7 @@ package edu.colorado.cires.argonaut.core.netcdf.synthprofile.v13.impl;
 import edu.colorado.cires.argonaut.core.netcdf.synthprofile.v13.ArgoSyntheticProfileV13Calibration;
 import edu.colorado.cires.argonaut.core.util.NetCdfReadUtils;
 import java.time.Instant;
+import java.util.Optional;
 
 public class NetCdfTiedArgoSyntheticProfileV13Calibration implements ArgoSyntheticProfileV13Calibration {
 
@@ -16,14 +17,18 @@ public class NetCdfTiedArgoSyntheticProfileV13Calibration implements ArgoSynthet
   public NetCdfTiedArgoSyntheticProfileV13Calibration(NetCdfTiedArgoSyntheticProfileV13Parameter parent, int calibrationIndex) {
     this.parent = parent;
     this.calibrationIndex = calibrationIndex;
-    equation = NetCdfReadUtils.getLevel3String(parent.getNetcdf(), parent.getProfileIndex(), calibrationIndex, parent.getParamIndex(),
-        "SCIENTIFIC_CALIB_EQUATION");
-    coefficient = NetCdfReadUtils.getLevel3String(parent.getNetcdf(), parent.getProfileIndex(), calibrationIndex, parent.getParamIndex(),
-        "SCIENTIFIC_CALIB_COEFFICIENT");
-    comment = NetCdfReadUtils.getLevel3String(parent.getNetcdf(), parent.getProfileIndex(), calibrationIndex, parent.getParamIndex(),
-        "SCIENTIFIC_CALIB_COMMENT");
+    equation = valueOrDefaultString(NetCdfReadUtils.getLevel3String(parent.getNetcdf(), parent.getProfileIndex(), calibrationIndex, parent.getParamIndex(),
+        "SCIENTIFIC_CALIB_EQUATION"));
+    coefficient = valueOrDefaultString(NetCdfReadUtils.getLevel3String(parent.getNetcdf(), parent.getProfileIndex(), calibrationIndex, parent.getParamIndex(),
+        "SCIENTIFIC_CALIB_COEFFICIENT"));
+    comment = valueOrDefaultString(NetCdfReadUtils.getLevel3String(parent.getNetcdf(), parent.getProfileIndex(), calibrationIndex, parent.getParamIndex(),
+        "SCIENTIFIC_CALIB_COMMENT"));
     date = NetCdfReadUtils.getLevel3Instant(parent.getNetcdf(), parent.getProfileIndex(), calibrationIndex, parent.getParamIndex(),
         "SCIENTIFIC_CALIB_DATE");
+  }
+
+  private static String valueOrDefaultString(String value) {
+    return value == null ? "none" : value;
   }
 
   @Override

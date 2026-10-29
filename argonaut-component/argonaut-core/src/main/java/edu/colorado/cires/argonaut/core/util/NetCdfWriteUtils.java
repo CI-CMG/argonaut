@@ -9,6 +9,7 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Function;
 import ucar.ma2.Array;
 import ucar.ma2.ArrayChar;
@@ -208,11 +209,14 @@ public final class NetCdfWriteUtils {
     List<? extends CommonCalibrationValues> calibrations = parameter.getCalibrations();
     int calibrationIndex = 0;
     for (CommonCalibrationValues calibration : calibrations) {
-      writeString(writer, new int[]{profileIndex, calibrationIndex, parameterIndex}, "SCIENTIFIC_CALIB_EQUATION", calibration.getEquation());
-      writeDate(writer, new int[]{profileIndex, calibrationIndex, parameterIndex}, "SCIENTIFIC_CALIB_DATE", calibration.getDate());
-      writeString(writer, new int[]{profileIndex, calibrationIndex, parameterIndex}, "SCIENTIFIC_CALIB_COMMENT", calibration.getComment());
-      writeString(writer, new int[]{profileIndex, calibrationIndex, parameterIndex}, "SCIENTIFIC_CALIB_COEFFICIENT", calibration.getCoefficient());
-      writeString(writer, new int[]{profileIndex, calibrationIndex, parameterIndex}, "PARAMETER", parameterName);
+      int[] coordinates = {profileIndex, calibrationIndex, parameterIndex};
+
+      writeCalibrationValue(writer, "SCIENTIFIC_CALIB_EQUATION", calibration.getEquation(), coordinates);
+      writeCalibrationValue(writer, "SCIENTIFIC_CALIB_DATE", calibration.getDate(), coordinates);
+      writeCalibrationValue(writer, "SCIENTIFIC_CALIB_COMMENT", calibration.getComment(), coordinates);
+      writeCalibrationValue(writer, "SCIENTIFIC_CALIB_COEFFICIENT", calibration.getCoefficient(), coordinates);
+      writeCalibrationValue(writer, "PARAMETER", parameterName, coordinates);
+
       calibrationIndex++;
     }
 
@@ -225,6 +229,18 @@ public final class NetCdfWriteUtils {
       writeFloat(writer, new int[]{profileIndex, i}, parameterName + "_ADJUSTED_ERROR", level.getAdjustedErrorValue());
     }
 
+  }
+
+  private static void writeCalibrationValue(NetcdfFormatWriter writer, String parameterName,
+    Object value, int[] coordinates) throws InvalidRangeException, IOException {
+    Object toWrite = Optional.ofNullable(value)
+      .orElse("none");
+
+    switch (toWrite) {
+      case String s -> writeString(writer, coordinates, parameterName, s);
+      case Instant i -> writeDate(writer, coordinates, parameterName, i);
+      default -> throw new IllegalStateException("Cannot write invalid type %s to calibration field".formatted(toWrite.getClass().getSimpleName()));
+    }
   }
 
 
