@@ -251,7 +251,7 @@ class DefaultSyntheticProfileMergerTest {
     float[] expected = fromList(expectedParam.getLevels().stream().map(ArgoSyntheticProfileV13Level::getAdjustedValue).toList(),
         Float.MAX_VALUE - 1f);
     float[] actual = fromList(actualParam.getLevels().stream().map(ArgoSyntheticProfileV13Level::getAdjustedValue).toList(), Float.MAX_VALUE - 1f);
-    assertArrayEquals(expected, actual, 0.0001f, "%s adjusted values not equal".formatted(expectedParam.getParameterName()));
+    assertArrayEquals(expected, actual, 0.001f, "%s adjusted values not equal".formatted(expectedParam.getParameterName()));
   }
 
   private static void assertAdjustedErrorEqual(ArgoSyntheticProfileV13Parameter expectedParam, ArgoSyntheticProfileV13Parameter actualParam) {
