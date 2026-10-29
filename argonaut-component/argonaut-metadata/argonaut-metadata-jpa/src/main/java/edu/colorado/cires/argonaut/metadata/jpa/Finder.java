@@ -582,18 +582,17 @@ class Finder {
   //argo_bio-traj_index.txt
   MetadataRecordPage getBioTrajectoryIndexPage(IndexPageRequest pageRequest) {
     try (EntityManager em = entityManagerFactory.createEntityManager()) {
-      long count = em.createQuery( // WHERE bioTrajectory.fileStatus = 'ACTIVE'; //              ORDER BY bioTrajectory.filePath
+      long count = em.createQuery(
           """
-              SELECT COUNT(bioTrajectory) FROM ArgoFloatBioTrajectoryEntity bioTrajectory
+              SELECT COUNT(bioTrajectory) FROM ArgoFloatProfileEntity bioTrajectory
           """, Long.class)
         .getSingleResult();
 
-      List<ArgoFloatBioTrajectoryEntity> pageResults = em.createQuery(
-                      //          WHERE bioTrajectory.fileStatus = 'ACTIVE'
-    """
-          SELECT bioTrajectory FROM ArgoFloatBioTrajectoryEntity bioTrajectory
+      List<ArgoFloatProfileEntity> pageResults = em.createQuery(
+        """
+          SELECT bioTrajectory FROM ArgoFloatProfileEntity bioTrajectory
           ORDER BY bioTrajectory.filePath
-        """, ArgoFloatBioTrajectoryEntity.class)
+        """, ArgoFloatProfileEntity.class)
         .setMaxResults(pageRequest.getPageSize())
         .setFirstResult((pageRequest.getPageNumber() - 1) * pageRequest.getPageSize())
         .getResultList();
@@ -627,7 +626,7 @@ class Finder {
             .build();
   }
 
-  private static MetadataRecord fromBioTrajectoryEntity(ArgoFloatBioTrajectoryEntity profile) {
+  private static MetadataRecord fromBioTrajectoryEntity(ArgoFloatProfileEntity profile) {
     return MetadataRecord.builder()
             .withFile(profile.getFilePath())
             .withLatitudeMax(profile.getLatitudeMax())
@@ -636,7 +635,8 @@ class Finder {
             .withLongitudeMin(profile.getLongitudeMin())
             .withProfilerType(profile.getProfilerType())
             .withInstitution(profile.getInstitution())
-            .withParameters(profile.getParameters())
+            .withParameters(profile.getParameters().stream().sorted(Comparator.comparingInt(ArgoFloatProfileParameterEntity::getParameterIndex)).map(
+                    ArgoFloatProfileParameterEntity::getParameterName).toList())
             .withDateUpdate(profile.getDateUpdate() == null ? null : profile.getDateUpdate().toInstant())
             .build();
   }

@@ -78,7 +78,7 @@ public class JpaMetadataStoreTest {
       EntityTransaction tx = em.getTransaction();
       tx.begin();
       try {
-        em.createQuery("delete from ArgoFloatBioTrajectoryEntity").executeUpdate();
+//        em.createQuery("delete from ArgoFloatBioTrajectoryEntity").executeUpdate();
         em.createQuery("delete from ArgoFloatProfileParameterEntity ").executeUpdate();
         em.createQuery("delete from ArgonautFileRemovedTimeEntity").executeUpdate();
         em.createQuery("delete from ArgonautSyntheticMergeMetadataEntity").executeUpdate();
@@ -258,7 +258,7 @@ public class JpaMetadataStoreTest {
         .withProfilerType("845")
         .withInstitution("A0")
         .withDateUpdate(dateUpdate1)
-        .withParameters(Arrays.asList("params"))
+        .withParameters(List.of("params"))
         .withAction(Action.UPDATE)
         .withActionTimestamp(Instant.now())
         .withFileType(ArgoFileType.PROFILE_CORE)
@@ -3999,7 +3999,6 @@ public class JpaMetadataStoreTest {
         .withParameters(Arrays.asList("params"))
         .withAction(Action.UPDATE)
         .withFileType(ArgoFileType.PROFILE_CORE)
-        .withProfileMode(ProfileMode.DELAYED_MODE)
         .build());
 
     // in results
@@ -4195,9 +4194,14 @@ public class JpaMetadataStoreTest {
             .withFileName("6904189_BRtraj.nc")
             .withDac("bodc")
             .withFloatId("6904189")
+            .withCycleNumber("001")
+            .withDirection("A")
+            .withParameterDataMode("D")
             .withProfileMode(ProfileMode.REAL_TIME)
             .withActionTimestamp(now)
             .withDate(Instant.parse("2024-01-10T01:30:18Z")) // 20240110013018
+            // Test omitting lat/lons
+            .withOcean(ArgoOcean.ATLANTIC_OCEAN)
             .withProfilerType("836")
             .withInstitution("BO")
             .withFileStatus(FileStatus.ACTIVE)
@@ -4212,6 +4216,9 @@ public class JpaMetadataStoreTest {
             .withFileName("2901550_BRtraj.nc")
             .withDac("csio")
             .withFloatId("2901550")
+            .withCycleNumber("002")
+            .withDirection("A")
+            .withParameterDataMode("RRRDRRD")
             .withProfileMode(ProfileMode.REAL_TIME)
             .withActionTimestamp(now)
             .withDate(Instant.parse("2024-11-16T06:06:44Z")) // 20241116060644
@@ -4233,6 +4240,9 @@ public class JpaMetadataStoreTest {
             .withFileName("2901551_BRtraj.nc")
             .withDac("csio")
             .withFloatId("2901551")
+            .withCycleNumber("003")
+            .withDirection("A")
+            .withParameterDataMode("D")
             .withProfileMode(ProfileMode.REAL_TIME)
             .withActionTimestamp(now)
             .withDate(Instant.parse("2024-11-16T06:06:54Z")) // 20241116060654
@@ -4276,7 +4286,6 @@ public class JpaMetadataStoreTest {
                     .withIndexPageRequest(DefaultIndexPageRequest.builder().withPageNumber(1).withPageSize(2).build())
                     .build(),
             results);
-
   }
 
   @Test

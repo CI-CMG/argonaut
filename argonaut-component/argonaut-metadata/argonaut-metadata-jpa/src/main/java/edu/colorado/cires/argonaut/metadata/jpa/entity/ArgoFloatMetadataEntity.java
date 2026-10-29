@@ -37,40 +37,54 @@ public class ArgoFloatMetadataEntity {
 
   @Column(name = "file_status", length = 50, nullable = false)
   private String fileStatus;
+
   @Column(name = "metadata_date")
   private ZonedDateTime metadataDate;
+
   @Column(name = "latitude")
   private Double latitude;
+
   @Column(name = "latitude_min")
   private Double latitudeMin;
+
   @Column(name = "latitude_max")
   private Double latitudeMax;
+
   @Column(name = "longitude")
   private Double longitude;
+
   @Column(name = "longitude_min")
   private Double longitudeMin;
+
   @Column(name = "longitude_max")
   private Double longitudeMax;
+
   @Column(name = "ocean", length = 1)
   private String ocean;
+
   @Column(name = "profiler_type", length = 4)
   private String profilerType;
+
   @Column(name = "institution", length = 2)
   private String institution;
+
   @Column(name = "date_update")
   private ZonedDateTime dateUpdate;
+
   @Column(name = "parameters", length = 100)
   private String parameters;
+
   @Column(name = "parameter_data_mode", length = 100)
   private String parameterDataMode;
+
   @Column(name = "last_updated_time", nullable = false)
   private ZonedDateTime lastUpdatedTime;
+
   @Column(name = "file_name", nullable = false, length = 20)
   private String fileName;
 
   @OneToMany(mappedBy = "argoFloatMetadata", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<ArgonautFileRemovedTimeEntity> removedTimes = new ArrayList<>();
-
 
   public String getFile() {
     return file;

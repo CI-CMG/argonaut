@@ -13,6 +13,7 @@ import jakarta.persistence.LockModeType;
 import jakarta.persistence.OptimisticLockException;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -364,6 +365,7 @@ class Updater {
         createOrUpdateProfileMergeFile(record);
         break;
       case BIO_TRAJECTORY:
+        createCycleIfMissing(record);
         createOrUpdateBioTrajectory(record);
         break;
       case TRAJECTORY:
@@ -453,20 +455,26 @@ class Updater {
   }
 
   private void createOrUpdateBioTrajectory(MetadataRecord record) {
+    String cycleId = getCycleId(record);
     String file = Objects.requireNonNull(record.getFile());
 
     try (EntityManager em = entityManagerFactory.createEntityManager()) {
       EntityTransaction tx = em.getTransaction();
       tx.begin();
+
       try {
-        ArgoFloatBioTrajectoryEntity entity = em.find(ArgoFloatBioTrajectoryEntity.class, file);
+        ArgoFloatCycleEntity cycle = em.find(ArgoFloatCycleEntity.class, cycleId);
+        ArgoFloatProfileEntity entity = em.find(ArgoFloatProfileEntity.class, file, LockModeType.OPTIMISTIC);
         boolean add = (entity == null);
 
         if (add) {
-          entity = new ArgoFloatBioTrajectoryEntity();
+          entity = new ArgoFloatProfileEntity();
           entity.setFilePath(file);
+          entity.setArgoFloatCycle(cycle);
         }
 
+        entity.setFileName(record.getFileName());
+        entity.setFileType(record.getFileType().toString());
         entity.setProfilerType(record.getProfilerType());
         entity.setInstitution(record.getInstitution());
         entity.setDateUpdate(record.getDateUpdate() == null ? null : record.getDateUpdate().atOffset(ZoneOffset.UTC).toZonedDateTime());
@@ -482,7 +490,17 @@ class Updater {
 
         entity.setFileStatus(ACTIVE.toString());
 
-        entity.setParameters(record.getParameters());
+        List<ArgoFloatProfileParameterEntity> parameters = new ArrayList<>();
+        for (int i = 0; i < record.getParameters().size(); i++) {
+          String parameterName =  record.getParameters().get(i);
+          ArgoFloatProfileParameterEntity parameter = new ArgoFloatProfileParameterEntity();
+          parameter.setId(UUID.randomUUID());
+          parameter.setParameterName(parameterName);
+          parameter.setArgoFloatProfile(entity);
+          parameter.setParameterIndex(i);
+          parameters.add(parameter);
+        }
+        entity.setParameters(parameters);
 
         entity.setDateUpdate(record.getDateUpdate().atOffset(ZoneOffset.UTC).toZonedDateTime());
 
