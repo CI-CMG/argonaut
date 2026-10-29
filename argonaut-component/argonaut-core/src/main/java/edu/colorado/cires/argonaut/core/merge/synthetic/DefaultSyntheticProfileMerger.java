@@ -1102,9 +1102,6 @@ public class DefaultSyntheticProfileMerger implements SyntheticProfileMerger {
       for (MinMax minMax : plan.getSections()) {
         for (int i = minMax.min(); i < minMax.max(); i++) {
           SynthRow row = rows.get(i);
-          if (row.getPressure() == 500 || row.getPressure() == 1400) {
-            String test = "";
-          }
           SynthProfile profile = row.getProfiles().get(plan.getProfileIndex());
           if (profile != null) {
             profile.getParameter(parameterName)
