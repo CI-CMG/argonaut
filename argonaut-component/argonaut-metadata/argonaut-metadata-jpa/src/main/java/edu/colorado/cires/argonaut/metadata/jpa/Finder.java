@@ -205,17 +205,29 @@ class Finder {
           """
                  SELECT COUNT(DISTINCT CONCAT(profile.profileDateYear, '_', profile.profileDateMonth, '_', profile.profileDateDay, '_', profile.ocean)) FROM ArgoFloatProfileEntity profile
                  WHERE profile.fileType = 'PROFILE_CORE' AND 
-                       (( profile.fileStatus = 'ACTIVE' AND profile.geoMergeTime IS NULL ) 
-                       OR  
-                       ( profile.fileStatus = 'REMOVED' AND profile.geoMergeTime IS NOT NULL ))
+                       profile.profileDateYear IS NOT NULL AND
+                       profile.profileDateMonth IS NOT NULL AND
+                       profile.profileDateDay IS NOT NULL AND
+                       profile.ocean IS NOT NULL AND
+                       (
+                         ( profile.fileStatus = 'ACTIVE' AND profile.geoMergeTime IS NULL ) 
+                         OR  
+                         ( profile.fileStatus = 'REMOVED' AND profile.geoMergeTime IS NOT NULL )
+                       )
               """, Long.class).getSingleResult();
       List<String> geoMergeIds = em.createQuery(
               """
                      SELECT DISTINCT CONCAT(profile.profileDateYear, '_', profile.profileDateMonth, '_', profile.profileDateDay, '_', profile.ocean) id FROM ArgoFloatProfileEntity profile
                        WHERE profile.fileType = 'PROFILE_CORE' AND 
-                       (( profile.fileStatus = 'ACTIVE' AND profile.geoMergeTime IS NULL ) 
-                       OR  
-                       ( profile.fileStatus = 'REMOVED' AND profile.geoMergeTime IS NOT NULL ))
+                       profile.profileDateYear IS NOT NULL AND
+                       profile.profileDateMonth IS NOT NULL AND
+                       profile.profileDateDay IS NOT NULL AND
+                       profile.ocean IS NOT NULL AND
+                       (
+                         ( profile.fileStatus = 'ACTIVE' AND profile.geoMergeTime IS NULL ) 
+                         OR  
+                         ( profile.fileStatus = 'REMOVED' AND profile.geoMergeTime IS NOT NULL )
+                       )
                      order by id
                   """, String.class)
           .setMaxResults(pageRequest.getPageSize())

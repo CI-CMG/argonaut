@@ -2643,6 +2643,158 @@ public class JpaMetadataStoreTest {
   }
 
   @Test
+  public void testFindUpdatedOrMissingGeoMergeFilesPageMissingDate() throws Exception {
+
+    Instant date = Instant.parse("2020-01-02T00:00:00.00Z");
+    Instant now = Instant.now();
+
+    datastore.updateIndex(MetadataRecord.builder()
+        .withFile("aoml/13857/profiles/D13857_001.nc")
+        .withFileName("D13857_001.nc")
+        .withDac("aoml")
+        .withFloatId("13857")
+        .withCycleNumber("001")
+        .withDirection("A")
+        .withParameterDataMode("D")
+        .withProfileMode(ProfileMode.DELAYED_MODE)
+        .withActionTimestamp(now)
+//        .withDate(date)
+        .withLatitude(0.267)
+        .withLatitudeMin(0.1)
+        .withLatitudeMax(0.4)
+        .withLongitude(-16.032)
+        .withLongitudeMin(-17.0)
+        .withLongitudeMax(-14.0)
+        .withOcean(ArgoOcean.INDIAN_OCEAN)
+        .withProfilerType("845")
+        .withInstitution("A0")
+        .withDateUpdate(now)
+        .withParameters(Arrays.asList("params"))
+        .withAction(Action.UPDATE)
+        .withFileType(ArgoFileType.PROFILE_CORE)
+        .build());
+
+    datastore.updateIndex(MetadataRecord.builder()
+        .withFile("aoml/13857/profiles/D13857_002.nc")
+        .withFileName("D13857_002.nc")
+        .withDac("aoml")
+        .withFloatId("13857")
+        .withCycleNumber("002")
+        .withDirection("A")
+        .withParameterDataMode("D")
+        .withProfileMode(ProfileMode.DELAYED_MODE)
+        .withActionTimestamp(now)
+        .withDate(date)
+        .withLatitude(0.267)
+        .withLatitudeMin(0.1)
+        .withLatitudeMax(0.4)
+        .withLongitude(-16.032)
+        .withLongitudeMin(-17.0)
+        .withLongitudeMax(-14.0)
+//        .withOcean(ArgoOcean.INDIAN_OCEAN)
+        .withProfilerType("845")
+        .withInstitution("A0")
+        .withDateUpdate(now)
+        .withParameters(Arrays.asList("params"))
+        .withAction(Action.UPDATE)
+        .withFileType(ArgoFileType.PROFILE_CORE)
+        .build());
+
+    // removed without geo merge timestamp should not be in results
+    datastore.updateIndex(MetadataRecord.builder()
+        .withFile("aoml/13857/profiles/D13857_003.nc")
+        .withFileName("D13857_003.nc")
+        .withDac("aoml")
+        .withFloatId("13857")
+        .withCycleNumber("003")
+        .withDirection("A")
+        .withParameterDataMode("D")
+        .withProfileMode(ProfileMode.DELAYED_MODE)
+        .withActionTimestamp(now)
+        .withDate(date)
+        .withLatitude(0.267)
+        .withLatitudeMin(0.1)
+        .withLatitudeMax(0.4)
+        .withLongitude(-16.032)
+        .withLongitudeMin(-17.0)
+        .withLongitudeMax(-14.0)
+        .withOcean(ArgoOcean.INDIAN_OCEAN)
+        .withProfilerType("845")
+        .withInstitution("A0")
+        .withDateUpdate(now)
+        .withParameters(Arrays.asList("params"))
+        .withAction(Action.UPDATE)
+        .withFileType(ArgoFileType.PROFILE_CORE)
+        .build());
+    datastore.updateIndex(MetadataRecord.builder()
+        .withFile("aoml/13857/profiles/D13857_003.nc")
+        .withFileName("D13857_003.nc")
+        .withActionTimestamp(date)
+        .withDac("aoml")
+        .withFloatId("13857")
+        .withAction(Action.REMOVE)
+        .withFileType(ArgoFileType.PROFILE_CORE)
+        .build());
+
+    datastore.updateIndex(MetadataRecord.builder()
+        .withFile("aoml/123/profiles/D123_001.nc")
+        .withFileName("D123_001.nc")
+        .withDac("aoml")
+        .withFloatId("123")
+        .withCycleNumber("001")
+        .withDirection("A")
+        .withParameterDataMode("D")
+        .withProfileMode(ProfileMode.DELAYED_MODE)
+        .withActionTimestamp(now)
+        .withDate(date)
+        .withLatitude(0.267)
+        .withLatitudeMin(0.1)
+        .withLatitudeMax(0.4)
+        .withLongitude(-16.032)
+        .withLongitudeMin(-17.0)
+        .withLongitudeMax(-14.0)
+//        .withOcean(ArgoOcean.ATLANTIC_OCEAN)
+        .withProfilerType("845")
+        .withInstitution("A0")
+        .withDateUpdate(now)
+        .withParameters(Arrays.asList("params"))
+        .withAction(Action.UPDATE)
+        .withFileType(ArgoFileType.PROFILE_CORE)
+        .build());
+
+    datastore.updateIndex(MetadataRecord.builder()
+        .withFile("aoml/123/profiles/BD123_001.nc")
+        .withFileName("BD123_001.nc")
+        .withDac("aoml")
+        .withFloatId("123")
+        .withCycleNumber("001")
+        .withDirection("A")
+        .withParameterDataMode("D")
+        .withProfileMode(ProfileMode.DELAYED_MODE)
+        .withActionTimestamp(now)
+        .withDate(date)
+        .withLatitude(0.267)
+        .withLatitudeMin(0.1)
+        .withLatitudeMax(0.4)
+        .withLongitude(-16.032)
+        .withLongitudeMin(-17.0)
+        .withLongitudeMax(-14.0)
+        .withOcean(ArgoOcean.ATLANTIC_OCEAN)
+        .withProfilerType("845")
+        .withInstitution("A0")
+        .withDateUpdate(now)
+        .withParameters(Arrays.asList("params"))
+        .withAction(Action.UPDATE)
+        .withFileType(ArgoFileType.PROFILE_BIOCHEMICAL)
+        .build());
+
+    GeoMergePage page1 = datastore.findUpdatedOrMissingGeoMergeFilesPage(DefaultIndexPageRequest.builder().withPageSize(1).build());
+    assertEquals(0, page1.getTotalRecords());
+
+
+  }
+
+  @Test
   public void testFindRemovedGeoMergeFilesPage() throws Exception {
 
     // saved file, not merged - should be in results

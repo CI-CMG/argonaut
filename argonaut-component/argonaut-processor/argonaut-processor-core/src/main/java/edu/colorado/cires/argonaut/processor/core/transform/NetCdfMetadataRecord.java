@@ -21,8 +21,8 @@ import edu.colorado.cires.argonaut.processor.core.GeoFilter;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.time.Instant;
+import java.util.List;
 import java.util.function.BiFunction;
-import java.util.stream.Collectors;
 import org.apache.commons.lang3.function.TriFunction;
 import org.jspecify.annotations.NonNull;
 
@@ -56,7 +56,7 @@ public final class NetCdfMetadataRecord {
           break;
       }
 
-      String parameterDataMode = profile.getParameters().stream().map(ArgoProfileV31Parameter::getDataMode).collect(Collectors.joining());
+      List<String> parameterDataMode = profile.getParameters().stream().map(ArgoProfileV31Parameter::getDataMode).map(pdm -> pdm == null ? " " : pdm).toList();
 
       ProfileMode profileMode = null;
       if(profile.getDataMode() != null) {
@@ -70,7 +70,7 @@ public final class NetCdfMetadataRecord {
           .withDac(dac)
           .withFloatId(profile.getPlatformNumber())
           .withProfileMode(profileMode)
-          .withParameterDataMode(parameterDataMode)
+          .withParameterDataMode(String.join("", parameterDataMode))
           .withParameters(profile.getStationParameters())
           .withDirection(profile.getDirection())
           .withCycleNumber(formatCycleNumber(profile.getCycleNumber()))
@@ -113,7 +113,7 @@ public final class NetCdfMetadataRecord {
         profileMode = ProfileMode.fromCharacter(presParam.getDataMode());
       }
 
-      String parameterDataMode = profile.getParameters().stream().map(CommonParameterValues::getDataMode).collect(Collectors.joining());
+      List<String> parameterDataMode = profile.getParameters().stream().map(CommonParameterValues::getDataMode).map(pdm -> pdm == null ? " " : pdm).toList();
 
 
       return MetadataRecord.builder()
@@ -122,7 +122,7 @@ public final class NetCdfMetadataRecord {
           .withDac(dac)
           .withFloatId(profile.getPlatformNumber())
           .withProfileMode(profileMode)
-          .withParameterDataMode(parameterDataMode)
+          .withParameterDataMode(String.join("", parameterDataMode))
           .withParameters(profile.getStationParameters())
           .withDirection(profile.getDirection())
           .withCycleNumber(formatCycleNumber(profile.getCycleNumber()))
