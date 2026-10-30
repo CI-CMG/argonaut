@@ -42,6 +42,7 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.function.LongFunction;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
@@ -905,14 +906,14 @@ public class DefaultSyntheticProfileMerger implements SyntheticProfileMerger {
       Float adjustedValue = knot.adjustedValue;
       Float adjustedError = knot.adjustedError;
       if ("4".equals(adjustedQc) || adjustedQc == null) {
-        Pair<Float, String> adjustedValues = interpolateValue(normalizedPressure, adjustedKnots, qcStrategy, Knot::adjustedValue, Knot::adjustedQc);
+        Pair<Float, String> adjustedValues = interpolateValue(normalizedPressure, adjustedKnots, qcStrategy, Knot::adjustedValue, Knot::adjustedQc, true);
         if (adjustedValues != null) {
           adjustedQc = adjustedValues.getRight();
           adjustedValue = adjustedValues.getLeft();
         }
 
         if (adjustedError == null && hasAdjustedError) {
-          Pair<Float, String> adjustedErrorValues = interpolateValue(normalizedPressure, adjustedKnots, qcStrategy, Knot::adjustedError, Knot::adjustedQc);
+          Pair<Float, String> adjustedErrorValues = interpolateValue(normalizedPressure, adjustedKnots, qcStrategy, Knot::adjustedError, Knot::adjustedQc, false);
           if (adjustedErrorValues != null) {
             adjustedError = adjustedErrorValues.getLeft();
           }
@@ -921,9 +922,9 @@ public class DefaultSyntheticProfileMerger implements SyntheticProfileMerger {
       return new FloatQc(knot.y(), knot.qc(), 0F, adjustedValue, adjustedError, adjustedQc);
     }
 
-    Pair<Float, String> values = interpolateValue(normalizedPressure, knots, qcStrategy, Knot::y, Knot::qc);
+    Pair<Float, String> values = interpolateValue(normalizedPressure, knots, qcStrategy, Knot::y, Knot::qc, false);
     if (values != null) {
-      Pair<Float, String> adjustedValues = interpolateValue(normalizedPressure, adjustedKnots, qcStrategy, Knot::adjustedValue, Knot::adjustedQc);
+      Pair<Float, String> adjustedValues = interpolateValue(normalizedPressure, adjustedKnots, qcStrategy, Knot::adjustedValue, Knot::adjustedQc, true);
       String adjustedQc = adjustedKnots.isEmpty() ? null : "4";
       Float adjustedValue = null;
       Float adjustedError = null;
@@ -932,7 +933,7 @@ public class DefaultSyntheticProfileMerger implements SyntheticProfileMerger {
         adjustedValue = adjustedValues.getLeft();
 
         if (hasAdjustedError) {
-          Pair<Float, String> adjustedErrorValues = interpolateValue(normalizedPressure, adjustedKnots, qcStrategy, Knot::adjustedError, Knot::adjustedQc);
+          Pair<Float, String> adjustedErrorValues = interpolateValue(normalizedPressure, adjustedKnots, qcStrategy, Knot::adjustedError, Knot::adjustedQc, false);
           if (adjustedErrorValues != null) {
             adjustedError = adjustedErrorValues.getLeft();
           }
@@ -944,32 +945,32 @@ public class DefaultSyntheticProfileMerger implements SyntheticProfileMerger {
     return null;
   }
 
-  private static Pair<Float, String> interpolateValue(Long normalizedPressure, TreeMap<Long, Knot> knots, QcStrategy qcStrategy, Function<Knot, Float> getValue, Function<Knot, String> getQc) {
+  private static <T> Entry<Long, Knot> getClosesNonNullKnot(Long normalizedPressure, LongFunction<Entry<Long, Knot>> mapOperation, Function<Knot, T> getValue) {
+    Entry<Long, Knot> entry = mapOperation.apply(normalizedPressure);
+
+    while (entry != null) {
+      if (getValue.apply(entry.getValue()) != null) {
+        return entry;
+      }
+
+      Long currentPressure = entry.getKey();
+      entry = mapOperation.apply(currentPressure);
+      if (currentPressure.equals(entry.getKey())) {
+        return null;
+      }
+    }
+
+    return null;
+  }
+
+  private static Pair<Float, String> interpolateValue(Long normalizedPressure, TreeMap<Long, Knot> knots, QcStrategy qcStrategy, Function<Knot, Float> getValue, Function<Knot, String> getQc, boolean independentQc) {
     Knot knotAtPressure = knots.get(normalizedPressure);
     if (knotAtPressure != null) {
       return Pair.of(getValue.apply(knotAtPressure), getQc.apply(knotAtPressure));
     }
 
-    Function<Function<Long, Entry<Long, Knot>>, Entry<Long, Knot>> getClosestNonNullValue = (mapOperation) -> {
-      Entry<Long, Knot> entry = mapOperation.apply(normalizedPressure);
-
-      while (entry != null) {
-        if (getValue.apply(entry.getValue()) != null) {
-          return entry;
-        }
-
-        Long currentPressure = entry.getKey();
-        entry = mapOperation.apply(currentPressure);
-        if (currentPressure.equals(entry.getKey())) {
-          return null;
-        }
-      }
-
-      return null;
-    };
-
-    Entry<Long, Knot> floorEntry = getClosestNonNullValue.apply(knots::floorEntry);
-    Entry<Long, Knot> ceilingEntry = getClosestNonNullValue.apply(knots::ceilingEntry);
+    Entry<Long, Knot> floorEntry = getClosesNonNullKnot(normalizedPressure, knots::floorEntry, getValue);
+    Entry<Long, Knot> ceilingEntry = getClosesNonNullKnot(normalizedPressure, knots::ceilingEntry, getValue);
 
     BiFunction<Entry<Long, Knot>, Long, Pair<Float, String>> valueConsumer = (entry, threshold) -> {
       Long pressure = entry.getKey();
@@ -982,10 +983,12 @@ public class DefaultSyntheticProfileMerger implements SyntheticProfileMerger {
       return null;
     };
 
+    Pair<Float, String> result = null;
+
     if (ceilingEntry == null && floorEntry != null) { // known deeper value -> extrapolate downward
-      return valueConsumer.apply(floorEntry, 2000L);
+      result = valueConsumer.apply(floorEntry, 2000L);
     } else if (floorEntry == null && ceilingEntry != null) { // known shallower value -> extrapolate upward
-      return valueConsumer.apply(ceilingEntry, 1000L);
+      result = valueConsumer.apply(ceilingEntry, 1000L);
     } else if (floorEntry != null) { // known shallower and deeper value -> linear interpolation
       Knot floor = floorEntry.getValue();
       BigDecimal x0 = BigDecimal.valueOf(floorEntry.getKey());
@@ -1003,10 +1006,30 @@ public class DefaultSyntheticProfileMerger implements SyntheticProfileMerger {
           .divide(x1.subtract(x0), RoundingMode.FLOOR)
       ).floatValue();
 
-      return Pair.of(v, qcStrategy.getQc(qc0, qc1));
+      result = Pair.of(v, qcStrategy.getQc(qc0, qc1));
     }
 
-    return null;
+    if (result == null) {
+      return null;
+    }
+
+    String qc = result.getRight();
+    if (independentQc) {
+      String floorQc = Optional.ofNullable(getClosesNonNullKnot(normalizedPressure,
+        knots::floorEntry, getQc))
+        .map(Entry::getValue)
+        .map(getQc)
+        .orElse(null);
+      String ceilingQc = Optional.ofNullable(getClosesNonNullKnot(normalizedPressure,
+        knots::ceilingEntry, getQc))
+        .map(Entry::getValue)
+        .map(getQc)
+        .orElse(null);
+
+      qc = qcStrategy.getQc(floorQc, ceilingQc);
+    }
+
+    return Pair.of(result.getLeft(), qc);
   }
 
   private static class Plan {
