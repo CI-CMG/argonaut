@@ -84,7 +84,7 @@ class DefaultSyntheticProfileMergerTest {
   }
 
   private static Stream<Named<TestCase>> dacTestCases() throws IOException {
-    Path basePath = Paths.get("/Users/paytoncain/Documents/projects/work/wod/data/pub/dac");
+    Path basePath = Paths.get("---CHANGE TO LOCAL DAC PATH---");
     return Files.walk(basePath, 2)
       .filter(path -> path.getNameCount() == basePath.getNameCount() + 2)
       .flatMap(path -> {
