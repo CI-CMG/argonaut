@@ -1,9 +1,0 @@
-ERROR: Input directory not found: /Users/paytoncain/Documents/projects/work/wod/argonaut/argonaut-component/argonaut-core/src/test/resources/test/meds
-{Error using <a href="matlab:matlab.lang.internal.introspective.errorDocCallback('fclose')" style="font-weight:bold">fclose</a>
-Invalid file identifier. Use fopen to generate a valid file identifier.
-
-Error in <a href="matlab:matlab.lang.internal.introspective.errorDocCallback('nc_create_synthetic_profile', '/Users/paytoncain/Documents/projects/work/wod/Coriolis-data-processing-chain-for-Argo-floats/decArgo_soft/soft/util/nc_create_synthetic_profile.m', 305)" style="font-weight:bold">nc_create_synthetic_profile</a> (<a href="matlab: opentoline('/Users/paytoncain/Documents/projects/work/wod/Coriolis-data-processing-chain-for-Argo-floats/decArgo_soft/soft/util/nc_create_synthetic_profile.m',305,0)">line 305</a>)
-fclose(g_cocs_fidCsvFile);
-^^^^^^^^^^^^^^^^^^^^^^^^^
-} 
-nc_create_synthetic_profile

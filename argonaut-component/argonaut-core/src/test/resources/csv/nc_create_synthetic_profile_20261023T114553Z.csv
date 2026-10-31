@@ -1,1 +1,0 @@
-AO,warning,5903712,149,Found b-parameter(s) DOXY NITRATE but without any PRES_QC=0..3 and non-FillValue BGC data. Create synthetic profile only with available core data.,BD5903712_149.nc

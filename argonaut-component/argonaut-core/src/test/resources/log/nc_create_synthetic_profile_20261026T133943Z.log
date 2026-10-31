@@ -1,4 +1,0 @@
-001/001 6901174
-   01/01: Float #6901174 Cycle #143
-<a href="matlab: opentoline('/Users/paytoncain/Documents/projects/work/wod/Coriolis-data-processing-chain-for-Argo-floats/decArgo_soft/soft/util/sub_foreign/ARGO_simplified_profile.m',697,1)">697 </a>upres=unique(inpres(inpres~=FV));
-<a href="matlab: opentoline('/Users/paytoncain/Documents/projects/work/wod/Coriolis-data-processing-chain-for-Argo-floats/decArgo_soft/soft/util/sub_foreign/ARGO_simplified_profile.m',773,1)">773 </a>useind=false(size(upres));

@@ -1,8 +1,0 @@
-001/001 6901174
-   01/01: Float #6901174 Cycle #143
-<a href="matlab: opentoline('/Users/paytoncain/Documents/projects/work/wod/Coriolis-data-processing-chain-for-Argo-floats/decArgo_soft/soft/util/sub/nc_create_synthetic_profile_.m',1258,1)">1258 </a>   syntProfData = ARGO_simplified_profile( ...
-<a href="matlab: opentoline('/Users/paytoncain/Documents/projects/work/wod/Coriolis-data-processing-chain-for-Argo-floats/decArgo_soft/soft/util/sub_foreign/ARGO_simplified_profile.m',139,1)">139 </a>if ~isempty(cfilepath) % c-file exists
-<a href="matlab: opentoline('/Users/paytoncain/Documents/projects/work/wod/Coriolis-data-processing-chain-for-Argo-floats/decArgo_soft/soft/util/sub_foreign/ARGO_simplified_profile.m',309,1)">309 </a>[noNLEVELs,noNPROFs]=size(S.PRES.value);
-<a href="matlab: opentoline('/Users/paytoncain/Documents/projects/work/wod/Coriolis-data-processing-chain-for-Argo-floats/decArgo_soft/soft/util/sub_foreign/ARGO_simplified_profile.m',503,1)">503 </a>end
-<a href="matlab: opentoline('/Users/paytoncain/Documents/projects/work/wod/Coriolis-data-processing-chain-for-Argo-floats/decArgo_soft/soft/util/sub_foreign/ARGO_simplified_profile.m',773,1)">773 </a>useind=false(size(upres));
-<a href="matlab: opentoline('/Users/paytoncain/Documents/projects/work/wod/Coriolis-data-processing-chain-for-Argo-floats/decArgo_soft/soft/util/sub/nc_create_synthetic_profile_.m',98,1)">98  </a>if ((a_createOnlyMultiProfFlag == 1) || (a_createMultiProfFlag == 1))
