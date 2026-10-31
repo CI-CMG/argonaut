@@ -913,7 +913,7 @@ public class DefaultSyntheticProfileMerger implements SyntheticProfileMerger {
         }
 
         if (adjustedError == null && hasAdjustedError) {
-          Pair<Float, String> adjustedErrorValues = interpolateValue(normalizedPressure, adjustedKnots, qcStrategy, Knot::adjustedError, Knot::adjustedQc, false);
+          Pair<Float, String> adjustedErrorValues = interpolateValue(normalizedPressure, adjustedKnots, qcStrategy, Knot::adjustedError, Knot::adjustedQc, true);
           if (adjustedErrorValues != null) {
             adjustedError = adjustedErrorValues.getLeft();
           }
@@ -933,7 +933,7 @@ public class DefaultSyntheticProfileMerger implements SyntheticProfileMerger {
         adjustedValue = adjustedValues.getLeft();
 
         if (hasAdjustedError) {
-          Pair<Float, String> adjustedErrorValues = interpolateValue(normalizedPressure, adjustedKnots, qcStrategy, Knot::adjustedError, Knot::adjustedQc, false);
+          Pair<Float, String> adjustedErrorValues = interpolateValue(normalizedPressure, adjustedKnots, qcStrategy, Knot::adjustedError, Knot::adjustedQc, true);
           if (adjustedErrorValues != null) {
             adjustedError = adjustedErrorValues.getLeft();
           }
@@ -945,7 +945,7 @@ public class DefaultSyntheticProfileMerger implements SyntheticProfileMerger {
     return null;
   }
 
-  private static <T> Entry<Long, Knot> getClosesNonNullKnot(Long normalizedPressure, LongFunction<Entry<Long, Knot>> mapOperation, Function<Knot, T> getValue) {
+  private static Entry<Long, Knot> getClosesNonNullKnot(Long normalizedPressure, LongFunction<Entry<Long, Knot>> mapOperation, Function<Knot, ?> getValue) {
     Entry<Long, Knot> entry = mapOperation.apply(normalizedPressure);
 
     while (entry != null) {
@@ -963,14 +963,14 @@ public class DefaultSyntheticProfileMerger implements SyntheticProfileMerger {
     return null;
   }
 
-  private static Pair<Float, String> interpolateValue(Long normalizedPressure, TreeMap<Long, Knot> knots, QcStrategy qcStrategy, Function<Knot, Float> getValue, Function<Knot, String> getQc, boolean independentQc) {
+  private static Pair<Float, String> interpolateValue(Long normalizedPressure, TreeMap<Long, Knot> knots, QcStrategy qcStrategy, Function<Knot, Float> getValue, Function<Knot, String> getQc, boolean adjustedParameter) {
     Knot knotAtPressure = knots.get(normalizedPressure);
     if (knotAtPressure != null) {
       return Pair.of(getValue.apply(knotAtPressure), getQc.apply(knotAtPressure));
     }
 
-    Entry<Long, Knot> floorEntry = getClosesNonNullKnot(normalizedPressure, knots::floorEntry, getValue);
-    Entry<Long, Knot> ceilingEntry = getClosesNonNullKnot(normalizedPressure, knots::ceilingEntry, getValue);
+    Entry<Long, Knot> floorEntry = getClosesNonNullKnot(normalizedPressure, knots::floorEntry, adjustedParameter ? getQc : getValue);
+    Entry<Long, Knot> ceilingEntry = getClosesNonNullKnot(normalizedPressure, knots::ceilingEntry, adjustedParameter ? getQc : getValue);
 
     BiFunction<Entry<Long, Knot>, Long, Pair<Float, String>> valueConsumer = (entry, threshold) -> {
       Long pressure = entry.getKey();
@@ -991,45 +991,44 @@ public class DefaultSyntheticProfileMerger implements SyntheticProfileMerger {
       result = valueConsumer.apply(ceilingEntry, 1000L);
     } else if (floorEntry != null) { // known shallower and deeper value -> linear interpolation
       Knot floor = floorEntry.getValue();
-      BigDecimal x0 = BigDecimal.valueOf(floorEntry.getKey());
-      BigDecimal y0 = BigDecimal.valueOf(getValue.apply(floor));
-      String qc0 = getQc.apply(floor);
-
       Knot ceiling = ceilingEntry.getValue();
-      BigDecimal x1 = BigDecimal.valueOf(ceilingEntry.getKey());
-      BigDecimal y1 = BigDecimal.valueOf(getValue.apply(ceiling));
-      String qc1 = getQc.apply(ceiling);
+      Float floorValue = getValue.apply(floor);
+      Float ceilingValue = getValue.apply(ceiling);
 
-      float v = y0.add(
-        BigDecimal.valueOf(normalizedPressure).subtract(x0)
-          .multiply(y1.subtract(y0))
-          .divide(x1.subtract(x0), RoundingMode.FLOOR)
-      ).floatValue();
+      if (floorValue == null || ceilingValue == null) {
+        if (floorValue == null && ceilingValue == null) {
+          return null;
+        }
 
-      result = Pair.of(v, qcStrategy.getQc(qc0, qc1));
+        long floorDiffPressure = Math.abs(floorEntry.getKey() - normalizedPressure);
+        long ceilingDiffPressure = Math.abs(ceilingEntry.getKey() - normalizedPressure);
+
+        int compare = Long.compare(floorDiffPressure, ceilingDiffPressure);
+        if (compare == 0 || compare > 0) {
+          result = Pair.of(ceilingValue, getQc.apply(ceiling));
+        } else {
+          result = Pair.of(floorValue, getQc.apply(floor));
+        }
+      } else {
+        BigDecimal x0 = BigDecimal.valueOf(floorEntry.getKey());
+        BigDecimal y0 = BigDecimal.valueOf(floorValue);
+        String qc0 = getQc.apply(floor);
+
+        BigDecimal x1 = BigDecimal.valueOf(ceilingEntry.getKey());
+        BigDecimal y1 = BigDecimal.valueOf(ceilingValue);
+        String qc1 = getQc.apply(ceiling);
+
+        float v = y0.add(
+          BigDecimal.valueOf(normalizedPressure).subtract(x0)
+            .multiply(y1.subtract(y0))
+            .divide(x1.subtract(x0), RoundingMode.FLOOR)
+        ).floatValue();
+
+        result = Pair.of(v, qcStrategy.getQc(qc0, qc1));
+      }
     }
 
-    if (result == null) {
-      return null;
-    }
-
-    String qc = result.getRight();
-    if (independentQc) {
-      String floorQc = Optional.ofNullable(getClosesNonNullKnot(normalizedPressure,
-        knots::floorEntry, getQc))
-        .map(Entry::getValue)
-        .map(getQc)
-        .orElse(null);
-      String ceilingQc = Optional.ofNullable(getClosesNonNullKnot(normalizedPressure,
-        knots::ceilingEntry, getQc))
-        .map(Entry::getValue)
-        .map(getQc)
-        .orElse(null);
-
-      qc = qcStrategy.getQc(floorQc, ceilingQc);
-    }
-
-    return Pair.of(result.getLeft(), qc);
+    return result;
   }
 
   private static class Plan {
