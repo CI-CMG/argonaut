@@ -245,6 +245,13 @@
         <version>7.1.0</version>
       </dependency>
 
+      <dependency>
+        <groupId>commons-codec</groupId>
+        <artifactId>commons-codec</artifactId>
+        <version>1.23.0</version>
+        <scope>compile</scope>
+      </dependency>
+
       <!--security updates-->
       <dependency>
         <groupId>org.apache.httpcomponents</groupId>

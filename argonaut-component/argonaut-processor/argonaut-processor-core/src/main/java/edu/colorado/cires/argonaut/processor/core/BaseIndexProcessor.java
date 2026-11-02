@@ -15,6 +15,10 @@ import java.math.RoundingMode;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.security.DigestInputStream;
+import java.security.DigestOutputStream;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -24,6 +28,8 @@ import java.util.TreeMap;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Supplier;
 import java.util.zip.GZIPOutputStream;
+
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.io.FileUtils;
@@ -225,14 +231,21 @@ public abstract class BaseIndexProcessor implements IndexProcessor {
             try {
               String path = outputFileStore.appendToPath(outputFileStore.getRoot(), textFileName);
               outputFileStore.uploadLocalFile(textFile, path);
-              try (InputStream in = Files.newInputStream(textFile);
-                  OutputStream out = new GZIPOutputStream(outputFileStore.getOutputStream(path + ".gz"))) {
+              try (
+                InputStream in = Files.newInputStream(textFile);
+                OutputStream out = new GZIPOutputStream(outputFileStore.getOutputStream(path + ".gz"));
+              ) {
                 IOUtils.copy(in, out);
+              }
+
+              // Second pass to get txt.gz md5 hash
+              try (InputStream is = Files.newInputStream(textFile)) {
+                String checksum = DigestUtils.md5Hex(is) + "  " + Path.of(path).getFileName() + ".gz";
+                Files.writeString(Path.of(textFile + ".gz.md5"), checksum, StandardCharsets.UTF_8);
               }
             } catch (IOException e) {
               throw new RuntimeException("Unable to upload index file", e);
             }
-
           } finally {
             FileUtils.deleteQuietly(dir.toFile());
           }

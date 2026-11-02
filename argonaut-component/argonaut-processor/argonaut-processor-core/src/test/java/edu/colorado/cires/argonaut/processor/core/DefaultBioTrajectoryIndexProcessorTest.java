@@ -116,8 +116,8 @@ public class DefaultBioTrajectoryIndexProcessorTest {
 
     assertTrue(Files.exists(outputDir.resolve("argo_bio-traj_index.txt.gz")));
     ByteArrayOutputStream out = new ByteArrayOutputStream();
-    try(InputStream in = new GZIPInputStream(Files.newInputStream(outputDir.resolve("argo_bio-traj_index.txt.gz")))) {
-      IOUtils.copy(in, out);
+    try(InputStream is = new GZIPInputStream(Files.newInputStream(outputDir.resolve("argo_bio-traj_index.txt.gz")))) {
+      IOUtils.copy(is, out);
     }
 
     assertEquals(expected, out.toString(StandardCharsets.UTF_8));

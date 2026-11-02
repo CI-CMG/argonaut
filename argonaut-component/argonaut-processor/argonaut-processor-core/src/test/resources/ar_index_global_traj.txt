@@ -1,0 +1,12 @@
+# Title : Trajectory directory file of the Argo Global Data Assembly Center
+# Description : The directory file describes all trajectory files of the argo GDAC ftp site.
+# Project : ARGO
+# Format version : 2.2
+# Date of update : 20261029074524
+# FTP root number 1 : ftp://ftp.ifremer.fr/ifremer/argo/dac
+# FTP root number 2 : ftp://usgodae.org/pub/outgoing/argo/dac
+# GDAC node : CORIOLIS
+file,latitude_max,latitude_min,longitude_max,longitude_min,profiler_type,institution,date_update
+aoml/13857/13857_Rtraj.nc,6.931,0.008,-15.014,-33.808,845,AO,20210428200335
+aoml/13858/13858_Rtraj.nc,5.213,-0.363,-9.498,-17.793,845,AO,20210428200337
+aoml/13859/13859_Rtraj.nc,5.929,-0.939,-18.642,-33.677,845,AO,20181011200025
