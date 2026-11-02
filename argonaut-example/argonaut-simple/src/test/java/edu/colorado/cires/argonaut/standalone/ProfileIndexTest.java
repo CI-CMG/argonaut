@@ -95,19 +95,4 @@ public class ProfileIndexTest {
 
   }
 
-  private static List<List<String>> readCsvLines(InputStream inputStream) throws IOException {
-    List<List<String>> lines = new ArrayList<>(3);
-    try (CSVParser reader = CSVFormat.DEFAULT.builder().setCommentMarker('#').setSkipHeaderRecord(true).get()
-        .parse(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
-      for (CSVRecord record : reader) {
-        List<String> line = new ArrayList<>(10);
-        for (int i = 0; i < 10; i++) {
-          line.add(record.get(i));
-        }
-        lines.add(line);
-      }
-    }
-    return lines;
-  }
-
 }

@@ -223,7 +223,7 @@ public abstract class BaseIndexProcessor implements IndexProcessor {
             }
 
             try {
-              String path = outputFileStore.appendToPath(outputFileStore.getRoot(), textFileName);
+              String path = outputFileStore.appendToPath(outputFileStore.getRoot(), "idx", textFileName);
               outputFileStore.uploadLocalFile(textFile, path);
               try (InputStream in = Files.newInputStream(textFile);
                   OutputStream out = new GZIPOutputStream(outputFileStore.getOutputStream(path + ".gz"))) {

@@ -112,12 +112,12 @@ public class DefaultWeeklyProfileIndexProcessorTest {
     processor.generateIndex();
 
     String expected = Files.readString(Paths.get("src/test/resources/ar_index_this_week_prof.txt"), StandardCharsets.UTF_8);
-    assertTrue(Files.exists(outputDir.resolve("ar_index_this_week_prof.txt")));
-    assertEquals(expected, Files.readString(outputDir.resolve("ar_index_this_week_prof.txt"), StandardCharsets.UTF_8));
+    assertTrue(Files.exists(outputDir.resolve("idx/ar_index_this_week_prof.txt")));
+    assertEquals(expected, Files.readString(outputDir.resolve("idx/ar_index_this_week_prof.txt"), StandardCharsets.UTF_8));
 
-    assertTrue(Files.exists(outputDir.resolve("ar_index_this_week_prof.txt.gz")));
+    assertTrue(Files.exists(outputDir.resolve("idx/ar_index_this_week_prof.txt.gz")));
     ByteArrayOutputStream out = new ByteArrayOutputStream();
-    try(InputStream in = new GZIPInputStream(Files.newInputStream(outputDir.resolve("ar_index_this_week_prof.txt.gz")))) {
+    try(InputStream in = new GZIPInputStream(Files.newInputStream(outputDir.resolve("idx/ar_index_this_week_prof.txt.gz")))) {
       IOUtils.copy(in, out);
     }
 

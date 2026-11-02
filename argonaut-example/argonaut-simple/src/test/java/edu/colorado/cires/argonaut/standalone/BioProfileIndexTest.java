@@ -92,8 +92,8 @@ public class BioProfileIndexTest {
 
     await().pollInterval(Duration.ofSeconds(10)).atMost(Duration.ofMinutes(2)).untilAsserted(() -> {
 
-      Path textFile = TestDataContext.outputDir.resolve("argo_bio-profile_index.txt");
-      Path gzFile = TestDataContext.outputDir.resolve("argo_bio-profile_index.txt.gz");
+      Path textFile = TestDataContext.outputDir.resolve("idx/argo_bio-profile_index.txt");
+      Path gzFile = TestDataContext.outputDir.resolve("idx/argo_bio-profile_index.txt.gz");
 
       assertTrue(Files.exists(textFile));
       assertTrue(Files.exists(gzFile));

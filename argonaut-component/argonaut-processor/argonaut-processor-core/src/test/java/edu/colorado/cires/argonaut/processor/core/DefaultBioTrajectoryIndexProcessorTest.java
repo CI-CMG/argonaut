@@ -111,12 +111,12 @@ public class DefaultBioTrajectoryIndexProcessorTest {
     processor.generateIndex();
 
     String expected = Files.readString(Paths.get("src/test/resources/argo_bio-traj_index.txt"), StandardCharsets.UTF_8);
-    assertTrue(Files.exists(outputDir.resolve("argo_bio-traj_index.txt")));
-    assertEquals(expected, Files.readString(outputDir.resolve("argo_bio-traj_index.txt"), StandardCharsets.UTF_8));
+    assertTrue(Files.exists(outputDir.resolve("idx/argo_bio-traj_index.txt")));
+    assertEquals(expected, Files.readString(outputDir.resolve("idx/argo_bio-traj_index.txt"), StandardCharsets.UTF_8));
 
-    assertTrue(Files.exists(outputDir.resolve("argo_bio-traj_index.txt.gz")));
+    assertTrue(Files.exists(outputDir.resolve("idx/argo_bio-traj_index.txt.gz")));
     ByteArrayOutputStream out = new ByteArrayOutputStream();
-    try(InputStream in = new GZIPInputStream(Files.newInputStream(outputDir.resolve("argo_bio-traj_index.txt.gz")))) {
+    try(InputStream in = new GZIPInputStream(Files.newInputStream(outputDir.resolve("idx/argo_bio-traj_index.txt.gz")))) {
       IOUtils.copy(in, out);
     }
 
