@@ -53,8 +53,6 @@ public class ArgonautProfileMergeFileEntity {
   private String institution;
   @Column(name = "date_update")
   private ZonedDateTime dateUpdate;
-  @Column(name = "parameters", length = 100)
-  private String parameters;
   @Column(name = "parameter_data_mode", length = 100)
   private String parameterDataMode;
   @Column(name = "last_updated_time", nullable = false)
@@ -177,14 +175,6 @@ public class ArgonautProfileMergeFileEntity {
 
   public void setDateUpdate(ZonedDateTime dateUpdate) {
     this.dateUpdate = dateUpdate;
-  }
-
-  public String getParameters() {
-    return parameters;
-  }
-
-  public void setParameters(String parameters) {
-    this.parameters = parameters;
   }
 
   public String getParameterDataMode() {

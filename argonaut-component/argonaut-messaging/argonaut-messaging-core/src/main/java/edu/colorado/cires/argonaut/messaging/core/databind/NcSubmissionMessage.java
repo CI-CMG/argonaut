@@ -1,11 +1,15 @@
 package edu.colorado.cires.argonaut.messaging.core.databind;
 
 
+import com.fasterxml.jackson.annotation.JsonAnyGetter;
+import com.fasterxml.jackson.annotation.JsonAnySetter;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 import tools.jackson.databind.annotation.JsonDeserialize;
@@ -36,7 +40,8 @@ public final class NcSubmissionMessage implements Comparable<NcSubmissionMessage
     private int numberOfFilesInSubmission;
     private Operation operation;
     private UUID traceId;
-//    private List<String> associatedFiles = new ArrayList<>();
+    private String source;
+    private final Map<String, Object> otherFields = new HashMap<>();
 
     private Builder() {
 
@@ -52,7 +57,7 @@ public final class NcSubmissionMessage implements Comparable<NcSubmissionMessage
       numberOfFilesInSubmission = source.numberOfFilesInSubmission;
       operation = source.operation;
       traceId = source.traceId;
-//      this.associatedFiles = new ArrayList<>(source.associatedFiles);
+      this.source = source.source;
     }
 
     public Builder withFloatId(String floatId) {
@@ -105,11 +110,22 @@ public final class NcSubmissionMessage implements Comparable<NcSubmissionMessage
       return this;
     }
 
+    public Builder withSource(String source) {
+      this.source = source;
+      return this;
+    }
+
+    @Deprecated
+    @JsonAnySetter
+    private Builder withOtherField(String name, Object value) {
+      this.otherFields.put(name, value);
+      return this;
+    }
 
     public NcSubmissionMessage build() {
       validationErrors.sort(String::compareTo);
       return new NcSubmissionMessage(floatId, Collections.unmodifiableList(validationErrors), timestamp, dac, fileName, fileType,
-          numberOfFilesInSubmission, operation, traceId);
+          numberOfFilesInSubmission, operation, traceId, source, otherFields);
     }
   }
 
@@ -122,9 +138,11 @@ public final class NcSubmissionMessage implements Comparable<NcSubmissionMessage
   private final int numberOfFilesInSubmission;
   private final Operation operation;
   private final UUID traceId;
+  private final String source;
+  private final Map<String, Object> otherFields;
 
   private NcSubmissionMessage(String floatId, List<String> validationErrors, Instant timestamp, String dac, String fileName, ArgoFileType fileType,
-      int numberOfFilesInSubmission, Operation operation, UUID traceId) {
+      int numberOfFilesInSubmission, Operation operation, UUID traceId, String source, Map<String, Object> otherFields) {
     this.floatId = floatId;
     this.validationErrors = validationErrors;
     this.timestamp = timestamp;
@@ -134,6 +152,8 @@ public final class NcSubmissionMessage implements Comparable<NcSubmissionMessage
     this.numberOfFilesInSubmission = numberOfFilesInSubmission;
     this.operation = operation;
     this.traceId = traceId;
+    this.source = source;
+    this.otherFields = Collections.unmodifiableMap(new HashMap<>(otherFields));
   }
 
   public Operation getOperation() {
@@ -173,6 +193,15 @@ public final class NcSubmissionMessage implements Comparable<NcSubmissionMessage
     return numberOfFilesInSubmission;
   }
 
+  public String getSource() {
+    return source;
+  }
+
+  @Deprecated
+  @JsonAnyGetter
+  public Map<String, Object> getOtherFields() {
+    return otherFields;
+  }
 
   @Override
   public int compareTo(NcSubmissionMessage o) {
@@ -197,15 +226,16 @@ public final class NcSubmissionMessage implements Comparable<NcSubmissionMessage
       return false;
     }
     NcSubmissionMessage that = (NcSubmissionMessage) o;
-    return numberOfFilesInSubmission == that.numberOfFilesInSubmission && Objects.equals(floatId, that.floatId)
-        && Objects.equals(validationErrors, that.validationErrors) && Objects.equals(timestamp, that.timestamp)
-        && Objects.equals(dac, that.dac) && Objects.equals(fileName, that.fileName) && fileType == that.fileType
-        && operation == that.operation && Objects.equals(traceId, that.traceId);
+    return numberOfFilesInSubmission == that.numberOfFilesInSubmission && Objects.equals(floatId, that.floatId) && Objects.equals(
+        validationErrors, that.validationErrors) && Objects.equals(timestamp, that.timestamp) && Objects.equals(dac, that.dac)
+        && Objects.equals(fileName, that.fileName) && fileType == that.fileType && operation == that.operation && Objects.equals(
+        traceId, that.traceId) && Objects.equals(source, that.source) && Objects.equals(otherFields, that.otherFields);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(floatId, validationErrors, timestamp, dac, fileName, fileType, numberOfFilesInSubmission, operation, traceId);
+    return Objects.hash(floatId, validationErrors, timestamp, dac, fileName, fileType, numberOfFilesInSubmission, operation, traceId, source,
+        otherFields);
   }
 
   @Override
@@ -220,6 +250,8 @@ public final class NcSubmissionMessage implements Comparable<NcSubmissionMessage
         ", numberOfFilesInSubmission=" + numberOfFilesInSubmission +
         ", operation=" + operation +
         ", traceId=" + traceId +
+        ", source='" + source + '\'' +
+        ", otherFields=" + otherFields +
         '}';
   }
 

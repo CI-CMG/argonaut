@@ -59,6 +59,7 @@ public class DefaultSubmissionProcessor implements SubmissionProcessor {
         .withDac(submittedFile.getDac())
         .withTimestamp(submittedFile.getTimestamp())
         .withTraceId(submittedFile.getTraceId())
+        .withSource(submittedFile.getSource())
         .build();
   }
 
@@ -70,6 +71,7 @@ public class DefaultSubmissionProcessor implements SubmissionProcessor {
         .withDac(submittedFile.getDac())
         .withTimestamp(submittedFile.getTimestamp())
         .withTraceId(submittedFile.getTraceId())
+        .withSource(submittedFile.getSource())
         .build();
   }
 

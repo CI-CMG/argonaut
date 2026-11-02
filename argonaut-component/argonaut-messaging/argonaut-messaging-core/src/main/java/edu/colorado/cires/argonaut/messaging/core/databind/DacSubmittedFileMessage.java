@@ -30,6 +30,7 @@ public final class DacSubmittedFileMessage implements TracedMessage {
     private String dac;
     private UUID traceId;
     private String fileName;
+    private String source;
     private final Map<String, Object> otherFields = new HashMap<>();
 
     private Builder() {
@@ -42,6 +43,7 @@ public final class DacSubmittedFileMessage implements TracedMessage {
       dac = source.dac;
       traceId = source.traceId;
       fileName = source.fileName;
+      this.source = source.source;
       otherFields.putAll(source.otherFields);
     }
 
@@ -70,6 +72,11 @@ public final class DacSubmittedFileMessage implements TracedMessage {
       return this;
     }
 
+    public Builder withSource(String source) {
+      this.source = source;
+      return this;
+    }
+
     @Deprecated
     @JsonAnySetter
     private Builder withOtherField(String name, Object value) {
@@ -78,7 +85,7 @@ public final class DacSubmittedFileMessage implements TracedMessage {
     }
 
     public DacSubmittedFileMessage build() {
-      return new DacSubmittedFileMessage(path, timestamp, dac, traceId, fileName, otherFields);
+      return new DacSubmittedFileMessage(path, timestamp, dac, traceId, fileName, source, otherFields);
     }
   }
 
@@ -87,14 +94,16 @@ public final class DacSubmittedFileMessage implements TracedMessage {
   private final String dac;
   private final UUID traceId;
   private final String fileName;
+  private final String source;
   private final Map<String, Object> otherFields;
 
-  private DacSubmittedFileMessage(String path, Instant timestamp, String dac, UUID traceId, String fileName, Map<String, Object> otherFields) {
+  private DacSubmittedFileMessage(String path, Instant timestamp, String dac, UUID traceId, String fileName, String source, Map<String, Object> otherFields) {
     this.path = path;
     this.timestamp = timestamp;
     this.dac = dac;
     this.traceId = traceId;
     this.fileName = fileName;
+    this.source = source;
     this.otherFields = Collections.unmodifiableMap(new HashMap<>(otherFields));
   }
 
@@ -118,6 +127,10 @@ public final class DacSubmittedFileMessage implements TracedMessage {
     return fileName;
   }
 
+  public String getSource() {
+    return source;
+  }
+
   @Deprecated
   @JsonAnyGetter
   public Map<String, Object> getOtherFields() {
@@ -129,15 +142,15 @@ public final class DacSubmittedFileMessage implements TracedMessage {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    DacSubmittedFileMessage that = (DacSubmittedFileMessage) o;
-    return Objects.equals(path, that.path) && Objects.equals(timestamp, that.timestamp) && Objects.equals(dac, that.dac)
-        && Objects.equals(traceId, that.traceId) && Objects.equals(fileName, that.fileName) && Objects.equals(otherFields,
-        that.otherFields);
+    DacSubmittedFileMessage message = (DacSubmittedFileMessage) o;
+    return Objects.equals(path, message.path) && Objects.equals(timestamp, message.timestamp) && Objects.equals(dac,
+        message.dac) && Objects.equals(traceId, message.traceId) && Objects.equals(fileName, message.fileName)
+        && Objects.equals(source, message.source) && Objects.equals(otherFields, message.otherFields);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(path, timestamp, dac, traceId, fileName, otherFields);
+    return Objects.hash(path, timestamp, dac, traceId, fileName, source, otherFields);
   }
 
   @Override
@@ -148,6 +161,7 @@ public final class DacSubmittedFileMessage implements TracedMessage {
         ", dac='" + dac + '\'' +
         ", traceId=" + traceId +
         ", fileName='" + fileName + '\'' +
+        ", source='" + source + '\'' +
         ", otherFields=" + otherFields +
         '}';
   }

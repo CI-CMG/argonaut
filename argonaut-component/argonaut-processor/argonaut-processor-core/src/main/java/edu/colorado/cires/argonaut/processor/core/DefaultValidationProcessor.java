@@ -20,8 +20,12 @@ import java.util.List;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import org.apache.commons.io.FileUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class DefaultValidationProcessor implements ValidationProcessor {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(DefaultValidationProcessor.class);
 
   private Path workingDirectory;
   private FileStore processingFileStore;
@@ -72,6 +76,11 @@ public class DefaultValidationProcessor implements ValidationProcessor {
 
   @Override
   public NcSubmissionMessage validate(NcSubmissionMessage ncSubmissionMessage) {
+    if ("import".equals(ncSubmissionMessage.getSource())){
+      LOGGER.debug("Skipping validation for imported file {}", ncSubmissionMessage.getFileName());
+      return ncSubmissionMessage;
+    }
+
     Path tempDir;
     try {
       Files.createDirectories(workingDirectory);

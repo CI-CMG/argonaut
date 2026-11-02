@@ -30,6 +30,10 @@ public class AuditSender {
   }
 
   public void fileReceived(DacSubmittedFileMessage message) {
+    AuditEventProcessor auditEventProcessor = AuditEventProcessor.FILE_RECEIVED;
+    if ("import".equals(message.getSource())) {
+      auditEventProcessor = AuditEventProcessor.IMPORT_RECEIVED;
+    }
     messageSender.sendJson(
         auditQueue,
         jsonMapper.writeValueAsString(AuditMessage.builder()
@@ -37,7 +41,7 @@ public class AuditSender {
                 .withEventType(EventType.INFO)
                 .withFileName(message.getFileName())
                 .withMessage("received file " + message.getFileName())
-                .withProcessor(AuditEventProcessor.FILE_RECEIVED)
+                .withProcessor(auditEventProcessor)
                 .withTimestamp(Instant.now())
                 .withTraceId(message.getTraceId())
             .build()));
