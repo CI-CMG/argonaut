@@ -214,7 +214,7 @@
       <dependency>
         <groupId>io.github.ci-cmg</groupId>
         <artifactId>argo-file-checker-exec</artifactId>
-        <version>4.0.0-SNAPSHOT</version>
+        <version>103.0.6</version>
       </dependency>
       <dependency>
         <groupId>com.github.spotbugs</groupId>
