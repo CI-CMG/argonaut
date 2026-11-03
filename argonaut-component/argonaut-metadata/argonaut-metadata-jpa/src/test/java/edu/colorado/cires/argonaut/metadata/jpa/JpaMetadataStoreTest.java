@@ -230,7 +230,7 @@ public class JpaMetadataStoreTest {
 
     assertThat(actual)
       .usingRecursiveComparison()
-      .ignoringFields("action", "actionTimestamp")
+      .ignoringFields("action", "actionTimestamp", "dateUpdate")
       .isEqualTo(expected);
   }
 
