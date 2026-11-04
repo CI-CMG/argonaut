@@ -22,6 +22,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import org.apache.camel.test.spring.junit5.CamelSpringTest;
 import org.junit.jupiter.api.AfterEach;
@@ -100,7 +101,10 @@ public class RemovalTest {
 
     submissions.stream()
         .map(path -> TestDataContext.outputDir.resolve("dac").resolve(path.subpath(4, 8)))
-        .forEach(path -> assertTrue(Files.exists(path)));
+        .forEach(path -> {
+          assertTrue(Files.exists(path));
+          assertTrue(Files.exists(Objects.requireNonNull(path.getParent()).resolve(Objects.requireNonNull(path.getFileName()).toString() + ".md5")));
+        });
 
     List<Path> removalFiles = Arrays.asList(
         Paths.get("src/test/resources/aoml_removal.txt"),
@@ -132,6 +136,7 @@ public class RemovalTest {
           String dac = path.getName(4).toString();
           assertEquals(!removed, Files.exists(TestDataContext.outputDir.resolve("dac").resolve(path.subpath(4, 8))));
           assertEquals(removed, Files.exists(TestDataContext.outputDir.resolve("etc").resolve("removed").resolve(dac).resolve(path.getFileName())));
+          assertEquals(removed, Files.exists(TestDataContext.outputDir.resolve("etc").resolve("removed").resolve(dac).resolve(path.getFileName() + ".md5")));
         });
 
     assertFalse(Files.exists(TestDataContext.submissionDir.resolve("dac/aoml/processed/2026-02-20T01:02:03Z/reject/aoml_removal.txt")));
@@ -161,6 +166,7 @@ public class RemovalTest {
             String dac = path.getName(4).toString();
             assertEquals(!removed, Files.exists(TestDataContext.outputDir.resolve("dac").resolve(path.subpath(4, 8))));
             assertFalse(Files.exists(TestDataContext.outputDir.resolve("etc").resolve("removed").resolve(dac).resolve(path.getFileName())));
+            assertFalse(Files.exists(TestDataContext.outputDir.resolve("etc").resolve("removed").resolve(dac).resolve(path.getFileName() + ".md5")));
           });
     });
 

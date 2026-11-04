@@ -24,6 +24,8 @@ import edu.colorado.cires.argonaut.messaging.core.databind.ProfileMode;
 import edu.colorado.cires.argonaut.messaging.core.databind.ProfileOperation;
 import edu.colorado.cires.argonaut.messaging.core.queue.MessageSender;
 import edu.colorado.cires.argonaut.messaging.core.util.ArgonautJsonMapperFactory;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -97,6 +99,10 @@ public class DefaultSyntheticProfileProcessorTest {
       Files.copy(Paths.get("src/test/resources/synth_proc").resolve(parts[parts.length - 1]), localPath);
       return null;
     }).when(fileStore).downloadLocalFile(any(), pathCaptor.capture());
+
+    when(fileStore.getInputStream(any())).thenReturn(new ByteArrayInputStream(new byte[0]));
+    when(fileStore.getOutputStream(any())).thenReturn(new ByteArrayOutputStream());
+
 
     when(geoFilter.determineArgoOcean(anyDouble(), anyDouble())).thenReturn(ArgoOcean.INDIAN_OCEAN);
 
@@ -220,6 +226,7 @@ public class DefaultSyntheticProfileProcessorTest {
 
     when(geoFilter.determineArgoOcean(anyDouble(), anyDouble())).thenReturn(ArgoOcean.INDIAN_OCEAN);
 
+    when(fileStore.fileExists(eq("/foo/bar/dac/meds/4902691/profiles/SR4902691_034.nc.md5"))).thenReturn(true);
 
     DefaultSyntheticProfileProcessor processor = new DefaultSyntheticProfileProcessor();
     processor.setLocalTempDir(workingDir);
@@ -234,6 +241,7 @@ public class DefaultSyntheticProfileProcessorTest {
 
     verify(fileStore, times(0)).downloadLocalFile(any(), any());
     verify(fileStore, times(1)).delete(eq("/foo/bar/dac/meds/4902691/profiles/SR4902691_034.nc"));
+    verify(fileStore, times(1)).delete(eq("/foo/bar/dac/meds/4902691/profiles/SR4902691_034.nc.md5"));
 
     verifyNoInteractions(syntheticProfileMerger);
 

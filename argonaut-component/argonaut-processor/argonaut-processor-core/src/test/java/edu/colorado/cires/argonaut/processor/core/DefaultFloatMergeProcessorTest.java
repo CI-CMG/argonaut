@@ -19,6 +19,8 @@ import edu.colorado.cires.argonaut.messaging.core.databind.MetadataRecord.FileSt
 import edu.colorado.cires.argonaut.messaging.core.databind.ProfileOperation;
 import edu.colorado.cires.argonaut.messaging.core.queue.MessageSender;
 import edu.colorado.cires.argonaut.messaging.core.util.ArgonautJsonMapperFactory;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -65,7 +67,15 @@ public class DefaultFloatMergeProcessorTest {
     when(outputFileStore.appendToPath(eq("/foo/bar"), eq("dac"), eq("aoml/123/123_prof.nc"))).thenReturn("/foo/bar/dac/aoml/123/123_prof.nc");
     when(outputFileStore.appendToPath(eq("/foo/bar"), eq("dac"), eq("aoml"), eq("123"), eq("123_prof.nc"))).thenReturn("/foo/bar/dac/aoml/123/123_prof.nc");
 
+    when(outputFileStore.getInputStream(eq("/foo/bar/dac/aoml/123/profiles/R123_001.nc"))).thenReturn(new ByteArrayInputStream(new byte[0]));
+    when(outputFileStore.getInputStream(eq("/foo/bar/dac/aoml/123/profiles/R123_001D.nc"))).thenReturn(new ByteArrayInputStream(new byte[0]));
+    when(outputFileStore.getInputStream(eq("/foo/bar/dac/aoml/123/profiles/R123_002.nc"))).thenReturn(new ByteArrayInputStream(new byte[0]));
+    when(outputFileStore.getInputStream(eq("/foo/bar/dac/aoml/123/123_prof.nc"))).thenReturn(new ByteArrayInputStream(new byte[0]));
 
+    when(outputFileStore.getOutputStream(eq("/foo/bar/dac/aoml/123/profiles/R123_001.nc.md5"))).thenReturn(new ByteArrayOutputStream());
+    when(outputFileStore.getOutputStream(eq("/foo/bar/dac/aoml/123/profiles/R123_001D.nc.md5"))).thenReturn(new ByteArrayOutputStream());
+    when(outputFileStore.getOutputStream(eq("/foo/bar/dac/aoml/123/profiles/R123_002.nc.md5"))).thenReturn(new ByteArrayOutputStream());
+    when(outputFileStore.getOutputStream(eq("/foo/bar/dac/aoml/123/123_prof.nc.md5"))).thenReturn(new ByteArrayOutputStream());
 
     DefaultFloatMergeProcessor processor = new DefaultFloatMergeProcessor();
     processor.setOutputFileStore(outputFileStore);
@@ -168,6 +178,8 @@ public class DefaultFloatMergeProcessorTest {
     when(outputFileStore.appendToPath(eq("aoml"), eq("123"), eq("123_prof.nc"))).thenReturn("aoml/123/123_prof.nc");
     when(outputFileStore.appendToPath(eq("/foo/bar"), eq("dac"), eq("aoml"), eq("123"), eq("123_prof.nc"))).thenReturn("/foo/bar/dac/aoml/123/123_prof.nc");
 
+    when(outputFileStore.fileExists("/foo/bar/dac/aoml/123/123_prof.nc.md5")).thenReturn(true);
+
     DefaultFloatMergeProcessor processor = new DefaultFloatMergeProcessor();
     processor.setOutputFileStore(outputFileStore);
     processor.setLocalTempDir(localTempDir);
@@ -192,6 +204,7 @@ public class DefaultFloatMergeProcessorTest {
     verifyNoInteractions(merger);
 
     verify(outputFileStore, times(1)).delete(eq("/foo/bar/dac/aoml/123/123_prof.nc"));
+    verify(outputFileStore, times(1)).delete(eq("/foo/bar/dac/aoml/123/123_prof.nc.md5"));
 
     ArgumentCaptor<String> jsonCaptor = ArgumentCaptor.forClass(String.class);
     verify(messageSender, times(4)).sendJson(eq("updateIndexQueue"), jsonCaptor.capture());
@@ -240,6 +253,9 @@ public class DefaultFloatMergeProcessorTest {
     when(outputFileStore.appendToPath(eq("aoml"), eq("123"), eq("123_prof.nc"))).thenReturn("aoml/123/123_prof.nc");
     when(outputFileStore.appendToPath(eq("/foo/bar"), eq("dac"), eq("aoml"), eq("123"), eq("123_prof.nc"))).thenReturn("/foo/bar/dac/aoml/123/123_prof.nc");
 
+    when(outputFileStore.fileExists("/foo/bar/dac/aoml/123/123_prof.nc.md5")).thenReturn(true);
+
+
     DefaultFloatMergeProcessor processor = new DefaultFloatMergeProcessor();
     processor.setOutputFileStore(outputFileStore);
     processor.setLocalTempDir(localTempDir);
@@ -259,6 +275,7 @@ public class DefaultFloatMergeProcessorTest {
     verifyNoInteractions(merger);
 
     verify(outputFileStore, times(1)).delete(eq("/foo/bar/dac/aoml/123/123_prof.nc"));
+    verify(outputFileStore, times(1)).delete(eq("/foo/bar/dac/aoml/123/123_prof.nc.md5"));
 
     ArgumentCaptor<String> jsonCaptor = ArgumentCaptor.forClass(String.class);
     verify(messageSender, times(1)).sendJson(eq("updateIndexQueue"), jsonCaptor.capture());
@@ -290,6 +307,15 @@ public class DefaultFloatMergeProcessorTest {
     when(outputFileStore.appendToPath(eq("/foo/bar"), eq("dac"), eq("aoml/123/123_prof.nc"))).thenReturn("/foo/bar/dac/aoml/123/123_prof.nc");
     when(outputFileStore.appendToPath(eq("/foo/bar"), eq("dac"), eq("aoml"), eq("123"), eq("123_prof.nc"))).thenReturn("/foo/bar/dac/aoml/123/123_prof.nc");
 
+    when(outputFileStore.getInputStream(eq("/foo/bar/dac/aoml/123/profiles/R123_001.nc"))).thenReturn(new ByteArrayInputStream(new byte[0]));
+    when(outputFileStore.getInputStream(eq("/foo/bar/dac/aoml/123/profiles/R123_001D.nc"))).thenReturn(new ByteArrayInputStream(new byte[0]));
+    when(outputFileStore.getInputStream(eq("/foo/bar/dac/aoml/123/profiles/R123_002.nc"))).thenReturn(new ByteArrayInputStream(new byte[0]));
+    when(outputFileStore.getInputStream(eq("/foo/bar/dac/aoml/123/123_prof.nc"))).thenReturn(new ByteArrayInputStream(new byte[0]));
+
+    when(outputFileStore.getOutputStream(eq("/foo/bar/dac/aoml/123/profiles/R123_001.nc.md5"))).thenReturn(new ByteArrayOutputStream());
+    when(outputFileStore.getOutputStream(eq("/foo/bar/dac/aoml/123/profiles/R123_001D.nc.md5"))).thenReturn(new ByteArrayOutputStream());
+    when(outputFileStore.getOutputStream(eq("/foo/bar/dac/aoml/123/profiles/R123_002.nc.md5"))).thenReturn(new ByteArrayOutputStream());
+    when(outputFileStore.getOutputStream(eq("/foo/bar/dac/aoml/123/123_prof.nc.md5"))).thenReturn(new ByteArrayOutputStream());
 
 
     DefaultFloatMergeProcessor processor = new DefaultFloatMergeProcessor();

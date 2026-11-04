@@ -36,6 +36,15 @@ public class DefaultRemovedFileDeleteProcessor implements RemovedFileDeleteProce
     }
     LOGGER.info("Deleted file {}", removalPath);
 
+    String md5File = removalPath + ".md5";
+    try {
+      if(outputFileStore.fileExists(md5File)) {
+        outputFileStore.delete(md5File);
+      }
+    } catch (Exception e) {
+      LOGGER.warn("Unable to delete md5 file {}", md5File, e);
+    }
+
     return MetadataRecord.builder(message.getFiles().get(0))
         .withTraceId(message.getTraceId())
         .withActionTimestamp(timestampSupplier.get())

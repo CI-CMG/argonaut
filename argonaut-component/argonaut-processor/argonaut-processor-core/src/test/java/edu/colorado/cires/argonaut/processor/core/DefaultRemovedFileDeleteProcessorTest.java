@@ -43,6 +43,7 @@ public class DefaultRemovedFileDeleteProcessorTest {
     UUID traceId = UUID.randomUUID();
     FileStore fileStore = new TestFileStore(tempDir);
     Path testFile = Files.createFile(Files.createDirectories(tempDir.resolve("etc/removed/aoml")).resolve("BD13855_001.nc"));
+    Path testMd5File = Files.createFile(Files.createDirectories(tempDir.resolve("etc/removed/aoml")).resolve("BD13855_001.nc.md5"));
     assertTrue(Files.exists(testFile));
 
     Instant now = Instant.now();
@@ -79,6 +80,7 @@ public class DefaultRemovedFileDeleteProcessorTest {
         .build(), record);
 
     assertFalse(Files.exists(testFile));
+    assertFalse(Files.exists(testMd5File));
 
   }
 

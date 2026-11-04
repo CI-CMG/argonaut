@@ -16,6 +16,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
 import org.apache.camel.test.spring.junit5.CamelSpringTest;
@@ -182,10 +183,13 @@ public class GeoMergeCronTest {
     });
 
     Path merged = TestDataContext.outputDir.resolve("geo/indian_ocean/2023/01/20230109_prof.nc");
+    Path mergedMd5 = TestDataContext.outputDir.resolve("geo/indian_ocean/2023/01/20230109_prof.nc.md5");
     assertTrue(Files.exists(merged));
+    assertTrue(Files.exists(mergedMd5));
 
     submittedFiles.stream().map(file -> TestDataContext.outputDir.resolve("dac").resolve(file)).forEach(path -> {
       assertTrue(Files.exists(path));
+      assertTrue(Files.exists(Objects.requireNonNull(path.getParent()).resolve(Objects.requireNonNull(path.getFileName()).toString() + ".md5")));
     });
 
     NetCdfTestUtils.assertFilesEqual(Paths.get("src/test/resources/geo/indian_ocean/2023/01/20230109_prof.nc"), merged);

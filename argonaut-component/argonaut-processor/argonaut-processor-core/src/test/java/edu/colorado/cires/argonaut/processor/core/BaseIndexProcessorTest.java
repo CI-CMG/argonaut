@@ -204,7 +204,10 @@ class BaseIndexProcessorTest {
     }).when(fileStore).uploadLocalFile(any(), anyString());
 
     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-    doAnswer(inv -> outputStream).when(fileStore).getOutputStream(anyString());
+    doAnswer(inv -> ((String)inv.getArguments()[0]).endsWith(".md5") ? new ByteArrayOutputStream() : outputStream).when(fileStore).getOutputStream(anyString());
+
+    when(fileStore.getInputStream(any())).thenReturn(new ByteArrayInputStream(new byte[0]));
+
 
     BaseIndexProcessor indexProcessor = testCase.factory().get();
     indexProcessor.setPageSize(1);

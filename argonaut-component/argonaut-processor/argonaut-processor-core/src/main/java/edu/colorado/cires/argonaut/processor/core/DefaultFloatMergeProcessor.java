@@ -11,6 +11,8 @@ import edu.colorado.cires.argonaut.messaging.core.databind.MetadataRecord.FileSt
 import edu.colorado.cires.argonaut.messaging.core.databind.ProfileOperation;
 import edu.colorado.cires.argonaut.messaging.core.queue.MessageSender;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
@@ -127,6 +129,14 @@ public class DefaultFloatMergeProcessor implements FloatMergeProcessor {
     String outputFile = getOutputFile(message);
     outputFileStore.delete(outputFile);
     LOGGER.debug("Removed multi-cycle merge file: {}", outputFile);
+    String md5File = outputFile + ".md5";
+    try {
+      if(outputFileStore.fileExists(md5File)) {
+        outputFileStore.delete(md5File);
+      }
+    } catch (Exception e) {
+      LOGGER.warn("Unable to delete md5 file {}", md5File, e);
+    }
   }
 
   private String getOutputFile(ProfileOperation message) {
@@ -152,6 +162,11 @@ public class DefaultFloatMergeProcessor implements FloatMergeProcessor {
       }
       try {
         outputFileStore.uploadLocalFile(localOutputFile, outputFile);
+
+        try (InputStream dataIn = outputFileStore.getInputStream(outputFile); OutputStream md5Out = outputFileStore.getOutputStream(outputFile + ".md5")) {
+          ChecksumUtils.writeMd5ToOutputStream(dataIn, outputFileStore.getFileName(outputFile), md5Out);
+        }
+
       } catch (IOException e) {
         throw new RuntimeException("Unable to upload merge file " + outputFile, e);
       }

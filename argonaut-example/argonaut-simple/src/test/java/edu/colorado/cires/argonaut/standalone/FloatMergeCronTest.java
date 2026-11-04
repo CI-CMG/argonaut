@@ -13,6 +13,7 @@ import java.nio.file.Paths;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import org.apache.camel.test.spring.junit5.CamelSpringTest;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -162,9 +163,11 @@ public class FloatMergeCronTest {
     });
 
     assertTrue(Files.exists(TestDataContext.outputDir.resolve("dac/meds/4902704/4902704_prof.nc")));
+    assertTrue(Files.exists(TestDataContext.outputDir.resolve("dac/meds/4902704/4902704_prof.nc.md5")));
 
     fileNames.stream().map(fileName -> TestDataContext.outputDir.resolve("dac/meds/4902704/profiles/").resolve(fileName)).forEach(path -> {
       assertTrue(Files.exists(path));
+      assertTrue(Files.exists(Objects.requireNonNull(path.getParent()).resolve(Objects.requireNonNull(path.getFileName()).toString() + ".md5")));
     });
   }
 

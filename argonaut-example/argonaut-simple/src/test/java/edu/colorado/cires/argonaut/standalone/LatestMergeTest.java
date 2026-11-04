@@ -162,7 +162,9 @@ public class LatestMergeTest {
     System.out.println("Merge completed. Verifying output...");
 
     Path merged = TestDataContext.outputDir.resolve("latest_data/" + fileNameHolder[0] + "_prof_0.nc");
+    Path mergedMd5 = TestDataContext.outputDir.resolve("latest_data/" + fileNameHolder[0] + "_prof_0.nc.md5");
     assertTrue(Files.exists(merged));
+    assertTrue(Files.exists(mergedMd5));
 
     modifiedAssertFilesEqual(Paths.get("src/test/resources/latest/latest_data/R20260925_prof_0.nc"), merged);
 

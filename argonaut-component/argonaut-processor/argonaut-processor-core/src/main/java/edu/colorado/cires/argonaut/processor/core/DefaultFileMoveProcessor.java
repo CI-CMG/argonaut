@@ -77,12 +77,20 @@ public class DefaultFileMoveProcessor implements FileMoveProcessor {
           submissionFileStore.delete(processedFile);
         }
       }
-      // TODO copy timestamped copy of removal file to output?
     } else {
       String source = resolveOutputFile(ncSubmissionMessage);
       String destination = resolveRemovedFile(ncSubmissionMessage);
+      String sourceMd5 = source + ".md5";
+      String destinationMd5 = destination + ".md5";
       outputFileStore.move(source, destination);
       LOGGER.info("Moved removed file from {} to {}", source, destination);
+      try {
+        if (outputFileStore.fileExists(sourceMd5)) {
+          outputFileStore.move(sourceMd5, destinationMd5);
+        }
+      } catch (Exception e) {
+        LOGGER.warn("Unable to move md5 file {} -> {}", sourceMd5, destinationMd5);
+      }
     }
   }
 
@@ -101,6 +109,12 @@ public class DefaultFileMoveProcessor implements FileMoveProcessor {
         IOUtils.copy(inputStream, outputStream);
       } catch (IOException e) {
         throw new RuntimeException("Unable to copy " + processingFile + " to " + destinationFile, e);
+      }
+      String md5 = destinationFile + ".md5";
+      try (InputStream dataInputStream = outputFileStore.getInputStream(destinationFile); OutputStream md5OutputStream = outputFileStore.getOutputStream(md5)) {
+        ChecksumUtils.writeMd5ToOutputStream(dataInputStream, outputFileStore.getFileName(destinationFile), md5OutputStream);
+      } catch (IOException e) {
+        throw new RuntimeException("Unable to create md5 file " + md5, e);
       }
       processingFileStore.delete(processingFile);
     } else {

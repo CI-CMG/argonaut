@@ -225,10 +225,23 @@ public abstract class BaseIndexProcessor implements IndexProcessor {
             try {
               String path = outputFileStore.appendToPath(outputFileStore.getRoot(), "idx", textFileName);
               outputFileStore.uploadLocalFile(textFile, path);
+
+              String md5Path = path + ".md5";
+              String gzMd5Path = path + ".gz.md5";
+
               try (InputStream in = Files.newInputStream(textFile);
                   OutputStream out = new GZIPOutputStream(outputFileStore.getOutputStream(path + ".gz"))) {
                 IOUtils.copy(in, out);
               }
+
+              try (InputStream dataIn = Files.newInputStream(textFile); OutputStream md5Out = outputFileStore.getOutputStream(md5Path)) {
+                ChecksumUtils.writeMd5ToOutputStream(dataIn, textFileName, md5Out);
+              }
+
+              try (InputStream dataIn = outputFileStore.getInputStream(path + ".gz"); OutputStream md5Out = outputFileStore.getOutputStream(gzMd5Path)) {
+                ChecksumUtils.writeMd5ToOutputStream(dataIn, textFileName + ".gz", md5Out);
+              }
+
             } catch (IOException e) {
               throw new RuntimeException("Unable to upload index file", e);
             }

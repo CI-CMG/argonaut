@@ -95,8 +95,13 @@ public class BioProfileIndexTest {
       Path textFile = TestDataContext.outputDir.resolve("idx/argo_bio-profile_index.txt");
       Path gzFile = TestDataContext.outputDir.resolve("idx/argo_bio-profile_index.txt.gz");
 
+      Path textFileMd5 = TestDataContext.outputDir.resolve("idx/argo_bio-profile_index.txt.md5");
+      Path gzFileMd5 = TestDataContext.outputDir.resolve("idx/argo_bio-profile_index.txt.gz.md5");
+
       assertTrue(Files.exists(textFile));
       assertTrue(Files.exists(gzFile));
+      assertTrue(Files.exists(textFileMd5));
+      assertTrue(Files.exists(gzFileMd5));
 
       List<List<String>> lines;
       try (InputStream in = Files.newInputStream(textFile)) {

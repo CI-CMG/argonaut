@@ -44,8 +44,10 @@ public class DefaultFileMoveProcessorTest {
     processor.setProcessingFileStore(processingFileStore);
 
     Path outputFile = outputDir.resolve("dac/aoml/1234/profiles/R1234_001.nc");
+    Path outputFileMd5 = outputDir.resolve("dac/aoml/1234/profiles/R1234_001.nc.md5");
     Files.createDirectories(outputFile.getParent());
     Files.createFile(outputFile);
+    Files.createFile(outputFileMd5);
 
     NcSubmissionMessage message = NcSubmissionMessage.builder()
         .withOperation(Operation.REMOVE)
@@ -60,8 +62,9 @@ public class DefaultFileMoveProcessorTest {
     processor.moveFile(message);
 
     assertFalse(Files.exists(outputFile));
+    assertFalse(Files.exists(outputFileMd5));
     assertTrue(Files.exists(outputDir.resolve("etc/removed/aoml/R1234_001.nc")));
-
+    assertTrue(Files.exists(outputDir.resolve("etc/removed/aoml/R1234_001.nc.md5")));
 
   }
 

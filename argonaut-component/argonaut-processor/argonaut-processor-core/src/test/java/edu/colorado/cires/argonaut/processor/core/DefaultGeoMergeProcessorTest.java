@@ -20,6 +20,8 @@ import edu.colorado.cires.argonaut.messaging.core.databind.MetadataRecord.Action
 import edu.colorado.cires.argonaut.messaging.core.databind.MetadataRecord.FileStatus;
 import edu.colorado.cires.argonaut.messaging.core.queue.MessageSender;
 import edu.colorado.cires.argonaut.messaging.core.util.ArgonautJsonMapperFactory;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -69,6 +71,16 @@ public class DefaultGeoMergeProcessorTest {
     when(outputFileStore.appendToPath(eq("aoml"), eq("123"), eq("123_prof.nc"))).thenReturn("aoml/123/123_prof.nc");
     when(outputFileStore.appendToPath(eq("/foo/bar"), eq("geo"), eq("pacific_ocean"), eq("2020"), eq("12"), eq("20201204_prof.nc"))).thenReturn(
         "/foo/bar/geo/pacific_ocean/2020/12/20201204_prof.nc");
+
+    when(outputFileStore.getInputStream(eq("/foo/bar/dac/aoml/123/profiles/R123_001.nc"))).thenReturn(new ByteArrayInputStream(new byte[0]));
+    when(outputFileStore.getInputStream(eq("/foo/bar/dac/aoml/123/profiles/R123_001D.nc"))).thenReturn(new ByteArrayInputStream(new byte[0]));
+    when(outputFileStore.getInputStream(eq("/foo/bar/dac/aoml/123/profiles/R123_002.nc"))).thenReturn(new ByteArrayInputStream(new byte[0]));
+    when(outputFileStore.getInputStream(eq("/foo/bar/geo/pacific_ocean/2020/12/20201204_prof.nc"))).thenReturn(new ByteArrayInputStream(new byte[0]));
+
+    when(outputFileStore.getOutputStream(eq("/foo/bar/dac/aoml/123/profiles/R123_001.nc.md5"))).thenReturn(new ByteArrayOutputStream());
+    when(outputFileStore.getOutputStream(eq("/foo/bar/dac/aoml/123/profiles/R123_001D.nc.md5"))).thenReturn(new ByteArrayOutputStream());
+    when(outputFileStore.getOutputStream(eq("/foo/bar/dac/aoml/123/profiles/R123_002.nc.md5"))).thenReturn(new ByteArrayOutputStream());
+    when(outputFileStore.getOutputStream(eq("/foo/bar/geo/pacific_ocean/2020/12/20201204_prof.nc.md5"))).thenReturn(new ByteArrayOutputStream());
 
     DefaultGeoMergeProcessor processor = new DefaultGeoMergeProcessor();
     processor.setOutputFileStore(outputFileStore);
@@ -190,6 +202,9 @@ public class DefaultGeoMergeProcessorTest {
     when(outputFileStore.appendToPath(eq("/foo/bar"), eq("geo"), eq("pacific_ocean"), eq("2020"), eq("12"), eq("20201204_prof.nc"))).thenReturn(
         "/foo/bar/geo/pacific_ocean/2020/12/20201204_prof.nc");
 
+    when(outputFileStore.fileExists(eq("/foo/bar/geo/pacific_ocean/2020/12/20201204_prof.nc.md5"))).thenReturn(true);
+
+
     DefaultGeoMergeProcessor processor = new DefaultGeoMergeProcessor();
     processor.setOutputFileStore(outputFileStore);
     processor.setLocalTempDir(localTempDir);
@@ -235,6 +250,7 @@ public class DefaultGeoMergeProcessorTest {
     verifyNoInteractions(merger);
 
     verify(outputFileStore, times(1)).delete(eq("/foo/bar/geo/pacific_ocean/2020/12/20201204_prof.nc"));
+    verify(outputFileStore, times(1)).delete(eq("/foo/bar/geo/pacific_ocean/2020/12/20201204_prof.nc.md5"));
 
     ArgumentCaptor<String> jsonCaptor = ArgumentCaptor.forClass(String.class);
     verify(messageSender, times(3)).sendJson(eq("updateIndexQueue"), jsonCaptor.capture());
@@ -280,6 +296,9 @@ public class DefaultGeoMergeProcessorTest {
     when(outputFileStore.appendToPath(eq("/foo/bar"), eq("geo"), eq("pacific_ocean"), eq("2020"), eq("12"), eq("20201204_prof.nc"))).thenReturn(
         "/foo/bar/geo/pacific_ocean/2020/12/20201204_prof.nc");
 
+    when(outputFileStore.fileExists(eq("/foo/bar/geo/pacific_ocean/2020/12/20201204_prof.nc.md5"))).thenReturn(true);
+
+
     DefaultGeoMergeProcessor processor = new DefaultGeoMergeProcessor();
     processor.setOutputFileStore(outputFileStore);
     processor.setLocalTempDir(localTempDir);
@@ -304,6 +323,7 @@ public class DefaultGeoMergeProcessorTest {
     verifyNoInteractions(messageSender);
 
     verify(outputFileStore, times(1)).delete(eq("/foo/bar/geo/pacific_ocean/2020/12/20201204_prof.nc"));
+    verify(outputFileStore, times(1)).delete(eq("/foo/bar/geo/pacific_ocean/2020/12/20201204_prof.nc.md5"));
 
   }
 
@@ -326,6 +346,17 @@ public class DefaultGeoMergeProcessorTest {
     when(outputFileStore.appendToPath(eq("aoml"), eq("123"), eq("123_prof.nc"))).thenReturn("aoml/123/123_prof.nc");
     when(outputFileStore.appendToPath(eq("/foo/bar"), eq("geo"), eq("pacific_ocean"), eq("2020"), eq("12"), eq("20201204_prof.nc"))).thenReturn(
         "/foo/bar/geo/pacific_ocean/2020/12/20201204_prof.nc");
+
+    when(outputFileStore.getInputStream(eq("/foo/bar/dac/aoml/123/profiles/R123_001.nc"))).thenReturn(new ByteArrayInputStream(new byte[0]));
+    when(outputFileStore.getInputStream(eq("/foo/bar/dac/aoml/123/profiles/R123_001D.nc"))).thenReturn(new ByteArrayInputStream(new byte[0]));
+    when(outputFileStore.getInputStream(eq("/foo/bar/dac/aoml/123/profiles/R123_002.nc"))).thenReturn(new ByteArrayInputStream(new byte[0]));
+    when(outputFileStore.getInputStream(eq("/foo/bar/geo/pacific_ocean/2020/12/20201204_prof.nc"))).thenReturn(new ByteArrayInputStream(new byte[0]));
+
+    when(outputFileStore.getOutputStream(eq("/foo/bar/dac/aoml/123/profiles/R123_001.nc.md5"))).thenReturn(new ByteArrayOutputStream());
+    when(outputFileStore.getOutputStream(eq("/foo/bar/dac/aoml/123/profiles/R123_001D.nc.md5"))).thenReturn(new ByteArrayOutputStream());
+    when(outputFileStore.getOutputStream(eq("/foo/bar/dac/aoml/123/profiles/R123_002.nc.md5"))).thenReturn(new ByteArrayOutputStream());
+    when(outputFileStore.getOutputStream(eq("/foo/bar/geo/pacific_ocean/2020/12/20201204_prof.nc.md5"))).thenReturn(new ByteArrayOutputStream());
+
 
     DefaultGeoMergeProcessor processor = new DefaultGeoMergeProcessor();
     processor.setOutputFileStore(outputFileStore);

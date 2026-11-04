@@ -22,6 +22,8 @@ import edu.colorado.cires.argonaut.messaging.core.databind.MetadataRecord.FileSt
 import edu.colorado.cires.argonaut.messaging.core.databind.ProfileOperation;
 import edu.colorado.cires.argonaut.messaging.core.queue.MessageSender;
 import edu.colorado.cires.argonaut.messaging.core.util.ArgonautJsonMapperFactory;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -88,6 +90,13 @@ public class DefaultLatestProfileMergeProcessorTest {
         "/foo/bar/dac/csio/222/profiles/D222_002.nc");
     when(outputFileStore.appendToPath(eq("/foo/bar"), eq("dac"), eq("aoml/1234/profiles/D1234_001.nc"))).thenReturn(
         "/foo/bar/dac/aoml/1234/profiles/D1234_001.nc");
+
+    when(outputFileStore.fileExists(eq("/foo/bar/latest_data/D20260923_prof_0.nc.md5"))).thenReturn(true);
+    when(outputFileStore.fileExists(eq("/foo/bar/latest_data/D20260923_prof_1.nc.md5"))).thenReturn(true);
+    when(outputFileStore.fileExists(eq("/foo/bar/latest_data/D20260923_prof_2.nc.md5"))).thenReturn(true);
+
+    when(outputFileStore.getInputStream(any())).thenReturn(new ByteArrayInputStream(new byte[0]));
+    when(outputFileStore.getOutputStream(any())).thenReturn(new ByteArrayOutputStream());
 
     DefaultLatestProfileMergeProcessor processor = new DefaultLatestProfileMergeProcessor();
     processor.setOutputFileStore(outputFileStore);
@@ -160,6 +169,10 @@ public class DefaultLatestProfileMergeProcessorTest {
     verify(outputFileStore, times(1)).delete(eq("/foo/bar/latest_data/D20260923_prof_1.nc"));
     verify(outputFileStore, times(1)).delete(eq("/foo/bar/latest_data/D20260923_prof_2.nc"));
 
+    verify(outputFileStore, times(1)).delete(eq("/foo/bar/latest_data/D20260923_prof_0.nc.md5"));
+    verify(outputFileStore, times(1)).delete(eq("/foo/bar/latest_data/D20260923_prof_1.nc.md5"));
+    verify(outputFileStore, times(1)).delete(eq("/foo/bar/latest_data/D20260923_prof_2.nc.md5"));
+
     ArgumentCaptor<List<LocalPathSupplier>> localPathSupplierCaptor0 = ArgumentCaptor.forClass(List.class);
     verify(merger, times(1)).mergeProfiles(localPathSupplierCaptor0.capture(), eq(Arrays.asList("PRES", "TEMP", "PSAL")), argThat(
         (ArgumentMatcher<Path>) path -> path.getFileName().toString().equals("D20260923_prof_0.nc")));
@@ -196,7 +209,6 @@ public class DefaultLatestProfileMergeProcessorTest {
           .build())));
     }
 
-
   }
 
 
@@ -229,6 +241,10 @@ public class DefaultLatestProfileMergeProcessorTest {
     when(outputFileStore.appendToPath(eq("/foo/bar"), eq("latest_data"), eq("D20260923_prof_1.nc"))).thenReturn(
         "/foo/bar/latest_data/D20260923_prof_1.nc");
 
+    when(outputFileStore.fileExists(eq("/foo/bar/latest_data/D20260923_prof_0.nc.md5"))).thenReturn(true);
+    when(outputFileStore.fileExists(eq("/foo/bar/latest_data/D20260923_prof_1.nc.md5"))).thenReturn(true);
+    when(outputFileStore.fileExists(eq("/foo/bar/latest_data/D20260923_prof_2.nc.md5"))).thenReturn(true);
+
     DefaultLatestProfileMergeProcessor processor = new DefaultLatestProfileMergeProcessor();
     processor.setOutputFileStore(outputFileStore);
     processor.setLocalTempDir(localTempDir);
@@ -254,10 +270,15 @@ public class DefaultLatestProfileMergeProcessorTest {
     verify(outputFileStore, times(1)).delete(eq("/foo/bar/latest_data/D20260923_prof_1.nc"));
     verify(outputFileStore, times(1)).delete(eq("/foo/bar/latest_data/D20260923_prof_2.nc"));
 
+    verify(outputFileStore, times(1)).delete(eq("/foo/bar/latest_data/D20260923_prof_0.nc.md5"));
+    verify(outputFileStore, times(1)).delete(eq("/foo/bar/latest_data/D20260923_prof_1.nc.md5"));
+    verify(outputFileStore, times(1)).delete(eq("/foo/bar/latest_data/D20260923_prof_2.nc.md5"));
+
     // clear mocked verifications in order to ensure no extra interactions can be verified
     verify(outputFileStore, times(1)).getRoot();
     verify(outputFileStore, times(4)).appendToPath(any(), any());
     verify(outputFileStore, times(1)).listFileNamesInDirectory(any());
+    verify(outputFileStore, times(3)).fileExists(any());
 
     verifyNoMoreInteractions(outputFileStore);
 
