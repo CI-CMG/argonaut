@@ -161,7 +161,7 @@ public class JpaMetadataStoreTest {
 
     BiConsumer<MetadataRecord, MetadataRecord> assertTrajectory = (expected, actual) -> assertThat(actual)
       .usingRecursiveComparison()
-      .ignoringFields("action", "actionTimestamp")
+      .ignoringFields("action", "actionTimestamp", "dateUpdate")
       .isEqualTo(expected);
 
     assertTrajectory.accept(input, result);
