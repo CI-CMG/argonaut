@@ -40,7 +40,7 @@ public class AuditSender {
                 .withDac(message.getDac())
                 .withEventType(EventType.INFO)
                 .withFileName(message.getFileName())
-                .withMessage("received file " + message.getFileName())
+                .withMessage("received file")
                 .withProcessor(auditEventProcessor)
                 .withTimestamp(Instant.now())
                 .withTraceId(message.getTraceId())
