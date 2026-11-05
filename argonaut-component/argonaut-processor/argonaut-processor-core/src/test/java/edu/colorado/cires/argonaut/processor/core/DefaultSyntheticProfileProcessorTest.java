@@ -160,7 +160,7 @@ public class DefaultSyntheticProfileProcessorTest {
         .withActionTimestamp(now)
         .withFile("meds/4902691/profiles/SR4902691_034.nc")
         .withFileName("SR4902691_034.nc")
-        .withDate(Instant.parse("2026-04-15T11:33:59.999Z"))
+        .withDate(Instant.parse("2026-04-15T11:34:00.000Z"))
         .withDateUpdate(now)
         .withAction(Action.UPDATE)
         .withDac("meds")
