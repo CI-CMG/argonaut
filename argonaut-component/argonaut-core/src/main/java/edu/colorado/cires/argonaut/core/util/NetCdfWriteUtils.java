@@ -234,12 +234,12 @@ public final class NetCdfWriteUtils {
   private static void writeCalibrationValue(NetcdfFormatWriter writer, String parameterName,
     Object value, int[] coordinates) throws InvalidRangeException, IOException {
     Object toWrite = Optional.ofNullable(value)
-      .orElse("none");
+      .orElse("");
 
     switch (toWrite) {
       case String s -> writeString(writer, coordinates, parameterName, s);
       case Instant i -> writeDate(writer, coordinates, parameterName, i);
-      default -> throw new IllegalStateException("Cannot write invalid type %s to calibration field".formatted(toWrite.getClass().getSimpleName()));
+      default -> throw new IllegalStateException("Cannot write invalid type %s to calibration field".formatted(value.getClass().getSimpleName()));
     }
   }
 
