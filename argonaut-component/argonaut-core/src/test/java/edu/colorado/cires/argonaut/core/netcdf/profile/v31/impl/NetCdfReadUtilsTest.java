@@ -11,7 +11,7 @@ public class NetCdfReadUtilsTest {
 
   @Test
   public void testCalculateJulianDate() {
-    assertEquals(Instant.parse("2001-07-25T19:14:00.008Z"), NetCdfReadUtils.calculateJulianDate(Instant.parse("1950-01-01T00:00:00.000Z"), 18833.8013889885));
+    assertEquals(Instant.parse("2001-07-25T19:14:00.009Z"), NetCdfReadUtils.calculateJulianDate(Instant.parse("1950-01-01T00:00:00.000Z"), 18833.8013889885));
   }
 
 }

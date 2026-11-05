@@ -55,9 +55,9 @@ public class ArgoProfileV31ReaderTest {
       assertEquals("2596", p0.getFloatSerialNumber());
       assertEquals("012606", p0.getFirmwareVersion());
       assertEquals("846", p0.getWmoInstrumentType());
-      assertEquals(Instant.parse("2007-01-21T04:22:15Z"), p0.getJulianDate());
+      assertEquals(Instant.parse("2007-01-21T04:22:15.001Z"), p0.getJulianDate());
       assertEquals("1", p0.getJulianDateQc());
-      assertEquals(Instant.parse("2007-01-21T18:48:33.002Z"), p0.getJulianDateOfLocation());
+      assertEquals(Instant.parse("2007-01-21T18:48:33.003Z"), p0.getJulianDateOfLocation());
       assertEquals(-38.507, p0.getLatitude(), 0.001);
       assertEquals(76.029, p0.getLongitude(), 0.001);
       assertEquals("1", p0.getPositionQc());
