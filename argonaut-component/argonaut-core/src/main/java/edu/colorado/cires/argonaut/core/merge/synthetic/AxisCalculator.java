@@ -17,6 +17,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -326,7 +327,7 @@ final class AxisCalculator {
           .map(paramToSensor::get)
           .sorted()
           .collect(Collectors.joining("_"))
-      )).collect(Collectors.toMap(Pair::getRight, Pair::getLeft));
+      )).collect(Collectors.toMap(Pair::getRight, Pair::getLeft, (a, b) -> b, TreeMap::new));
 
     List<Integer> order = new ArrayList<>(cProfiles.size());
     order.add(0);
