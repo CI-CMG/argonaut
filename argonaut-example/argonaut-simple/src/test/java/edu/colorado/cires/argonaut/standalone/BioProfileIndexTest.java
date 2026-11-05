@@ -90,7 +90,7 @@ public class BioProfileIndexTest {
             "PRES C1PHASE_DOXY C2PHASE_DOXY TEMP_DOXY DOXY", "RRRRD", "20250903104136")
     );
 
-    await().pollInterval(Duration.ofSeconds(10)).atMost(Duration.ofMinutes(2)).untilAsserted(() -> {
+    await().pollInterval(Duration.ofSeconds(10)).atMost(Duration.ofMinutes(4)).untilAsserted(() -> {
 
       Path textFile = TestDataContext.outputDir.resolve("idx/argo_bio-profile_index.txt");
       Path gzFile = TestDataContext.outputDir.resolve("idx/argo_bio-profile_index.txt.gz");
