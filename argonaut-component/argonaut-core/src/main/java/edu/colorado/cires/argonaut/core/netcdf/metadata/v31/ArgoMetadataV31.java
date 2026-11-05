@@ -2,6 +2,7 @@ package edu.colorado.cires.argonaut.core.netcdf.metadata.v31;
 
 import java.time.Instant;
 import java.util.List;
+import org.jspecify.annotations.Nullable;
 
 public interface ArgoMetadataV31 {
 
@@ -120,4 +121,7 @@ public interface ArgoMetadataV31 {
   List<String> getParameterSensors();
 
   List<String> getParameters();
+
+  @Nullable
+  Double getPressureOffset(String parameterName);
 }

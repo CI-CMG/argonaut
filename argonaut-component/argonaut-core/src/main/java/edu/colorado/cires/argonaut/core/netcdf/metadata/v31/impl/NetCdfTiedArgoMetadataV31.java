@@ -5,10 +5,52 @@ import edu.colorado.cires.argonaut.core.netcdf.metadata.v31.ArgoMetadataV31Contr
 import edu.colorado.cires.argonaut.core.netcdf.metadata.v31.ArgoMetadataV31TelecommunicationSystem;
 import edu.colorado.cires.argonaut.core.util.NetCdfReadUtils;
 import java.time.Instant;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import org.apache.commons.lang3.tuple.Pair;
+import org.jspecify.annotations.Nullable;
 import ucar.nc2.NetcdfFile;
 
 public class NetCdfTiedArgoMetadataV31 implements ArgoMetadataV31 {
+
+  private static final Map<String, List<String>> SHORT_NAME_TO_SENSORS = new HashMap<>();
+
+  static {
+    SHORT_NAME_TO_SENSORS.put("ctd", List.of(
+      "CTD_PRES", "CTD_TEMP", "CTD_CNDC", "CTD_PSAL"));
+
+    SHORT_NAME_TO_SENSORS.put("optode", List.of(
+      "OPTODE_DOXY"));
+
+    SHORT_NAME_TO_SENSORS.put("ocr", List.of(
+      "RADIOMETER_DOWN_IRR", "RADIOMETER_PAR",
+        "RADIOMETER_DOWN_IRR380", "RADIOMETER_DOWN_IRR412", "RADIOMETER_DOWN_IRR490")
+      ); // Truncated <nnn> suffix
+
+    SHORT_NAME_TO_SENSORS.put("eco", List.of(
+      "FLUOROMETER_CHLA", "FLUOROMETER_CDOM", "BACKSCATTERINGMETER_BBP", "BACKSCATTERINGMETER_BBP700",
+      "BACKSCATTERINGMETER_BBP532"));
+
+    SHORT_NAME_TO_SENSORS.put("mcoms", List.of(
+      "FLUOROMETER_CHLA", "FLUOROMETER_CDOM", "BACKSCATTERINGMETER_BBP"));
+
+    SHORT_NAME_TO_SENSORS.put("flntu", List.of(
+      "FLUOROMETER_CHLA", "BACKSCATTERINGMETER_TURBIDITY"));
+
+    SHORT_NAME_TO_SENSORS.put("crover", List.of(
+      "TRANSMISSOMETER_CP"));
+
+    SHORT_NAME_TO_SENSORS.put("suna", List.of(
+      "SPECTROPHOTOMETER_NITRATE", "SPECTROPHOTOMETER_BISULFIDE"));
+
+    SHORT_NAME_TO_SENSORS.put("isus", List.of(
+      "SPECTROPHOTOMETER_NITRATE"));
+  }
 
   private final NetcdfFile netcdf;
   private final String title;
@@ -65,6 +107,7 @@ public class NetCdfTiedArgoMetadataV31 implements ArgoMetadataV31 {
   private final String endMissionStatus;
   private final List<String> parameterSensors;
   private final List<String> parameters;
+  private final Map<String, Double> pressureOffset = new HashMap<>();
 
   public NetCdfTiedArgoMetadataV31(NetcdfFile netcdf) {
     this.netcdf = netcdf;
@@ -123,9 +166,43 @@ public class NetCdfTiedArgoMetadataV31 implements ArgoMetadataV31 {
     endMissionStatus = NetCdfReadUtils.getString(netcdf, "END_MISSION_STATUS");
     parameterSensors = NetCdfReadUtils.getListOfString(netcdf, "PARAMETER_SENSOR");
     parameters = NetCdfReadUtils.getListOfString(netcdf, "PARAMETER");
+    computePressureOffsetValues(netcdf);
 
     primaryControllerBoard = null;
     secondaryControllerBoard = null;
+  }
+
+  private void computePressureOffsetValues(NetcdfFile netcdf) {
+    Optional.ofNullable(NetCdfReadUtils.getListOfString(netcdf, "LAUNCH_CONFIG_PARAMETER_NAME"))
+      .flatMap(names -> NetCdfReadUtils.read1DDoubleArray("LAUNCH_CONFIG_PARAMETER_VALUE", netcdf)
+          .map(values -> Pair.of(names, values))
+      ).ifPresent(pair -> populatePressureOffsets(pair.getLeft(), pair.getRight(), pressureOffset));
+  }
+
+  private void populatePressureOffsets(List<String> names, double[] parameterValues, Map<String, Double> pressureOffset) {
+    Map<String, List<String>> sensorToParameter = IntStream.range(0, parameters.size()).boxed()
+      .map(i -> Pair.of(parameterSensors.get(i), parameters.get(i)))
+      .collect(Collectors.groupingBy(Pair::getLeft, Collectors.mapping(Pair::getRight, Collectors.toList())));
+
+    for (int i = 0; i < names.size(); i++) {
+      String parameterName = names.get(i);
+      if (parameterName.contains("VerticalPressureOffset_dbar")) {
+        String sensorShortName = parameterName
+          .replace("CONFIG_", "")
+          .replaceAll("(?:_?\\d+)?VerticalPressureOffset_dbar", "")
+          .toLowerCase();
+
+        double value = parameterValues[i];
+
+        Optional.ofNullable(SHORT_NAME_TO_SENSORS.get(sensorShortName))
+          .map(sensors -> sensors.stream()
+            .map(sensorToParameter::get)
+            .filter(Objects::nonNull)
+            .flatMap(List::stream)
+          )
+          .ifPresent(parameterNames -> parameterNames.forEach(name -> pressureOffset.put(name, value)));
+      }
+    }
   }
 
   @Override
@@ -402,5 +479,11 @@ public class NetCdfTiedArgoMetadataV31 implements ArgoMetadataV31 {
   @Override
   public List<String> getParameters() {
     return parameters;
+  }
+
+  @Override
+  @Nullable
+  public Double getPressureOffset(String parameterName) {
+    return pressureOffset.get(parameterName);
   }
 }

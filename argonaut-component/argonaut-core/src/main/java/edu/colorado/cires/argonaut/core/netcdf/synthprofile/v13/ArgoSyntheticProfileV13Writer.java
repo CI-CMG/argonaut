@@ -28,7 +28,13 @@ public class ArgoSyntheticProfileV13Writer {
     dimensionSpec.setProfiles(1);
     dimensionSpec.setParameters(profile.getParameters().size());
     dimensionSpec.setLevels(profile.getParameters().get(0).getLevels().size());
-    dimensionSpec.setCalibrations(1);
+    dimensionSpec.setCalibrations(profile.getParameters().stream()
+      .map(ArgoSyntheticProfileV13Parameter::getCalibrations)
+      .map(List::size)
+      .mapToInt(Integer::intValue)
+      .max()
+      .orElse(0)
+    );
 
     ArgoNetCdfCreatedDimensions dimensions = CommonParameterAttributes.addCommonDimensions(builder, dimensionSpec);
     CommonParameterAttributes.addCommonVariables(builder, dimensions, profile.getParameters().stream().map(ArgoSyntheticProfileV13Parameter::getParameterName).toList());
