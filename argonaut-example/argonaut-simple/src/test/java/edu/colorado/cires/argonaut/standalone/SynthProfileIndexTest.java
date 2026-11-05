@@ -95,7 +95,7 @@ public class SynthProfileIndexTest {
         Arrays.asList("file", "date", "latitude", "longitude", "ocean", "profiler_type", "institution", "parameters", "parameter_data_mode", "date_update"),
 //        Arrays.asList("bodc/6901174/profiles/SD6901174_143.nc", "20160728134500", "13.687", "-28.076", "A", "836", "BO", "PRES TEMP PSAL DOXY DOWN_IRRADIANCE380 DOWN_IRRADIANCE412 DOWN_IRRADIANCE490 DOWNWELLING_PAR CHLA CHLA_FLUORESCENCE BBP700 BBP532", "DDDDRRRRAAAR", "20260703132654"),
 //        Arrays.asList("coriolis/6901486/profiles/SD6901486_037.nc", "20130924134100", "63.508", "-36.430", "A", "836", "IF", "PRES TEMP PSAL DOXY DOWN_IRRADIANCE380 DOWN_IRRADIANCE412 DOWN_IRRADIANCE490 DOWNWELLING_PAR CHLA CHLA_FLUORESCENCE BBP700 CDOM", "DDDDDDDDAADR", "20260809072735"),
-        Arrays.asList("jma/2900460/profiles/SR2900460_069.nc", "20060621072219", "43.934", "-164.325", "A" , "846", "JA", "PRES TEMP PSAL DOXY", "AAAA", "date_update_value")
+        Arrays.asList("jma/2900460/profiles/SR2900460_069.nc", "20060621072220", "43.934", "-164.325", "A" , "846", "JA", "PRES TEMP PSAL DOXY", "AAAA", "date_update_value")
     );
 
     await().pollInterval(Duration.ofSeconds(10)).atMost(Duration.ofMinutes(5)).untilAsserted(() -> {

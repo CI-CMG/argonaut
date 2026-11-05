@@ -124,7 +124,7 @@ public class SubmissionRoutingProcessorTest {
 
     verify(messageSender).sendJson(eq(submitRemovalQueue), eq(jsonMapper.writeValueAsString(resultMessage)));
     verify(messageSender).sendJson(eq(submitDataQueue), eq(jsonMapper.writeValueAsString(resultMessage2)));
-    verify(auditSender).updateStarted(eq(resultMessage2));
+    verify(auditSender).updateStarted(eq(resultMessage2), eq(false));
 
   }
 

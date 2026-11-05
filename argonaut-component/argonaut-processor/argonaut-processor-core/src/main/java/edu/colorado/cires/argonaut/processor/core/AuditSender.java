@@ -61,7 +61,7 @@ public class AuditSender {
             .build()));
   }
 
-  public void updateStarted(NcSubmissionMessage message) {
+  public void updateStarted(NcSubmissionMessage message, boolean isImport) {
     messageSender.sendJson(
         auditQueue,
         jsonMapper.writeValueAsString(AuditMessage.builder()
@@ -69,7 +69,7 @@ public class AuditSender {
             .withEventType(EventType.INFO)
             .withFileName(message.getFileName())
             .withMessage("triggered file update")
-            .withProcessor(AuditEventProcessor.FILE_RECEIVED)
+            .withProcessor(isImport ? AuditEventProcessor.IMPORT_RECEIVED : AuditEventProcessor.FILE_RECEIVED)
             .withTimestamp(Instant.now())
             .withTraceId(message.getTraceId())
             .build()));

@@ -68,7 +68,7 @@ public class SubmissionRoutingProcessor {
   }
 
   private void submitUpdate(NcSubmissionMessage submissionMessage) {
-    auditSender.updateStarted(submissionMessage);
+    auditSender.updateStarted(submissionMessage, "import".equals(submissionMessage.getSource()));
     messageSender.sendJson(submitDataQueue, jsonMapper.writeValueAsString(submissionMessage));
   }
 

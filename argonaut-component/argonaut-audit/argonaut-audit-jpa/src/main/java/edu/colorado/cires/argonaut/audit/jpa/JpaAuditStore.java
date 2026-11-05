@@ -94,7 +94,7 @@ public class JpaAuditStore implements AuditStore {
                     SELECT COUNT(a.id) FROM ArgonautAuditEntity a 
                       WHERE a.dacName = :dac 
                       AND a.processor = 'FILE_RECEIVED'
-                      AND (a.message = 'received file' OR a.message = 'triggered file removal')
+                      AND (a.message = 'triggered file update' OR a.message = 'triggered file removal')
                       AND a.timestamp < :timestamp
                       AND a.reportDate IS NULL
                   """,
@@ -108,7 +108,7 @@ public class JpaAuditStore implements AuditStore {
                     SELECT a FROM ArgonautAuditEntity a 
                       WHERE a.dacName = :dac 
                       AND a.processor = 'FILE_RECEIVED'
-                      AND (a.message = 'received file' OR a.message = 'triggered file removal')
+                      AND (a.message = 'triggered file update' OR a.message = 'triggered file removal')
                       AND a.timestamp < :timestamp
                       AND a.reportDate IS NULL
                       ORDER BY a.timestamp, a.id
