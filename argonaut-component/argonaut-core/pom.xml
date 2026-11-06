@@ -7,6 +7,8 @@
     <version>1.0.1-SNAPSHOT</version>
   </parent>
 
+  <name>${project.groupId}:${project.artifactId}</name>
+
   <artifactId>argonaut-core</artifactId>
 
   <properties>
