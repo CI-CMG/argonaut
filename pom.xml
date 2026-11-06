@@ -382,8 +382,8 @@
         <configuration>
           <autoVersionSubmodules>true</autoVersionSubmodules>
           <useReleaseProfile>false</useReleaseProfile>
-          <releaseProfiles>release,site-publish</releaseProfiles>
-          <goals>deploy site</goals>
+          <releaseProfiles>release</releaseProfiles>
+          <goals>deploy</goals>
           <tagNameFormat>v@{project.version}</tagNameFormat>
           <arguments>-DskipTests -Dgit.username=${git.username} -Dgit.password=${git.password}</arguments>
           <username>${git.username}</username>
