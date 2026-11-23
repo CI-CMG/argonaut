@@ -2,10 +2,24 @@ package edu.colorado.cires.argonaut.metadata.jpa;
 
 import static edu.colorado.cires.argonaut.messaging.core.databind.MetadataRecord.FileStatus.ACTIVE;
 
+import edu.colorado.cires.argonaut.messaging.core.databind.ArgoFileType;
+import edu.colorado.cires.argonaut.messaging.core.databind.ArgoFileTypeDetails;
 import edu.colorado.cires.argonaut.messaging.core.databind.MetadataRecord;
 import edu.colorado.cires.argonaut.messaging.core.databind.MetadataRecord.FileStatus;
+import edu.colorado.cires.argonaut.messaging.core.databind.NcSubmissionMessage;
+import edu.colorado.cires.argonaut.messaging.core.databind.NcSubmissionMessage.Operation;
 import edu.colorado.cires.argonaut.messaging.core.databind.ProfileMode;
-import edu.colorado.cires.argonaut.metadata.jpa.entity.*;
+import edu.colorado.cires.argonaut.messaging.core.queue.AuditSender;
+import edu.colorado.cires.argonaut.messaging.core.queue.MessageSender;
+import edu.colorado.cires.argonaut.metadata.jpa.entity.ArgoDacEntity;
+import edu.colorado.cires.argonaut.metadata.jpa.entity.ArgoFloatCycleEntity;
+import edu.colorado.cires.argonaut.metadata.jpa.entity.ArgoFloatEntity;
+import edu.colorado.cires.argonaut.metadata.jpa.entity.ArgoFloatMetadataEntity;
+import edu.colorado.cires.argonaut.metadata.jpa.entity.ArgoFloatProfileEntity;
+import edu.colorado.cires.argonaut.metadata.jpa.entity.ArgoFloatProfileParameterEntity;
+import edu.colorado.cires.argonaut.metadata.jpa.entity.ArgoFloatTechnicalInfoEntity;
+import edu.colorado.cires.argonaut.metadata.jpa.entity.ArgoFloatTrajectoryEntity;
+import edu.colorado.cires.argonaut.metadata.jpa.entity.ArgonautProfileMergeFileEntity;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.EntityTransaction;
@@ -19,15 +33,25 @@ import java.util.Objects;
 import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tools.jackson.databind.json.JsonMapper;
 
 class Updater {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(Updater.class);
 
   private final EntityManagerFactory entityManagerFactory;
+  private final AuditSender auditSender;
+  private final String fileMoveQueue;
+  private final MessageSender messageSender;
+  private final JsonMapper jsonMapper;
 
-  Updater(EntityManagerFactory entityManagerFactory) {
+  Updater(EntityManagerFactory entityManagerFactory, AuditSender auditSender, String fileMoveQueue, MessageSender messageSender,
+      JsonMapper jsonMapper) {
     this.entityManagerFactory = entityManagerFactory;
+    this.auditSender = auditSender;
+    this.fileMoveQueue = fileMoveQueue;
+    this.messageSender = messageSender;
+    this.jsonMapper = jsonMapper;
   }
 
   private void createDacIfMissing(MetadataRecord record) {
@@ -347,6 +371,41 @@ class Updater {
     }
   }
 
+  private void triggerDelayedModeReplacement(MetadataRecord record) {
+    if ((record.getFileType() == ArgoFileType.PROFILE_CORE || record.getFileType() == ArgoFileType.PROFILE_BIOCHEMICAL) && record.getProfileMode() == ProfileMode.DELAYED_MODE) {
+      String delayedFileName = Objects.requireNonNull(record.getFileName());
+      String realTimeFileName = null;
+      if((record.getFileType() == ArgoFileType.PROFILE_CORE && delayedFileName.startsWith("D")) || (record.getFileType() == ArgoFileType.PROFILE_BIOCHEMICAL && delayedFileName.startsWith("BD") )) {
+        realTimeFileName = delayedFileName.replaceFirst("D", "R");
+      }
+      if (realTimeFileName != null) {
+        String realTimeFile = Objects.requireNonNull(record.getFile()).replace(delayedFileName, realTimeFileName);
+        try (EntityManager em = entityManagerFactory.createEntityManager()) {
+          ArgoFloatProfileEntity realTimeEntity = em.find(ArgoFloatProfileEntity.class, realTimeFile);
+          if (realTimeEntity != null && realTimeEntity.getFileStatus().equals(ACTIVE.toString())) {
+            ArgoFileTypeDetails fileTypeDetails = ArgoFileType.getFileNameDetails(realTimeFileName);
+            String floatDir = fileTypeDetails.getFloatId();
+            NcSubmissionMessage message = NcSubmissionMessage.builder()
+                .withOperation(Operation.REMOVE)
+                .withFileName(realTimeFileName)
+                .withFileType(fileTypeDetails.getType())
+                .withDac(record.getDac())
+                .withTimestamp(record.getActionTimestamp())
+                .withTraceId(record.getTraceId())
+                .withFloatId(floatDir)
+                .build();
+
+            LOGGER.info("Notifying file removal {} : {}", message.getDac(), message.getFileName());
+
+            auditSender.removalStarted(message);
+            messageSender.sendJson(fileMoveQueue, jsonMapper.writeValueAsString(message));
+          }
+        }
+      }
+
+    }
+  }
+
   void update(MetadataRecord record) {
     createDacIfMissing(record);
     createFloatIfMissing(record);
@@ -357,6 +416,7 @@ class Updater {
       case SYNTHETIC_PROFILE_SINGLE_CYCLE:
         createCycleIfMissing(record);
         createOrUpdateProfile(record);
+        triggerDelayedModeReplacement(record);
         break;
       case METADATA:
         createOrUpdateMetadata(record);

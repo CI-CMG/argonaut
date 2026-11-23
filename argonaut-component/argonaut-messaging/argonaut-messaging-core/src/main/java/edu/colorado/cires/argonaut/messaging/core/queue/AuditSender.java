@@ -1,4 +1,4 @@
-package edu.colorado.cires.argonaut.processor.core;
+package edu.colorado.cires.argonaut.messaging.core.queue;
 
 import edu.colorado.cires.argonaut.messaging.core.databind.AuditEventProcessor;
 import edu.colorado.cires.argonaut.messaging.core.databind.AuditMessage;
@@ -7,7 +7,6 @@ import edu.colorado.cires.argonaut.messaging.core.databind.DacSubmittedFileMessa
 import edu.colorado.cires.argonaut.messaging.core.databind.MetadataRecord;
 import edu.colorado.cires.argonaut.messaging.core.databind.NcSubmissionMessage;
 import edu.colorado.cires.argonaut.messaging.core.databind.ProfileOperation;
-import edu.colorado.cires.argonaut.messaging.core.queue.MessageSender;
 import java.time.Instant;
 import tools.jackson.databind.json.JsonMapper;
 

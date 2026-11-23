@@ -11,6 +11,7 @@ import edu.colorado.cires.argonaut.messaging.core.databind.ArgoFileType;
 import edu.colorado.cires.argonaut.messaging.core.databind.DacSubmittedFileMessage;
 import edu.colorado.cires.argonaut.messaging.core.databind.NcSubmissionMessage;
 import edu.colorado.cires.argonaut.messaging.core.databind.NcSubmissionMessage.Operation;
+import edu.colorado.cires.argonaut.messaging.core.queue.AuditSender;
 import edu.colorado.cires.argonaut.messaging.core.queue.MessageSender;
 import edu.colorado.cires.argonaut.messaging.core.util.ArgonautJsonMapperFactory;
 import java.time.Instant;

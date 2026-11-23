@@ -2,6 +2,8 @@ package edu.colorado.cires.argonaut.metadata.jpa;
 
 import edu.colorado.cires.argonaut.messaging.core.databind.MetadataRecord;
 import edu.colorado.cires.argonaut.messaging.core.databind.ProfileOperation;
+import edu.colorado.cires.argonaut.messaging.core.queue.AuditSender;
+import edu.colorado.cires.argonaut.messaging.core.queue.MessageSender;
 import edu.colorado.cires.argonaut.metadata.core.GeoMergePage;
 import edu.colorado.cires.argonaut.metadata.core.IndexPageRequest;
 import edu.colorado.cires.argonaut.metadata.core.MetadataRecordPage;
@@ -11,7 +13,9 @@ import edu.colorado.cires.argonaut.metadata.core.RecentProfileSearch;
 import edu.colorado.cires.argonaut.metadata.core.RemovedFilePage;
 import edu.colorado.cires.argonaut.metadata.core.RemovedFileSearch;
 import jakarta.persistence.EntityManagerFactory;
+import java.util.Objects;
 import java.util.Optional;
+import tools.jackson.databind.json.JsonMapper;
 
 public class JpaMetadataStore implements MetadataStore {
 
@@ -20,9 +24,41 @@ public class JpaMetadataStore implements MetadataStore {
   private SyntheticMerger syntheticMerger;
   private MultiFloatMerger multiFloatMerger;
   private Finder finder;
+  private EntityManagerFactory entityManagerFactory;
+
+  private AuditSender auditSender;
+  private String fileMoveQueue;
+  private MessageSender messageSender;
+  private JsonMapper jsonMapper;
+
+  public void setAuditSender(AuditSender auditSender) {
+    this.auditSender = auditSender;
+  }
+
+  public void setFileMoveQueue(String fileMoveQueue) {
+    this.fileMoveQueue = fileMoveQueue;
+  }
+
+  public void setMessageSender(MessageSender messageSender) {
+    this.messageSender = messageSender;
+  }
+
+  public void setJsonMapper(JsonMapper jsonMapper) {
+    this.jsonMapper = jsonMapper;
+  }
 
   public void setEntityManagerFactory(EntityManagerFactory entityManagerFactory) {
-    updater = new Updater(entityManagerFactory);
+    this.entityManagerFactory = entityManagerFactory;
+  }
+
+  public void init() {
+    updater = new Updater(
+        Objects.requireNonNull(entityManagerFactory),
+        Objects.requireNonNull(auditSender),
+        Objects.requireNonNull(fileMoveQueue),
+        Objects.requireNonNull(messageSender),
+        Objects.requireNonNull(jsonMapper)
+    );
     remover = new Remover(entityManagerFactory);
     syntheticMerger = new SyntheticMerger(entityManagerFactory);
     multiFloatMerger = new MultiFloatMerger(entityManagerFactory);
