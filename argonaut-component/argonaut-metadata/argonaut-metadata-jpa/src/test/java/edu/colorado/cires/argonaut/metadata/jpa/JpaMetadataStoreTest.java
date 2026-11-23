@@ -8,6 +8,12 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import edu.colorado.cires.argonaut.messaging.core.databind.ArgoFileType;
 import edu.colorado.cires.argonaut.messaging.core.databind.ArgoOcean;
@@ -15,8 +21,13 @@ import edu.colorado.cires.argonaut.messaging.core.databind.GeoMergeInfo;
 import edu.colorado.cires.argonaut.messaging.core.databind.MetadataRecord;
 import edu.colorado.cires.argonaut.messaging.core.databind.MetadataRecord.Action;
 import edu.colorado.cires.argonaut.messaging.core.databind.MetadataRecord.FileStatus;
+import edu.colorado.cires.argonaut.messaging.core.databind.NcSubmissionMessage;
+import edu.colorado.cires.argonaut.messaging.core.databind.NcSubmissionMessage.Operation;
 import edu.colorado.cires.argonaut.messaging.core.databind.ProfileMode;
 import edu.colorado.cires.argonaut.messaging.core.databind.ProfileOperation;
+import edu.colorado.cires.argonaut.messaging.core.queue.AuditSender;
+import edu.colorado.cires.argonaut.messaging.core.queue.MessageSender;
+import edu.colorado.cires.argonaut.messaging.core.util.ArgonautJsonMapperFactory;
 import edu.colorado.cires.argonaut.metadata.core.DefaultIndexPageRequest;
 import edu.colorado.cires.argonaut.metadata.core.DefaultMetadataRecordPage;
 import edu.colorado.cires.argonaut.metadata.core.DefaultRecentProfileSearch;
@@ -55,11 +66,16 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
+import tools.jackson.databind.json.JsonMapper;
 
 public class JpaMetadataStoreTest {
 
   private EntityManagerFactory emf;
   private JpaMetadataStore datastore;
+  private AuditSender auditSender;
+  private final static String fileMoveQueue = "file-move";
+  private final static JsonMapper jsonMapper = ArgonautJsonMapperFactory.getJsonMapper();
+  private MessageSender messageSender;
 
   @BeforeEach
   public void setup() throws Exception {
@@ -71,8 +87,18 @@ public class JpaMetadataStoreTest {
     override.put("hibernate.hbm2ddl.auto", "update");
     override.put("hibernate.show_sql", "true");
     emf = Persistence.createEntityManagerFactory("argonaut-index", override);
+
+    auditSender = mock(AuditSender.class);
+    messageSender = mock(MessageSender.class);
+
     datastore = new JpaMetadataStore();
     datastore.setEntityManagerFactory(emf);
+    datastore.setAuditSender(auditSender);
+    datastore.setFileMoveQueue(fileMoveQueue);
+    datastore.setJsonMapper(jsonMapper);
+    datastore.setMessageSender(messageSender);
+
+    datastore.init();
 
     try (EntityManager em = emf.createEntityManager()) {
       EntityTransaction tx = em.getTransaction();
@@ -5070,6 +5096,143 @@ public class JpaMetadataStoreTest {
                     .withIndexPageRequest(DefaultIndexPageRequest.builder().withPageNumber(1).withPageSize(2).build())
                     .build(),
             results);
+
+  }
+
+
+
+  @Test
+  public void testReplaceProfileDelayedMode() throws Exception {
+    Instant date1 = Instant.now();
+
+    MetadataRecord real = MetadataRecord.builder()
+        .withFile("aoml/13857/profiles/R13857_001.nc")
+        .withFileName("R13857_001.nc")
+        .withDac("aoml")
+        .withFloatId("13857")
+        .withDirection("A")
+        .withParameterDataMode("R")
+        .withProfileMode(ProfileMode.REAL_TIME)
+        .withCycleNumber("001")
+        .withDate(date1)
+        .withLatitude(0.267)
+        .withLatitudeMin(0.1)
+        .withLatitudeMax(0.4)
+        .withLongitude(-16.032)
+        .withLongitudeMin(-17.0)
+        .withLongitudeMax(-14.0)
+        .withOcean(ArgoOcean.ATLANTIC_OCEAN)
+        .withProfilerType("845")
+        .withInstitution("A0")
+        .withDateUpdate(date1)
+        .withParameters(List.of("params"))
+        .withAction(Action.UPDATE)
+        .withActionTimestamp(Instant.now())
+        .withFileType(ArgoFileType.PROFILE_CORE)
+        .build();
+    datastore.updateIndex(real);
+
+    verifyNoInteractions(auditSender, messageSender);
+
+    Instant dateUpdate1 = date1.plusSeconds(60);
+    MetadataRecord realUpdate = MetadataRecord.builder(real)
+        .withDateUpdate(dateUpdate1)
+        .build();
+    datastore.updateIndex(realUpdate);
+
+    verifyNoInteractions(auditSender, messageSender);
+
+    Instant dateUpdate2 = dateUpdate1.plusSeconds(60);
+    MetadataRecord delayedUpdate = MetadataRecord.builder(realUpdate)
+        .withFile("aoml/13857/profiles/D13857_001.nc")
+        .withFileName("D13857_001.nc")
+        .withParameterDataMode("D")
+        .withProfileMode(ProfileMode.DELAYED_MODE)
+        .withDateUpdate(dateUpdate2)
+        .build();
+
+    datastore.updateIndex(delayedUpdate);
+
+    NcSubmissionMessage expected = NcSubmissionMessage.builder()
+        .withOperation(Operation.REMOVE)
+        .withFileName("R13857_001.nc")
+        .withFileType(ArgoFileType.PROFILE_CORE)
+        .withDac("aoml")
+        .withTimestamp(delayedUpdate.getActionTimestamp())
+        .withTraceId(delayedUpdate.getTraceId())
+        .withFloatId("13857")
+        .build();
+
+    verify(auditSender, times(1)).removalStarted(eq(expected));
+    verify(messageSender, times(1)).sendJson(eq(fileMoveQueue),eq(jsonMapper.writeValueAsString(expected)));
+
+  }
+
+
+  @Test
+  public void testReplaceBioProfileDelayedMode() throws Exception {
+    Instant date1 = Instant.now();
+
+    MetadataRecord real = MetadataRecord.builder()
+        .withFile("aoml/13857/profiles/BR13857_001.nc")
+        .withFileName("BR13857_001.nc")
+        .withDac("aoml")
+        .withFloatId("13857")
+        .withDirection("A")
+        .withParameterDataMode("R")
+        .withProfileMode(ProfileMode.REAL_TIME)
+        .withCycleNumber("001")
+        .withDate(date1)
+        .withLatitude(0.267)
+        .withLatitudeMin(0.1)
+        .withLatitudeMax(0.4)
+        .withLongitude(-16.032)
+        .withLongitudeMin(-17.0)
+        .withLongitudeMax(-14.0)
+        .withOcean(ArgoOcean.ATLANTIC_OCEAN)
+        .withProfilerType("845")
+        .withInstitution("A0")
+        .withDateUpdate(date1)
+        .withParameters(List.of("params"))
+        .withAction(Action.UPDATE)
+        .withActionTimestamp(Instant.now())
+        .withFileType(ArgoFileType.PROFILE_BIOCHEMICAL)
+        .build();
+    datastore.updateIndex(real);
+
+    verifyNoInteractions(auditSender, messageSender);
+
+    Instant dateUpdate1 = date1.plusSeconds(60);
+    MetadataRecord realUpdate = MetadataRecord.builder(real)
+        .withDateUpdate(dateUpdate1)
+        .build();
+    datastore.updateIndex(realUpdate);
+
+    verifyNoInteractions(auditSender, messageSender);
+
+    Instant dateUpdate2 = dateUpdate1.plusSeconds(60);
+    MetadataRecord delayedUpdate = MetadataRecord.builder(realUpdate)
+        .withFile("aoml/13857/profiles/BD13857_001.nc")
+        .withFileName("BD13857_001.nc")
+        .withParameterDataMode("D")
+        .withProfileMode(ProfileMode.DELAYED_MODE)
+        .withDateUpdate(dateUpdate2)
+        .build();
+
+    datastore.updateIndex(delayedUpdate);
+
+    NcSubmissionMessage expected = NcSubmissionMessage.builder()
+        .withOperation(Operation.REMOVE)
+        .withFileName("BR13857_001.nc")
+        .withFileType(ArgoFileType.PROFILE_BIOCHEMICAL)
+        .withDac("aoml")
+        .withTimestamp(delayedUpdate.getActionTimestamp())
+        .withTraceId(delayedUpdate.getTraceId())
+        .withFloatId("13857")
+        .build();
+
+    verify(auditSender, times(1)).removalStarted(eq(expected));
+    verify(messageSender, times(1)).sendJson(eq(fileMoveQueue),eq(jsonMapper.writeValueAsString(expected)));
 
   }
 }

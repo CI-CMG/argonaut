@@ -2,6 +2,7 @@ package edu.colorado.cires.argonaut.processor.core;
 
 import edu.colorado.cires.argonaut.messaging.core.databind.DacSubmittedFileMessage;
 import edu.colorado.cires.argonaut.messaging.core.databind.NcSubmissionMessage;
+import edu.colorado.cires.argonaut.messaging.core.queue.AuditSender;
 import edu.colorado.cires.argonaut.messaging.core.queue.MessageSender;
 import java.util.List;
 import tools.jackson.databind.json.JsonMapper;

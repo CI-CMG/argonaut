@@ -157,7 +157,11 @@
 
   <bean id="metadataStore" class="edu.colorado.cires.argonaut.metadata.jpa.JpaMetadataStore">
     <property name="entityManagerFactory" ref="entityManagerFactory"/>
-  </bean>
+    <property name="jsonMapper" ref="jsonMapper"/>
+    <property name="auditSender" ref="auditSender"/>
+    <property name="messageSender" ref="messageSender"/>
+    <property name="fileMoveQueue" value="seda:file-output"/>
+   </bean>
 
   <bean id="updateIndexProcessor" class="edu.colorado.cires.argonaut.processor.core.DefaultUpdateIndexProcessor">
     <property name="metadataStore" ref="metadataStore"/>
@@ -230,7 +234,7 @@
     <property name="merger" ref="onePerFileMultiProfileMerger"/>
   </bean>
 
-  <bean id="auditSender" class="edu.colorado.cires.argonaut.processor.core.AuditSender">
+  <bean id="auditSender" class="edu.colorado.cires.argonaut.messaging.core.queue.AuditSender">
     <property name="jsonMapper" ref="jsonMapper"/>
     <property name="messageSender" ref="messageSender"/>
     <property name="auditQueue" value="seda:audit"/>
