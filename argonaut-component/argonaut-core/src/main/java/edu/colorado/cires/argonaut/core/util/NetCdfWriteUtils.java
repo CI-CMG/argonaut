@@ -163,7 +163,6 @@ public final class NetCdfWriteUtils {
     }
   }
 
-
   public static void writeCommonFileLevelValues(NetcdfFormatWriter writer, CommonFileValues profile) throws InvalidRangeException, IOException {
     writeDate(writer, new int[] {0}, "REFERENCE_DATE_TIME", profile.getReferenceDateTime() == null ? REFERENCE_DATE : profile.getReferenceDateTime());
     writeDate(writer, new int[] {0}, "DATE_CREATION", profile.getDateCreation() == null ? Instant.now() : profile.getDateCreation());
@@ -203,7 +202,6 @@ public final class NetCdfWriteUtils {
       CommonParameterValues parameter) throws InvalidRangeException, IOException {
 
     writeCharacter(writer, new int[] {profileIndex}, "PROFILE_" + parameterName + "_QC", parameter.getQc());
-    writeCharacter(writer, new int[] {profileIndex, parameterIndex}, "PARAMETER_DATA_MODE", parameter.getDataMode());
     writeString(writer, new int[] {profileIndex, parameterIndex}, "STATION_PARAMETERS", parameterName);
 
     List<? extends CommonCalibrationValues> calibrations = parameter.getCalibrations();

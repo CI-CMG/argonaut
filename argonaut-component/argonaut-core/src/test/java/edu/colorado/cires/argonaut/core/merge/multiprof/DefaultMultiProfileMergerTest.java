@@ -22,8 +22,12 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.stream.Streams;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import ucar.nc2.NetcdfFile;
+import ucar.nc2.NetcdfFiles;
+import ucar.nc2.Variable;
 
 public class DefaultMultiProfileMergerTest {
 
@@ -47,7 +51,7 @@ public class DefaultMultiProfileMergerTest {
   }
 
   @Test
-  public void test() throws Exception {
+  public void testContent() throws Exception {
     Path dacPath = Paths.get("src/test/resources/dac/meds/4902704");
 
     List<LocalPathSupplier> pathSuppliers;
@@ -348,6 +352,50 @@ public class DefaultMultiProfileMergerTest {
 
     }
 
+    try (
+        NetcdfFile actual = NetcdfFiles.open(output.toString());
+        NetcdfFile expected = NetcdfFiles.open(dacPath.resolve("4902704_prof.nc").toString());
+    ) {
+      List<Variable> expectedVariables = expected.getVariables();
+      List<Variable> actualVariables = actual.getVariables();
+
+      List<String> actualNames = actualVariables.stream().map(v -> v.getShortName()).toList();
+      List<String> expectedNames = expectedVariables.stream().map(v -> v.getShortName()).toList();
+
+      // simple test for order and size
+      assertEquals(expectedNames, actualNames);
+
+      // now assert on variable details
+      for (int i = 0; i < expectedVariables.size(); i++) {
+        Variable expectedVariable = expectedVariables.get(i);
+        Variable actualVariable = actualVariables.get(i);
+
+        assertEquals(expectedVariable.getShortName(), actualVariable.getShortName());
+        assertEquals(expectedVariable.isScalar(), actualVariable.isScalar());
+        assertEquals(expectedVariable.getDataType(), actualVariable.getDataType());
+        assertEquals(expectedVariable.getParentGroup(), actualVariable.getParentGroup());
+        assertEquals(expectedVariable.getParentStructure(), actualVariable.getParentStructure());
+        assertEquals(expectedVariable.isVariableLength(), actualVariable.isVariableLength());
+        assertEquals(expectedVariable.getDimensions().size(), actualVariable.getDimensions().size());
+
+        if (expectedVariable.getDataType().isString()) {
+          // some French GDAC files have smaller sizes than updated specs.  Assert that the ones Argonaut generates are the same size at a minimum
+          assertTrue(expectedVariable.getDimension(expectedVariable.getDimensions().size() - 1 ).getLength() <= actualVariable.getDimension(expectedVariable.getDimensions().size() - 1).getLength(), "String variable dimensions are not compatible: " + expectedVariable + " " + actualVariable);
+        } else {
+          for (int j = 0; j < expectedVariable.getDimensions().size(); j++) {
+            assertEquals(expectedVariable.getDimension(j), actualVariable.getDimension(j));
+          }
+        }
+
+        assertEquals(Streams.of(expectedVariable.attributes()).toList(), Streams.of(actualVariable.attributes()).toList(),
+            "Attributes do not match: " + expectedVariable.getShortName());
+
+      }
+
+
+    }
+
   }
+
 
 }

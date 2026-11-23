@@ -4,7 +4,6 @@ import java.time.Instant;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.regex.Matcher;
@@ -91,7 +90,7 @@ public final class CommonParameterAttributes {
 
     @Override
     public Float getResolution() {
-      return 0.1f;
+      return 1.0f;
     }
 
     @Override
@@ -968,6 +967,15 @@ public final class CommonParameterAttributes {
       return 0.001f;
     }
 
+    @Override
+    public Float getValidMin() {
+      return -0.2f;
+    }
+
+    @Override
+    public Float getValidMax() {
+      return 100f;
+    }
   };
 
   /*
@@ -1255,6 +1263,15 @@ public final class CommonParameterAttributes {
       return 0.01f;
     }
 
+    @Override
+    public Float getValidMin() {
+      return -5f;
+    }
+
+    @Override
+    public Float getValidMax() {
+      return 600f;
+    }
   };
 
   /*
@@ -1634,6 +1651,15 @@ public final class CommonParameterAttributes {
       return 0.000001f;
     }
 
+    @Override
+    public Float getValidMin() {
+      return -3f;
+    }
+
+    @Override
+    public Float getValidMax() {
+      return 3f;
+    }
   };
 
 
@@ -5639,7 +5665,8 @@ public final class CommonParameterAttributes {
     Dimension nParamDim = builder.addDimension("N_PARAM", dimensions.getParameters());
     Dimension nLevelsDim = builder.addDimension("N_LEVELS", dimensions.getLevels());
     Dimension nCalibDim = builder.addDimension("N_CALIB", dimensions.getCalibrations());
-    Dimension nHistoryDim = dimensions.getHistories() > 0 ? builder.addDimension("N_HISTORY", dimensions.getHistories()) : builder.addUnlimitedDimension("N_HISTORY");
+    Dimension nHistoryDim =
+        dimensions.getHistories() > 0 ? builder.addDimension("N_HISTORY", dimensions.getHistories()) : builder.addUnlimitedDimension("N_HISTORY");
     return new ArgoNetCdfCreatedDimensions(
         dateTimeDim, string256Dim, string64Dim, string32Dim, string16Dim, string8Dim,
         string4Dim, string2Dim, nProfDim, nParamDim, nLevelsDim, nCalibDim,
@@ -5647,291 +5674,399 @@ public final class CommonParameterAttributes {
     );
   }
 
-  public static void addCommonVariables(NetcdfFormatWriter.Builder builder, ArgoNetCdfCreatedDimensions dimensions, List<String> parameterNames) {
+  @FunctionalInterface
+  private interface VariableAdder {
+    void add(ArgoNetCdfCreatedDimensions dimensions, NetcdfFormatWriter.Builder builder, String parameterName);
+  }
 
-    Dimension dateTimeDim = dimensions.getDateTimeDim();
-    Dimension string256Dim = dimensions.getString256Dim();
-    Dimension string64Dim = dimensions.getString64Dim();
-    Dimension string32Dim = dimensions.getString32Dim();
-    Dimension string16Dim = dimensions.getString16Dim();
-    Dimension string8Dim = dimensions.getString8Dim();
-    Dimension string4Dim = dimensions.getString4Dim();
-    Dimension string2Dim = dimensions.getString2Dim();
-    Dimension nProfDim = dimensions.getnProfDim();
-    Dimension nParamDim = dimensions.getnParamDim();
-    Dimension nLevelsDim = dimensions.getnLevelsDim();
-    Dimension nCalibDim = dimensions.getnCalibDim();
-    Dimension nHistoryDim = dimensions.getnHistoryDim();
 
-    builder.addVariable("DATA_TYPE", DataType.CHAR, Collections.singletonList(string32Dim))
-        .addAttribute(new Attribute("_FillValue", " "))
+  public enum ArgoNetCdfVariables {
+
+    DATA_TYPE(
+        (dimensions, builder, parameterName) -> builder.addVariable("DATA_TYPE", DataType.CHAR, Collections.singletonList(dimensions.getString32Dim()))
         .addAttribute(new Attribute("long_name", "Data type"))
-        .addAttribute(new Attribute("conventions", "Argo reference table 1"));
-
-    builder.addVariable("FORMAT_VERSION", DataType.CHAR, Collections.singletonList(string4Dim))
+        .addAttribute(new Attribute("conventions", "Argo reference table 1"))
         .addAttribute(new Attribute("_FillValue", " "))
-        .addAttribute(new Attribute("long_name", "File format version"));
+    ),
 
-    builder.addVariable("HANDBOOK_VERSION", DataType.CHAR, Collections.singletonList(string4Dim))
+    FORMAT_VERSION(
+        (dimensions, builder, parameterName) -> builder.addVariable("FORMAT_VERSION",   DataType.CHAR, Collections.singletonList(dimensions.getString4Dim()))
+        .addAttribute(new Attribute("long_name", "File format version"))
         .addAttribute(new Attribute("_FillValue", " "))
-        .addAttribute(new Attribute("long_name", "Data handbook version"));
+    ),
 
-    builder.addVariable("REFERENCE_DATE_TIME", DataType.CHAR, Collections.singletonList(dateTimeDim))
+
+    HANDBOOK_VERSION(
+        (dimensions, builder, parameterName) -> builder.addVariable("HANDBOOK_VERSION",   DataType.CHAR, Collections.singletonList(dimensions.getString4Dim()))
+        .addAttribute(new Attribute("long_name", "Data handbook version"))
         .addAttribute(new Attribute("_FillValue", " "))
+    ),
+
+    REFERENCE_DATE_TIME(
+        (dimensions, builder, parameterName) -> builder.addVariable("REFERENCE_DATE_TIME",   DataType.CHAR, Collections.singletonList(dimensions.getDateTimeDim()))
         .addAttribute(new Attribute("long_name", "Date of reference for Julian days"))
-        .addAttribute(new Attribute("conventions", "YYYYMMDDHHMISS"));
-
-    builder.addVariable("DATE_CREATION", DataType.CHAR, Collections.singletonList(dateTimeDim))
+        .addAttribute(new Attribute("conventions", "YYYYMMDDHHMISS"))
         .addAttribute(new Attribute("_FillValue", " "))
+    ),
+
+    DATE_CREATION(
+        (dimensions, builder, parameterName) -> builder.addVariable("DATE_CREATION",   DataType.CHAR, Collections.singletonList(dimensions.getDateTimeDim()))
         .addAttribute(new Attribute("long_name", "Date of file creation"))
-        .addAttribute(new Attribute("conventions", "YYYYMMDDHHMISS"));
-
-    builder.addVariable("DATE_UPDATE", DataType.CHAR, Collections.singletonList(dateTimeDim))
+        .addAttribute(new Attribute("conventions", "YYYYMMDDHHMISS"))
         .addAttribute(new Attribute("_FillValue", " "))
+    ),
+
+    DATE_UPDATE(
+        (dimensions, builder, parameterName) -> builder.addVariable("DATE_UPDATE",   DataType.CHAR, Collections.singletonList(dimensions.getDateTimeDim()))
         .addAttribute(new Attribute("long_name", "Date of update of this file"))
-        .addAttribute(new Attribute("conventions", "YYYYMMDDHHMISS"));
-
-    builder.addVariable("PLATFORM_NUMBER", DataType.CHAR, Arrays.asList(nProfDim, string8Dim))
+        .addAttribute(new Attribute("conventions", "YYYYMMDDHHMISS"))
         .addAttribute(new Attribute("_FillValue", " "))
+    ),
+
+    PLATFORM_NUMBER(
+        (dimensions, builder, parameterName) -> builder.addVariable("PLATFORM_NUMBER",   DataType.CHAR, Arrays.asList(dimensions.getnProfDim(), dimensions.getString8Dim()))
         .addAttribute(new Attribute("long_name", "Float unique identifier"))
-        .addAttribute(new Attribute("conventions", "WMO float identifier : A9IIIII"));
-
-    builder.addVariable("PROJECT_NAME", DataType.CHAR, Arrays.asList(nProfDim, string64Dim))
+        .addAttribute(new Attribute("conventions", "WMO float identifier : A9IIIII"))
         .addAttribute(new Attribute("_FillValue", " "))
-        .addAttribute(new Attribute("long_name", "Name of the project"));
+    ),
 
-    builder.addVariable("PI_NAME", DataType.CHAR, Arrays.asList(nProfDim, string64Dim))
+    PROJECT_NAME(
+        (dimensions, builder, parameterName) -> builder.addVariable("PROJECT_NAME",   DataType.CHAR, Arrays.asList(dimensions.getnProfDim(), dimensions.getString64Dim()))
+        .addAttribute(new Attribute("long_name", "Name of the project"))
         .addAttribute(new Attribute("_FillValue", " "))
-        .addAttribute(new Attribute("long_name", "Name of the principal investigator"));
+    ),
 
-    builder.addVariable("VERTICAL_SAMPLING_SCHEME", DataType.CHAR, Arrays.asList(nProfDim, string256Dim))
+    PI_NAME(
+        (dimensions, builder, parameterName) -> builder.addVariable("PI_NAME",   DataType.CHAR, Arrays.asList(dimensions.getnProfDim(), dimensions.getString64Dim()))
+        .addAttribute(new Attribute("long_name", "Name of the principal investigator"))
         .addAttribute(new Attribute("_FillValue", " "))
-        .addAttribute(new Attribute("long_name", "Vertical sampling scheme"))
-        .addAttribute(new Attribute("conventions", "Argo reference table 16"));
+    ),
 
-    builder.addVariable("DATA_STATE_INDICATOR", DataType.CHAR, Arrays.asList(nProfDim, string4Dim))
-        .addAttribute(new Attribute("_FillValue", " "))
-        .addAttribute(new Attribute("long_name", "Degree of processing the data have passed through"))
-        .addAttribute(new Attribute("conventions", "Argo reference table 6"));
-
-    builder.addVariable("STATION_PARAMETERS", DataType.CHAR, Arrays.asList(nProfDim, nParamDim, string64Dim))
-        .addAttribute(new Attribute("_FillValue", " "))
+    STATION_PARAMETERS(
+        (dimensions, builder, parameterName) -> builder.addVariable("STATION_PARAMETERS",   DataType.CHAR, Arrays.asList(dimensions.getnProfDim(), dimensions.getnParamDim(), dimensions.getString64Dim()))
         .addAttribute(new Attribute("long_name", "List of available parameters for the station"))
-        .addAttribute(new Attribute("conventions", "Argo reference table 3"));
+        .addAttribute(new Attribute("conventions", "Argo reference table 3"))
+        .addAttribute(new Attribute("_FillValue", " "))
+    ),
 
-    builder.addVariable("CYCLE_NUMBER", DataType.INT, Collections.singletonList(nProfDim))
-        .addAttribute(new Attribute("_FillValue", 99999))
+    CYCLE_NUMBER(
+        (dimensions, builder, parameterName) -> builder.addVariable("CYCLE_NUMBER",   DataType.INT, Collections.singletonList(dimensions.getnProfDim()))
         .addAttribute(new Attribute("long_name", "Float cycle number"))
-        .addAttribute(new Attribute("conventions", "0...N, 0 : launch cycle (if exists), 1 : first complete cycle"));
+        .addAttribute(new Attribute("conventions", "0...N, 0 : launch cycle (if exists), 1 : first complete cycle"))
+        .addAttribute(new Attribute("_FillValue", 99999))
+    ),
 
-    builder.addVariable("DIRECTION", DataType.CHAR, Collections.singletonList(nProfDim))
+    DIRECTION(
+        (dimensions, builder, parameterName) -> builder.addVariable("DIRECTION",   DataType.CHAR, Collections.singletonList(dimensions.getnProfDim()))
+        .addAttribute(new Attribute("long_name", "Direction of the station profiles"))
+        .addAttribute(new Attribute("conventions", "A: ascending profiles, D: descending profiles"))
         .addAttribute(new Attribute("_FillValue", " "))
-        .addAttribute(new Attribute("long_name", "Direction of the station profile"))
-        .addAttribute(new Attribute("conventions", "A: ascending profiles, D: descending profiles"));
+    ),
 
-    builder.addVariable("DATA_CENTRE", DataType.CHAR, Arrays.asList(nProfDim, string2Dim))
-        .addAttribute(new Attribute("_FillValue", " "))
+    DATA_CENTRE(
+        (dimensions, builder, parameterName) -> builder.addVariable("DATA_CENTRE",   DataType.CHAR, Arrays.asList(dimensions.getnProfDim(), dimensions.getString2Dim()))
         .addAttribute(new Attribute("long_name", "Data centre in charge of float data processing"))
-        .addAttribute(new Attribute("conventions", "Argo reference table 4"));
-
-    builder.addVariable("DC_REFERENCE", DataType.CHAR, Arrays.asList(nProfDim, string32Dim))
+        .addAttribute(new Attribute("conventions", "Argo reference table 4"))
         .addAttribute(new Attribute("_FillValue", " "))
+    ),
+
+    DC_REFERENCE(
+        (dimensions, builder, parameterName) -> builder.addVariable("DC_REFERENCE",   DataType.CHAR, Arrays.asList(dimensions.getnProfDim(), dimensions.getString32Dim()))
         .addAttribute(new Attribute("long_name", "Station unique identifier in data centre"))
-        .addAttribute(new Attribute("conventions", "Data centre convention"));
-
-    builder.addVariable("PARAMETER_DATA_MODE", DataType.CHAR, Arrays.asList(nProfDim, nParamDim))
+        .addAttribute(new Attribute("conventions", "Data centre convention"))
         .addAttribute(new Attribute("_FillValue", " "))
+    ),
+
+    DATA_STATE_INDICATOR(
+        (dimensions, builder, parameterName) -> builder.addVariable("DATA_STATE_INDICATOR",   DataType.CHAR, Arrays.asList(dimensions.getnProfDim(), dimensions.getString4Dim()))
+        .addAttribute(new Attribute("long_name", "Degree of processing the data have passed through"))
+        .addAttribute(new Attribute("conventions", "Argo reference table 6"))
+        .addAttribute(new Attribute("_FillValue", " "))
+    ),
+
+    DATA_MODE(
+        (dimensions, builder, parameterName)  -> builder.addVariable("DATA_MODE",   DataType.CHAR, Arrays.asList(dimensions.getnProfDim()))
         .addAttribute(new Attribute("long_name", "Delayed mode or real time data"))
-        .addAttribute(new Attribute("conventions", "R : real time; D : delayed mode; A : real time with adjustment"));
-
-    builder.addVariable("PLATFORM_TYPE", DataType.CHAR, Arrays.asList(nProfDim, string32Dim))
+        .addAttribute(new Attribute("conventions", "R : real time; D : delayed mode; A : real time with adjustment"))
         .addAttribute(new Attribute("_FillValue", " "))
+    ),
+
+    PLATFORM_TYPE(
+        (dimensions, builder, parameterName) -> builder.addVariable("PLATFORM_TYPE",   DataType.CHAR, Arrays.asList(dimensions.getnProfDim(), dimensions.getString32Dim()))
         .addAttribute(new Attribute("long_name", "Type of float"))
-        .addAttribute(new Attribute("conventions", "Argo reference table 23"));
-
-    builder.addVariable("FLOAT_SERIAL_NO", DataType.CHAR, Arrays.asList(nProfDim, string32Dim))
+        .addAttribute(new Attribute("conventions", "Argo reference table 23"))
         .addAttribute(new Attribute("_FillValue", " "))
-        .addAttribute(new Attribute("long_name", "Serial number of the float"));
+    ),
 
-    builder.addVariable("FIRMWARE_VERSION", DataType.CHAR, Arrays.asList(nProfDim, string32Dim))
+    FLOAT_SERIAL_NO(
+        (dimensions, builder, parameterName) -> builder.addVariable("FLOAT_SERIAL_NO",   DataType.CHAR, Arrays.asList(dimensions.getnProfDim(), dimensions.getString32Dim()))
+        .addAttribute(new Attribute("long_name", "Serial number of the float"))
         .addAttribute(new Attribute("_FillValue", " "))
-        .addAttribute(new Attribute("long_name", "Instrument firmware version"));
+    ),
 
-    builder.addVariable("WMO_INST_TYPE", DataType.CHAR, Arrays.asList(nProfDim, string4Dim))
+    FIRMWARE_VERSION(
+        (dimensions, builder, parameterName) -> builder.addVariable("FIRMWARE_VERSION",   DataType.CHAR, Arrays.asList(dimensions.getnProfDim(), dimensions.getString32Dim()))
+        .addAttribute(new Attribute("long_name", "Instrument firmware version"))
         .addAttribute(new Attribute("_FillValue", " "))
+    ),
+
+    WMO_INST_TYPE(
+        (dimensions, builder, parameterName) -> builder.addVariable("WMO_INST_TYPE",   DataType.CHAR, Arrays.asList(dimensions.getnProfDim(), dimensions.getString4Dim()))
         .addAttribute(new Attribute("long_name", "Coded instrument type"))
-        .addAttribute(new Attribute("conventions", "Argo reference table 8"));
-
-    builder.addVariable("DATA_MODE", DataType.CHAR, Arrays.asList(nProfDim))
+        .addAttribute(new Attribute("conventions", "Argo reference table 8"))
         .addAttribute(new Attribute("_FillValue", " "))
-        .addAttribute(new Attribute("long_name", "Delayed mode or real time data"))
-        .addAttribute(new Attribute("conventions", "R : real time; D : delayed mode; A : real time with adjustment"));
+    ),
 
-    builder.addVariable("JULD", DataType.DOUBLE, Arrays.asList(nProfDim))
-        .addAttribute(new Attribute("_FillValue", 999999d))
+    JULD(
+        (dimensions, builder, parameterName) -> builder.addVariable("JULD",   DataType.DOUBLE, Arrays.asList(dimensions.getnProfDim()))
         .addAttribute(new Attribute("long_name", "Julian day (UTC) of the station relative to REFERENCE_DATE_TIME"))
         .addAttribute(new Attribute("standard_name", "time"))
         .addAttribute(new Attribute("units", "days since 1950-01-01 00:00:00 UTC"))
         .addAttribute(new Attribute("conventions", "Relative julian days with decimal part (as parts of day)"))
-        .addAttribute(new Attribute("axis", "T"))
-        .addAttribute(new Attribute("resolution", 1.0E-5));
-
-    builder.addVariable("JULD_QC", DataType.CHAR, Arrays.asList(nProfDim))
-        .addAttribute(new Attribute("_FillValue", " "))
-        .addAttribute(new Attribute("long_name", "Quality on date and time"))
-        .addAttribute(new Attribute("conventions", "Argo reference table 2"));
-
-    builder.addVariable("JULD_LOCATION", DataType.DOUBLE, Arrays.asList(nProfDim))
-        .addAttribute(new Attribute("resolution", 1.0E-5))
+        .addAttribute(new Attribute("resolution", 0.0))
         .addAttribute(new Attribute("_FillValue", 999999d))
+        .addAttribute(new Attribute("axis", "T"))
+    ),
+
+    JULD_QC((dimensions, builder, parameterName) -> builder.addVariable("JULD_QC",   DataType.CHAR, Arrays.asList(dimensions.getnProfDim()))
+        .addAttribute(new Attribute("long_name", "Quality on date and time"))
+        .addAttribute(new Attribute("conventions", "Argo reference table 2"))
+        .addAttribute(new Attribute("_FillValue", " "))
+    ),
+
+    JULD_LOCATION(
+        (dimensions, builder, parameterName) -> builder.addVariable("JULD_LOCATION",   DataType.DOUBLE, Arrays.asList(dimensions.getnProfDim()))
         .addAttribute(new Attribute("long_name", "Julian day (UTC) of the location relative to REFERENCE_DATE_TIME"))
         .addAttribute(new Attribute("units", "days since 1950-01-01 00:00:00 UTC"))
-        .addAttribute(new Attribute("conventions", "Relative julian days with decimal part (as parts of day)"));
-
-    builder.addVariable("LATITUDE", DataType.DOUBLE, Arrays.asList(nProfDim))
+        .addAttribute(new Attribute("conventions", "Relative julian days with decimal part (as parts of day)"))
+        .addAttribute(new Attribute("resolution", 0.0))
         .addAttribute(new Attribute("_FillValue", 999999d))
+    ),
+
+    LATITUDE(
+        (dimensions, builder, parameterName) -> builder.addVariable("LATITUDE",   DataType.DOUBLE, Arrays.asList(dimensions.getnProfDim()))
         .addAttribute(new Attribute("long_name", "Latitude of the station, best estimate"))
         .addAttribute(new Attribute("standard_name", "latitude"))
         .addAttribute(new Attribute("units", "degree_north"))
+        .addAttribute(new Attribute("_FillValue", 99999d))
         .addAttribute(new Attribute("valid_min", -90d))
         .addAttribute(new Attribute("valid_max", 90d))
-        .addAttribute(new Attribute("axis", "Y"));
+        .addAttribute(new Attribute("axis", "Y"))
+    ),
 
-    builder.addVariable("LONGITUDE", DataType.DOUBLE, Arrays.asList(nProfDim))
-        .addAttribute(new Attribute("_FillValue", 999999d))
+    LONGITUDE(
+        (dimensions, builder, parameterName) -> builder.addVariable("LONGITUDE",   DataType.DOUBLE, Arrays.asList(dimensions.getnProfDim()))
         .addAttribute(new Attribute("long_name", "Longitude of the station, best estimate"))
         .addAttribute(new Attribute("standard_name", "longitude"))
-        .addAttribute(new Attribute("units", "degree_north"))
+        .addAttribute(new Attribute("units", "degree_east"))
+        .addAttribute(new Attribute("_FillValue", 99999d))
         .addAttribute(new Attribute("valid_min", -180d))
         .addAttribute(new Attribute("valid_max", 180d))
-        .addAttribute(new Attribute("axis", "X"));
+        .addAttribute(new Attribute("axis", "X"))
+    ),
 
-    builder.addVariable("POSITION_QC", DataType.CHAR, Arrays.asList(nProfDim))
-        .addAttribute(new Attribute("_FillValue", " "))
+    POSITION_QC(
+        (dimensions, builder, parameterName) -> builder.addVariable("POSITION_QC",   DataType.CHAR, Arrays.asList(dimensions.getnProfDim()))
         .addAttribute(new Attribute("long_name", "Quality on position (latitude and longitude)"))
-        .addAttribute(new Attribute("conventions", "Argo reference table 2"));
-
-    builder.addVariable("POSITIONING_SYSTEM", DataType.CHAR, Arrays.asList(nProfDim, string8Dim))
+        .addAttribute(new Attribute("conventions", "Argo reference table 2"))
         .addAttribute(new Attribute("_FillValue", " "))
-        .addAttribute(new Attribute("long_name", "Positioning system"));
+    ),
 
-    builder.addVariable("CONFIG_MISSION_NUMBER", DataType.INT, Arrays.asList(nProfDim))
-        .addAttribute(new Attribute("_FillValue", 99999))
+    POSITIONING_SYSTEM(
+        (dimensions, builder, parameterName) -> builder.addVariable("POSITIONING_SYSTEM",   DataType.CHAR, Arrays.asList(dimensions.getnProfDim(), dimensions.getString8Dim()))
+        .addAttribute(new Attribute("long_name", "Positioning system"))
+        .addAttribute(new Attribute("_FillValue", " "))
+    ),
+
+    PROFILE_QC((dimensions, builder, parameterName) -> {
+        String shortName = "PROFILE_" + parameterName + "_QC";
+        builder.addVariable(shortName,   DataType.CHAR, Arrays.asList(dimensions.getnProfDim()))
+            .addAttribute(new Attribute("long_name", "Global quality flag of " + parameterName + " profile"))
+            .addAttribute(new Attribute("conventions", "Argo reference table 2a"))
+            .addAttribute(new Attribute("_FillValue", " "));
+    }),
+
+
+    VERTICAL_SAMPLING_SCHEME(
+        (dimensions, builder, parameterName) -> builder.addVariable("VERTICAL_SAMPLING_SCHEME",   DataType.CHAR, Arrays.asList(dimensions.getnProfDim(), dimensions.getString256Dim()))
+        .addAttribute(new Attribute("long_name", "Vertical sampling scheme"))
+        .addAttribute(new Attribute("conventions", "Argo reference table 16"))
+        .addAttribute(new Attribute("_FillValue", " "))
+    ),
+
+    CONFIG_MISSION_NUMBER(
+        (dimensions, builder, parameterName) -> builder.addVariable("CONFIG_MISSION_NUMBER",   DataType.INT, Arrays.asList(dimensions.getnProfDim()))
         .addAttribute(new Attribute("long_name", "Unique number denoting the missions performed by the float"))
-        .addAttribute(new Attribute("conventions", "1...N, 1 : first complete mission"));
+        .addAttribute(new Attribute("conventions", "1...N, 1 : first complete mission"))
+        .addAttribute(new Attribute("_FillValue", 99999))
+    ),
 
-    builder.addVariable("PARAMETER", DataType.CHAR, Arrays.asList(nProfDim, nCalibDim, nParamDim, string64Dim))
-        .addAttribute(new Attribute("_FillValue", " "))
-        .addAttribute(new Attribute("long_name", "List of parameters with calibration information"))
-        .addAttribute(new Attribute("conventions", "Argo reference table 3"));
+    PARAMETER_VAR((dimensions, builder, parameterName) -> NetCdfWriteUtils.buildParameterVariable(builder, parameterName, dimensions.getnProfDim(), dimensions.getnLevelsDim())),
 
-    builder.addVariable("SCIENTIFIC_CALIB_EQUATION", DataType.CHAR, Arrays.asList(nProfDim, nCalibDim, nParamDim, string256Dim))
-        .addAttribute(new Attribute("_FillValue", " "))
-        .addAttribute(new Attribute("long_name", "Calibration equation for this parameter"))
-        .addAttribute(new Attribute("conventions", "Argo reference table 3"));
+    PARAMETER_VAR_QC(
+        (dimensions, builder, parameterName) -> builder.addVariable(parameterName + "_QC", DataType.CHAR, Arrays.asList(dimensions.getnProfDim(), dimensions.getnLevelsDim()))
+            .addAttribute(new Attribute("long_name", "quality flag"))
+            .addAttribute(new Attribute("conventions", "Argo reference table 2"))
+            .addAttribute(new Attribute("_FillValue", " "))
+    ),
 
-    builder.addVariable("SCIENTIFIC_CALIB_COEFFICIENT", DataType.CHAR, Arrays.asList(nProfDim, nCalibDim, nParamDim, string256Dim))
-        .addAttribute(new Attribute("_FillValue", " "))
-        .addAttribute(new Attribute("long_name", "Calibration coefficients for this equation"))
-        .addAttribute(new Attribute("conventions", "Argo reference table 3"));
-
-    builder.addVariable("SCIENTIFIC_CALIB_COMMENT", DataType.CHAR, Arrays.asList(nProfDim, nCalibDim, nParamDim, string256Dim))
-        .addAttribute(new Attribute("_FillValue", " "))
-        .addAttribute(new Attribute("long_name", "Comment applying to this parameter calibration"));
-
-    builder.addVariable("SCIENTIFIC_CALIB_DATE", DataType.CHAR, Arrays.asList(nProfDim, nCalibDim, nParamDim, dateTimeDim))
-        .addAttribute(new Attribute("_FillValue", " "))
-        .addAttribute(new Attribute("long_name", "Date of calibration"))
-        .addAttribute(new Attribute("conventions", "YYYYMMDDHHMISS"));
-
-    builder.addVariable("HISTORY_REFERENCE", DataType.CHAR, Arrays.asList(nHistoryDim, nProfDim, string64Dim))
-        .addAttribute(new Attribute("_FillValue", " "))
-        .addAttribute(new Attribute("long_name", "Reference of database"))
-        .addAttribute(new Attribute("conventions", "Institution dependent"));
-
-    builder.addVariable("HISTORY_INSTITUTION", DataType.CHAR, Arrays.asList(nHistoryDim, nProfDim, string4Dim))
-        .addAttribute(new Attribute("_FillValue", " "))
-        .addAttribute(new Attribute("long_name", "Institution which performed action"))
-        .addAttribute(new Attribute("conventions", "Argo reference table 4"));
-
-    builder.addVariable("HISTORY_STEP", DataType.CHAR, Arrays.asList(nHistoryDim, nProfDim, string4Dim))
-        .addAttribute(new Attribute("_FillValue", " "))
-        .addAttribute(new Attribute("long_name", "Step in data processing"))
-        .addAttribute(new Attribute("conventions", "Argo reference table 12"));
-
-    builder.addVariable("HISTORY_SOFTWARE", DataType.CHAR, Arrays.asList(nHistoryDim, nProfDim, string4Dim))
-        .addAttribute(new Attribute("_FillValue", " "))
-        .addAttribute(new Attribute("long_name", "Name of software which performed action"))
-        .addAttribute(new Attribute("conventions", "Institution dependent"));
-
-    builder.addVariable("HISTORY_SOFTWARE_RELEASE", DataType.CHAR, Arrays.asList(nHistoryDim, nProfDim, string4Dim))
-        .addAttribute(new Attribute("_FillValue", " "))
-        .addAttribute(new Attribute("long_name", "Version/release of software which performed action"))
-        .addAttribute(new Attribute("conventions", "Institution dependent"));
-
-    builder.addVariable("HISTORY_ACTION", DataType.CHAR, Arrays.asList(nHistoryDim, nProfDim, string4Dim))
-        .addAttribute(new Attribute("_FillValue", " "))
-        .addAttribute(new Attribute("long_name", "Action performed on data"))
-        .addAttribute(new Attribute("conventions", "Argo reference table 7"));
-
-    builder.addVariable("HISTORY_PARAMETER", DataType.CHAR, Arrays.asList(nHistoryDim, nProfDim, string16Dim))
-        .addAttribute(new Attribute("_FillValue", " "))
-        .addAttribute(new Attribute("long_name", "Station parameter action is performed on"))
-        .addAttribute(new Attribute("conventions", "Argo reference table 3"));
-
-    builder.addVariable("HISTORY_QCTEST", DataType.CHAR, Arrays.asList(nHistoryDim, nProfDim, string16Dim))
-        .addAttribute(new Attribute("_FillValue", " "))
-        .addAttribute(new Attribute("long_name", "Documentation of tests performed, tests failed (in hex form)"))
-        .addAttribute(new Attribute("conventions", "Write tests performed when ACTION=QCP$; tests failed when ACTION=QCF$"));
-
-    builder.addVariable("HISTORY_DATE", DataType.CHAR, Arrays.asList(nHistoryDim, nProfDim, dateTimeDim))
-        .addAttribute(new Attribute("_FillValue", " "))
-        .addAttribute(new Attribute("long_name", "Date the history record was created"))
-        .addAttribute(new Attribute("conventions", "YYYYMMDDHHMISS"));
-
-    builder.addVariable("HISTORY_START_PRES", DataType.FLOAT, Arrays.asList(nHistoryDim, nProfDim))
-        .addAttribute(new Attribute("_FillValue", 99999f))
-        .addAttribute(new Attribute("long_name", "Start pressure action applied on"))
-        .addAttribute(new Attribute("units", "decibar"));
-
-    builder.addVariable("HISTORY_STOP_PRES", DataType.FLOAT, Arrays.asList(nHistoryDim, nProfDim))
-        .addAttribute(new Attribute("_FillValue", 99999f))
-        .addAttribute(new Attribute("long_name", "Stop pressure action applied on"))
-        .addAttribute(new Attribute("units", "decibar"));
-
-    builder.addVariable("HISTORY_PREVIOUS_VALUE", DataType.FLOAT, Arrays.asList(nHistoryDim, nProfDim))
-        .addAttribute(new Attribute("_FillValue", 99999f))
-        .addAttribute(new Attribute("long_name", "Parameter/Flag previous value before action"))
-        .addAttribute(new Attribute("units", "decibar"));
-
-    for (String parameterName : parameterNames) {
-      builder.addVariable("PROFILE_" + parameterName + "_QC", DataType.CHAR, Arrays.asList(nProfDim))
-          .addAttribute(new Attribute("long_name", "Global quality flag of " + parameterName + " profile"))
-          .addAttribute(new Attribute("conventions", "Argo reference table 2a"))
-          .addAttribute(new Attribute("_FillValue", " "));
-
-      NetCdfWriteUtils.buildParameterVariable(builder, parameterName, nProfDim, nLevelsDim);
-
-      builder.addVariable(parameterName + "_QC", DataType.CHAR, Arrays.asList(nProfDim, nLevelsDim))
-          .addAttribute(new Attribute("long_name", "quality flag"))
-          .addAttribute(new Attribute("conventions", "Argo reference table 2"))
-          .addAttribute(new Attribute("_FillValue", " "));
-
-      NetCdfWriteUtils.buildParameterVariable(builder, parameterName, "ADJUSTED", nProfDim, nLevelsDim);
-
-      builder.addVariable(parameterName + "_ADJUSTED_QC", DataType.CHAR, Arrays.asList(nProfDim, nLevelsDim))
-          .addAttribute(new Attribute("long_name", "quality flag"))
-          .addAttribute(new Attribute("conventions", "Argo reference table 2"))
-          .addAttribute(new Attribute("_FillValue", " "));
-
-      builder.addVariable(parameterName + "_ADJUSTED_ERROR", DataType.FLOAT, Arrays.asList(nProfDim, nLevelsDim))
-          .addAttribute(new Attribute("long_name", "Contains the error on the adjusted values as determined by the delayed mode QC process"))
+    PARAMETER_VAR_DPRESS(
+        (dimensions, builder, parameterName) -> builder.addVariable(parameterName + "_dPRES", DataType.FLOAT, Arrays.asList(dimensions.getnProfDim(), dimensions.getnLevelsDim()))
+          .addAttribute(new Attribute("long_name", parameterName + " pressure displacement from original sampled value"))
           .addAttribute(new Attribute("_FillValue", 99999f))
           .addAttribute(new Attribute("units", "decibar"))
-          .addAttribute(new Attribute("C_format", "%.3f"))
-          .addAttribute(new Attribute("FORTRAN_format", "F.3"))
-          .addAttribute(new Attribute("resolution", 0.001f));
+    ),
+
+    PARAMETER_VAR_ADJUSTED((dimensions, builder, parameterName) -> NetCdfWriteUtils.buildParameterVariable(builder, parameterName, "ADJUSTED", dimensions.getnProfDim(), dimensions.getnLevelsDim())),
+
+    PARAMETER_VAR_ADJUSTED_QC(
+        (dimensions, builder, parameterName) -> builder.addVariable(parameterName + "_ADJUSTED_QC", DataType.CHAR, Arrays.asList(dimensions.getnProfDim(), dimensions.getnLevelsDim()))
+                .addAttribute(new Attribute("long_name", "quality flag"))
+                .addAttribute(new Attribute("conventions", "Argo reference table 2"))
+                .addAttribute(new Attribute("_FillValue", " "))
+    ),
+
+    PARAMETER_VAR_ADJUSTED_ERROR(
+        (dimensions, builder, parameterName) -> {
+            ParameterAttributes<Float> attributes = CommonParameterAttributes.getParameterAttributes(parameterName);
+
+            builder.addVariable(parameterName + "_ADJUSTED_ERROR", DataType.FLOAT, Arrays.asList(dimensions.getnProfDim(), dimensions.getnLevelsDim()))
+                .addAttribute(new Attribute("long_name", "Contains the error on the adjusted values as determined by the delayed mode QC process"))
+                .addAttribute(new Attribute("_FillValue", 99999f))
+                .addAttribute(new Attribute("units", attributes.getUnits()))
+                .addAttribute(new Attribute("C_format", attributes.getCFormat()))
+                .addAttribute(new Attribute("FORTRAN_format", attributes.getFortranFormat()))
+                .addAttribute(new Attribute("resolution", attributes.getResolution()));
+        }
+    ),
+
+    PARAMETER(
+        (dimensions, builder, parameterName) -> builder.addVariable("PARAMETER",   DataType.CHAR, Arrays.asList(dimensions.getnProfDim(), dimensions.getnCalibDim(), dimensions.getnParamDim(), dimensions.getString64Dim()))
+        .addAttribute(new Attribute("long_name", "List of parameters with calibration information"))
+        .addAttribute(new Attribute("conventions", "Argo reference table 3"))
+        .addAttribute(new Attribute("_FillValue", " "))
+    ),
+
+    SCIENTIFIC_CALIB_EQUATION(
+            (dimensions, builder, parameterName) -> builder.addVariable("SCIENTIFIC_CALIB_EQUATION",   DataType.CHAR, Arrays.asList(dimensions.getnProfDim(), dimensions.getnCalibDim(), dimensions.getnParamDim(), dimensions.getString256Dim()))
+        .addAttribute(new Attribute("long_name", "Calibration equation for this parameter"))
+        .addAttribute(new Attribute("_FillValue", " "))
+    ),
+
+    SCIENTIFIC_CALIB_COEFFICIENT(
+        (dimensions, builder, parameterName) -> builder.addVariable("SCIENTIFIC_CALIB_COEFFICIENT",   DataType.CHAR, Arrays.asList(dimensions.getnProfDim(), dimensions.getnCalibDim(), dimensions.getnParamDim(), dimensions.getString256Dim()))
+        .addAttribute(new Attribute("long_name", "Calibration coefficients for this equation"))
+        .addAttribute(new Attribute("_FillValue", " "))
+    ),
+
+    SCIENTIFIC_CALIB_COMMENT((dimensions, builder, parameterName) -> builder.addVariable("SCIENTIFIC_CALIB_COMMENT",   DataType.CHAR, Arrays.asList(dimensions.getnProfDim(), dimensions.getnCalibDim(), dimensions.getnParamDim(), dimensions.getString256Dim()))
+        .addAttribute(new Attribute("long_name", "Comment applying to this parameter calibration"))
+        .addAttribute(new Attribute("_FillValue", " "))
+    ),
+
+    SCIENTIFIC_CALIB_DATE(
+        (dimensions, builder, parameterName) -> builder.addVariable("SCIENTIFIC_CALIB_DATE",   DataType.CHAR, Arrays.asList(dimensions.getnProfDim(), dimensions.getnCalibDim(), dimensions.getnParamDim(), dimensions.getDateTimeDim()))
+        .addAttribute(new Attribute("long_name", "Date of calibration"))
+        .addAttribute(new Attribute("conventions", "YYYYMMDDHHMISS"))
+        .addAttribute(new Attribute("_FillValue", " "))
+    ),
+
+    HISTORY_INSTITUTION(
+        (dimensions, builder, parameterName) -> builder.addVariable("HISTORY_INSTITUTION",   DataType.CHAR, Arrays.asList(dimensions.getnHistoryDim(), dimensions.getnProfDim(), dimensions.getString4Dim()))
+        .addAttribute(new Attribute("long_name", "Institution which performed action"))
+        .addAttribute(new Attribute("conventions", "Argo reference table 4"))
+        .addAttribute(new Attribute("_FillValue", " "))
+    ),
+
+    HISTORY_STEP(
+        (dimensions, builder, parameterName) -> builder.addVariable("HISTORY_STEP",   DataType.CHAR, Arrays.asList(dimensions.getnHistoryDim(), dimensions.getnProfDim(), dimensions.getString4Dim()))
+        .addAttribute(new Attribute("long_name", "Step in data processing"))
+        .addAttribute(new Attribute("conventions", "Argo reference table 12"))
+        .addAttribute(new Attribute("_FillValue", " "))
+    ),
+
+    HISTORY_SOFTWARE((dimensions, builder, parameterName) -> builder.addVariable("HISTORY_SOFTWARE",   DataType.CHAR, Arrays.asList(dimensions.getnHistoryDim(), dimensions.getnProfDim(), dimensions.getString4Dim()))
+        .addAttribute(new Attribute("long_name", "Name of software which performed action"))
+        .addAttribute(new Attribute("conventions", "Institution dependent"))
+        .addAttribute(new Attribute("_FillValue", " "))
+    ),
+
+    HISTORY_SOFTWARE_RELEASE(
+        (dimensions, builder, parameterName) -> builder.addVariable("HISTORY_SOFTWARE_RELEASE",   DataType.CHAR, Arrays.asList(dimensions.getnHistoryDim(), dimensions.getnProfDim(), dimensions.getString4Dim()))
+        .addAttribute(new Attribute("long_name", "Version/release of software which performed action"))
+        .addAttribute(new Attribute("conventions", "Institution dependent"))
+        .addAttribute(new Attribute("_FillValue", " "))
+    ),
+
+    HISTORY_REFERENCE(
+        (dimensions, builder, parameterName) -> builder.addVariable("HISTORY_REFERENCE",   DataType.CHAR, Arrays.asList(dimensions.getnHistoryDim(), dimensions.getnProfDim(), dimensions.getString64Dim()))
+        .addAttribute(new Attribute("long_name", "Reference of database"))
+        .addAttribute(new Attribute("conventions", "Institution dependent"))
+        .addAttribute(new Attribute("_FillValue", " "))
+    ),
+
+    HISTORY_DATE((dimensions, builder, parameterName) -> builder.addVariable("HISTORY_DATE",   DataType.CHAR, Arrays.asList(dimensions.getnHistoryDim(), dimensions.getnProfDim(), dimensions.getDateTimeDim()))
+        .addAttribute(new Attribute("long_name", "Date the history record was created"))
+        .addAttribute(new Attribute("conventions", "YYYYMMDDHHMISS"))
+        .addAttribute(new Attribute("_FillValue", " "))
+    ),
+
+    HISTORY_ACTION((dimensions, builder, parameterName) -> builder.addVariable("HISTORY_ACTION",   DataType.CHAR, Arrays.asList(dimensions.getnHistoryDim(), dimensions.getnProfDim(), dimensions.getString4Dim()))
+        .addAttribute(new Attribute("long_name", "Action performed on data"))
+        .addAttribute(new Attribute("conventions", "Argo reference table 7"))
+        .addAttribute(new Attribute("_FillValue", " "))
+    ),
+
+    HISTORY_PARAMETER((dimensions, builder, parameterName) -> builder.addVariable("HISTORY_PARAMETER",   DataType.CHAR, Arrays.asList(dimensions.getnHistoryDim(), dimensions.getnProfDim(), dimensions.getString16Dim()))
+        .addAttribute(new Attribute("long_name", "Station parameter action is performed on"))
+        .addAttribute(new Attribute("conventions", "Argo reference table 3"))
+        .addAttribute(new Attribute("_FillValue", " "))
+    ),
+
+    HISTORY_START_PRES((dimensions, builder, parameterName) -> builder.addVariable("HISTORY_START_PRES",   DataType.FLOAT, Arrays.asList(dimensions.getnHistoryDim(), dimensions.getnProfDim()))
+        .addAttribute(new Attribute("long_name", "Start pressure action applied on"))
+        .addAttribute(new Attribute("_FillValue", 99999f))
+        .addAttribute(new Attribute("units", "decibar"))
+    ),
+
+    HISTORY_STOP_PRES(
+        (dimensions, builder, parameterName) -> builder.addVariable("HISTORY_STOP_PRES",   DataType.FLOAT, Arrays.asList(dimensions.getnHistoryDim(), dimensions.getnProfDim()))
+        .addAttribute(new Attribute("long_name", "Stop pressure action applied on"))
+        .addAttribute(new Attribute("_FillValue", 99999f))
+        .addAttribute(new Attribute("units", "decibar"))
+    ),
+
+    HISTORY_PREVIOUS_VALUE((dimensions, builder, parameterName) -> builder.addVariable("HISTORY_PREVIOUS_VALUE",   DataType.FLOAT, Arrays.asList(dimensions.getnHistoryDim(), dimensions.getnProfDim()))
+        .addAttribute(new Attribute("long_name", "Parameter/Flag previous value before action"))
+        .addAttribute(new Attribute("_FillValue", 99999f))
+    ),
+
+    HISTORY_QCTEST(
+        (dimensions, builder, parameterName) -> builder.addVariable("HISTORY_QCTEST",   DataType.CHAR, Arrays.asList(dimensions.getnHistoryDim(), dimensions.getnProfDim(), dimensions.getString16Dim()))
+        .addAttribute(new Attribute("long_name", "Documentation of tests performed, tests failed (in hex form)"))
+        .addAttribute(new Attribute("conventions", "Write tests performed when ACTION=QCP$; tests failed when ACTION=QCF$"))
+        .addAttribute(new Attribute("_FillValue", " "))
+    ),
+
+    PARAMETER_DATA_MODE(
+        (dimensions, builder, parameterName) -> builder.addVariable("PARAMETER_DATA_MODE", DataType.CHAR, Arrays.asList(dimensions.getnProfDim(), dimensions.getnParamDim()))
+        .addAttribute(new Attribute("_FillValue", " "))
+        .addAttribute(new Attribute("long_name", "Delayed mode or real time data"))
+        .addAttribute(new Attribute("conventions", "R : real time; D : delayed mode; A : real time with adjustment"))
+    );
+
+    private final VariableAdder adder;
+    ArgoNetCdfVariables(VariableAdder adder) {
+      this.adder = adder;
     }
 
+    public void addToNetCdf(ArgoNetCdfCreatedDimensions dimensions, NetcdfFormatWriter.Builder builder, String parameterName) {
+      adder.add(dimensions, builder, parameterName);
+    }
+
+    public void addToNetCdf(ArgoNetCdfCreatedDimensions dimensions, NetcdfFormatWriter.Builder builder) {
+      addToNetCdf(dimensions, builder, null);
+    }
   }
+
 }
