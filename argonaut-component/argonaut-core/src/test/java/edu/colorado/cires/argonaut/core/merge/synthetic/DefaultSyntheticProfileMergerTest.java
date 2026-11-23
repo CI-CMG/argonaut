@@ -17,16 +17,18 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.List;
-import java.util.function.BiConsumer;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.stream.Streams;
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Named;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import ucar.nc2.NetcdfFile;
+import ucar.nc2.NetcdfFiles;
+import ucar.nc2.Variable;
 
 class DefaultSyntheticProfileMergerTest {
 
@@ -74,13 +76,16 @@ class DefaultSyntheticProfileMergerTest {
         "src/test/resources/dac/coriolis/6901486/profiles/BD6901486_037.nc",
         "src/test/resources/dac/coriolis/6901486/6901486_meta.nc",
         "src/test/resources/dac/coriolis/6901486/profiles/SD6901486_037.nc")),
-      Named.of("extrapolate out of bounds 2", new TestCase("src/test/resources/dac/bdoc/6901174/profiles/D6901174_143.nc",
-        "src/test/resources/dac/bdoc/6901174/profiles/BD6901174_143.nc",
-        "src/test/resources/dac/bdoc/6901174/6901174_meta.nc",
-        "src/test/resources/dac/bdoc/6901174/profiles/SD6901174_143.nc"))
+      Named.of("extrapolate out of bounds 2", new TestCase("src/test/resources/dac/bodc/6901174/profiles/D6901174_143.nc",
+        "src/test/resources/dac/bodc/6901174/profiles/BD6901174_143.nc",
+        "src/test/resources/dac/bodc/6901174/6901174_meta.nc",
+        "src/test/resources/dac/bodc/6901174/profiles/SD6901174_143.nc"))
     );
   }
 
+  /*
+    Leaving this unused method here for future use.  This can point to a dac directory and start performing comparisons.
+   */
   private static Stream<Named<TestCase>> dacTestCases() throws IOException {
     Path basePath = Paths.get("---CHANGE TO LOCAL DAC PATH---");
     return Files.walk(basePath, 2)
@@ -233,6 +238,71 @@ class DefaultSyntheticProfileMergerTest {
       ArgoSyntheticProfileV13Parameter nitrate = parameters.stream().filter(p -> p.getParameterName().equals("NITRATE")).findFirst().orElse(null);
       ArgoSyntheticProfileV13Parameter expectedNitrate = expectedParameters.stream().filter(p -> p.getParameterName().equals("NITRATE")).findFirst().orElse(null);
       assertParameterValuesEqual(expectedNitrate, nitrate);
+
+    }
+
+
+    try (
+        NetcdfFile actual = NetcdfFiles.open(outputPath.toString());
+        NetcdfFile expected = NetcdfFiles.open(expectedPath.toString());
+    ) {
+      List<Variable> expectedVariables = expected.getVariables();
+      List<Variable> actualVariables = actual.getVariables();
+
+      List<String> actualNames = actualVariables.stream().map(v -> v.getShortName()).toList();
+      List<String> expectedNames = expectedVariables.stream().map(v -> v.getShortName()).toList();
+
+      // simple test for order and size
+      assertEquals(expectedNames, actualNames);
+
+      // now assert on variable details
+      for (int i = 0; i < expectedVariables.size(); i++) {
+        Variable expectedVariable = expectedVariables.get(i);
+        Variable actualVariable = actualVariables.get(i);
+
+        assertEquals(expectedVariable.getShortName(), actualVariable.getShortName());
+        assertEquals(expectedVariable.isScalar(), actualVariable.isScalar());
+        assertEquals(expectedVariable.getDataType(), actualVariable.getDataType());
+        assertEquals(expectedVariable.getParentGroup(), actualVariable.getParentGroup());
+        assertEquals(expectedVariable.getParentStructure(), actualVariable.getParentStructure());
+        assertEquals(expectedVariable.isVariableLength(), actualVariable.isVariableLength());
+        assertEquals(expectedVariable.getDimensions().size(), actualVariable.getDimensions().size());
+
+        if (expectedVariable.getDataType().isString()) {
+          // some French GDAC files have smaller sizes than updated specs.  Assert that the ones Argonaut generates are the same size at a minimum
+          assertTrue(expectedVariable.getDimension(expectedVariable.getDimensions().size() - 1 ).getLength() <= actualVariable.getDimension(expectedVariable.getDimensions().size() - 1).getLength(), "String variable dimensions are not compatible: " + expectedVariable + " " + actualVariable);
+        } else {
+          for (int j = 0; j < expectedVariable.getDimensions().size(); j++) {
+            assertEquals(expectedVariable.getDimension(j), actualVariable.getDimension(j));
+          }
+        }
+
+
+          // TODO why is resolution different in the synth merge?
+          assertEquals(
+              Streams.of(expectedVariable.attributes())
+                  .filter(a -> !a.getName().equals("_ChunkSizes"))
+                  .filter(a -> !a.getName().equals("resolution"))
+                  .filter(a -> !a.getName().equals("C_format"))
+                  .filter(a -> !a.getName().equals("FORTRAN_format"))
+                  .collect(Collectors.toSet()),
+
+              Streams.of(actualVariable.attributes())
+                  .filter(a -> !a.getName().equals("resolution"))
+                  .filter(a -> !a.getName().equals("C_format"))
+                  .filter(a -> !a.getName().equals("FORTRAN_format"))
+                  .collect(Collectors.toSet()),
+
+              "Attributes do not match: " + expectedVariable.getShortName());
+
+
+
+
+
+
+
+      }
+
 
     }
 
