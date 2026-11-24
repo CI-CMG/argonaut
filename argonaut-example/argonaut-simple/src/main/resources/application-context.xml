@@ -155,7 +155,7 @@
     <property name="fileReader" ref="netCdfReader"/>
   </bean>
 
-  <bean id="metadataStore" class="edu.colorado.cires.argonaut.metadata.jpa.JpaMetadataStore">
+  <bean id="metadataStore" class="edu.colorado.cires.argonaut.metadata.jpa.JpaMetadataStore" init-method="init">
     <property name="entityManagerFactory" ref="entityManagerFactory"/>
     <property name="jsonMapper" ref="jsonMapper"/>
     <property name="auditSender" ref="auditSender"/>
