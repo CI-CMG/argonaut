@@ -91,9 +91,20 @@ public class DefaultLatestProfileMergeProcessorTest {
     when(outputFileStore.appendToPath(eq("/foo/bar"), eq("dac"), eq("aoml/1234/profiles/D1234_001.nc"))).thenReturn(
         "/foo/bar/dac/aoml/1234/profiles/D1234_001.nc");
 
-    when(outputFileStore.fileExists(eq("/foo/bar/latest_data/D20260923_prof_0.nc.md5"))).thenReturn(true);
-    when(outputFileStore.fileExists(eq("/foo/bar/latest_data/D20260923_prof_1.nc.md5"))).thenReturn(true);
-    when(outputFileStore.fileExists(eq("/foo/bar/latest_data/D20260923_prof_2.nc.md5"))).thenReturn(true);
+    when(outputFileStore.appendToPath(eq("/foo/bar"), eq("etc"), eq("md5"), eq("latest_data"))).thenReturn("/foo/bar/etc/md5/latest_data");
+    when(outputFileStore.appendToPath(eq("/foo/bar/etc/md5/latest_data"), eq("D20260923_prof_0.nc.md5"))).thenReturn("/foo/bar/etc/md5/latest_data/D20260923_prof_0.nc.md5");
+    when(outputFileStore.appendToPath(eq("/foo/bar/etc/md5/latest_data"), eq("D20260923_prof_1.nc.md5"))).thenReturn("/foo/bar/etc/md5/latest_data/D20260923_prof_1.nc.md5");
+    when(outputFileStore.appendToPath(eq("/foo/bar/etc/md5/latest_data"), eq("D20260923_prof_2.nc.md5"))).thenReturn("/foo/bar/etc/md5/latest_data/D20260923_prof_2.nc.md5");
+    when(outputFileStore.appendToPath(eq("/foo/bar"), eq("etc"), eq("md5"), eq("latest_data"), eq("D20260923_prof_0.nc.md5"))).thenReturn("/foo/bar/etc/md5/latest_data/D20260923_prof_0.nc.md5");
+    when(outputFileStore.appendToPath(eq("/foo/bar"), eq("etc"), eq("md5"), eq("latest_data"), eq("D20260923_prof_1.nc.md5"))).thenReturn("/foo/bar/etc/md5/latest_data/D20260923_prof_1.nc.md5");
+    when(outputFileStore.appendToPath(eq("/foo/bar"), eq("etc"), eq("md5"), eq("dac"), eq("aoml/1234/profiles/D1234_001.nc.md5"))).thenReturn("/foo/bar/etc/md5/dac/aoml/1234/profiles/D1234_001.nc.md5");
+    when(outputFileStore.appendToPath(eq("/foo/bar"), eq("etc"), eq("md5"), eq("dac"), eq("csio/222/profiles/D222_001.nc.md5"))).thenReturn("/foo/bar/etc/md5/dac/csio/222/profiles/D222_001.nc.md5");
+    when(outputFileStore.appendToPath(eq("/foo/bar"), eq("etc"), eq("md5"), eq("dac"), eq("csio/222/profiles/D222_002.nc.md5"))).thenReturn("/foo/bar/etc/md5/dac/csio/222/profiles/D222_002.nc.md5");
+    when(outputFileStore.appendToPath(eq("/foo/bar"), eq("etc"), eq("md5"), eq("dac"), eq("aoml/1234/profiles/D1234_001.nc.md5"))).thenReturn("/foo/bar/etc/md5/dac/aoml/1234/profiles/D1234_001.nc.md5");
+
+    when(outputFileStore.fileExists(eq("/foo/bar/etc/md5/latest_data/D20260923_prof_0.nc.md5"))).thenReturn(true);
+    when(outputFileStore.fileExists(eq("/foo/bar/etc/md5/latest_data/D20260923_prof_1.nc.md5"))).thenReturn(true);
+    when(outputFileStore.fileExists(eq("/foo/bar/etc/md5/latest_data/D20260923_prof_2.nc.md5"))).thenReturn(true);
 
     when(outputFileStore.getInputStream(any())).thenReturn(new ByteArrayInputStream(new byte[0]));
     when(outputFileStore.getOutputStream(any())).thenReturn(new ByteArrayOutputStream());
@@ -169,9 +180,9 @@ public class DefaultLatestProfileMergeProcessorTest {
     verify(outputFileStore, times(1)).delete(eq("/foo/bar/latest_data/D20260923_prof_1.nc"));
     verify(outputFileStore, times(1)).delete(eq("/foo/bar/latest_data/D20260923_prof_2.nc"));
 
-    verify(outputFileStore, times(1)).delete(eq("/foo/bar/latest_data/D20260923_prof_0.nc.md5"));
-    verify(outputFileStore, times(1)).delete(eq("/foo/bar/latest_data/D20260923_prof_1.nc.md5"));
-    verify(outputFileStore, times(1)).delete(eq("/foo/bar/latest_data/D20260923_prof_2.nc.md5"));
+    verify(outputFileStore, times(1)).delete(eq("/foo/bar/etc/md5/latest_data/D20260923_prof_0.nc.md5"));
+    verify(outputFileStore, times(1)).delete(eq("/foo/bar/etc/md5/latest_data/D20260923_prof_1.nc.md5"));
+    verify(outputFileStore, times(1)).delete(eq("/foo/bar/etc/md5/latest_data/D20260923_prof_2.nc.md5"));
 
     ArgumentCaptor<List<LocalPathSupplier>> localPathSupplierCaptor0 = ArgumentCaptor.forClass(List.class);
     verify(merger, times(1)).mergeProfiles(localPathSupplierCaptor0.capture(), eq(Arrays.asList("PRES", "TEMP", "PSAL")), argThat(
@@ -241,9 +252,20 @@ public class DefaultLatestProfileMergeProcessorTest {
     when(outputFileStore.appendToPath(eq("/foo/bar"), eq("latest_data"), eq("D20260923_prof_1.nc"))).thenReturn(
         "/foo/bar/latest_data/D20260923_prof_1.nc");
 
-    when(outputFileStore.fileExists(eq("/foo/bar/latest_data/D20260923_prof_0.nc.md5"))).thenReturn(true);
-    when(outputFileStore.fileExists(eq("/foo/bar/latest_data/D20260923_prof_1.nc.md5"))).thenReturn(true);
-    when(outputFileStore.fileExists(eq("/foo/bar/latest_data/D20260923_prof_2.nc.md5"))).thenReturn(true);
+    when(outputFileStore.appendToPath(eq("/foo/bar"), eq("etc"), eq("md5"), eq("latest_data"))).thenReturn("/foo/bar/etc/md5/latest_data");
+    when(outputFileStore.appendToPath(eq("/foo/bar/etc/md5/latest_data"), eq("D20260923_prof_0.nc.md5"))).thenReturn("/foo/bar/etc/md5/latest_data/D20260923_prof_0.nc.md5");
+    when(outputFileStore.appendToPath(eq("/foo/bar/etc/md5/latest_data"), eq("D20260923_prof_1.nc.md5"))).thenReturn("/foo/bar/etc/md5/latest_data/D20260923_prof_1.nc.md5");
+    when(outputFileStore.appendToPath(eq("/foo/bar/etc/md5/latest_data"), eq("D20260923_prof_2.nc.md5"))).thenReturn("/foo/bar/etc/md5/latest_data/D20260923_prof_2.nc.md5");
+    when(outputFileStore.appendToPath(eq("/foo/bar"), eq("etc"), eq("md5"), eq("latest_data"), eq("D20260923_prof_0.nc.md5"))).thenReturn("/foo/bar/etc/md5/latest_data/D20260923_prof_0.nc.md5");
+    when(outputFileStore.appendToPath(eq("/foo/bar"), eq("etc"), eq("md5"), eq("latest_data"), eq("D20260923_prof_1.nc.md5"))).thenReturn("/foo/bar/etc/md5/latest_data/D20260923_prof_1.nc.md5");
+    when(outputFileStore.appendToPath(eq("/foo/bar"), eq("etc"), eq("md5"), eq("dac"), eq("aoml/1234/profiles/D1234_001.nc.md5"))).thenReturn("/foo/bar/etc/md5/dac/aoml/1234/profiles/D1234_001.nc.md5");
+    when(outputFileStore.appendToPath(eq("/foo/bar"), eq("etc"), eq("md5"), eq("dac"), eq("csio/222/profiles/D222_001.nc.md5"))).thenReturn("/foo/bar/etc/md5/dac/csio/222/profiles/D222_001.nc.md5");
+    when(outputFileStore.appendToPath(eq("/foo/bar"), eq("etc"), eq("md5"), eq("dac"), eq("csio/222/profiles/D222_002.nc.md5"))).thenReturn("/foo/bar/etc/md5/dac/csio/222/profiles/D222_002.nc.md5");
+    when(outputFileStore.appendToPath(eq("/foo/bar"), eq("etc"), eq("md5"), eq("dac"), eq("aoml/1234/profiles/D1234_001.nc.md5"))).thenReturn("/foo/bar/etc/md5/dac/aoml/1234/profiles/D1234_001.nc.md5");
+
+    when(outputFileStore.fileExists(eq("/foo/bar/etc/md5/latest_data/D20260923_prof_0.nc.md5"))).thenReturn(true);
+    when(outputFileStore.fileExists(eq("/foo/bar/etc/md5/latest_data/D20260923_prof_1.nc.md5"))).thenReturn(true);
+    when(outputFileStore.fileExists(eq("/foo/bar/etc/md5/latest_data/D20260923_prof_2.nc.md5"))).thenReturn(true);
 
     DefaultLatestProfileMergeProcessor processor = new DefaultLatestProfileMergeProcessor();
     processor.setOutputFileStore(outputFileStore);
@@ -270,13 +292,14 @@ public class DefaultLatestProfileMergeProcessorTest {
     verify(outputFileStore, times(1)).delete(eq("/foo/bar/latest_data/D20260923_prof_1.nc"));
     verify(outputFileStore, times(1)).delete(eq("/foo/bar/latest_data/D20260923_prof_2.nc"));
 
-    verify(outputFileStore, times(1)).delete(eq("/foo/bar/latest_data/D20260923_prof_0.nc.md5"));
-    verify(outputFileStore, times(1)).delete(eq("/foo/bar/latest_data/D20260923_prof_1.nc.md5"));
-    verify(outputFileStore, times(1)).delete(eq("/foo/bar/latest_data/D20260923_prof_2.nc.md5"));
+    verify(outputFileStore, times(1)).delete(eq("/foo/bar/etc/md5/latest_data/D20260923_prof_0.nc.md5"));
+    verify(outputFileStore, times(1)).delete(eq("/foo/bar/etc/md5/latest_data/D20260923_prof_1.nc.md5"));
+    verify(outputFileStore, times(1)).delete(eq("/foo/bar/etc/md5/latest_data/D20260923_prof_2.nc.md5"));
 
     // clear mocked verifications in order to ensure no extra interactions can be verified
-    verify(outputFileStore, times(1)).getRoot();
-    verify(outputFileStore, times(4)).appendToPath(any(), any());
+    verify(outputFileStore, times(2)).getRoot();
+    verify(outputFileStore, times(7)).appendToPath(any(), any());
+    verify(outputFileStore, times(1)).appendToPath(any(), any(), any(), any());
     verify(outputFileStore, times(1)).listFileNamesInDirectory(any());
     verify(outputFileStore, times(3)).fileExists(any());
 

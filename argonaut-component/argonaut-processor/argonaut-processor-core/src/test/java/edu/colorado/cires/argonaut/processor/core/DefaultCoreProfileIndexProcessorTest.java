@@ -114,12 +114,12 @@ public class DefaultCoreProfileIndexProcessorTest {
     String expected = Files.readString(Paths.get("src/test/resources/ar_index_global_prof.txt"), StandardCharsets.UTF_8);
     String expectedMd5 = Files.readString(Paths.get("src/test/resources/ar_index_global_prof.txt.md5"), StandardCharsets.UTF_8);
     assertTrue(Files.exists(outputDir.resolve("idx/ar_index_global_prof.txt")));
-    assertTrue(Files.exists(outputDir.resolve("idx/ar_index_global_prof.txt.md5")));
+    assertTrue(Files.exists(outputDir.resolve("etc/md5/idx/ar_index_global_prof.txt.md5")));
     assertEquals(expected, Files.readString(outputDir.resolve("idx/ar_index_global_prof.txt"), StandardCharsets.UTF_8));
-    assertEquals(expectedMd5, Files.readString(outputDir.resolve("idx/ar_index_global_prof.txt.md5"), StandardCharsets.UTF_8));
+    assertEquals(expectedMd5, Files.readString(outputDir.resolve("etc/md5/idx/ar_index_global_prof.txt.md5"), StandardCharsets.UTF_8));
 
     assertTrue(Files.exists(outputDir.resolve("idx/ar_index_global_prof.txt.gz")));
-    assertTrue(Files.exists(outputDir.resolve("idx/ar_index_global_prof.txt.gz.md5")));
+    assertTrue(Files.exists(outputDir.resolve("etc/md5/idx/ar_index_global_prof.txt.gz.md5")));
     ByteArrayOutputStream out = new ByteArrayOutputStream();
     try(InputStream in = new GZIPInputStream(Files.newInputStream(outputDir.resolve("idx/ar_index_global_prof.txt.gz")))) {
       IOUtils.copy(in, out);
@@ -128,7 +128,7 @@ public class DefaultCoreProfileIndexProcessorTest {
     assertEquals(expected, out.toString(StandardCharsets.UTF_8));
 
     String expectedMd5Gz = Files.readString(Paths.get("src/test/resources/ar_index_global_prof.txt.gz.md5"), StandardCharsets.UTF_8);
-    assertEquals(expectedMd5Gz, Files.readString(outputDir.resolve("idx/ar_index_global_prof.txt.gz.md5"), StandardCharsets.UTF_8));
+    assertEquals(expectedMd5Gz, Files.readString(outputDir.resolve("etc/md5/idx/ar_index_global_prof.txt.gz.md5"), StandardCharsets.UTF_8));
 
   }
 

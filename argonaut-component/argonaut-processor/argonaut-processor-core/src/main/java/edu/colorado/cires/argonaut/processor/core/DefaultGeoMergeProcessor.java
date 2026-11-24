@@ -132,7 +132,8 @@ public class DefaultGeoMergeProcessor implements GeoMergeProcessor {
       LOGGER.trace("Geo merge executing: {}", message);
     }
 
-    String outputFile = getOutputFile(message);
+    PathPair outputPathPair = getOutputFile(message);
+    String outputFile = outputPathPair.filePath();
 
     Path localOutputFile;
     try {
@@ -150,7 +151,7 @@ public class DefaultGeoMergeProcessor implements GeoMergeProcessor {
       try {
         outputFileStore.uploadLocalFile(localOutputFile, outputFile);
 
-        try (InputStream dataIn = outputFileStore.getInputStream(outputFile); OutputStream md5Out = outputFileStore.getOutputStream(outputFile + ".md5")) {
+        try (InputStream dataIn = outputFileStore.getInputStream(outputFile); OutputStream md5Out = outputFileStore.getOutputStream(outputPathPair.md5Path())) {
           ChecksumUtils.writeMd5ToOutputStream(dataIn, outputFileStore.getFileName(outputFile), md5Out);
         }
 
@@ -164,10 +165,11 @@ public class DefaultGeoMergeProcessor implements GeoMergeProcessor {
   }
 
   private void removeMergeFile(GeoMergeInfo message) {
-    String outputFile = getOutputFile(message);
+    PathPair outputPathPair = getOutputFile(message);
+    String outputFile = outputPathPair.filePath();
     outputFileStore.delete(outputFile);
     LOGGER.debug("Removed geo-merge file: {}", outputFile);
-    String md5File = outputFile + ".md5";
+    String md5File = outputPathPair.md5Path();
     try {
       if(outputFileStore.fileExists(md5File)) {
         outputFileStore.delete(md5File);
@@ -177,15 +179,28 @@ public class DefaultGeoMergeProcessor implements GeoMergeProcessor {
     }
   }
 
-  private String getOutputFile(GeoMergeInfo message) {
+  private record PathPair(String filePath, String md5Path){}
+
+  private PathPair getOutputFile(GeoMergeInfo message) {
     String fileName = String.format("%04d%02d%02d_prof.nc", message.getYear(), message.getMonth(), message.getDay());
-    return outputFileStore.appendToPath(
+    return new PathPair(outputFileStore.appendToPath(
+
         outputFileStore.getRoot(),
         "geo",
         message.getOcean().getDirectory(),
         String.format("%04d", message.getYear()),
         String.format("%02d", message.getMonth()),
-        fileName
+        fileName),
+
+        outputFileStore.appendToPath(
+        outputFileStore.getRoot(),
+        "etc",
+        "md5",
+        "geo",
+        message.getOcean().getDirectory(),
+        String.format("%04d", message.getYear()),
+        String.format("%02d", message.getMonth()),
+        fileName + ".md5")
     );
   }
 

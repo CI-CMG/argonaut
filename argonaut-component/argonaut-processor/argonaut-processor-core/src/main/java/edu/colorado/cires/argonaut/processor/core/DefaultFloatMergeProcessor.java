@@ -126,10 +126,11 @@ public class DefaultFloatMergeProcessor implements FloatMergeProcessor {
   }
 
   private void removeMergeFile(ProfileOperation message) {
-    String outputFile = getOutputFile(message);
+    PathPair outputPathPair = getOutputFile(message);
+    String outputFile = outputPathPair.filePath();
     outputFileStore.delete(outputFile);
     LOGGER.debug("Removed multi-cycle merge file: {}", outputFile);
-    String md5File = outputFile + ".md5";
+    String md5File = outputPathPair.md5Path();
     try {
       if(outputFileStore.fileExists(md5File)) {
         outputFileStore.delete(md5File);
@@ -139,14 +140,20 @@ public class DefaultFloatMergeProcessor implements FloatMergeProcessor {
     }
   }
 
-  private String getOutputFile(ProfileOperation message) {
+  private record PathPair(String filePath, String md5Path){}
+
+  private PathPair getOutputFile(ProfileOperation message) {
     String floatId = message.getFloatId();
     String fileName = floatId + "_prof.nc";
-    return outputFileStore.appendToPath(outputFileStore.getRoot(), "dac", message.getDac(), floatId, fileName);
+    return new PathPair(
+        outputFileStore.appendToPath(outputFileStore.getRoot(), "dac", message.getDac(), floatId, fileName),
+        outputFileStore.appendToPath(outputFileStore.getRoot(), "etc", "md5", "dac", message.getDac(), floatId, fileName + ".md5")
+        );
   }
 
   private void mergeProfiles(ProfileOperation message) {
-    String outputFile = getOutputFile(message);
+    PathPair outputPathPair = getOutputFile(message);
+    String outputFile = outputPathPair.filePath();
     Path localOutputFile;
     try {
       localOutputFile = Files.createTempFile(localTempDir, "float-merge-", ".nc");
@@ -163,7 +170,7 @@ public class DefaultFloatMergeProcessor implements FloatMergeProcessor {
       try {
         outputFileStore.uploadLocalFile(localOutputFile, outputFile);
 
-        try (InputStream dataIn = outputFileStore.getInputStream(outputFile); OutputStream md5Out = outputFileStore.getOutputStream(outputFile + ".md5")) {
+        try (InputStream dataIn = outputFileStore.getInputStream(outputFile); OutputStream md5Out = outputFileStore.getOutputStream(outputPathPair.md5Path())) {
           ChecksumUtils.writeMd5ToOutputStream(dataIn, outputFileStore.getFileName(outputFile), md5Out);
         }
 

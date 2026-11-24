@@ -194,7 +194,11 @@ class BaseIndexProcessorTest {
     AtomicReference<String> atomicFileContent = new AtomicReference<>("");
     FileStore fileStore = mock(FileStore.class);
     when(fileStore.getRoot()).thenReturn(outputDir.toString());
-    when(fileStore.appendToPath(anyString(), anyString(), anyString())).thenAnswer(inv -> Paths.get(inv.getArgument(0), (String) inv.getArgument(1)).toString());
+    when(fileStore.appendToPath(anyString(), anyString())).thenAnswer(inv -> Paths.get(inv.getArgument(0), (String) inv.getArgument(1)).toString());
+    when(fileStore.appendToPath(anyString(), anyString(), anyString())).thenAnswer(inv -> Paths.get(inv.getArgument(0), (String) inv.getArgument(1), (String) inv.getArgument(2)).toString());
+    when(fileStore.appendToPath(anyString(), anyString(), anyString(), anyString())).thenAnswer(inv -> Paths.get(inv.getArgument(0), (String) inv.getArgument(1), (String) inv.getArgument(2), (String) inv.getArgument(3)).toString());
+    when(fileStore.appendToPath(anyString(), anyString(), anyString(), anyString(), anyString())).thenAnswer(inv -> Paths.get(inv.getArgument(0), (String) inv.getArgument(1), (String) inv.getArgument(2), (String) inv.getArgument(3), (String) inv.getArgument(4)).toString());
+
     doAnswer(inv -> {
       File file = ((Path) inv.getArgument(0)).toFile();
       assertEquals("%s.txt".formatted(fileNameBase), file.getName());

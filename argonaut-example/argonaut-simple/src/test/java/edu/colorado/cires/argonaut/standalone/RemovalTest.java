@@ -100,10 +100,9 @@ public class RemovalTest {
     });
 
     submissions.stream()
-        .map(path -> TestDataContext.outputDir.resolve("dac").resolve(path.subpath(4, 8)))
         .forEach(path -> {
-          assertTrue(Files.exists(path));
-          assertTrue(Files.exists(Objects.requireNonNull(path.getParent()).resolve(Objects.requireNonNull(path.getFileName()).toString() + ".md5")));
+          assertTrue(Files.exists(TestDataContext.outputDir.resolve("dac").resolve(path.subpath(4, 8))));
+          assertTrue(Files.exists(TestDataContext.outputDir.resolve("etc/md5/dac").resolve(path.subpath(4, 8) + ".md5")));
         });
 
     List<Path> removalFiles = Arrays.asList(

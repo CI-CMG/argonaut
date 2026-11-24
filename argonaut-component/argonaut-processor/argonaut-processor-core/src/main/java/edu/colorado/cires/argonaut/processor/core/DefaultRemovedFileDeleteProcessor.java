@@ -24,19 +24,25 @@ public class DefaultRemovedFileDeleteProcessor implements RemovedFileDeleteProce
     this.timestampSupplier = timestampSupplier;
   }
 
-  private String resolveRemovedFile(ProfileOperation message) {
-    return outputFileStore.appendToPath(outputFileStore.getRoot(), "etc", "removed", message.getDac(), message.getFiles().get(0).getFileName());
+  private record PathPair(String filePath, String md5Path) {}
+
+  private PathPair resolveRemovedFile(ProfileOperation message) {
+    return new PathPair(
+        outputFileStore.appendToPath(outputFileStore.getRoot(), "etc", "removed", message.getDac(), message.getFiles().get(0).getFileName()),
+        outputFileStore.appendToPath(outputFileStore.getRoot(), "etc", "removed", message.getDac(), message.getFiles().get(0).getFileName() + ".md5")
+        );
   }
 
   @Override
   public MetadataRecord delete(ProfileOperation message) {
-    String removalPath = resolveRemovedFile(message);
+    PathPair removalPathPair = resolveRemovedFile(message);
+    String removalPath = removalPathPair.filePath();
     if (outputFileStore.fileExists(removalPath)) {
       outputFileStore.delete(removalPath);
     }
     LOGGER.info("Deleted file {}", removalPath);
 
-    String md5File = removalPath + ".md5";
+    String md5File = removalPathPair.md5Path();
     try {
       if(outputFileStore.fileExists(md5File)) {
         outputFileStore.delete(md5File);

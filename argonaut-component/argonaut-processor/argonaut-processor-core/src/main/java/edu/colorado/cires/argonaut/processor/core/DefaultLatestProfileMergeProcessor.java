@@ -165,6 +165,7 @@ public class DefaultLatestProfileMergeProcessor implements LatestProfileMergePro
       String fileName = filePrefix + i + ".nc";
 
       String outputFile = outputFileStore.appendToPath(outputFileStore.getRoot(), "latest_data", fileName);
+      String outputMd5 = outputFileStore.appendToPath(outputFileStore.getRoot(), "etc", "md5", "latest_data", fileName + ".md5");
       Path localOutputDir;
       try {
         localOutputDir = Files.createTempDirectory(localTempDir, "latest-merge-");
@@ -182,7 +183,7 @@ public class DefaultLatestProfileMergeProcessor implements LatestProfileMergePro
         try {
           outputFileStore.uploadLocalFile(localOutputFile, outputFile);
 
-          try (InputStream dataIn = outputFileStore.getInputStream(outputFile); OutputStream md5Out = outputFileStore.getOutputStream(outputFile + ".md5")) {
+          try (InputStream dataIn = outputFileStore.getInputStream(outputFile); OutputStream md5Out = outputFileStore.getOutputStream(outputMd5)) {
             ChecksumUtils.writeMd5ToOutputStream(dataIn, outputFileStore.getFileName(outputFile), md5Out);
           }
 
@@ -216,6 +217,7 @@ public class DefaultLatestProfileMergeProcessor implements LatestProfileMergePro
 
   private void removeOldFiles(ProfileOperation message) {
     String dirPath = outputFileStore.appendToPath(outputFileStore.getRoot(), "latest_data");
+    String md5DirPath = outputFileStore.appendToPath(outputFileStore.getRoot(), "etc", "md5", "latest_data");
     List<String> existingFiles = outputFileStore.listFileNamesInDirectory(dirPath);
 
     Set<String> toRemove = new HashSet<>();
@@ -231,7 +233,7 @@ public class DefaultLatestProfileMergeProcessor implements LatestProfileMergePro
     for (String fileName : toRemove) {
       String outputFile = outputFileStore.appendToPath(dirPath, fileName);
       outputFileStore.delete(outputFile);
-      String md5File = outputFile + ".md5";
+      String md5File = outputFileStore.appendToPath(md5DirPath, fileName + ".md5");
       try {
         if(outputFileStore.fileExists(md5File)) {
           outputFileStore.delete(md5File);

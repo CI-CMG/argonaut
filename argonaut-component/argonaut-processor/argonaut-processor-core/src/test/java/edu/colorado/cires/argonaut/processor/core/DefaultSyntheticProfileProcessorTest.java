@@ -226,7 +226,7 @@ public class DefaultSyntheticProfileProcessorTest {
 
     when(geoFilter.determineArgoOcean(anyDouble(), anyDouble())).thenReturn(ArgoOcean.INDIAN_OCEAN);
 
-    when(fileStore.fileExists(eq("/foo/bar/dac/meds/4902691/profiles/SR4902691_034.nc.md5"))).thenReturn(true);
+    when(fileStore.fileExists(eq("/foo/bar/etc/md5/dac/meds/4902691/profiles/SR4902691_034.nc.md5"))).thenReturn(true);
 
     DefaultSyntheticProfileProcessor processor = new DefaultSyntheticProfileProcessor();
     processor.setLocalTempDir(workingDir);
@@ -241,7 +241,7 @@ public class DefaultSyntheticProfileProcessorTest {
 
     verify(fileStore, times(0)).downloadLocalFile(any(), any());
     verify(fileStore, times(1)).delete(eq("/foo/bar/dac/meds/4902691/profiles/SR4902691_034.nc"));
-    verify(fileStore, times(1)).delete(eq("/foo/bar/dac/meds/4902691/profiles/SR4902691_034.nc.md5"));
+    verify(fileStore, times(1)).delete(eq("/foo/bar/etc/md5/dac/meds/4902691/profiles/SR4902691_034.nc.md5"));
 
     verifyNoInteractions(syntheticProfileMerger);
 
