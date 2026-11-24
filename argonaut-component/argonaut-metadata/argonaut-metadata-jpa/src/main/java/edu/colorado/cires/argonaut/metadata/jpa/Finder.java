@@ -826,6 +826,7 @@ class Finder {
                       """
                             SELECT p FROM ArgoFloatMetadataEntity p
                             WHERE p.fileStatus = 'ACTIVE'
+                            ORDER BY p.file
                           """, ArgoFloatMetadataEntity.class)
               .setMaxResults(pageRequest.getPageSize())
               .setFirstResult((pageRequest.getPageNumber() - 1) * pageRequest.getPageSize())
