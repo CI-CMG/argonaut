@@ -334,7 +334,14 @@ public final class NetCdfReadUtils {
     return Optional.ofNullable(netcdf.findVariable(variableName))
       .map(variable -> {
         try {
-          return (double[]) variable.read().copyTo1DJavaArray();
+          Array array = variable.read();
+          int size = array.getShape()[0];
+          double[] result = new double[size];
+          for ( int i = 0; i < size; i++) {
+            // Explicitly creating array and calling getDouble to convert floats to doubles.  In the wild, it was noticed that sometimes these are floats not doubles.
+            result[i] = array.getDouble(i);
+          }
+          return result;
         } catch (IOException e) {
           throw new RuntimeException("failed to read %s".formatted(variableName), e);
         }
