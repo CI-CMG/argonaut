@@ -163,11 +163,11 @@ public class FloatMergeCronTest {
     });
 
     assertTrue(Files.exists(TestDataContext.outputDir.resolve("dac/meds/4902704/4902704_prof.nc")));
-    assertTrue(Files.exists(TestDataContext.outputDir.resolve("dac/meds/4902704/4902704_prof.nc.md5")));
+    assertTrue(Files.exists(TestDataContext.outputDir.resolve("etc/md5/dac/meds/4902704/4902704_prof.nc.md5")));
 
-    fileNames.stream().map(fileName -> TestDataContext.outputDir.resolve("dac/meds/4902704/profiles/").resolve(fileName)).forEach(path -> {
-      assertTrue(Files.exists(path));
-      assertTrue(Files.exists(Objects.requireNonNull(path.getParent()).resolve(Objects.requireNonNull(path.getFileName()).toString() + ".md5")));
+    fileNames.stream().forEach(fileName -> {
+      assertTrue(Files.exists(TestDataContext.outputDir.resolve("dac/meds/4902704/profiles/").resolve(fileName)));
+      assertTrue(Files.exists(TestDataContext.outputDir.resolve("etc/md5/dac/meds/4902704/profiles/").resolve(fileName + ".md5")));
     });
   }
 

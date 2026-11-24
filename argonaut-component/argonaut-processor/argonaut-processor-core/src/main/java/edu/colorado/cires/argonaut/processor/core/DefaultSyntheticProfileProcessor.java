@@ -101,18 +101,25 @@ public class DefaultSyntheticProfileProcessor implements SyntheticProfileProcess
     return outputFileStore.appendToPath(message.getDac(), message.getFloatId(), "profiles", getFileName(message));
   }
 
-  private String getUploadFile(ProfileOperation message) {
-    return outputFileStore.appendToPath(outputFileStore.getRoot(), "dac", getMetadataPath(message));
+  private record PathPair(String filePath, String md5Path){}
+
+  private PathPair getUploadFile(ProfileOperation message) {
+    String metadataPath = getMetadataPath(message);
+    return new PathPair(
+        outputFileStore.appendToPath(outputFileStore.getRoot(), "dac", metadataPath),
+        outputFileStore.appendToPath(outputFileStore.getRoot(), "etc", "md5", "dac", metadataPath + ".md5")
+        );
   }
 
   private MetadataRecord removeMergeFile(ProfileOperation message) {
     String file = getMetadataPath(message);
-    String outputFile = getUploadFile(message);
+    PathPair outputPathPair = getUploadFile(message);
+    String outputFile = outputPathPair.filePath();
     String fileName = getFileName(message);
     outputFileStore.delete(outputFile);
     LOGGER.info("Removed synthetic merge file: {}", file);
 
-    String md5File = outputFile + ".md5";
+    String md5File = outputPathPair.md5Path();
     try {
       if(outputFileStore.fileExists(md5File)) {
         outputFileStore.delete(md5File);
@@ -164,7 +171,8 @@ public class DefaultSyntheticProfileProcessor implements SyntheticProfileProcess
 
 
       String file = getMetadataPath(message);
-      String outputFile = getUploadFile(message);
+      PathPair outputPathPair = getUploadFile(message);
+      String outputFile = outputPathPair.filePath();
       String fileName = getFileName(message);
       Path outputPath = tempDir.resolve(fileName);
 
@@ -184,7 +192,7 @@ public class DefaultSyntheticProfileProcessor implements SyntheticProfileProcess
       try {
         outputFileStore.uploadLocalFile(outputPath, outputFile);
 
-        try (InputStream dataIn = outputFileStore.getInputStream(outputFile); OutputStream md5Out = outputFileStore.getOutputStream(outputFile + ".md5")) {
+        try (InputStream dataIn = outputFileStore.getInputStream(outputFile); OutputStream md5Out = outputFileStore.getOutputStream(outputPathPair.md5Path())) {
           ChecksumUtils.writeMd5ToOutputStream(dataIn, outputFileStore.getFileName(outputFile), md5Out);
         }
 

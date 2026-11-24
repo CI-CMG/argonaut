@@ -226,8 +226,9 @@ public abstract class BaseIndexProcessor implements IndexProcessor {
               String path = outputFileStore.appendToPath(outputFileStore.getRoot(), "idx", textFileName);
               outputFileStore.uploadLocalFile(textFile, path);
 
-              String md5Path = path + ".md5";
-              String gzMd5Path = path + ".gz.md5";
+              String md5BasePath = outputFileStore.appendToPath(outputFileStore.getRoot(), "etc", "md5", "idx");
+              String md5Path = outputFileStore.appendToPath(md5BasePath, textFileName + ".md5");
+              String gzMd5Path = outputFileStore.appendToPath(md5BasePath, textFileName + ".gz.md5");
 
               try (InputStream in = Files.newInputStream(textFile);
                   OutputStream out = new GZIPOutputStream(outputFileStore.getOutputStream(path + ".gz"))) {

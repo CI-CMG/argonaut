@@ -44,17 +44,23 @@ public class DefaultFileMoveProcessor implements FileMoveProcessor {
     }
   }
 
-  private String resolveOutputFile(NcSubmissionMessage ncSubmissionMessage) {
-    String destinationDir = outputFileStore.appendToPath(outputFileStore.getRoot(), "dac", ncSubmissionMessage.getDac(),
-        ncSubmissionMessage.getFloatId());
+  private record PathPair(String filePath, String md5Path){}
+
+  private PathPair resolveOutputFile(NcSubmissionMessage ncSubmissionMessage) {
+    String destinationDir = outputFileStore.appendToPath(outputFileStore.getRoot(), "dac", ncSubmissionMessage.getDac(), ncSubmissionMessage.getFloatId());
+    String md5Dir = outputFileStore.appendToPath(outputFileStore.getRoot(), "etc", "md5", "dac", ncSubmissionMessage.getDac(), ncSubmissionMessage.getFloatId());
     if (ArgoFileType.isProfile(ncSubmissionMessage.getFileType())) {
       destinationDir = outputFileStore.appendToPath(destinationDir, "profiles");
+      md5Dir = outputFileStore.appendToPath(md5Dir, "profiles");
     }
-    return outputFileStore.appendToPath(destinationDir, ncSubmissionMessage.getFileName());
+    return new PathPair(outputFileStore.appendToPath(destinationDir, ncSubmissionMessage.getFileName()), outputFileStore.appendToPath(md5Dir, ncSubmissionMessage.getFileName() + ".md5"));
   }
 
-  private String resolveRemovedFile(NcSubmissionMessage ncSubmissionMessage) {
-    return outputFileStore.appendToPath(outputFileStore.getRoot(), "etc", "removed", ncSubmissionMessage.getDac(), ncSubmissionMessage.getFileName());
+  private PathPair resolveRemovedFile(NcSubmissionMessage ncSubmissionMessage) {
+    return new PathPair(
+        outputFileStore.appendToPath(outputFileStore.getRoot(), "etc", "removed", ncSubmissionMessage.getDac(), ncSubmissionMessage.getFileName()),
+        outputFileStore.appendToPath(outputFileStore.getRoot(), "etc", "removed", ncSubmissionMessage.getDac(), ncSubmissionMessage.getFileName() + ".md5")
+    );
   }
 
   private void handleRemove(NcSubmissionMessage ncSubmissionMessage) {
@@ -78,10 +84,12 @@ public class DefaultFileMoveProcessor implements FileMoveProcessor {
         }
       }
     } else {
-      String source = resolveOutputFile(ncSubmissionMessage);
-      String destination = resolveRemovedFile(ncSubmissionMessage);
-      String sourceMd5 = source + ".md5";
-      String destinationMd5 = destination + ".md5";
+      PathPair sourcePathPair = resolveOutputFile(ncSubmissionMessage);
+      String source = sourcePathPair.filePath();
+      PathPair destinationPathPair = resolveRemovedFile(ncSubmissionMessage);
+      String destination = destinationPathPair.filePath();
+      String sourceMd5 = sourcePathPair.md5Path();
+      String destinationMd5 = destinationPathPair.md5Path();
       outputFileStore.move(source, destination);
       LOGGER.info("Moved removed file from {} to {}", source, destination);
       try {
@@ -102,7 +110,8 @@ public class DefaultFileMoveProcessor implements FileMoveProcessor {
     }
     String processingFile = processingFileStore.appendToPath(processingDacDir, ncSubmissionMessage.getFileName());
     if (ncSubmissionMessage.getValidationErrors().isEmpty()) {
-      String destinationFile = resolveOutputFile(ncSubmissionMessage);
+      PathPair destinationPathPair = resolveOutputFile(ncSubmissionMessage);
+      String destinationFile = destinationPathPair.filePath();
       try (InputStream inputStream = processingFileStore.getInputStream(processingFile);
           OutputStream outputStream = outputFileStore.getOutputStream(destinationFile)
       ) {
@@ -110,7 +119,7 @@ public class DefaultFileMoveProcessor implements FileMoveProcessor {
       } catch (IOException e) {
         throw new RuntimeException("Unable to copy " + processingFile + " to " + destinationFile, e);
       }
-      String md5 = destinationFile + ".md5";
+      String md5 = destinationPathPair.md5Path();
       try (InputStream dataInputStream = outputFileStore.getInputStream(destinationFile); OutputStream md5OutputStream = outputFileStore.getOutputStream(md5)) {
         ChecksumUtils.writeMd5ToOutputStream(dataInputStream, outputFileStore.getFileName(destinationFile), md5OutputStream);
       } catch (IOException e) {

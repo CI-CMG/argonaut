@@ -44,8 +44,9 @@ public class DefaultFileMoveProcessorTest {
     processor.setProcessingFileStore(processingFileStore);
 
     Path outputFile = outputDir.resolve("dac/aoml/1234/profiles/R1234_001.nc");
-    Path outputFileMd5 = outputDir.resolve("dac/aoml/1234/profiles/R1234_001.nc.md5");
+    Path outputFileMd5 = outputDir.resolve("etc/md5/dac/aoml/1234/profiles/R1234_001.nc.md5");
     Files.createDirectories(outputFile.getParent());
+    Files.createDirectories(outputFileMd5.getParent());
     Files.createFile(outputFile);
     Files.createFile(outputFileMd5);
 

@@ -183,13 +183,13 @@ public class GeoMergeCronTest {
     });
 
     Path merged = TestDataContext.outputDir.resolve("geo/indian_ocean/2023/01/20230109_prof.nc");
-    Path mergedMd5 = TestDataContext.outputDir.resolve("geo/indian_ocean/2023/01/20230109_prof.nc.md5");
+    Path mergedMd5 = TestDataContext.outputDir.resolve("etc/md5/geo/indian_ocean/2023/01/20230109_prof.nc.md5");
     assertTrue(Files.exists(merged));
     assertTrue(Files.exists(mergedMd5));
 
-    submittedFiles.stream().map(file -> TestDataContext.outputDir.resolve("dac").resolve(file)).forEach(path -> {
-      assertTrue(Files.exists(path));
-      assertTrue(Files.exists(Objects.requireNonNull(path.getParent()).resolve(Objects.requireNonNull(path.getFileName()).toString() + ".md5")));
+    submittedFiles.stream().forEach(file -> {
+      assertTrue(Files.exists(TestDataContext.outputDir.resolve("dac").resolve(file)));
+      assertTrue(Files.exists(TestDataContext.outputDir.resolve("etc/md5/dac").resolve(file + ".md5")));
     });
 
     NetCdfTestUtils.assertFilesEqual(Paths.get("src/test/resources/geo/indian_ocean/2023/01/20230109_prof.nc"), merged);
